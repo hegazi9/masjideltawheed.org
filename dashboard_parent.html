@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة ولي الأمر — مدرسة التوحيد القرآنية</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#1a7a4a; --green-d:#0f5c36; --green-l:#25a05f; --green-p:#e8f5ee;
+  --gold:#c8920a; --gold-l:#e8b429; --gold-p:#fdf3dc;
+  --white:#fff; --bg:#f4f6f4; --ink:#1a1a1a; --mid:#4a5e52; --light:#8ea598; --border:#dce8e0;
+  --red:#dc2626; --red-p:#fee2e2;
+  --blue:#1d6fa4; --blue-p:#dbeafe;
+  --shadow:0 2px 12px rgba(15,92,54,.07);
+  --shadow-lg:0 8px 28px rgba(15,92,54,.13);
+  --sb:260px; --tb:64px; --r:13px; --r-sm:9px;
+}
+html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--ink);}
+
+/* ══ SIDEBAR ══ */
+.sidebar{position:fixed;right:0;top:0;bottom:0;width:var(--sb);background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:100;box-shadow:-2px 0 16px rgba(0,0,0,.06);}
+.sb-logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;}
+.sb-logo .t1{font-family:'Amiri',serif;font-size:.9rem;font-weight:700;color:var(--green-d);line-height:1.3;}
+.sb-logo .t2{font-size:.67rem;color:var(--gold);font-weight:600;}
+
+.sb-user{margin:10px;padding:12px 13px;background:var(--green-p);border-radius:10px;display:flex;align-items:center;gap:10px;border:1px solid rgba(26,122,74,.15);}
+.sb-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--green),var(--green-l));display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;font-weight:700;}
+.sb-uname{font-size:.84rem;font-weight:700;color:var(--green-d);}
+.sb-urole{font-size:.67rem;color:#fff;font-weight:600;background:var(--green);padding:1px 8px;border-radius:99px;margin-top:2px;display:inline-block;}
+.sb-online{width:7px;height:7px;background:#25c26e;border-radius:50%;margin-right:auto;flex-shrink:0;box-shadow:0 0 5px #25c26e;}
+
+/* Child selector widget */
+.sb-child{margin:0 10px 4px;padding:10px 13px;background:var(--gold-p);border-radius:10px;border:1px solid rgba(200,146,10,.2);}
+.sb-child-lbl{font-size:.67rem;color:var(--gold);font-weight:700;margin-bottom:5px;}
+.sb-child-name{font-size:.85rem;font-weight:800;color:var(--green-d);}
+.sb-child-branch{font-size:.7rem;color:var(--mid);}
+
+.sb-nav{flex:1;overflow-y:auto;padding:8px;}
+.sb-nav::-webkit-scrollbar{width:3px;}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+.sb-sec{font-size:.61rem;font-weight:700;letter-spacing:1.4px;color:var(--light);padding:12px 10px 5px;text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;color:var(--mid);font-size:.85rem;font-weight:500;transition:all .18s;margin-bottom:1px;border:1px solid transparent;}
+.sb-item:hover{background:var(--green-p);color:var(--green-d);}
+.sb-item.active{background:var(--green);color:#fff;font-weight:700;}
+.sb-item.active .sb-icon{color:var(--gold-l);}
+.sb-icon{font-size:.95rem;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-right:auto;font-size:.64rem;font-weight:700;background:var(--gold);color:#fff;padding:1px 7px;border-radius:99px;}
+.sb-item.active .sb-badge{background:rgba(255,255,255,.3);}
+
+.sb-footer{padding:12px;border-top:1px solid var(--border);}
+.sb-footer-ayah{font-family:'Amiri',serif;font-size:.72rem;color:var(--gold);text-align:center;padding:8px;opacity:.75;line-height:1.7;margin-bottom:8px;}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:9px;cursor:pointer;color:var(--mid);font-size:.83rem;font-weight:600;transition:all .2s;border:1px solid var(--border);}
+.sb-logout:hover{background:#fee2e2;color:var(--red);border-color:#fca5a5;}
+
+/* ══ TOPBAR ══ */
+.topbar{position:fixed;top:0;right:var(--sb);left:0;height:var(--tb);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:90;box-shadow:0 1px 8px rgba(0,0,0,.05);}
+.tb-title{font-size:1.08rem;font-weight:800;color:var(--green-d);}
+.tb-sub{font-size:.72rem;color:var(--light);}
+.tb-right{display:flex;align-items:center;gap:9px;}
+.tb-btn{width:36px;height:36px;border-radius:9px;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;position:relative;}
+.tb-btn:hover{border-color:var(--green-l);}
+.tb-dot{position:absolute;top:6px;left:7px;width:8px;height:8px;border-radius:50%;background:var(--gold);border:2px solid #fff;}
+.tb-date{font-size:.75rem;color:var(--mid);background:var(--green-p);padding:5px 12px;border-radius:99px;font-weight:600;}
+
+/* ══ MAIN ══ */
+.main{margin-right:var(--sb);margin-top:var(--tb);padding:22px;min-height:calc(100vh - var(--tb));}
+
+/* ══ PAGES ══ */
+.page{display:none;animation:fadeUp .3s ease both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ══ SECTION TITLE ══ */
+.sec-title{font-size:1.15rem;font-weight:800;color:var(--green-d);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* ══ WELCOME BANNER ══ */
+.wb{border-radius:16px;padding:22px 28px;margin-bottom:18px;background:linear-gradient(135deg,var(--green-d) 0%,var(--green) 60%,var(--green-l) 100%);color:#fff;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.wb::before{content:'';position:absolute;left:-50px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05);}
+.wb::after{content:'';position:absolute;left:80px;bottom:-70px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.04);}
+.wb-title{font-family:'Amiri',serif;font-size:1.45rem;font-weight:700;margin-bottom:4px;position:relative;z-index:1;}
+.wb-sub{font-size:.84rem;opacity:.85;line-height:1.6;position:relative;z-index:1;}
+.wb-stats{display:flex;gap:18px;position:relative;z-index:1;flex-shrink:0;}
+.wb-stat{text-align:center;background:rgba(255,255,255,.12);border-radius:12px;padding:12px 18px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);}
+.wb-stat-num{font-size:1.5rem;font-weight:900;line-height:1;}
+.wb-stat-lbl{font-size:.7rem;opacity:.8;margin-top:2px;}
+
+/* ══ QUICK CARDS ══ */
+.quick-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;}
+.qcard{border-radius:var(--r);padding:16px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;border:1.5px solid transparent;}
+.qcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.qcard-green{background:var(--green);color:#fff;border-color:var(--green);}
+.qcard-gold{background:var(--gold);color:#fff;border-color:var(--gold);}
+.qcard-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+.qcard-outline{background:#fff;border-color:var(--border);}
+.qcard::before{content:attr(data-icon);position:absolute;left:-6px;bottom:-8px;font-size:3rem;opacity:.13;line-height:1;}
+.qnum{font-size:1.85rem;font-weight:900;line-height:1;margin-bottom:2px;}
+.qlbl{font-size:.8rem;font-weight:600;opacity:.92;}
+.qcard-outline .qnum{color:var(--green-d);}
+.qcard-outline .qlbl{color:var(--mid);}
+
+/* ══ CARD ══ */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-head{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to left,rgba(232,245,238,.4),transparent);}
+.card-title{font-size:.89rem;font-weight:800;color:var(--green-d);display:flex;align-items:center;gap:7px;}
+.card-body{padding:17px;}
+
+/* ══ GRID LAYOUTS ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.g12{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ══ TABLE ══ */
+.tbl{width:100%;border-collapse:collapse;font-size:.83rem;}
+.tbl th{background:var(--green-p);color:var(--green-d);font-weight:700;padding:10px 15px;text-align:right;font-size:.75rem;letter-spacing:.3px;}
+.tbl td{padding:11px 15px;border-bottom:1px solid var(--border);color:var(--mid);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafcfb;}
+
+/* ══ BADGE ══ */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.71rem;font-weight:700;}
+.bg-green{background:#d1fae5;color:#065f46;}
+.bg-gold{background:var(--gold-p);color:var(--gold);}
+.bg-red{background:var(--red-p);color:var(--red);}
+.bg-blue{background:var(--blue-p);color:var(--blue);}
+.bg-gray{background:#f3f4f6;color:#6b7280;}
+.bg-purple{background:#f0ebfa;color:#6b3fa0;}
+
+/* ══ BTNS ══ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--r-sm);font-family:Tajawal;font-size:.83rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,122,74,.2);}
+.btn-primary:hover{background:var(--green-d);transform:translateY(-1px);}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#a87308;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--mid);}
+.btn-outline:hover{border-color:var(--green-l);color:var(--green-d);}
+.btn-ghost{background:var(--green-p);color:var(--green-d);}
+.btn-ghost:hover{background:var(--green);color:#fff;}
+.btn-danger{background:var(--red-p);color:var(--red);}
+.btn-sm{padding:5px 12px;font-size:.75rem;}
+.btn-xs{padding:4px 9px;font-size:.69rem;}
+
+/* ══ FORM ══ */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg label{font-size:.77rem;font-weight:700;color:var(--green-d);}
+.fg input,.fg select,.fg textarea{font-family:Tajawal;font-size:.86rem;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;transition:border-color .2s;direction:rtl;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green-l);background:#fff;}
+.fg textarea{resize:vertical;min-height:68px;}
+
+/* ══ ALERTS ══ */
+.alert{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:var(--r-sm);margin-bottom:8px;font-size:.81rem;line-height:1.5;}
+.alert-ok{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
+.alert-warn{background:var(--gold-p);color:#92400e;border:1px solid #fde68a;}
+.alert-err{background:var(--red-p);color:var(--red);border:1px solid #fca5a5;}
+.alert-blue{background:var(--blue-p);color:var(--blue);border:1px solid #bfdbfe;}
+
+/* ══ AUDIO RECORDING CARD ══ */
+.rec-item{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;transition:all .2s;}
+.rec-item:hover{border-color:var(--green-l);box-shadow:var(--shadow);}
+.rec-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.rec-item-title{font-size:.84rem;font-weight:700;color:var(--green-d);}
+.rec-item-date{font-size:.7rem;color:var(--light);}
+.rec-player{display:flex;align-items:center;gap:9px;background:var(--green-p);border-radius:8px;padding:9px 12px;}
+.play-btn{width:32px;height:32px;border-radius:50%;background:var(--green);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;transition:all .2s;}
+.play-btn:hover{background:var(--green-d);}
+.rec-wave-bar{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden;}
+.rec-wave-fill{height:100%;width:0%;background:var(--green);border-radius:99px;transition:width .3s;}
+.rec-duration{font-size:.72rem;color:var(--mid);font-weight:600;flex-shrink:0;}
+
+/* ══ POINTS CARDS ══ */
+.pts-card{border-radius:12px;padding:16px;text-align:center;border:2px solid transparent;transition:all .2s;}
+.pts-card-green{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;}
+.pts-card-blue{background:linear-gradient(135deg,var(--blue-p),#bfdbfe);border-color:#93c5fd;}
+.pts-card-gold{background:linear-gradient(135deg,var(--gold-p),#fde68a);border-color:#fcd34d;}
+.pts-card-silver{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border-color:#cbd5e1;}
+.pts-card-diamond{background:linear-gradient(135deg,#f0f9ff,#bae6fd);border-color:#38bdf8;}
+.pts-num{font-size:2rem;font-weight:900;line-height:1.1;}
+.pts-lbl{font-size:.75rem;font-weight:700;margin-top:3px;opacity:.8;}
+
+/* ══ PROGRESS BAR ══ */
+.prog{background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden;margin-top:4px;}
+.prog-bar{height:100%;border-radius:99px;background:linear-gradient(to left,var(--green-l),var(--green));transition:width .6s ease;}
+.prog-bar-gold{background:linear-gradient(to left,var(--gold-l),var(--gold));}
+.prog-bar-blue{background:linear-gradient(to left,#60a5fa,var(--blue));}
+
+/* ══ SURAH TRACKER ══ */
+.surah-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fafcfb;border-radius:var(--r-sm);margin-bottom:6px;border:1px solid var(--border);}
+.surah-num{width:28px;height:28px;border-radius:50%;background:var(--green-p);color:var(--green-d);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.surah-name{font-size:.84rem;font-weight:700;color:var(--ink);flex:1;}
+.surah-status{font-size:.75rem;color:var(--mid);}
+
+/* ══ ATTENDANCE MINI CALENDAR ══ */
+.att-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+.att-day{text-align:center;padding:6px 2px;border-radius:7px;font-size:.68rem;font-weight:700;}
+.att-day-lbl{color:var(--light);font-size:.6rem;margin-bottom:2px;}
+.att-day-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:.72rem;font-weight:700;}
+.att-present{background:var(--green-p);color:var(--green-d);}
+.att-present .att-day-num{background:var(--green);color:#fff;}
+.att-absent{background:var(--red-p);color:var(--red);}
+.att-absent .att-day-num{background:var(--red);color:#fff;}
+.att-excused{background:var(--gold-p);color:var(--gold);}
+.att-excused .att-day-num{background:var(--gold);color:#fff;}
+.att-none{background:#f9fafb;color:var(--light);}
+.att-none .att-day-num{background:#e5e7eb;color:#9ca3af;}
+
+/* ══ MESSAGES ══ */
+.msg-compose{background:var(--green-p);border-radius:var(--r-sm);padding:14px;margin-bottom:14px;border:1px solid rgba(26,122,74,.15);}
+.msg-item{padding:13px 15px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.msg-item:hover{background:var(--green-p);}
+.msg-item:last-child{border-bottom:none;}
+.msg-unread{background:rgba(232,245,238,.5);}
+.msg-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;}
+.modal-title{font-size:1rem;font-weight:800;color:var(--green-d);}
+.modal-close{width:32px;height:32px;border-radius:8px;background:var(--bg);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--mid);transition:all .2s;}
+.modal-close:hover{background:var(--red-p);color:var(--red);}
+.modal-body{padding:20px;}
+
+/* ══ MONTHLY REPORT ══ */
+.report-stat{text-align:center;background:var(--green-p);border-radius:10px;padding:14px 10px;}
+.report-stat-num{font-size:1.6rem;font-weight:900;color:var(--green-d);}
+.report-stat-lbl{font-size:.72rem;color:var(--mid);margin-top:2px;}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:11px 22px;border-radius:99px;font-size:.84rem;font-weight:600;z-index:999;transition:transform .3s ease;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  window.db = window.supabase.createClient(
+    'https://mybjyoxfmbivamasxhyw.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08'
+  );
+  console.log('✅ Supabase connected');
+});
+</script>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAD2APMDASIAAhEBAxEB/8QAHQAAAgMBAAMBAAAAAAAAAAAAAAYFBwgEAQMJAv/EAEwQAAEDAwEEBwUEBgkBBgcAAAECAwQABQYRBxIhMQgTQVFhcYEUIjKRoRVCscEjUmJygtEGJDNDkqKywvBTJTQ1Y9LhFyZzk6PD8f/EABoBAAIDAQEAAAAAAAAAAAAAAAAEAgMFAQb/xAA8EQABAwIDAwoFBAECBwAAAAABAAIDBBESITFBUXEFEyIyYYGRocHRFEKx4fAjM1LxQ3LCFTREYoKSov/aAAwDAQACEQMRAD8A2XRRRQhFFFFCEUUUUIRRRRQhFFFcN6vFqskJU273GLBjpGpcfdCB9aEE2XdRVGZn0nsBs61RrI1OyCUOA9nR1bOv76uJ9AarO7dIDarkG8LBZoFljnk44neUB+8s6fSqnzRs6xVQmDjZgLj2C61/XplS4sVO9KkssJ73HAkfWsMXTIM3uqico2vqhoPxNRpS/lut7oqITF2XpcLl4zXJLm4eKvZ4vxeqz+dUGtZ8oJ7ioPme3UAcSB5LdT2W4qydHslszZ7lTmx/ur8JzPEFHROU2MnuE9r/ANVYaekbDkDRqFmsg/rLLKdf81cT8rZCo/obXlTfiXGj/urnxZ/gVWKkna3x+y+gMS82eYQIl1gyCeQakIV+Brur5zLTs5cP9WuWRQj2FxpKtPkTXfa7lMtpBxnajcYenwtredZHy10+ld+MbtBHcVY2Vx0seDh62X0KorFFl2w7ZLHun7Yg5DHTzDiUuEjzG6qrAxfpWQ0OIjZnisyAsnRT8M76R4lCtD8ifKrWVEb+qVN0uD9xpbxGXitL0Up4TtIwrMm0nH8giSXT/cKVuOj+BWhpsq/VWNcHC4KKKKKF1FFFFCEUUUUIRRRRQhFFFFCEUUUUIRRRRQhFFFFCEVFZRkdjxi1OXS/3ONb4jY1Ljy9NfADmT4DjVV7b9vtiwdTtksIbvWRfD1Lat5qOo8t8jmf2Rx79Kydm+QXrJbmb1n95fmSlcWoDatA2OwBI4IH1qiWobHlqdyqMhN8GzUnQcT6aq8tofScuNyfdtmzW0qKeKftGW3x/eSg8B/F8qoXKLvOvM5U7M8lmXiaf7pLpWE+H6qR4Cob2+6XZ1FttMRbbajoiNFQSVeenE0xxsEhWhhMzNLw1bQRqmIyQt9foOVITTu/yOt2DM/n5dUtBluYxjtqTk0d3ue5LovRaIbtUFmLrwCt3fWfU1Jw8bzW/JDvssxTP/UkL6tsf4iB8qkHMzs9nBZxHHo0cjh7XMHWunx48BS7eMkvt3WVXG6SX9fuleiR/COFQY2Q5saG9pzP53qqWeIDDJIXdjcm/n/ipw4VAg/8AjeW2mIoc22VF5fyFePY9ncbgu73icf8AyYwQP83GlDSvNXcw89Z57rD09UoaqJvUiHfcn628k3e1bPG/htV7e8VSUJ/AV4E3Z8rgbHeE+ImJP5UsohS1w3JiIzqozaglboQShJPIE8hXo0oFO0/MfEoNa8fI3/1CbtNnL/Dev0QntIQ4B+FeRjeJTeFtzNltZ5Imx1N/XlSoI75GoZcI7wk161JIOigQR31zmCOq8+R+oR8W09eJp8R9Cmx/AcnjI9othYuLQ4hyDJCz8tQfpUS9cr3bnDHubC1ga5LWuKzPwwXJQ2JodUj/AEsH1O76lMNyza22GMu1YLCTGbI3XLg6neec8R3f84CkSVIkS5CpEp5x55Z1UtatSfWvQkVZfRzxWBmW0X7BuLYWw/b5OhI13FbhCVDxBIPpTkNOyPq6nbtKzpamWqcGk5bAMgOASjYMcn3i2XK4RtwM25oOOlR5668B46AmpGZhlwgvWISlJDd3CVJUP7vUjUHxAINeuI1Nx5V+jSlrZWxvwVtBRAU6SUnh26AKP/8AaZcWvEm9YdOYuL4W5Y2w/URI724UKQRr4appaeSZhLh1b/Ue6ZpYKaRoY4HGRfsyNz5ApbyW0WtGXM2+xSeuhSeq6pZVvFO/oOPlTLtfwqFj0aBPtbakR16MPAnX3wNQr1APyqu2lrbcS4hRStKgpJHMEcjVns5DOzTZ/e4NyDa5cFDb7SkJ0KgDxPn/ADqM4midG4Ou0ZHvyupUjqaoZNG5tnuzbbZa5sF+7VdbLaNnJx6cjSRPt7kwqVpoVE+4nz0AIpW2VWRu+ZlGZfSFRmAX3QeRCeQ9SR9a5s/9zI1QxxEOOxGH8DaQfrrUGw8/HX1jDrjS+W8hRSfpUooCYnFhsX5+KrqKwCoY2Rt2x5W3gb+9ayQywlO6hpsJ5aBI0qjdvotzeSRGIjDTchLG8+UJA11Pu66dvA/OujZpBuyWlZXeLrNj2mGC4EqeV+nI7OJ5a/PlSFkt0evV8l3SR8b7hUB+qOQHoNKzuT6IxVJIdcN+u5bXLPKoqKFoMeEuOV9w295y8U7WDD7O/sqn3mWN65dS5IaIc4tpSSE8PHQ/OqvkmCXeNmO0a12ZDrMm3tIWlbhBT1ij2oeJB8xULbdpuV2fG4UMpzW6Wh+ahhxe8w6+raJIPIbqeVWNdLkG15R0bTME7NnqrNttUt7RMuYluudKuGHJAeZQdVFJPKoTF8Qj4jNvlyuMpxUMW9CkMhWoLiVaakHt+VPuLFU6BO19vO0mOBmkJCQkqPSNzdupI0P5VE5Pg+P4JIxO5wHFsSTFfdlqLv6TfHDUJ00413j2VjySJ/p7QWkGTZ/Ke71XRQxU8bIGEu7fIrO1b2mXi+5RiUSBHUozLmyhx0cie5kfLU6Vb+D7I7VEZauuXyHb5cbhSVMJJDLI7+J9T2VXuyuwhuxTL5lL+iLrNLkJtPZEQDiT3Ed/HuFW5XTDkE37f9lspG5JqZcQ5gqCd7e3sV2Ybs8sGH2kW7HbWiIgaFSk6qcV3rUeJ9at6iiuGGklgVgiiijQiiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihCKKKKEIooooQiiiihC//2Q==" 
+      alt="شعار المدرسة" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 4px 12px rgba(200,146,10,.25);flex-shrink:0;">
+    <div>
+      <div class="t1">مدرسة التوحيد القرآنية</div>
+      <div class="t2">لوحة ولي الأمر</div>
+    </div>
+  </div>
+
+  <div class="sb-user">
+    <div class="sb-av">و</div>
+    <div style="flex:1;">
+      <div class="sb-uname">محمد أحمد إبراهيم</div>
+      <div class="sb-urole">ولي أمر</div>
+    </div>
+    <div class="sb-online"></div>
+  </div>
+
+  <!-- Child selector -->
+  <div class="sb-child">
+    <div class="sb-child-lbl">👦 ابنك المتابَع</div>
+    <div class="sb-child-name">أحمد محمد إبراهيم</div>
+    <div class="sb-child-branch">شعبة الأبطال — حلقة المتوسطين</div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-sec">الرئيسية</div>
+    <div class="sb-item active" onclick="nav(this,'dashboard')"><span class="sb-icon">🏠</span> لوحة القيادة</div>
+
+    <div class="sb-sec">متابعة الابن</div>
+    <div class="sb-item" onclick="nav(this,'attendance')"><span class="sb-icon">📅</span> الحضور والغياب</div>
+    <div class="sb-item" onclick="nav(this,'memorization')"><span class="sb-icon">📖</span> تقدم الحفظ</div>
+    <div class="sb-item" onclick="nav(this,'review')"><span class="sb-icon">🔄</span> سجل المراجعة</div>
+    <div class="sb-item" onclick="nav(this,'points')"><span class="sb-icon">🏆</span> النقاط والكروت <span class="sb-badge">جديد</span></div>
+
+    <div class="sb-sec">التسجيلات والتقارير</div>
+    <div class="sb-item" onclick="nav(this,'recordings')"><span class="sb-icon">🎙️</span> التسجيلات الصوتية <span class="sb-badge">3</span></div>
+    <div class="sb-item" onclick="nav(this,'reports')"><span class="sb-icon">📄</span> التقارير الشهرية</div>
+
+    <div class="sb-sec">التواصل</div>
+    <div class="sb-item" onclick="nav(this,'messages')"><span class="sb-icon">💬</span> رسائل المعلم <span class="sb-badge">2</span></div>
+    <div class="sb-item" onclick="nav(this,'schedule')"><span class="sb-icon">📋</span> الجدول الأسبوعي</div>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-footer-ayah">﴿ وَعَلَّمَكَ مَا لَمْ تَكُنْ تَعْلَمُ ﴾</div>
+    <div class="sb-logout" onclick="confirmLogout()"><span>🚪</span> تسجيل الخروج</div>
+  </div>
+</aside>
+
+<!-- ══════════ TOPBAR ══════════ -->
+<div class="topbar">
+  <div>
+    <div class="tb-title" id="tb-title">🏠 لوحة القيادة</div>
+    <div class="tb-sub">مدرسة التوحيد القرآنية — متابعة ابنك أحمد</div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-btn" onclick="showToast('📬 لديك رسالتان جديدتان من المعلم')">🔔<div class="tb-dot"></div></div>
+    <div class="tb-btn" onclick="nav(document.querySelector('[onclick*=messages]'),'messages')">💬</div>
+    <div class="tb-date" id="tb-date"></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ════════════════════════════════════════
+     DASHBOARD
+════════════════════════════════════════ -->
+<div id="page-dashboard" class="page active">
+
+  <div class="wb">
+    <div>
+      <div class="wb-title">أهلاً، أ. محمد 👋</div>
+      <div class="wb-sub">ابنك أحمد في تقدم رائع هذا الشهر 🌟<br>آخر حصة: الثلاثاء الماضي — سورة البقرة آية ١–٢٠</div>
+    </div>
+    <div class="wb-stats">
+      <div class="wb-stat">
+        <div class="wb-stat-num">٨٩٪</div>
+        <div class="wb-stat-lbl">نسبة الحضور</div>
+      </div>
+      <div class="wb-stat">
+        <div class="wb-stat-num">٤٧٠</div>
+        <div class="wb-stat-lbl">نقاطه الكلية</div>
+      </div>
+      <div class="wb-stat">
+        <div class="wb-stat-num">١٢</div>
+        <div class="wb-stat-lbl">سورة أتمها</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick cards -->
+  <div class="quick-row">
+    <div class="qcard qcard-green" data-icon="📅" onclick="nav(document.querySelector('[onclick*=attendance]'),'attendance')">
+      <div class="qnum">٢</div>
+      <div class="qlbl">📅 غياب هذا الشهر</div>
+    </div>
+    <div class="qcard qcard-gold" data-icon="📖" onclick="nav(document.querySelector('[onclick*=memorization]'),'memorization')">
+      <div class="qnum">٦٤٪</div>
+      <div class="qlbl">📖 تقدم الحفظ هذا الشهر</div>
+    </div>
+    <div class="qcard qcard-blue" data-icon="🎙️" onclick="nav(document.querySelector('[onclick*=recordings]'),'recordings')">
+      <div class="qnum">٣</div>
+      <div class="qlbl">🎙️ تسجيلات جديدة</div>
+    </div>
+    <div class="qcard qcard-outline" data-icon="🏆" onclick="nav(document.querySelector('[onclick*=points]'),'points')">
+      <div class="qnum">٤٧٠</div>
+      <div class="qlbl">🏆 رصيد النقاط</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <!-- Last session -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🎙️ آخر حصة مسجّلة</div><span class="badge bg-green">ممتاز</span></div>
+      <div class="card-body">
+        <div style="font-size:.82rem;color:var(--mid);margin-bottom:10px;">البقرة (١–٢٠) — الثلاثاء ٢٨ أبريل</div>
+        <div class="rec-player">
+          <button class="play-btn" onclick="showToast('▶️ جارٍ تشغيل التسجيل...')">▶</button>
+          <div class="rec-wave-bar"><div class="rec-wave-fill" style="width:35%"></div></div>
+          <span class="rec-duration">١:٤٣</span>
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;font-size:.78rem;">
+          <span style="color:var(--mid);">الأخطاء: <strong style="color:var(--green);">خطأ واحد فقط</strong></span>
+          <span class="badge bg-green">+١٥ نقطة</span>
+        </div>
+        <div style="font-size:.74rem;color:var(--mid);background:var(--green-p);border-radius:7px;padding:8px;margin-top:10px;">
+          💬 <strong>ملاحظة المعلم:</strong> أداء ممتاز! المتابعة في المنزل واضحة
+        </div>
+      </div>
+    </div>
+
+    <!-- This week attendance -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">📅 حضور هذا الأسبوع</div></div>
+      <div class="card-body">
+        <div id="mini-att-week" class="att-week"></div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.72rem;">
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span> حضر</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;"></span> غاب</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;"></span> معذور</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🔔 تنبيهات وأخبار</div><span class="badge bg-gold">٣</span></div>
+      <div class="card-body" style="padding:11px;">
+        <div class="alert alert-ok">🎉 <span>أحمد <strong>أتم حفظ</strong> سورة الملك كاملة!</span></div>
+        <div class="alert alert-blue">🗓️ <span>حلقة الأسبوع القادم <strong>يوم الثلاثاء</strong> كالمعتاد</span></div>
+        <div class="alert alert-warn">📣 <span>يوم ترفيهي للشعبة <strong>الجمعة القادمة</strong> في الملعب</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Points summary -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🏆 ملخص النقاط والكروت</div>
+      <button class="btn btn-ghost btn-sm" onclick="nav(document.querySelector('[onclick*=points]'),'points')">عرض الكل</button>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;text-align:center;">
+        <div class="pts-card pts-card-green">
+          <div class="pts-num" style="color:#065f46;">٣٢٠</div>
+          <div class="pts-lbl" style="color:#065f46;">نقاط الحصص</div>
+        </div>
+        <div class="pts-card pts-card-silver">
+          <div class="pts-num" style="color:#475569;">١</div>
+          <div class="pts-lbl" style="color:#475569;">كارت فضي</div>
+        </div>
+        <div class="pts-card pts-card-gold">
+          <div class="pts-num" style="color:var(--gold);">١</div>
+          <div class="pts-lbl" style="color:var(--gold);">كارت ذهبي</div>
+        </div>
+        <div class="pts-card pts-card-blue">
+          <div class="pts-num" style="color:var(--blue);">٤٧٠</div>
+          <div class="pts-lbl" style="color:var(--blue);">الإجمالي</div>
+        </div>
+        <div class="pts-card pts-card-diamond">
+          <div class="pts-num" style="color:#0369a1;">🏪</div>
+          <div class="pts-lbl" style="color:#0369a1;">متجر المكافآت</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     ATTENDANCE
+════════════════════════════════════════ -->
+<div id="page-attendance" class="page">
+  <div class="sec-title">📅 سجل الحضور والغياب</div>
+
+  <div class="g12" style="margin-bottom:16px;">
+    <!-- Monthly summary -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">📊 ملخص الشهر الحالي</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="report-stat"><div class="report-stat-num" style="color:var(--green);">٨</div><div class="report-stat-lbl">حصص حضر</div></div>
+          <div class="report-stat" style="background:var(--red-p);"><div class="report-stat-num" style="color:var(--red);">٢</div><div class="report-stat-lbl">غياب</div></div>
+          <div class="report-stat" style="background:var(--gold-p);"><div class="report-stat-num" style="color:var(--gold);">٠</div><div class="report-stat-lbl">معذور</div></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--mid);margin-bottom:5px;font-weight:600;">نسبة الحضور</div>
+        <div class="prog" style="height:10px;"><div class="prog-bar" style="width:80%;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;margin-top:4px;color:var(--mid);">
+          <span>٨٠٪</span><span>الهدف: ٩٠٪</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consecutive attendance -->
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🔥 سلسلة الحضور</div></div>
+      <div class="card-body">
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-size:3rem;line-height:1;">🔥</div>
+          <div style="font-size:2.2rem;font-weight:900;color:var(--gold);margin:4px 0;">٦</div>
+          <div style="font-size:.85rem;color:var(--mid);">حصص متتالية بدون غياب</div>
+        </div>
+        <div style="background:var(--gold-p);border-radius:8px;padding:9px;text-align:center;font-size:.78rem;color:var(--gold);font-weight:700;border:1px solid rgba(200,146,10,.2);">
+          🏅 سجّل ١٠ حصص متتالية واحصل على كارت فضي!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance log -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 سجل الحضور التفصيلي</div>
+      <select class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:.75rem;" onchange="showToast('جارٍ تحميل بيانات الشهر...')">
+        <option>أبريل ٢٠٢٥</option>
+        <option>مارس ٢٠٢٥</option>
+        <option>فبراير ٢٠٢٥</option>
+      </select>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table class="tbl">
+        <thead><tr><th>#</th><th>التاريخ</th><th>اليوم</th><th>الحصة</th><th>الحالة</th><th>ملاحظة</th></tr></thead>
+        <tbody id="att-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MEMORIZATION PROGRESS
+════════════════════════════════════════ -->
+<div id="page-memorization" class="page">
+  <div class="sec-title">📖 تقدم الحفظ</div>
+
+  <div class="g12" style="margin-bottom:16px;">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">📊 الإحصاء الكلي</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="report-stat"><div class="report-stat-num">١٢</div><div class="report-stat-lbl">سورة محفوظة</div></div>
+          <div class="report-stat" style="background:var(--blue-p);"><div class="report-stat-num" style="color:var(--blue);">٣٩٠</div><div class="report-stat-lbl">آية كاملة</div></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--mid);margin-bottom:5px;font-weight:600;">التقدم في منهج هذا الفصل</div>
+        <div class="prog" style="height:10px;"><div class="prog-bar" style="width:64%;"></div></div>
+        <div style="font-size:.72rem;color:var(--mid);margin-top:4px;">٦٤٪ — ١٦ سورة من أصل ٢٥</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🎯 السورة الحالية</div></div>
+      <div class="card-body">
+        <div style="text-align:center;padding:10px 0;">
+          <div style="font-family:'Amiri',serif;font-size:1.6rem;font-weight:700;color:var(--green-d);margin-bottom:6px;">سورة البقرة</div>
+          <div style="font-size:.8rem;color:var(--mid);margin-bottom:12px;">يحفظ حالياً من الآية ١ إلى ٢٠ من أصل ٢٨٦ آية</div>
+          <div class="prog" style="height:10px;"><div class="prog-bar prog-bar-gold" style="width:7%;"></div></div>
+          <div style="font-size:.72rem;color:var(--mid);margin-top:5px;">٢٠ / ٢٨٦ آية</div>
+        </div>
+        <div class="alert alert-blue" style="margin-top:12px;margin-bottom:0;">📝 المطلوب للأسبوع القادم: آية ٢١–٣٥</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed surahs -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">✅ السور المحفوظة</div><span class="badge bg-green">١٢ سورة</span></div>
+    <div class="card-body">
+      <div id="surahs-list"></div>
+    </div>
+  </div>
+
+  <!-- Recent memorization sessions -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">📋 آخر جلسات الحفظ</div></div>
+    <div class="card-body" style="padding:0;">
+      <table class="tbl">
+        <thead><tr><th>التاريخ</th><th>السورة</th><th>الآيات</th><th>الأخطاء</th><th>التقييم</th><th>النقاط</th></tr></thead>
+        <tbody id="mem-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     REVIEW
+════════════════════════════════════════ -->
+<div id="page-review" class="page">
+  <div class="sec-title">🔄 سجل المراجعة</div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📊 إحصاء المراجعة</div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+        <div class="report-stat"><div class="report-stat-num">١٨</div><div class="report-stat-lbl">جلسة مراجعة</div></div>
+        <div class="report-stat" style="background:var(--gold-p);"><div class="report-stat-num" style="color:var(--gold);">٨٤٪</div><div class="report-stat-lbl">متوسط الإتقان</div></div>
+        <div class="report-stat" style="background:var(--blue-p);"><div class="report-stat-num" style="color:var(--blue);">٣٩٠</div><div class="report-stat-lbl">آية راجعها</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">📋 سجل المراجعة التفصيلي</div></div>
+    <div class="card-body" style="padding:0;">
+      <table class="tbl">
+        <thead><tr><th>التاريخ</th><th>السورة</th><th>الآيات</th><th>الأخطاء</th><th>التقييم</th><th>ملاحظة</th></tr></thead>
+        <tbody id="review-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     POINTS & CARDS
+════════════════════════════════════════ -->
+<div id="page-points" class="page">
+  <div class="sec-title">🏆 النقاط والكروت</div>
+
+  <!-- Points balance -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">💰 رصيد النقاط الكلي</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">
+        <div class="pts-card pts-card-green">
+          <div class="pts-num" style="color:#065f46;">٣٢٠</div>
+          <div class="pts-lbl" style="color:#065f46;">من الحصص</div>
+        </div>
+        <div class="pts-card pts-card-silver">
+          <div style="font-size:1.3rem;margin-bottom:2px;">🥈</div>
+          <div class="pts-num" style="font-size:1.2rem;color:#475569;">×١</div>
+          <div class="pts-lbl" style="color:#475569;">كارت فضي<br><small>(٥٠ نقطة)</small></div>
+        </div>
+        <div class="pts-card pts-card-gold">
+          <div style="font-size:1.3rem;margin-bottom:2px;">🥇</div>
+          <div class="pts-num" style="font-size:1.2rem;color:var(--gold);">×١</div>
+          <div class="pts-lbl" style="color:var(--gold);">كارت ذهبي<br><small>(١٠٠ نقطة)</small></div>
+        </div>
+        <div class="pts-card pts-card-blue" style="grid-column:span 2;display:flex;align-items:center;justify-content:center;gap:12px;">
+          <div style="text-align:center;">
+            <div style="font-size:2.2rem;font-weight:900;color:var(--blue);">٤٧٠</div>
+            <div style="font-size:.78rem;color:var(--blue);font-weight:700;">إجمالي النقاط</div>
+          </div>
+          <div style="width:1px;height:40px;background:rgba(29,111,164,.2);"></div>
+          <div style="text-align:center;">
+            <div style="font-size:1.1rem;font-weight:900;color:var(--green);">🏪</div>
+            <div style="font-size:.72rem;color:var(--mid);">قابلة للصرف</div>
+            <div style="font-size:.72rem;color:var(--mid);">في المسجد</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Points history -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">📋 سجل النقاط</div></div>
+    <div class="card-body" style="padding:0;">
+      <table class="tbl">
+        <thead><tr><th>التاريخ</th><th>السبب</th><th>النوع</th><th>النقاط</th><th>الرصيد</th></tr></thead>
+        <tbody id="pts-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     RECORDINGS
+════════════════════════════════════════ -->
+<div id="page-recordings" class="page">
+  <div class="sec-title">🎙️ التسجيلات الصوتية</div>
+
+  <div class="alert alert-blue" style="margin-bottom:16px;">
+    💡 هذه التسجيلات أرسلها معلم أحمد لمتابعة حفظه. يُنصح بالاستماع إليها مع ابنك لتشجيعه.
+  </div>
+
+  <div id="recordings-list"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MONTHLY REPORTS
+════════════════════════════════════════ -->
+<div id="page-reports" class="page">
+  <div class="sec-title">📄 التقارير الشهرية</div>
+
+  <!-- Month selector -->
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn btn-primary btn-sm">أبريل ٢٠٢٥</button>
+    <button class="btn btn-outline btn-sm" onclick="showToast('جارٍ تحميل تقرير مارس...')">مارس ٢٠٢٥</button>
+    <button class="btn btn-outline btn-sm" onclick="showToast('جارٍ تحميل تقرير فبراير...')">فبراير ٢٠٢٥</button>
+    <button class="btn btn-outline btn-sm" onclick="showToast('جارٍ تحميل تقرير يناير...')">يناير ٢٠٢٥</button>
+  </div>
+
+  <div class="g12">
+    <!-- Report summary -->
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📊 تقرير أبريل ٢٠٢٥</div>
+          <button class="btn btn-outline btn-sm" onclick="printReport()">🖨️ طباعة</button>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div class="report-stat"><div class="report-stat-num">٨٠٪</div><div class="report-stat-lbl">نسبة الحضور</div></div>
+            <div class="report-stat"><div class="report-stat-num">٨٤٪</div><div class="report-stat-lbl">متوسط التقييم</div></div>
+            <div class="report-stat"><div class="report-stat-num">٦٠</div><div class="report-stat-lbl">نقاط الشهر</div></div>
+            <div class="report-stat"><div class="report-stat-num">٤٠</div><div class="report-stat-lbl">آية محفوظة</div></div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <div style="font-size:.77rem;font-weight:700;color:var(--green-d);margin-bottom:6px;">مستوى الحفظ الجديد</div>
+            <div class="prog"><div class="prog-bar" style="width:64%;"></div></div>
+            <div style="font-size:.7rem;color:var(--mid);margin-top:3px;">٦٤٪ من منهج الفصل</div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <div style="font-size:.77rem;font-weight:700;color:var(--green-d);margin-bottom:6px;">مستوى المراجعة</div>
+            <div class="prog"><div class="prog-bar prog-bar-blue" style="width:84%;"></div></div>
+            <div style="font-size:.7rem;color:var(--mid);margin-top:3px;">٨٤٪ إتقان</div>
+          </div>
+
+          <div style="background:var(--green-p);border-radius:9px;padding:12px;border:1px solid rgba(26,122,74,.15);">
+            <div style="font-size:.78rem;font-weight:700;color:var(--green-d);margin-bottom:6px;">💬 تقييم المعلم</div>
+            <div style="font-size:.82rem;color:var(--mid);line-height:1.6;">أحمد طالب مجتهد ومتميز في حلقته. يحتاج إلى مزيد من المراجعة في المنزل لتثبيت ما حفظه. نلاحظ تحسناً واضحاً في أسلوب القراءة والتجويد.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">💡 توصيات المعلم لكم</div></div>
+        <div class="card-body" style="padding:12px;">
+          <div class="alert alert-ok">✅ <span>استمروا في تشغيل التسجيلات له يومياً في البيت</span></div>
+          <div class="alert alert-blue">📖 <span>اطلبوا منه مراجعة سورة الملك يومياً قبل النوم</span></div>
+          <div class="alert alert-warn">⏰ <span>حاولوا الالتزام بموعد الحلقة وعدم الغياب</span></div>
+          <div class="alert alert-ok">🎉 <span>شجعوه — إنجازاته رائعة هذا الشهر!</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">🏆 إنجازات الشهر</div></div>
+        <div class="card-body" style="padding:12px;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:9px;background:var(--gold-p);padding:9px 12px;border-radius:8px;border:1px solid rgba(200,146,10,.2);">
+              <span style="font-size:1.3rem;">🏅</span>
+              <div>
+                <div style="font-size:.82rem;font-weight:700;color:var(--green-d);">أتم حفظ سورة الملك</div>
+                <div style="font-size:.7rem;color:var(--mid);">إنجاز رائع — ٣٠ آية كريمة</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;background:var(--green-p);padding:9px 12px;border-radius:8px;border:1px solid rgba(26,122,74,.15);">
+              <span style="font-size:1.3rem;">🥇</span>
+              <div>
+                <div style="font-size:.82rem;font-weight:700;color:var(--green-d);">حصل على كارت ذهبي</div>
+                <div style="font-size:.7rem;color:var(--mid);">١٠٠ نقطة إضافية</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;background:var(--blue-p);padding:9px 12px;border-radius:8px;border:1px solid rgba(29,111,164,.15);">
+              <span style="font-size:1.3rem;">🔥</span>
+              <div>
+                <div style="font-size:.82rem;font-weight:700;color:var(--green-d);">٦ حصص متتالية بدون غياب</div>
+                <div style="font-size:.7rem;color:var(--mid);">استمرار رائع!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MESSAGES
+════════════════════════════════════════ -->
+<div id="page-messages" class="page">
+  <div class="sec-title">💬 رسائل المعلم</div>
+
+  <!-- Compose -->
+  <div class="msg-compose">
+    <div style="font-size:.8rem;font-weight:700;color:var(--green-d);margin-bottom:9px;">📤 إرسال رسالة للمعلم</div>
+    <div class="fg" style="margin-bottom:8px;">
+      <textarea placeholder="اكتب رسالتك هنا... (سؤال عن أحمد، اعتذار غياب، ملاحظة...)" style="min-height:70px;background:#fff;"></textarea>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="showToast('✅ تم إرسال رسالتك للمعلم!')">📤 إرسال الرسالة</button>
+  </div>
+
+  <!-- Messages list -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">📬 صندوق الرسائل</div><span class="badge bg-gold">٢ جديدة</span></div>
+    <div style="padding:0;" id="msgs-container"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCHEDULE
+════════════════════════════════════════ -->
+<div id="page-schedule" class="page">
+  <div class="sec-title">📋 الجدول الأسبوعي</div>
+
+  <div class="alert alert-blue" style="margin-bottom:16px;">
+    📌 <strong>شعبة الأبطال</strong> — الجمعة والثلاثاء من كل أسبوع
+  </div>
+
+  <div class="g12">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🕌 الجمعة</div><span class="badge bg-green">يوم حلقة</span></div>
+      <div class="card-body">
+        <div style="font-size:.82rem;color:var(--mid);line-height:2;">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">⏰ <span><strong>الوقت:</strong> بعد صلاة العصر</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🎙️ <span><strong>الركن الأول:</strong> تسميع الحفظ الجديد</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🔄 <span><strong>الركن الثاني:</strong> تسميع المراجعة</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🎵 <span><strong>الركن الثالث:</strong> التلقين الجماعي</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;">📚 <span><strong>الركن الرابع:</strong> الكنوز الأثرية</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div class="card-title">🕌 الثلاثاء</div><span class="badge bg-green">يوم حلقة</span></div>
+      <div class="card-body">
+        <div style="font-size:.82rem;color:var(--mid);line-height:2;">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">⏰ <span><strong>الوقت:</strong> بعد صلاة العصر</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🎙️ <span><strong>الركن الأول:</strong> تسميع الحفظ الجديد</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🔄 <span><strong>الركن الثاني:</strong> تسميع المراجعة</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">🎵 <span><strong>الركن الثالث:</strong> التلقين الجماعي</span></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 0;">🎯 <span><strong>الركن الخامس:</strong> شرح التجويد</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-head"><div class="card-title">💡 نصائح لدعم ابنك في المنزل</div></div>
+    <div class="card-body" style="padding:12px;">
+      <div class="alert alert-ok">📱 <span>شغّل له تسجيلاته الصوتية كل يوم بعد الغداء</span></div>
+      <div class="alert alert-blue">🌙 <span>اطلب منه مراجعة ما حفظ قبل النوم ولو لربع ساعة</span></div>
+      <div class="alert alert-gold" style="background:var(--gold-p);color:#92400e;border:1px solid #fde68a;">🌟 <span>اشكره وشجعه أمام أهل البيت — التشجيع يزيد من حماسه</span></div>
+      <div class="alert alert-blue">📖 <span>حاول تسمعه يقرأ وهو يصلي معك — هذا يثبّت الحفظ</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<!-- ══════════ PRINT REPORT AREA ══════════ -->
+<div id="print-area" style="display:none;">
+  <style>
+    @media print {
+      body > *:not(#print-area) { display: none !important; }
+      #print-area { display: block !important; font-family: 'Tajawal', sans-serif; direction: rtl; padding: 30px; }
+      .print-header { text-align: center; border-bottom: 2px solid #1a7a4a; padding-bottom: 16px; margin-bottom: 20px; }
+      .print-section { margin-bottom: 18px; }
+      .print-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+      .print-stat { text-align: center; border: 1px solid #dce8e0; border-radius: 8px; padding: 10px; }
+    }
+  </style>
+  <div class="print-header">
+    <h1 style="font-family:'Amiri',serif;color:#0f5c36;font-size:1.8rem;">مدرسة التوحيد القرآنية</h1>
+    <h2 style="font-size:1.2rem;color:#1a7a4a;">تقرير ولي الأمر — أبريل ٢٠٢٥</h2>
+    <p style="color:#4a5e52;">اسم الطالب: أحمد محمد إبراهيم | الشعبة: الأبطال</p>
+  </div>
+  <div class="print-section">
+    <h3 style="color:#0f5c36;margin-bottom:10px;">ملخص الشهر</h3>
+    <div class="print-grid">
+      <div class="print-stat"><div style="font-size:1.4rem;font-weight:900;color:#1a7a4a;">٨٠٪</div><div>نسبة الحضور</div></div>
+      <div class="print-stat"><div style="font-size:1.4rem;font-weight:900;color:#c8920a;">٨٤٪</div><div>متوسط التقييم</div></div>
+      <div class="print-stat"><div style="font-size:1.4rem;font-weight:900;color:#1a7a4a;">٦٠</div><div>نقاط مكتسبة</div></div>
+      <div class="print-stat"><div style="font-size:1.4rem;font-weight:900;color:#1d6fa4;">٤٠</div><div>آية محفوظة</div></div>
+    </div>
+  </div>
+  <div class="print-section">
+    <h3 style="color:#0f5c36;margin-bottom:8px;">تقييم المعلم</h3>
+    <p style="line-height:1.8;color:#4a5e52;">أحمد طالب مجتهد ومتميز في حلقته. يحتاج إلى مزيد من المراجعة في المنزل لتثبيت ما حفظه. نلاحظ تحسناً واضحاً في أسلوب القراءة والتجويد.</p>
+  </div>
+</div>
+
+<!-- ══════════ TOAST ══════════ -->
+<div id="toast"><span id="toast-msg"></span></div>
+
+<script>
+// ══ DATA ══
+let ATTENDANCE = [];
+let STUDENT_ID = null;
+
+async function loadParentData() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) return;
+
+  // جيب ابن ولي الأمر
+  const { data: stuData, error: stuErr } = await window.db
+    .from('students')
+    .select(`
+      id, memorized_parts, total_points,
+      users!students_user_id_fkey(full_name)
+    `)
+    .eq('is_active', true)
+    .limit(1)
+    .single();
+
+  if (stuErr) { console.error('student:', stuErr); return; }
+
+  STUDENT_ID = stuData.id;
+
+  // اسم الابن في الصفحة
+  const sonEl = document.getElementById('son-name');
+  if (sonEl) sonEl.textContent = stuData.users?.full_name || 'ابنك';
+
+  // إحصائيات
+  const memEl = document.getElementById('stat-memorized');
+  if (memEl) memEl.textContent = (stuData.memorized_parts || 0) + ' جزء';
+  const ptsEl = document.getElementById('stat-points');
+  if (ptsEl) ptsEl.textContent = stuData.total_points || 0;
+
+  // جيب الحضور
+  const { data: attData } = await window.db
+    .from('attendance')
+    .select('*')
+    .eq('student_id', STUDENT_ID)
+    .order('date', { ascending: false })
+    .limit(30);
+
+  const statusMap = { present:'حاضر', absent:'غائب', late:'متأخر', excused:'معذور' };
+  ATTENDANCE = (attData || []).map(a => ({
+    date: new Date(a.date).toLocaleDateString('ar-EG'),
+    status: statusMap[a.status] || a.status,
+    notes: a.notes || '—',
+  }));
+
+  renderAttendance();
+  renderMiniWeek();
+}
+
+let MEMORIZATION = [];
+
+async function loadMemorization() {
+  if (!STUDENT_ID) return;
+
+  const { data, error } = await window.db
+    .from('memorization')
+    .select('*')
+    .eq('student_id', STUDENT_ID)
+    .eq('type', 'new')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) { console.error('memorization:', error); return; }
+
+  const gradeMap = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'حاول مرة أخرى' };
+
+  MEMORIZATION = (data || []).map(m => ({
+    date: new Date(m.date).toLocaleDateString('ar-EG'),
+    surah: m.surah_name || '—',
+    verses: (m.from_verse||'') + '—' + (m.to_verse||''),
+    errors: m.errors_count || 0,
+    score: gradeMap[m.grade] || m.grade,
+    pts: m.points_earned || 0,
+    hasRec: !!m.audio_url,
+    audioUrl: m.audio_url || null,
+    notes: m.notes || '—',
+  }));
+
+  renderMemorization();
+}
+
+const REVIEW = [
+  {date:'٢٥ أبريل',surah:'الملك',ayat:'كاملة',errors:'١',grade:'ممتاز',note:'إتقان ممتاز'},
+  {date:'١٨ أبريل',surah:'الفجر',ayat:'كاملة',errors:'٣',grade:'جيد جداً',note:'يحتاج تثبيت'},
+  {date:'١١ أبريل',surah:'الشمس',ayat:'كاملة',errors:'٠',grade:'ممتاز',note:'رائع جداً!'},
+  {date:'٤ أبريل',surah:'الليل',ayat:'كاملة',errors:'٢',grade:'ممتاز',note:''},
+  {date:'٢٨ مارس',surah:'الضحى',ayat:'كاملة',errors:'١',grade:'ممتاز',note:'أداء جميل'},
+];
+
+const SURAHS = [
+  {name:'الفاتحة',ayat:7,level:'محفوظة تماماً'},
+  {name:'الضحى',ayat:11,level:'محفوظة تماماً'},
+  {name:'الشرح',ayat:8,level:'محفوظة تماماً'},
+  {name:'العلق',ayat:19,level:'محفوظة تماماً'},
+  {name:'القدر',ayat:5,level:'محفوظة تماماً'},
+  {name:'الزلزلة',ayat:8,level:'محفوظة تماماً'},
+  {name:'العاديات',ayat:11,level:'محفوظة تماماً'},
+  {name:'الهمزة',ayat:9,level:'محفوظة تماماً'},
+  {name:'الفيل',ayat:5,level:'محفوظة تماماً'},
+  {name:'قريش',ayat:4,level:'محفوظة تماماً'},
+  {name:'الماعون',ayat:7,level:'محفوظة تماماً'},
+  {name:'الملك',ayat:30,level:'محفوظة تماماً'},
+];
+
+let POINTS_LOG = [];
+
+async function loadPoints() {
+  if (!STUDENT_ID) return;
+
+  const { data, error } = await window.db
+    .from('points_cards')
+    .select('*')
+    .eq('student_id', STUDENT_ID)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (error) { console.error('points:', error); return; }
+
+  const cardNames = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', silver:'فضي', golden:'ذهبي', diamond:'ماسي' };
+
+  POINTS_LOG = (data || []).map(p => ({
+    date: new Date(p.date).toLocaleDateString('ar-EG'),
+    type: cardNames[p.card_type] || p.card_type,
+    pts: p.points,
+    reason: p.reason || '—',
+  }));
+
+  renderPoints();
+}
+
+const RECORDINGS = [
+  {title:'تسميع سورة البقرة (١–٢٠)',date:'٢٨ أبريل ٢٠٢٥',duration:'١:٤٣',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'أداء ممتاز! المتابعة في المنزل واضحة'},
+  {title:'تسميع مراجعة سورة الملك',date:'٢٥ أبريل ٢٠٢٥',duration:'٢:١٢',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'حفظه قوي جداً — بارك الله فيه'},
+  {title:'تسميع سورة البقرة (١–١٠)',date:'٢٢ أبريل ٢٠٢٥',duration:'١:٠٥',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'بداية جيدة للبقرة'},
+];
+
+const MESSAGES = [
+  {from:'الشيخ محمود أحمد',time:'أمس',msg:'السلام عليكم، أحمد متفوق هذا الشهر والحمد لله. يرجى الاستمرار في المراجعة المنزلية.',read:false},
+  {from:'الشيخ محمود أحمد',time:'منذ ٣ أيام',msg:'تذكير: الحلقة القادمة الثلاثاء بعد العصر. الرجاء إحضار أحمد في الموعد.',read:false},
+  {from:'الشيخ محمود أحمد',time:'الأسبوع الماضي',msg:'أرسلت تسجيل أحمد لسورة الملك. ما شاء الله عليه تحسن كبير.',read:true},
+  {from:'الإدارة',time:'١٠ أبريل',msg:'يوم ترفيهي للشعبة يوم الجمعة القادمة في ملعب الحي. المواصلة على مسؤولية الأولياء.',read:true},
+];
+
+// ══ WEEK DATA ══
+const WEEK_DAYS = ['ج','س','ح','ن','ث','ر','خ'];
+const WEEK_LABELS = ['جمعة','سبت','أحد','اثنين','ثلاثاء','أربعاء','خميس'];
+const WEEK_ATT = ['present','none','none','none','present','none','none'];
+
+// ══ NAVIGATION ══
+const PAGE_TITLES = {
+  dashboard:'🏠 لوحة القيادة',
+  attendance:'📅 الحضور والغياب',
+  memorization:'📖 تقدم الحفظ',
+  review:'🔄 سجل المراجعة',
+  points:'🏆 النقاط والكروت',
+  recordings:'🎙️ التسجيلات الصوتية',
+  reports:'📄 التقارير الشهرية',
+  messages:'💬 رسائل المعلم',
+  schedule:'📋 الجدول الأسبوعي',
+};
+
+function nav(el, pageId) {
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const page = document.getElementById('page-'+pageId);
+  if (page) page.classList.add('active');
+  document.getElementById('tb-title').textContent = PAGE_TITLES[pageId] || pageId;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══ RENDER FUNCTIONS ══
+function renderMiniWeek() {
+  const el = document.getElementById('mini-att-week');
+  if (!el) return;
+  el.innerHTML = WEEK_DAYS.map((d,i) => `
+    <div class="att-day att-${WEEK_ATT[i]}">
+      <div class="att-day-lbl">${d}</div>
+      <div class="att-day-num">${i+1}</div>
+    </div>`).join('');
+}
+
+function renderAttendance() {
+  const el = document.getElementById('att-table-body');
+  if (!el) return;
+  const statusMap = {present:['bg-green','حضر'],absent:['bg-red','غاب'],excused:['bg-gold','معذور']};
+  el.innerHTML = ATTENDANCE.map((a,i) => {
+    const [cls,lbl] = statusMap[a.status]||['bg-gray','—'];
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${a.date}</strong></td>
+      <td>${a.day}</td>
+      <td>${a.session}</td>
+      <td><span class="badge ${cls}">${lbl}</span></td>
+      <td style="font-size:.75rem;color:var(--light);">${a.note||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMemorization() {
+  const el = document.getElementById('mem-table');
+  if (!el) return;
+  const gradeMap = {'ممتاز':'bg-green','جيد جداً':'bg-blue','جيد':'bg-gold','حاول مجدداً':'bg-red'};
+  el.innerHTML = MEMORIZATION.map(m => `<tr>
+    <td>${m.date}</td>
+    <td><strong>${m.surah}</strong></td>
+    <td>${m.ayat}</td>
+    <td>${m.errors}</td>
+    <td><span class="badge ${gradeMap[m.grade]||'bg-gray'}">${m.grade}</span></td>
+    <td><span class="badge bg-green">+${m.pts} نقطة</span></td>
+  </tr>`).join('');
+
+  const sl = document.getElementById('surahs-list');
+  if (!sl) return;
+  sl.innerHTML = SURAHS.map((s,i) => `
+    <div class="surah-row">
+      <div class="surah-num">${i+1}</div>
+      <div>
+        <div class="surah-name">${s.name}</div>
+        <div class="surah-status">${s.ayat} آية</div>
+      </div>
+      <span class="badge bg-green">✅ ${s.level}</span>
+    </div>`).join('');
+}
+
+function renderReview() {
+  const el = document.getElementById('review-table');
+  if (!el) return;
+  const gradeMap = {'ممتاز':'bg-green','جيد جداً':'bg-blue','جيد':'bg-gold'};
+  el.innerHTML = REVIEW.map(r => `<tr>
+    <td>${r.date}</td>
+    <td><strong>${r.surah}</strong></td>
+    <td>${r.ayat}</td>
+    <td>${r.errors}</td>
+    <td><span class="badge ${gradeMap[r.grade]||'bg-gray'}">${r.grade}</span></td>
+    <td style="font-size:.75rem;color:var(--mid);">${r.note||'—'}</td>
+  </tr>`).join('');
+}
+
+function renderPoints() {
+  const el = document.getElementById('pts-table');
+  if (!el) return;
+  const typeMap = {'ممتاز':'bg-green','جيد جداً':'bg-blue','جيد':'bg-gold','كارت فضي':'bg-gray','كارت ذهبي':'bg-gold','كارت ماسي':'bg-purple'};
+  el.innerHTML = POINTS_LOG.map(p => `<tr>
+    <td>${p.date}</td>
+    <td style="font-size:.78rem;">${p.reason}</td>
+    <td><span class="badge ${typeMap[p.type]||'bg-gray'}">${p.type}</span></td>
+    <td><strong style="color:var(--green);">${p.pts}</strong></td>
+    <td><strong>${p.balance}</strong></td>
+  </tr>`).join('');
+}
+
+function renderRecordings() {
+  const el = document.getElementById('recordings-list');
+  if (!el) return;
+  el.innerHTML = RECORDINGS.map((r,i) => `
+    <div class="rec-item">
+      <div class="rec-item-head">
+        <div>
+          <div class="rec-item-title">🎙️ ${r.title}</div>
+          <div class="rec-item-date">${r.date} — ${r.teacher}</div>
+        </div>
+        <span class="badge bg-green">${r.grade}</span>
+      </div>
+      <div class="rec-player" style="margin-bottom:10px;">
+        <button class="play-btn" onclick="playRec(${i},this)">▶</button>
+        <div class="rec-wave-bar"><div class="rec-wave-fill" id="wave-${i}"></div></div>
+        <span class="rec-duration">${r.duration}</span>
+      </div>
+      <div style="font-size:.74rem;color:var(--mid);background:var(--green-p);border-radius:7px;padding:8px;">
+        💬 <strong>ملاحظة المعلم:</strong> ${r.note}
+      </div>
+    </div>`).join('');
+}
+
+let playingRec = -1;
+let playInterval = null;
+function playRec(i, btn) {
+  if (playingRec === i) {
+    btn.textContent = '▶';
+    clearInterval(playInterval);
+    playingRec = -1;
+    return;
+  }
+  document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶');
+  clearInterval(playInterval);
+  btn.textContent = '⏸';
+  playingRec = i;
+  let progress = 0;
+  const wavEl = document.getElementById('wave-'+i);
+  if (wavEl) wavEl.style.width = '0%';
+  playInterval = setInterval(() => {
+    progress += 2;
+    if (wavEl) wavEl.style.width = progress + '%';
+    if (progress >= 100) {
+      clearInterval(playInterval);
+      btn.textContent = '▶';
+      playingRec = -1;
+    }
+  }, 80);
+}
+
+function renderMessages() {
+  const el = document.getElementById('msgs-container');
+  if (!el) return;
+  el.innerHTML = MESSAGES.map((m,i) => `
+    <div class="msg-item ${m.read?'':'msg-unread'}" onclick="markRead(${i},this)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="sb-av" style="width:30px;height:30px;font-size:.7rem;flex-shrink:0;">${m.from[0]}</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--green-d);">${m.from}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${!m.read?'<div class="msg-dot"></div>':''}
+          <span style="font-size:.7rem;color:var(--light);">${m.time}</span>
+        </div>
+      </div>
+      <div style="font-size:.79rem;color:var(--mid);line-height:1.6;padding-right:38px;">${m.msg}</div>
+    </div>`).join('');
+}
+
+function markRead(i, el) {
+  MESSAGES[i].read = true;
+  el.classList.remove('msg-unread');
+  el.querySelector('.msg-dot')?.remove();
+}
+
+// ══ TOAST ══
+let tT;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tT);
+  tT = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══ DATE ══
+function setDate() {
+  const now = new Date();
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('tb-date').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+}
+
+// ══ PRINT REPORT ══
+function printReport() {
+  document.getElementById('print-area').style.display = 'block';
+  window.print();
+  setTimeout(() => document.getElementById('print-area').style.display = 'none', 500);
+}
+
+// ══ LOGOUT ══
+function confirmLogout() {
+  if (confirm('هل تريد تسجيل الخروج؟')) window.location.href = 'login.html';
+}
+
+// ══ INIT ══
+async function init() {
+  // التحقق من تسجيل الدخول
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser || currentUser.role !== 'parent') {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const nameEl = document.getElementById('sb-user-name');
+  if (nameEl) nameEl.textContent = currentUser.full_name || 'ولي الأمر';
+
+  setDate();
+
+  // تحميل البيانات
+  await loadParentData();
+  await Promise.all([loadMemorization(), loadPoints()]);
+
+  renderReview();
+  renderRecordings();
+  renderMessages();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+});
+
+init();
+</script>
+</body>
+</html>
