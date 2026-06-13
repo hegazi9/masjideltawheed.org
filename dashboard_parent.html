@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة ولي الأمر — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
+  const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08';
+  window.db = supabase.createClient(_SB_URL, _SB_KEY);
+</script>
+<script src="theme.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -62,6 +69,22 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 .tb-btn{width:36px;height:36px;border-radius:9px;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;position:relative;}
 .tb-btn:hover{border-color:var(--green-l);}
 .tb-dot{position:absolute;top:6px;left:7px;width:8px;height:8px;border-radius:50%;background:var(--gold);border:2px solid #fff;}
+.tb-notif-count{position:absolute;top:3px;left:3px;min-width:16px;height:16px;border-radius:99px;background:#c0392b;border:2px solid #fff;display:none;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;padding:0 3px;}
+.notif-dropdown{position:absolute;top:calc(100% + 10px);left:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(15,35,24,.15);border:1px solid var(--border);z-index:9999;display:none;flex-direction:column;overflow:hidden;}
+.notif-dropdown.open{display:flex;}
+.notif-dd-head{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-dd-title{font-size:.85rem;font-weight:800;}
+.notif-dd-clear{font-size:.72rem;cursor:pointer;font-weight:600;color:var(--green-l);}
+.notif-dd-body{max-height:300px;overflow-y:auto;}
+.notif-dd-body::-webkit-scrollbar{width:3px;}
+.notif-item{padding:11px 15px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;display:flex;gap:9px;align-items:flex-start;}
+.notif-item:hover{background:#f9fdf9;}
+.notif-item.unread{background:#fffef5;}
+.notif-item-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:#fdf3dc;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.notif-item-title{font-size:.81rem;font-weight:700;margin-bottom:2px;}
+.notif-item-body{font-size:.74rem;color:var(--mid);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.notif-item-date{font-size:.67rem;color:var(--light);margin-top:3px;}
+.notif-dd-empty{padding:30px 15px;text-align:center;font-size:.82rem;}
 .tb-date{font-size:.75rem;color:var(--mid);background:var(--green-p);padding:5px 12px;border-radius:99px;font-weight:600;}
 
 /* ══ MAIN ══ */
@@ -269,8 +292,8 @@ window.addEventListener('DOMContentLoaded', function() {
   <!-- Child selector -->
   <div class="sb-child">
     <div class="sb-child-lbl">👦 ابنك المتابَع</div>
-    <div class="sb-child-name">أحمد محمد إبراهيم</div>
-    <div class="sb-child-branch">شعبة الأبطال — حلقة المتوسطين</div>
+    <div class="sb-child-name" id="son-name">—</div>
+    <div class="sb-child-branch">—</div>
   </div>
 
   <nav class="sb-nav">
@@ -282,6 +305,7 @@ window.addEventListener('DOMContentLoaded', function() {
     <div class="sb-item" onclick="nav(this,'memorization')"><span class="sb-icon">📖</span> تقدم الحفظ</div>
     <div class="sb-item" onclick="nav(this,'review')"><span class="sb-icon">🔄</span> سجل المراجعة</div>
     <div class="sb-item" onclick="nav(this,'points')"><span class="sb-icon">🏆</span> النقاط والكروت <span class="sb-badge">جديد</span></div>
+    <div class="sb-item" onclick="if(typeof STUDENT_ID!=='undefined'&&STUDENT_ID){SFILE.open(STUDENT_ID,true);SFILE.setName(document.querySelector('.sb-child-name')?.textContent||'')}else{alert('جارٍ تحميل بيانات الابن...')}"><span class="sb-icon">📁</span> الملف الدراسي</div>
 
     <div class="sb-sec">التسجيلات والتقارير</div>
     <div class="sb-item" onclick="nav(this,'recordings')"><span class="sb-icon">🎙️</span> التسجيلات الصوتية <span class="sb-badge">3</span></div>
@@ -305,9 +329,17 @@ window.addEventListener('DOMContentLoaded', function() {
     <div class="tb-sub">مدرسة التوحيد القرآنية — متابعة ابنك أحمد</div>
   </div>
   <div class="tb-right">
-    <div class="tb-btn" onclick="showToast('📬 لديك رسالتان جديدتان من المعلم')">🔔<div class="tb-dot"></div></div>
+    <div class="tb-btn" id="notif-bell" onclick="toggleNotifDropdown()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="tb-notif-count" id="notif-count">0</div>
+      <div class="notif-dropdown" id="notif-dropdown" onclick="event.stopPropagation()">
+        <div class="notif-dd-head"><span class="notif-dd-title">🔔 الإشعارات</span><span class="notif-dd-clear" onclick="markAllNotifRead()">تعيين الكل كمقروء</span></div>
+        <div class="notif-dd-body" id="notif-dd-body"><div class="notif-dd-empty">لا توجد إشعارات</div></div>
+      </div>
+    </div>
     <div class="tb-btn" onclick="nav(document.querySelector('[onclick*=messages]'),'messages')">💬</div>
-    <div class="tb-date" id="tb-date"></div>
+    <div class="tb-notif" onclick="openThemePicker()" title="تغيير الثيم" style="font-size:1.1rem;width:38px;height:38px;border-radius:9px;background:var(--bg,#f4f6f4);border:1.5px solid var(--border,#dce8e0);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;">🎨</div>
+  <div class="tb-date" id="tb-date"></div>
   </div>
 </div>
 
@@ -830,7 +862,7 @@ window.addEventListener('DOMContentLoaded', function() {
   <div class="print-header">
     <h1 style="font-family:'Amiri',serif;color:#0f5c36;font-size:1.8rem;">مدرسة التوحيد القرآنية</h1>
     <h2 style="font-size:1.2rem;color:#1a7a4a;">تقرير ولي الأمر — أبريل ٢٠٢٥</h2>
-    <p style="color:#4a5e52;">اسم الطالب: أحمد محمد إبراهيم | الشعبة: الأبطال</p>
+    <p style="color:#4a5e52;">اسم الطالب: <span id="print-son-name">—</span></p>
   </div>
   <div class="print-section">
     <h3 style="color:#0f5c36;margin-bottom:10px;">ملخص الشهر</h3>
@@ -877,6 +909,7 @@ async function loadParentData() {
   // اسم الابن في الصفحة
   const sonEl = document.getElementById('son-name');
   if (sonEl) sonEl.textContent = stuData.users?.full_name || 'ابنك';
+  const pSon = document.getElementById('print-son-name'); if (pSon) pSon.textContent = stuData.users?.full_name || '—';
 
   // إحصائيات
   const memEl = document.getElementById('stat-memorized');
@@ -935,28 +968,9 @@ async function loadMemorization() {
   renderMemorization();
 }
 
-const REVIEW = [
-  {date:'٢٥ أبريل',surah:'الملك',ayat:'كاملة',errors:'١',grade:'ممتاز',note:'إتقان ممتاز'},
-  {date:'١٨ أبريل',surah:'الفجر',ayat:'كاملة',errors:'٣',grade:'جيد جداً',note:'يحتاج تثبيت'},
-  {date:'١١ أبريل',surah:'الشمس',ayat:'كاملة',errors:'٠',grade:'ممتاز',note:'رائع جداً!'},
-  {date:'٤ أبريل',surah:'الليل',ayat:'كاملة',errors:'٢',grade:'ممتاز',note:''},
-  {date:'٢٨ مارس',surah:'الضحى',ayat:'كاملة',errors:'١',grade:'ممتاز',note:'أداء جميل'},
-];
+const REVIEW = [];
 
-const SURAHS = [
-  {name:'الفاتحة',ayat:7,level:'محفوظة تماماً'},
-  {name:'الضحى',ayat:11,level:'محفوظة تماماً'},
-  {name:'الشرح',ayat:8,level:'محفوظة تماماً'},
-  {name:'العلق',ayat:19,level:'محفوظة تماماً'},
-  {name:'القدر',ayat:5,level:'محفوظة تماماً'},
-  {name:'الزلزلة',ayat:8,level:'محفوظة تماماً'},
-  {name:'العاديات',ayat:11,level:'محفوظة تماماً'},
-  {name:'الهمزة',ayat:9,level:'محفوظة تماماً'},
-  {name:'الفيل',ayat:5,level:'محفوظة تماماً'},
-  {name:'قريش',ayat:4,level:'محفوظة تماماً'},
-  {name:'الماعون',ayat:7,level:'محفوظة تماماً'},
-  {name:'الملك',ayat:30,level:'محفوظة تماماً'},
-];
+const SURAHS = [];
 
 let POINTS_LOG = [];
 
@@ -984,23 +998,14 @@ async function loadPoints() {
   renderPoints();
 }
 
-const RECORDINGS = [
-  {title:'تسميع سورة البقرة (١–٢٠)',date:'٢٨ أبريل ٢٠٢٥',duration:'١:٤٣',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'أداء ممتاز! المتابعة في المنزل واضحة'},
-  {title:'تسميع مراجعة سورة الملك',date:'٢٥ أبريل ٢٠٢٥',duration:'٢:١٢',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'حفظه قوي جداً — بارك الله فيه'},
-  {title:'تسميع سورة البقرة (١–١٠)',date:'٢٢ أبريل ٢٠٢٥',duration:'١:٠٥',grade:'ممتاز',teacher:'الشيخ محمود أحمد',note:'بداية جيدة للبقرة'},
-];
+const RECORDINGS = [];
 
-const MESSAGES = [
-  {from:'الشيخ محمود أحمد',time:'أمس',msg:'السلام عليكم، أحمد متفوق هذا الشهر والحمد لله. يرجى الاستمرار في المراجعة المنزلية.',read:false},
-  {from:'الشيخ محمود أحمد',time:'منذ ٣ أيام',msg:'تذكير: الحلقة القادمة الثلاثاء بعد العصر. الرجاء إحضار أحمد في الموعد.',read:false},
-  {from:'الشيخ محمود أحمد',time:'الأسبوع الماضي',msg:'أرسلت تسجيل أحمد لسورة الملك. ما شاء الله عليه تحسن كبير.',read:true},
-  {from:'الإدارة',time:'١٠ أبريل',msg:'يوم ترفيهي للشعبة يوم الجمعة القادمة في ملعب الحي. المواصلة على مسؤولية الأولياء.',read:true},
-];
+const MESSAGES = [];
 
 // ══ WEEK DATA ══
 const WEEK_DAYS = ['ج','س','ح','ن','ث','ر','خ'];
 const WEEK_LABELS = ['جمعة','سبت','أحد','اثنين','ثلاثاء','أربعاء','خميس'];
-const WEEK_ATT = ['present','none','none','none','present','none','none'];
+const WEEK_ATT = ['none','none','none','none','none','none','none'];
 
 // ══ NAVIGATION ══
 const PAGE_TITLES = {
@@ -1213,6 +1218,33 @@ function confirmLogout() {
   if (confirm('هل تريد تسجيل الخروج؟')) window.location.href = 'login.html';
 }
 
+// ══ NOTIFICATION SYSTEM ══
+let NOTIF_DATA = [];
+const NOTIF_READ_KEY = 'notif_read_parent';
+function getReadIds(){ try{ return JSON.parse(localStorage.getItem(NOTIF_READ_KEY)||'[]'); }catch(e){ return []; } }
+function setReadIds(ids){ localStorage.setItem(NOTIF_READ_KEY, JSON.stringify(ids)); }
+async function loadNotifications(){
+  try {
+    const { data } = await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false}).limit(30);
+    NOTIF_DATA = (data||[]).filter(a=>{ const r=(a.target_role||'all').split(','); return r.includes('all')||r.includes('parent'); });
+    renderNotifications();
+  } catch(e){ console.log('notif:',e); }
+}
+function renderNotifications(){
+  const readIds=getReadIds(); const body=document.getElementById('notif-dd-body'); const countEl=document.getElementById('notif-count');
+  if(!body) return;
+  if(NOTIF_DATA.length===0){ body.innerHTML='<div class="notif-dd-empty">لا توجد إشعارات</div>'; if(countEl) countEl.style.display='none'; return; }
+  const unread=NOTIF_DATA.filter(a=>!readIds.includes(String(a.id)));
+  if(countEl){ if(unread.length>0){ countEl.style.display='flex'; countEl.textContent=unread.length>9?'9+':unread.length; } else countEl.style.display='none'; }
+  body.innerHTML=NOTIF_DATA.map(a=>{ const isUnread=!readIds.includes(String(a.id)); const date=new Date(a.created_at).toLocaleDateString('ar-EG',{day:'numeric',month:'short'});
+    return `<div class="notif-item ${isUnread?'unread':''}" onclick="readNotif('${a.id}')"><div class="notif-item-icon">📢</div><div style="flex:1;min-width:0;"><div class="notif-item-title">${a.title}</div><div class="notif-item-body">${a.body}</div><div style="display:flex;gap:6px;align-items:center;margin-top:3px;"><span class="notif-item-date">${date}</span>${isUnread?'<span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-right:auto;"></span>':''}</div></div></div>`;
+  }).join('');
+}
+function readNotif(id){ const r=getReadIds(); if(!r.includes(String(id))) r.push(String(id)); setReadIds(r); renderNotifications(); }
+function markAllNotifRead(){ setReadIds(NOTIF_DATA.map(a=>String(a.id))); renderNotifications(); document.getElementById('notif-dropdown').classList.remove('open'); }
+function toggleNotifDropdown(){ document.getElementById('notif-dropdown').classList.toggle('open'); }
+document.addEventListener('click',function(e){ const bell=document.getElementById('notif-bell'); if(bell&&!bell.contains(e.target)){ const dd=document.getElementById('notif-dropdown'); if(dd) dd.classList.remove('open'); } });
+
 // ══ INIT ══
 async function init() {
   // التحقق من تسجيل الدخول
@@ -1230,6 +1262,7 @@ async function init() {
   // تحميل البيانات
   await loadParentData();
   await Promise.all([loadMemorization(), loadPoints()]);
+  loadNotifications();
 
   renderReview();
   renderRecordings();
@@ -1242,5 +1275,157 @@ document.addEventListener('keydown', e => {
 
 init();
 </script>
+
+<!-- ════════════ وحدة ملف الطالب المشتركة (السجل القرآني / التجويد / التقييم السلوكي) ════════════
+     المصدر الموحَّد: جدول student_files (student_id + data jsonb). تظهر نفس بيانات المعلم في كل اللوحات.
+     الاستعمال: SFILE.open(studentId, readOnly)   // readOnly=true لولي الأمر (عرض فقط) -->
+<div id="sfile-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5000;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;font-family:'Tajawal',sans-serif;" dir="rtl">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(15,35,24,.25);overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#1e5c36,#0f2318);color:#fff;">
+      <div><div style="font-size:1rem;font-weight:800;">📁 ملف الطالب</div>
+        <div id="sfile-name" style="font-size:.82rem;opacity:.85;margin-top:2px;"></div></div>
+      <button onclick="SFILE.close()" style="background:transparent;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;gap:4px;padding:10px 16px 0;border-bottom:1px solid #dce8e0;flex-wrap:wrap;">
+      <button class="sfile-tab" onclick="SFILE.tab(1)" style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:Tajawal;font-size:.8rem;font-weight:700;background:#2d7a50;color:#fff;">📖 السجل القرآني</button>
+      <button class="sfile-tab" onclick="SFILE.tab(2)" style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:Tajawal;font-size:.8rem;font-weight:700;background:transparent;color:#1a1a1a;">🎙️ التجويد</button>
+      <button class="sfile-tab" onclick="SFILE.tab(3)" style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:Tajawal;font-size:.8rem;font-weight:700;background:transparent;color:#1a1a1a;">📊 التقييم السلوكي</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:18px;">
+      <div id="sfile-pane-1"></div>
+      <div id="sfile-pane-2" style="display:none;"></div>
+      <div id="sfile-pane-3" style="display:none;"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid #dce8e0;">
+      <button id="sfile-save-btn" onclick="SFILE.ask()" style="padding:8px 18px;border:none;border-radius:9px;background:#1e5c36;color:#fff;font-family:Tajawal;font-weight:700;font-size:.85rem;cursor:pointer;">💾 حفظ</button>
+      <button onclick="SFILE.close()" style="padding:8px 18px;border:1.5px solid #dce8e0;border-radius:9px;background:#fff;color:#4a5e52;font-family:Tajawal;font-weight:700;font-size:.85rem;cursor:pointer;">إغلاق</button>
+    </div>
+  </div>
+</div>
+<div id="sfile-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5100;align-items:center;justify-content:center;padding:16px;font-family:'Tajawal',sans-serif;" dir="rtl">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(15,35,24,.25);overflow:hidden;">
+    <div style="padding:14px 18px;font-weight:800;color:#0f2318;border-bottom:1px solid #dce8e0;">💾 تأكيد الحفظ</div>
+    <div style="padding:22px 18px;text-align:center;font-weight:600;color:#1e5c36;">هل أنت متأكد من حفظ هذه التغييرات؟</div>
+    <div style="display:flex;gap:8px;justify-content:center;padding:12px 18px;border-top:1px solid #dce8e0;">
+      <button onclick="SFILE.save()" style="padding:8px 22px;border:none;border-radius:9px;background:#1e5c36;color:#fff;font-family:Tajawal;font-weight:700;cursor:pointer;">نعم</button>
+      <button onclick="document.getElementById('sfile-confirm').style.display='none'" style="padding:8px 22px;border:1.5px solid #dce8e0;border-radius:9px;background:#fff;color:#4a5e52;font-family:Tajawal;font-weight:700;cursor:pointer;">لا</button>
+    </div>
+  </div>
+</div>
+<script>
+window.SFILE = (function(){
+  const GR_Q=['ممتاز','جيد جداً','جيد','حاول مرة أخرى'];
+  const GR_T=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+  const TJ=[
+    ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
+    ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
+    ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
+    ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
+    ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
+    ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
+    ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]],
+  ];
+  const BH=[['discipline','الانضباط'],['behavior','السلوك'],['participation','المشاركة'],['cleanliness','النظافة والهندام'],['cooperation','التعاون']];
+  const MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
+  let curId=null, readOnly=false;
+  const esc=s=>(s||'').replace(/"/g,'&quot;');
+  const ro=()=>readOnly?'disabled':'';
+  const inp='width:100%;border:none;font-family:Tajawal;font-size:.75rem;outline:none;padding:3px;box-sizing:border-box;';
+  function opts(arr,v){ return '<option value="">—</option>'+arr.map(o=>`<option value="${o}" ${o===v?'selected':''}>${o}</option>`).join(''); }
+  function toast(m){ if(typeof showToast==='function') showToast(m); else { let t=document.getElementById('sfile-toast'); if(!t){ t=document.createElement('div'); t.id='sfile-toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f2318;color:#fff;padding:11px 20px;border-radius:10px;font-family:Tajawal;font-weight:700;z-index:6000;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.25);'; document.body.appendChild(t);} t.textContent=m; t.style.display='block'; clearTimeout(window._sft); window._sft=setTimeout(()=>t.style.display='none',2600);} }
+  function paneQuran(d){
+    const ss=d.sessions||[]; let rows='';
+    for(let i=0;i<21;i++){ const s=ss[i]||{};
+      rows+=`<tr>
+        <td style="padding:5px 8px;border:1px solid #dce8e0;text-align:center;color:#8ea598;font-size:.75rem;">${i+1}</td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><input id="sfm-session-date-${i}" type="date" value="${s.date||''}" style="${inp}" ${ro()}></td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><input id="sfm-session-surah-${i}" type="text" placeholder="السورة/الجزء" value="${esc(s.surah)}" style="${inp}" ${ro()}></td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><input id="sfm-session-from-${i}" type="text" placeholder="من" value="${esc(s.from)}" style="${inp}width:60px;" ${ro()}></td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><input id="sfm-session-to-${i}" type="text" placeholder="إلى" value="${esc(s.to)}" style="${inp}width:60px;" ${ro()}></td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><select id="sfm-session-type-${i}" style="${inp}" ${ro()}><option value="">—</option><option value="حفظ" ${s.type==='حفظ'?'selected':''}>حفظ</option><option value="مراجعة" ${s.type==='مراجعة'?'selected':''}>مراجعة</option></select></td>
+        <td style="padding:4px;border:1px solid #dce8e0;"><select id="sfm-session-grade-${i}" style="${inp}" ${ro()}>${opts(GR_Q,s.grade)}</select></td>
+      </tr>`;
+    }
+    return `<div style="background:linear-gradient(135deg,#2d7a50,#0f2318);color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📖 السجل القرآني</div>
+      <div style="margin-bottom:14px;"><label style="font-size:.76rem;color:#8ea598;display:block;margin-bottom:4px;">الإنجاز الحالي</label><input id="sfm-current-achievement" type="text" value="${esc(d.currentAchievement)}" placeholder="مثال: تم حفظ جزء عم وتبارك" style="width:100%;padding:8px 10px;border:1.5px solid #dce8e0;border-radius:7px;font-family:Tajawal;font-size:.83rem;outline:none;box-sizing:border-box;" ${ro()}></div>
+      <div style="font-weight:700;font-size:.83rem;color:#0f2318;margin-bottom:8px;">سجل تسميع الحلقات (21 حلقة)</div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal;min-width:580px;">
+        <thead><tr style="background:#e8f5ee;color:#0f2318;">
+          <th style="padding:7px 8px;border:1px solid #dce8e0;width:34px;">#</th><th style="padding:7px;border:1px solid #dce8e0;">التاريخ</th><th style="padding:7px;border:1px solid #dce8e0;">السورة/الجزء</th><th style="padding:7px;border:1px solid #dce8e0;">من</th><th style="padding:7px;border:1px solid #dce8e0;">إلى</th><th style="padding:7px;border:1px solid #dce8e0;">النوع</th><th style="padding:7px;border:1px solid #dce8e0;">التقييم</th>
+        </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function paneTajweed(d){
+    const tj=d.tajweed||{}; let rows='';
+    TJ.forEach(([lvl,skills])=>{
+      rows+=`<tr style="background:#e8f5ee;"><td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:#0f2318;border:1px solid #dce8e0;">${lvl}</td></tr>`;
+      skills.forEach(([k,lbl])=>{ rows+=`<tr>
+        <td style="padding:7px 10px;border:1px solid #dce8e0;">${lbl}</td>
+        <td style="padding:7px;border:1px solid #dce8e0;"><select id="sfm-tj-${k}" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid #dce8e0;border-radius:6px;outline:none;" ${ro()}>${opts(GR_T,tj[k])}</select></td>
+        <td style="padding:7px;border:1px solid #dce8e0;"><input id="sfm-tj-${k}-note" type="text" placeholder="ملاحظات" value="${esc(tj[k+'_note'])}" style="width:100%;border:1.5px solid #dce8e0;border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;" ${ro()}></td>
+      </tr>`; });
+    });
+    return `<div style="background:linear-gradient(135deg,#2d7a50,#0f2318);color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ سجل التجويد — 7 مستويات</div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
+        <thead><tr style="background:#e8f5ee;color:#0f2318;"><th style="padding:7px 10px;border:1px solid #dce8e0;text-align:right;">المهارة</th><th style="padding:7px;border:1px solid #dce8e0;text-align:center;width:140px;">المستوى</th><th style="padding:7px;border:1px solid #dce8e0;text-align:right;">الملاحظات</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function paneBehavior(d){
+    const bh=d.behavior||{}; let html=`<div style="background:linear-gradient(135deg,#2d7a50,#0f2318);color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📊 التقييم الأخلاقي والسلوكي</div>`;
+    MONTHS.forEach(([mo,molbl])=>{
+      let rows=''; BH.forEach(([f,lbl])=>{ rows+=`<tr>
+        <td style="padding:7px 10px;border:1px solid #dce8e0;">${lbl}</td>
+        <td style="padding:7px;border:1px solid #dce8e0;"><select id="sfm-${mo}-${f}" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid #dce8e0;border-radius:6px;outline:none;" ${ro()}>${opts(GR_T,bh[mo+f])}</select></td>
+        <td style="padding:7px;border:1px solid #dce8e0;"><input id="sfm-${mo}-${f}-notes" type="text" placeholder="ملاحظات" value="${esc(bh[mo+f+'Notes'])}" style="width:100%;border:1.5px solid #dce8e0;border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;" ${ro()}></td>
+      </tr>`; });
+      html+=`<div style="margin-bottom:20px;">
+        <div style="background:#2d7a50;color:#fff;padding:9px 14px;border-radius:8px 8px 0 0;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span>${molbl}</span>
+          <span style="font-size:.78rem;font-weight:400;">من: <input id="sfm-${mo}-from" type="date" value="${bh[mo+'From']||''}" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:4px;color:#fff;padding:2px 6px;font-family:Tajawal;font-size:.78rem;" ${ro()}></span>
+          <span style="font-size:.78rem;font-weight:400;">إلى: <input id="sfm-${mo}-to" type="date" value="${bh[mo+'To']||''}" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:4px;color:#fff;padding:2px 6px;font-family:Tajawal;font-size:.78rem;" ${ro()}></span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
+          <thead><tr style="background:#e8f5ee;"><th style="padding:7px 10px;border:1px solid #dce8e0;text-align:right;">المجال</th><th style="padding:7px;border:1px solid #dce8e0;text-align:center;width:140px;">التقييم</th><th style="padding:7px;border:1px solid #dce8e0;text-align:right;">الملاحظات</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    });
+    return html;
+  }
+  function tab(n){
+    document.querySelectorAll('#sfile-overlay .sfile-tab').forEach((b,i)=>{ const on=i+1===n; b.style.background=on?'#2d7a50':'transparent'; b.style.color=on?'#fff':'#1a1a1a'; });
+    [1,2,3].forEach(i=>{ const el=document.getElementById('sfile-pane-'+i); if(el) el.style.display=(i===n)?'block':'none'; });
+  }
+  async function open(studentId, isReadOnly){
+    curId=studentId; readOnly=!!isReadOnly;
+    let d={};
+    try{ const {data}=await db.from('student_files').select('data').eq('student_id',studentId).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
+    document.getElementById('sfile-pane-1').innerHTML=paneQuran(d);
+    document.getElementById('sfile-pane-2').innerHTML=paneTajweed(d);
+    document.getElementById('sfile-pane-3').innerHTML=paneBehavior(d);
+    document.getElementById('sfile-save-btn').style.display=readOnly?'none':'';
+    const nm=document.getElementById('sfile-name'); if(nm) nm.textContent=readOnly?'عرض فقط':'';
+    tab(1);
+    document.getElementById('sfile-overlay').style.display='flex';
+  }
+  function setName(name){ const nm=document.getElementById('sfile-name'); if(nm&&name) nm.textContent=name+(readOnly?' — عرض فقط':''); }
+  function close(){ document.getElementById('sfile-overlay').style.display='none'; }
+  function ask(){ document.getElementById('sfile-confirm').style.display='flex'; }
+  function collect(){
+    const sessions=[]; for(let i=0;i<21;i++){ sessions.push({
+      date:val('sfm-session-date-'+i),surah:val('sfm-session-surah-'+i),from:val('sfm-session-from-'+i),to:val('sfm-session-to-'+i),type:val('sfm-session-type-'+i),grade:val('sfm-session-grade-'+i)
+    }); }
+    const tajweed={}; TJ.forEach(([,sk])=>sk.forEach(([k])=>{ tajweed[k]=val('sfm-tj-'+k); tajweed[k+'_note']=val('sfm-tj-'+k+'-note'); }));
+    const behavior={}; MONTHS.forEach(([mo])=>{ behavior[mo+'From']=val('sfm-'+mo+'-from'); behavior[mo+'To']=val('sfm-'+mo+'-to');
+      BH.forEach(([f])=>{ behavior[mo+f]=val('sfm-'+mo+'-'+f); behavior[mo+f+'Notes']=val('sfm-'+mo+'-'+f+'-notes'); }); });
+    return { currentAchievement:val('sfm-current-achievement'), sessions, tajweed, behavior };
+  }
+  function val(id){ const el=document.getElementById(id); return el?el.value:''; }
+  async function save(){
+    document.getElementById('sfile-confirm').style.display='none';
+    if(!curId) return;
+    try{ const {error}=await db.from('student_files').upsert({student_id:curId,data:collect()},{onConflict:'student_id'}); if(error) throw error;
+      close(); toast('✅ تم حفظ ملف الطالب');
+    }catch(e){ toast('❌ تعذّر الحفظ — تأكد من جدول student_files'); }
+  }
+  return { open, close, tab, ask, save, setName };
+})();
+</script>
+
 </body>
 </html>
