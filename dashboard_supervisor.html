@@ -931,11 +931,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <span class="sb-icon">👔</span> الموظفون
     </div>
 
-    <div class="sb-section" style="display:none;">العمليات</div>
+    <div class="sb-section">العمليات</div>
     <div class="sb-item" onclick="nav(this,'schedule')" style="display:none;">
       <span class="sb-icon">📖</span> الخطط والمقررات
     </div>
-    <div class="sb-item" onclick="nav(this,'reports')" style="display:none;">
+    <div class="sb-item" onclick="nav(this,'reports')">
       <span class="sb-icon">📄</span> التقارير
     </div>
     <div class="sb-item" onclick="nav(this,'stats')" style="display:none;">
@@ -2639,23 +2639,15 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
      PAGE: REPORTS
 ══════════════════════════════════════════════════════ -->
 <div id="page-reports" class="page">
-  <div class="section-title">📋 التقارير</div>
-  <div class="grid-2">
-    <div class="card" style="margin-bottom:0;">
-      <div class="card-head"><div class="card-title">📊 تقرير شهري عام</div></div>
-      <div class="card-body">
-        <div class="fg"><label>الشهر</label><select><option>أبريل ٢٠٢٦</option><option>مارس ٢٠٢٦</option><option>فبراير ٢٠٢٦</option></select></div>
-        <div class="fg"><label>نوع التقرير</label><select><option>كل الطلاب</option><option>طالب محدد</option><option>حلقة محددة</option></select></div>
-        <button class="btn btn-gold" onclick="showToast('🖨️ جارٍ إنشاء التقرير...')">🖨️ إنشاء التقرير</button>
-      </div>
+  <div class="section-title">📄 تقارير الجلسات الإشرافية</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:18px;">سجلّ كل الجلسات الإشرافية المُسجَّلة — بتاريخ الجلسة واسم المشرف القائم بها.</div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-head">
+      <div class="card-title">🗂️ سجلّ الجلسات</div>
+      <span class="badge bg-gray" id="reports-count">—</span>
     </div>
-    <div class="card" style="margin-bottom:0;">
-      <div class="card-head"><div class="card-title">📩 تقرير لولي الأمر</div></div>
-      <div class="card-body">
-        <div class="fg"><label>اختر الطالب</label><select><option value="">— اختر الطالب —</option></select></div>
-        <div class="fg"><label>الفترة</label><select><option>هذا الشهر</option><option>آخر ٣ أشهر</option><option>هذا العام</option></select></div>
-        <button class="btn btn-primary" onclick="showToast('📩 تم إرسال التقرير لولي الأمر!')">📩 إرسال لولي الأمر</button>
-      </div>
+    <div id="reports-body" style="overflow-x:auto;">
+      <div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
     </div>
   </div>
 </div>
@@ -4223,6 +4215,11 @@ async function loadStudents() {
     is_active: s.is_active,
   }));
 
+  if (MY_GENDER) {           // المشرف يرى طلاب شعبته فقط (نفس الجنس)
+    STUDENTS = STUDENTS.filter(s => genderOfBranchName(s.circle) === MY_GENDER);
+    STUDENTS.forEach((s,i)=>s.idx=i+1);
+  }
+
   ATT_STUDENTS = STUDENTS.filter(s => s.is_active).map(s => s.name);
 
   const active = STUDENTS.filter(s => s.is_active).length;
@@ -4905,6 +4902,15 @@ function processTeachers(data, branchMap) {
       is_active: t.is_active,
     };
   });
+
+  if (MY_GENDER) {           // المشرف يرى معلمي شعبته فقط (نفس الجنس)
+    TEACHERS = TEACHERS.filter(t => {
+      const g = (t.circle && t.circle!=='—') ? genderOfBranchName(t.circle)
+              : (USER_GENDER[String(t.id)] || NAME_GENDER[(t.full_name||'').trim()] || null);
+      return !g || g===MY_GENDER;
+    });
+    TEACHERS.forEach((t,i)=>t.idx=i+1);
+  }
 
   // Update stats
   const active = TEACHERS.filter(t => t.is_active).length;
@@ -7163,6 +7169,25 @@ const SUPERVISORS_DATA = loadSupervisorsData();
 // HYDRATE: إعادة بناء BRANCH_DATA من Supabase (حلقات + طلاب أحياء)
 // المشرف يرى معلماته فقط عبر supervisor_id؛ المدير يرى الكل
 // ══════════════════════════════════════════════════════════
+
+// ── فهرس جنس المستخدمين (منع تسرّب بيانات الجنس الآخر في البحث/الرسائل) ──
+let MY_GENDER=null, USER_GENDER={}, NAME_GENDER={}, BR_GENDER={};
+function isUuidV(v){ return typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(v); }
+function normG(g){ return (g==='إناث'||g==='أنثى'||g==='انثى'||g==='بنات')?'إناث':'ذكور'; }
+function genderOfBranchName(b){ return (b==='الملكات'||b==='الأميرات'||b==='البنات')?'إناث':'ذكور'; }
+async function buildGenderIndex(){
+  try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BR_GENDER[b.id]=genderOfBranchName(b.name)); }catch(e){}
+  try{ const {data}=await db.from('students').select('user_id,branch_id'); (data||[]).forEach(s=>{ if(s.user_id) USER_GENDER[String(s.user_id)]=BR_GENDER[s.branch_id]||'ذكور'; }); }catch(e){}
+  try{ const {data}=await db.from('circles').select('teachers,supervisor_id,branch_id,gender');
+    (data||[]).forEach(c=>{ const g=c.gender?normG(c.gender):(BR_GENDER[c.branch_id]||'ذكور');
+      (c.teachers||[]).forEach(t=>{ const k=String(t).trim(); if(isUuidV(k)) USER_GENDER[k]=g; else NAME_GENDER[k]=g; });
+      if(c.supervisor_id) USER_GENDER[String(c.supervisor_id)]=g; });
+  }catch(e){}
+  try{ const {data}=await db.from('users').select('id,full_name,branch_id'); (data||[]).forEach(u=>{ if(u.branch_id){ const g=BR_GENDER[u.branch_id]; if(g){ USER_GENDER[String(u.id)]=g; if(u.full_name) NAME_GENDER[u.full_name.trim()]=g; } } }); }catch(e){}
+}
+function genderOfUser(u){ if(!u) return null; if(u.role==='admin') return null; return USER_GENDER[String(u.id)]||NAME_GENDER[(u.name||u.full_name||'').trim()]||null; }
+function sameSection(u){ if(!MY_GENDER) return true; const g=genderOfUser(u); return !g || g===MY_GENDER; }
+
 async function hydrateBranchDataFromDB(){
   const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
   const PAL = {
@@ -7219,6 +7244,7 @@ async function hydrateBranchDataFromDB(){
       colorIdx[bn]++;
       BRANCH_DATA[key].push(item);
       (svbt[key] = svbt[key] || []).push(tName);
+      if (cu.role === 'supervisor' && !MY_GENDER && bn) MY_GENDER = genderOfBranchName(bn);
     });
 
     // لو مشرف: ثبّت قوائم معلميه بالأسماء الحقيقية (للفلاتر اللاحقة)
@@ -7238,6 +7264,11 @@ async function init(){
   }
 
   await hydrateBranchDataFromDB();   // ← بناء BRANCH_DATA من Supabase قبل أي رسم
+  await buildGenderIndex();          // ← فهرس الجنس لمنع تسرّب بيانات الجنس الآخر
+  if(!MY_GENDER){                    // تأكيد جنس المشرف من DB لو hydrate ماحددهوش
+    const _cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
+    if(_cu.role==='supervisor') MY_GENDER = USER_GENDER[String(_cu.id)] || NAME_GENDER[(_cu.full_name||'').trim()] || null;
+  }
   // map: اسم في الـ DB → الاسم المعروض + التيتل
   const ADMIN_MAP = {
     'الشيخ علاء عارف' : { display: 'الشيخ علاء عارف',   title: 'مدير المدرسة' },
@@ -7577,6 +7608,7 @@ async function loadAnnPeople(){
   // ── المشرفين من SUPERVISORS الـ static ──
   if(typeof SUPERVISORS !== 'undefined' && SUPERVISORS.length > 0){
     SUPERVISORS.forEach(sv => {
+      if (MY_GENDER && genderOfBranchName(sv.branch) !== MY_GENDER) return;
       const fullName = sv.name + ' ' + sv.lname;
       annAllPeople.push({ id: sv.id, name: fullName, role: 'مشرف — '+sv.branch, icon: '👁️' });
     });
@@ -8152,6 +8184,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'attendance') loadSupAttendance();
   if (pageId === 'memorization') loadSupMemo();
   if (pageId === 'messages') initMessages();
+  if (pageId === 'reports') loadReports();
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -9634,75 +9667,160 @@ function svWeekOfMonth(){
   return Math.min(4, Math.floor((d.getDate()-1)/7)+1);
 }
 
-// ── جدول الجلسات الإشرافية ──
+// ── جدول الجلسات الإشرافية — ٤ جلسات لكل شعبة (ركن لكل معلم) ──
 function svBuildSessionsSchedule(branches){
-  let teachers = [];
-  branches.forEach(b=>{ svBranchTeachers(b).forEach(t=> teachers.push({name:t.name, branch:b})); });
-  const seen={}; teachers = teachers.filter(t=>{ if(seen[t.name]) return false; seen[t.name]=1; return true; });
-  if(!teachers.length){
-    return `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">🗓️ جدول الجلسات الإشرافية</div></div><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا يوجد معلمون</div></div>`;
-  }
-  teachers.sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
-
-  const pillars  = [
+  const pillars = [
     {key:'hifz',   name:'الحفظ والمراجعة', icon:'📿', accent:'var(--jade)',   bg:'var(--pale)'},
     {key:'manhaj', name:'المنهج المصاحب',  icon:'📚', accent:'var(--blue)',   bg:'var(--blue-pale)'},
     {key:'talqin', name:'التلقين',         icon:'🗣️', accent:'var(--purple)', bg:'var(--purple-pale)'},
     {key:'amma',   name:'النقاط العامة',   icon:'⭐', accent:'var(--gold)',   bg:'var(--gold-pale)'},
   ];
-  const dayNames = ['الأحد','الاثنين','الأربعاء','الخميس'];
-  const w = svWeekOfMonth();
 
-  // وزّع كل معلم: يوم ثابت + ركن هذا الأسبوع (يدور على الأركان الأربعة شهريًا)
-  const byDay = [[],[],[],[]];
-  teachers.forEach((t,idx)=>{
-    const dayI   = idx % dayNames.length;
-    const pillar = pillars[(idx + (w-1)) % pillars.length];
-    const date   = svCurrentCircleDate(t.branch);
-    const rec    = svLoadSession(date, t.name);
-    const done   = !!(rec.pillars && rec.pillars[pillar.key]) || !!rec.done;
-    byDay[dayI].push({t, pillar, done});
-  });
+  const cards = (branches||[]).map(b=>{
+    const cfg  = SV_DB_BRANCH_CFG[b] || SV_DB_BRANCH_CFG['الأبطال'];
+    const date = svCurrentCircleDate(b);
+    const bEsc = b.replace(/'/g,"\'");
+    const teachers = svBranchTeachers(b);  // [{name, phone}]
 
-  // أعمدة الأيام (نمط تقويم جوجل)
-  const cols = dayNames.map((dn,di)=>{
-    const cells = byDay[di].map(s=>{
-      const nameEsc = s.t.name.replace(/'/g,"\\'");
-      const bEsc    = s.t.branch.replace(/'/g,"\\'");
-      const first   = s.t.name.split(' ').slice(0,2).join(' ');
-      return `<div onclick="svOpenEvalModal('${bEsc}','${nameEsc}','${s.pillar.key}')"
-        title="${s.t.name} — ${s.pillar.name}"
-        style="cursor:pointer;border-right:4px solid ${s.pillar.accent};background:${s.pillar.bg};border-radius:8px;padding:7px 9px;transition:all .15s;position:relative;overflow:hidden;"
+    // ٤ خانات = ٤ أركان، معلم لكل ركن (أول ٤ معلمين بالشعبة)
+    const cells = pillars.map((p,i)=>{
+      const t = teachers[i] || null;
+      if(!t){
+        return `<div style="border:1px dashed var(--border);border-right:4px solid ${p.accent};border-radius:var(--r-sm);padding:11px;background:var(--bg);opacity:.7;">
+          <div style="font-size:.72rem;font-weight:700;color:${p.accent};">${p.icon} ${p.name}</div>
+          <div style="font-size:.74rem;color:var(--light);margin-top:6px;">لم يُسند معلم</div>
+        </div>`;
+      }
+      const nameEsc = t.name.replace(/'/g,"\'");
+      const rec  = svLoadSession(date, t.name);
+      const done = !!(rec.pillars && rec.pillars[p.key]);
+      const first = t.name.split(' ').slice(0,2).join(' ');
+      return `<div onclick="svOpenEvalModal('${bEsc}','${nameEsc}','${p.key}')"
+        title="${t.name} — ${p.name}"
+        style="cursor:pointer;border:1.5px solid ${done?p.accent:'var(--border)'};border-right:4px solid ${p.accent};background:${done?p.bg:'#fff'};border-radius:var(--r-sm);padding:11px;transition:all .15s;"
         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow)'"
         onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <div style="font-size:.78rem;font-weight:700;color:var(--forest);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.done?'✅ ':''}${first}</div>
-        <div style="font-size:.64rem;color:${s.pillar.accent};font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.pillar.icon} ${s.pillar.name}</div>
+        <div style="font-size:.72rem;font-weight:700;color:${p.accent};">${p.icon} ${p.name}</div>
+        <div style="font-size:.84rem;font-weight:800;color:var(--forest);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${done?'✅ ':''}${first}</div>
+        <div style="font-size:.66rem;color:${done?p.accent:'var(--light)'};font-weight:600;margin-top:2px;">${done?'تمت الجلسة':'لم تتم بعد'}</div>
       </div>`;
     }).join('');
-    return `<div style="flex:1;min-width:130px;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg);">
-      <div style="padding:8px 10px;text-align:center;font-size:.82rem;font-weight:800;color:var(--white);background:var(--emerald);">${dn}</div>
-      <div style="padding:8px;display:flex;flex-direction:column;gap:7px;min-height:60px;">
-        ${cells || '<div style="font-size:.7rem;color:var(--light);text-align:center;padding:10px 0;">—</div>'}
+
+    return `<div class="card" style="margin-bottom:0;border-top:3px solid ${cfg.accent};">
+      <div class="card-head" style="background:${cfg.bg};">
+        <div class="card-title" style="display:flex;align-items:center;gap:8px;font-size:1rem;">
+          <span style="font-size:1.2rem;">${cfg.emoji}</span> جلسات شعبة ${b}
+        </div>
+        <span class="badge bg-gray" style="font-size:.74rem;">📅 ${svFmtArDate(date)}</span>
       </div>
+      <div style="padding:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">${cells}</div>
     </div>`;
   }).join('');
 
-  // مفتاح الألوان
-  const legend = pillars.map(p=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:var(--mid);">
-    <span style="width:11px;height:11px;border-radius:3px;background:${p.accent};display:inline-block;"></span>${p.icon} ${p.name}</span>`).join('');
-
-  const wkAr = ['الأول','الثاني','الثالث','الرابع','الخامس'][w-1] || w;
-  return `<div class="card" style="margin-bottom:0;">
-    <div class="card-head">
+  return `<div style="margin-bottom:0;">
+    <div class="card-head" style="background:none;border:none;padding:0 0 12px;">
       <div class="card-title">🗓️ جدول الجلسات الإشرافية</div>
-      <span class="badge bg-gray">الأسبوع ${wkAr} من الشهر</span>
+      <span class="badge bg-gray">٤ جلسات لكل شعبة — ركن لكل معلم</span>
     </div>
-    <div style="padding:14px;">
-      <div style="display:flex;flex-wrap:wrap;gap:12px 18px;margin-bottom:14px;padding:8px 0;border-bottom:1px solid var(--border);">${legend}</div>
-      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;align-items:flex-start;">${cols}</div>
-      <div style="font-size:.74rem;color:var(--light);line-height:1.6;margin-top:12px;">اضغط على أي مربّع لفتح تقييم الركن المحدّد فقط — يتناوب كل معلم على الأركان الأربعة بحيث يُقيَّم في جميعها مرة شهريًا على الأقل.</div>
-    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">${cards || '<div class="card"><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا توجد شعب</div></div>'}</div>
   </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// تقارير الجلسات الإشرافية (live من supervisory_sessions)
+// ══════════════════════════════════════════════════════
+const SV_PILLAR_NAMES = { hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة' };
+const SV_RATE_AR = { yes:'نعم', partial:'جزئياً', no:'لا' };
+window.SV_REPORTS_CACHE = window.SV_REPORTS_CACHE || [];
+
+function svFmtReportDate(iso){
+  try{ return new Date(iso+'T00:00:00').toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}); }
+  catch(e){ return iso; }
+}
+
+async function loadReports(){
+  const body = document.getElementById('reports-body');
+  const cnt  = document.getElementById('reports-count');
+  if(!body) return;
+  body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>';
+  const cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
+  let rows = [];
+  try{
+    let q = db.from('supervisory_sessions').select('*').order('session_date',{ascending:false});
+    if(cu.role==='supervisor' && cu.id) q = q.eq('supervisor_id', String(cu.id));
+    const { data, error } = await q;
+    if(error){ console.log('loadReports:', error.message); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل التقارير</div>'; return; }
+    rows = data || [];
+  }catch(e){ console.log('loadReports ex:', e); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر الاتصال بالخادم</div>'; return; }
+
+  if(cnt) cnt.textContent = rows.length ? (rows.length + ' جلسة') : '—';
+  if(!rows.length){
+    body.innerHTML = '<div class="empty" style="padding:36px;"><span class="empty-icon">📭</span>لم تُسجَّل أي جلسات إشرافية بعد</div>';
+    return;
+  }
+  window.SV_REPORTS_CACHE = rows;
+  svRenderReportsTable(rows);
+}
+
+function svPillarBadges(pil){
+  const keys = Object.keys(pil||{}).filter(k=>pil[k]);
+  if(!keys.length) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
+  return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${SV_PILLAR_NAMES[k]||k}</span>`).join('');
+}
+
+function svRenderReportsTable(rows){
+  const body = document.getElementById('reports-body');
+  const trs = rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);">
+    <td style="padding:10px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);white-space:nowrap;">${svFmtReportDate(r.session_date)}</td>
+    <td style="padding:10px;font-weight:700;color:var(--forest);">${r.teacher_name||'—'}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${r.branch||'—'}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
+    <td style="padding:10px;text-align:center;">${svPillarBadges(r.pillars)}</td>
+    <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
+    <td style="padding:10px;text-align:center;"><button class="btn btn-outline btn-xs" onclick="svViewReport(${i})">👁️ عرض</button></td>
+  </tr>`).join('');
+  body.innerHTML = `<table style="width:100%;border-collapse:collapse;min-width:760px;">
+    <thead><tr style="background:var(--bg);">
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);width:40px;">م</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">تاريخ الجلسة</th>
+      <th style="padding:11px;text-align:right;font-size:.76rem;color:var(--mid);">المعلم</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الشعبة</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">المشرف</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الأركان المُقيَّمة</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الحضور</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">التفاصيل</th>
+    </tr></thead>
+    <tbody>${trs}</tbody>
+  </table>`;
+}
+
+function svViewReport(i){
+  const r = (window.SV_REPORTS_CACHE||[])[i]; if(!r) return;
+  const scores = r.scores || {};
+  const sections = SV_EVAL_SECTIONS.map(sec=>{
+    const items = sec.items.map((it,idx)=>{
+      const v = scores[sec.key+'_'+idx];
+      if(!v) return '';
+      const c = v==='yes'?'var(--jade)':v==='partial'?'var(--gold)':'var(--red)';
+      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--border);font-size:.8rem;">
+        <span style="color:var(--forest);flex:1;">${idx+1}. ${it}</span>
+        <span style="color:${c};font-weight:700;white-space:nowrap;">${SV_RATE_AR[v]||v}</span></div>`;
+    }).filter(Boolean).join('');
+    if(!items) return '';
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:.88rem;font-weight:800;color:var(--emerald);font-family:Amiri,serif;padding:7px 11px;background:var(--pale);border-radius:var(--r-sm);margin-bottom:5px;">${sec.title}</div>${items}</div>`;
+  }).filter(Boolean).join('');
+  document.getElementById('rep-detail-title').textContent = 'الجلسة الإشرافية — ' + (r.teacher_name||'');
+  document.getElementById('rep-detail-meta').innerHTML =
+    `<span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
+     <span class="badge bg-gray">👤 المشرف: ${r.supervisor_name||'—'}</span>
+     <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
+     <span class="badge ${r.attendance==='غائب'?'bg-red':'bg-green'}">الحضور: ${r.attendance||'—'}${r.attendance==='متأخر'&&r.late_min?(' ('+r.late_min+'د)'):''}</span>`;
+  document.getElementById('rep-detail-body').innerHTML =
+    (sections || '<div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا توجد بنود مُقيَّمة في هذه الجلسة</div>')
+    + (r.other ? `<div style="margin-top:8px;padding:11px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.82rem;color:var(--forest);"><strong>ملاحظات:</strong> ${r.other}</div>` : '');
+  openModal('modal-report-detail');
 }
 
 // ── فتح معلمي شعبة معينة فقط ──
@@ -12966,6 +13084,7 @@ function searchComposeRecipients(q) {
   // نعرض فقط المستخدمين اللي عندهم IDs أرقام (من DB الحقيقية) وأسماء
   const results = MSG_USERS_CACHE.filter(u => {
     if (!u.name || !u.id) return false;
+    if (!sameSection(u)) return false;   // إخفاء مستخدمي الجنس الآخر
     if (!u.name.toLowerCase().includes(q.toLowerCase()) && !u.name.includes(q)) return false;
     if (COMPOSE_RECIPIENTS.find(r => r.id === u.id)) return false;
     return true;
@@ -13280,6 +13399,23 @@ function transliterateAr(str) {
     <div class="modal-foot">
       <button class="btn btn-primary" onclick="svConfirmSaveSession()">💾 حفظ</button>
       <button class="btn btn-outline" onclick="closeModal('modal-sv-eval')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال: عرض تفاصيل جلسة (تقارير) ══ -->
+<div class="overlay" id="modal-report-detail">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head">
+      <div class="modal-title" id="rep-detail-title">تفاصيل الجلسة</div>
+      <button class="modal-close" onclick="closeModal('modal-report-detail')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div id="rep-detail-meta" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;"></div>
+      <div id="rep-detail-body"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-report-detail')">إغلاق</button>
     </div>
   </div>
 </div>

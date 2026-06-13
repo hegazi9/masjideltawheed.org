@@ -842,11 +842,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <span class="sb-icon">👔</span> الموظفون
     </div>
 
-    <div class="sb-section" style="display:none;">العمليات</div>
+    <div class="sb-section">العمليات</div>
     <div class="sb-item" onclick="nav(this,'schedule')" style="display:none;">
       <span class="sb-icon">📖</span> الخطط والمقررات
     </div>
-    <div class="sb-item" onclick="nav(this,'reports')" style="display:none;">
+    <div class="sb-item" onclick="nav(this,'reports')">
       <span class="sb-icon">📄</span> التقارير
     </div>
     <div class="sb-item" onclick="nav(this,'stats')" style="display:none;">
@@ -2609,23 +2609,15 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
      PAGE: REPORTS
 ══════════════════════════════════════════════════════ -->
 <div id="page-reports" class="page">
-  <div class="section-title">📋 التقارير</div>
-  <div class="grid-2">
-    <div class="card" style="margin-bottom:0;">
-      <div class="card-head"><div class="card-title">📊 تقرير شهري عام</div></div>
-      <div class="card-body">
-        <div class="fg"><label>الشهر</label><select><option>أبريل ٢٠٢٦</option><option>مارس ٢٠٢٦</option><option>فبراير ٢٠٢٦</option></select></div>
-        <div class="fg"><label>نوع التقرير</label><select><option>كل الطلاب</option><option>طالب محدد</option><option>حلقة محددة</option></select></div>
-        <button class="btn btn-gold" onclick="showToast('🖨️ جارٍ إنشاء التقرير...')">🖨️ إنشاء التقرير</button>
-      </div>
+  <div class="section-title">📄 تقارير الجلسات الإشرافية</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:18px;">سجلّ كل الجلسات الإشرافية بكل الشعب — بتاريخ الجلسة واسم المشرف القائم بها.</div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-head">
+      <div class="card-title">🗂️ سجلّ الجلسات</div>
+      <span class="badge bg-gray" id="reports-count">—</span>
     </div>
-    <div class="card" style="margin-bottom:0;">
-      <div class="card-head"><div class="card-title">📩 تقرير لولي الأمر</div></div>
-      <div class="card-body">
-        <div class="fg"><label>اختر الطالب</label><select><option value="">— اختر الطالب —</option></select></div>
-        <div class="fg"><label>الفترة</label><select><option>هذا الشهر</option><option>آخر ٣ أشهر</option><option>هذا العام</option></select></div>
-        <button class="btn btn-primary" onclick="showToast('📩 تم إرسال التقرير لولي الأمر!')">📩 إرسال لولي الأمر</button>
-      </div>
+    <div id="reports-body" style="overflow-x:auto;">
+      <div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
     </div>
   </div>
 </div>
@@ -7950,6 +7942,128 @@ openModal = function(id) {
 };
 
 // ── NAVIGATION ──
+// ══════════════════════════════════════════════════════
+// تقارير الجلسات الإشرافية (live من supervisory_sessions) — كل الشعب
+// ══════════════════════════════════════════════════════
+const SV_PILLAR_NAMES = { hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة' };
+const SV_RATE_AR = { yes:'نعم', partial:'جزئياً', no:'لا' };
+const SV_EVAL_SECTIONS = [
+  { key:'hifz', title:'الحفظ والمراجعة', items:[
+    'إعطاء فرصة للطالب أثناء التسميع',
+    'متابعة الخطة',
+    'تشجيع الطالب (معرفة الأسباب) في حالة (إعادة المحاولة - الجيد)',
+  ]},
+  { key:'manhaj', title:'المنهج المصاحب', items:[
+    'التحضير المسبق للشرح',
+    'وجود استراتيجية أو أكثر للشرح',
+    'إشراك الطلاب في الشرح',
+    'محاولة إيصال المعلومة للطالب بالطريقة التي تناسبه والتأكد من الاستيعاب',
+    'إعطاء واجب للطلاب',
+    'تمارين أو أسئلة تنشيطية أثناء الحلقة',
+    'مراجعة على الدرس السابق',
+  ]},
+  { key:'talqin', title:'التلقين', items:[
+    'سماع كل طالب فردي',
+    'القدرة على التقاط الأخطاء',
+    'النظر على أفواه الطلاب',
+  ]},
+  { key:'amma', title:'النقاط العامة', items:[
+    'القدرة على التعامل مع المشاكل السلوكية للطلاب',
+    'تعامله مع اختلاف مستويات وقدرات الطلاب',
+    'إدارة الوقت',
+    'الابتسامة',
+    'التوازن بين الانضباط واللين',
+  ]},
+];
+window.SV_REPORTS_CACHE = window.SV_REPORTS_CACHE || [];
+
+function svFmtReportDate(iso){
+  try{ return new Date(iso+'T00:00:00').toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}); }
+  catch(e){ return iso; }
+}
+
+async function loadReports(){
+  const body = document.getElementById('reports-body');
+  const cnt  = document.getElementById('reports-count');
+  if(!body) return;
+  body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>';
+  let rows = [];
+  try{
+    const { data, error } = await db.from('supervisory_sessions').select('*').order('session_date',{ascending:false});
+    if(error){ console.log('loadReports:', error.message); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل التقارير</div>'; return; }
+    rows = data || [];
+  }catch(e){ console.log('loadReports ex:', e); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر الاتصال بالخادم</div>'; return; }
+
+  if(cnt) cnt.textContent = rows.length ? (rows.length + ' جلسة') : '—';
+  if(!rows.length){
+    body.innerHTML = '<div class="empty" style="padding:36px;"><span class="empty-icon">📭</span>لم تُسجَّل أي جلسات إشرافية بعد</div>';
+    return;
+  }
+  window.SV_REPORTS_CACHE = rows;
+  svRenderReportsTable(rows);
+}
+
+function svPillarBadges(pil){
+  const keys = Object.keys(pil||{}).filter(k=>pil[k]);
+  if(!keys.length) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
+  return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${SV_PILLAR_NAMES[k]||k}</span>`).join('');
+}
+
+function svRenderReportsTable(rows){
+  const body = document.getElementById('reports-body');
+  const trs = rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);">
+    <td style="padding:10px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);white-space:nowrap;">${svFmtReportDate(r.session_date)}</td>
+    <td style="padding:10px;font-weight:700;color:var(--forest);">${r.teacher_name||'—'}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${r.branch||'—'}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
+    <td style="padding:10px;text-align:center;">${svPillarBadges(r.pillars)}</td>
+    <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
+    <td style="padding:10px;text-align:center;"><button class="btn btn-outline btn-xs" onclick="svViewReport(${i})">👁️ عرض</button></td>
+  </tr>`).join('');
+  body.innerHTML = `<table style="width:100%;border-collapse:collapse;min-width:760px;">
+    <thead><tr style="background:var(--bg);">
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);width:40px;">م</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">تاريخ الجلسة</th>
+      <th style="padding:11px;text-align:right;font-size:.76rem;color:var(--mid);">المعلم</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الشعبة</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">المشرف</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الأركان المُقيَّمة</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الحضور</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">التفاصيل</th>
+    </tr></thead>
+    <tbody>${trs}</tbody>
+  </table>`;
+}
+
+function svViewReport(i){
+  const r = (window.SV_REPORTS_CACHE||[])[i]; if(!r) return;
+  const scores = r.scores || {};
+  const sections = SV_EVAL_SECTIONS.map(sec=>{
+    const items = sec.items.map((it,idx)=>{
+      const v = scores[sec.key+'_'+idx];
+      if(!v) return '';
+      const c = v==='yes'?'var(--jade)':v==='partial'?'var(--gold)':'var(--red)';
+      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--border);font-size:.8rem;">
+        <span style="color:var(--forest);flex:1;">${idx+1}. ${it}</span>
+        <span style="color:${c};font-weight:700;white-space:nowrap;">${SV_RATE_AR[v]||v}</span></div>`;
+    }).filter(Boolean).join('');
+    if(!items) return '';
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:.88rem;font-weight:800;color:var(--emerald);font-family:Amiri,serif;padding:7px 11px;background:var(--pale);border-radius:var(--r-sm);margin-bottom:5px;">${sec.title}</div>${items}</div>`;
+  }).filter(Boolean).join('');
+  document.getElementById('rep-detail-title').textContent = 'الجلسة الإشرافية — ' + (r.teacher_name||'');
+  document.getElementById('rep-detail-meta').innerHTML =
+    `<span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
+     <span class="badge bg-gray">👤 المشرف: ${r.supervisor_name||'—'}</span>
+     <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
+     <span class="badge ${r.attendance==='غائب'?'bg-red':'bg-green'}">الحضور: ${r.attendance||'—'}${r.attendance==='متأخر'&&r.late_min?(' ('+r.late_min+'د)'):''}</span>`;
+  document.getElementById('rep-detail-body').innerHTML =
+    (sections || '<div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا توجد بنود مُقيَّمة في هذه الجلسة</div>')
+    + (r.other ? `<div style="margin-top:8px;padding:11px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.82rem;color:var(--forest);"><strong>ملاحظات:</strong> ${r.other}</div>` : '');
+  openModal('modal-report-detail');
+}
+
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -7975,6 +8089,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'memorization') loadAdminMemorization();
   if (pageId === 'attendance') loadAdminAttendance();
   if (pageId === 'messages') initMessages();
+  if (pageId === 'reports') loadReports();
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -10535,10 +10650,24 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') hideStudentMenu
   </div>
 </div>
 
+<!-- ══ مودال: عرض تفاصيل جلسة إشرافية (تقارير) ══ -->
+<div class="overlay" id="modal-report-detail">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head">
+      <div class="modal-title" id="rep-detail-title">تفاصيل الجلسة</div>
+      <button class="modal-close" onclick="closeModal('modal-report-detail')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div id="rep-detail-meta" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;"></div>
+      <div id="rep-detail-body"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-report-detail')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ══════════════════════════════════════
-// ADMINS — CONTEXT MENU & ACTIONS
-// ══════════════════════════════════════
 let _adminMenuTarget = null;
 let _adminLongPressTimer = null;
 
