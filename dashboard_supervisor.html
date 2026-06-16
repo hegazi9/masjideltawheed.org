@@ -846,16 +846,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   font-weight: 700;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const { createClient } = supabase;
-  const db = createClient(
-    'https://mybjyoxfmbivamasxhyw.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08'
-  );
-  window.db = db;
-  console.log('✅ Supabase connected');
-</script>
 </head>
 <body>
 
@@ -932,7 +922,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
 
     <div class="sb-section">العمليات</div>
-    <div class="sb-item" onclick="nav(this,'schedule')" style="display:none;">
+    <div class="sb-item" onclick="nav(this,'schedule')">
       <span class="sb-icon">📖</span> الخطط والمقررات
     </div>
     <div class="sb-item" onclick="nav(this,'reports')">
@@ -1028,6 +1018,9 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       </div>
     </div>
   </div>
+
+  <!-- ══ أيقونة حلقة المشرف كمعلم (تظهر فقط لو له حلقة تدريس) ══ -->
+  <div id="db-my-teaching" style="display:none;margin-bottom:18px;"></div>
 
   <!-- ══ نوافذ الشعب: جدول حضور المعلمين + الجلسة الإشرافية ══ -->
   <div id="db-branch-windows" style="display:flex;flex-direction:column;gap:18px;">
@@ -1471,11 +1464,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
         <div style="padding:16px 22px;display:flex;align-items:center;gap:22px;">
           <div style="text-align:center;">
-            <div style="font-size:2rem;font-weight:900;color:var(--emerald);line-height:1;">2</div>
+            <div style="font-size:2rem;font-weight:900;color:var(--emerald);line-height:1;" data-sv-count>—</div>
             <div style="font-size:.72rem;color:var(--light);margin-top:3px;">مشرفون</div>
           </div>
           <div style="width:1px;height:36px;background:var(--border);"></div>
-          <div style="font-size:.83rem;color:var(--mid);">عصام هاني · خالد ناصر</div>
+          <div style="font-size:.83rem;color:var(--mid);" data-sv-names>—</div>
         </div>
       </div>
 
@@ -1491,11 +1484,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
         <div style="padding:16px 22px;display:flex;align-items:center;gap:22px;">
           <div style="text-align:center;">
-            <div style="font-size:2rem;font-weight:900;color:#1d6fa4;line-height:1;">2</div>
+            <div style="font-size:2rem;font-weight:900;color:#1d6fa4;line-height:1;" data-sv-count>—</div>
             <div style="font-size:.72rem;color:var(--light);margin-top:3px;">مشرفون</div>
           </div>
           <div style="width:1px;height:36px;background:var(--border);"></div>
-          <div style="font-size:.83rem;color:var(--mid);">عصام هاني · خالد ناصر</div>
+          <div style="font-size:.83rem;color:var(--mid);" data-sv-names>—</div>
         </div>
       </div>
 
@@ -1511,11 +1504,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
         <div style="padding:16px 22px;display:flex;align-items:center;gap:22px;">
           <div style="text-align:center;">
-            <div style="font-size:2rem;font-weight:900;color:#8e44ad;line-height:1;">2</div>
+            <div style="font-size:2rem;font-weight:900;color:#8e44ad;line-height:1;" data-sv-count>—</div>
             <div style="font-size:.72rem;color:var(--light);margin-top:3px;">مشرفون</div>
           </div>
           <div style="width:1px;height:36px;background:var(--border);"></div>
-          <div style="font-size:.83rem;color:var(--mid);">أسماء محمد · مريم تامر</div>
+          <div style="font-size:.83rem;color:var(--mid);" data-sv-names>—</div>
         </div>
       </div>
 
@@ -1531,11 +1524,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
         <div style="padding:16px 22px;display:flex;align-items:center;gap:22px;">
           <div style="text-align:center;">
-            <div style="font-size:2rem;font-weight:900;color:var(--gold);line-height:1;">2</div>
+            <div style="font-size:2rem;font-weight:900;color:var(--gold);line-height:1;" data-sv-count>—</div>
             <div style="font-size:.72rem;color:var(--light);margin-top:3px;">مشرفون</div>
           </div>
           <div style="width:1px;height:36px;background:var(--border);"></div>
-          <div style="font-size:.83rem;color:var(--mid);">أحمد سليمان · عبدالله هاني</div>
+          <div style="font-size:.83rem;color:var(--mid);" data-sv-names>—</div>
         </div>
       </div>
 
@@ -2374,44 +2367,58 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
      PAGE: SCHEDULE
 ══════════════════════════════════════════════════════ -->
 <div id="page-schedule" class="page">
-  <div class="section-title">🗓️ الجداول الأسبوعية</div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">جدول الحلقات — هذا الأسبوع</div>
-      <div style="display:flex;gap:8px;">
-        <span class="badge bg-gold">إجازة</span>
+  <div class="section-title">📖 الخطط والمقررات</div>
+
+  <div id="cp-courses" class="card">
+    <div class="card-head"><div class="card-title">الدورات</div></div>
+    <div class="card-body">
+      <div id="cp-courses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">
+        <div onclick="openCourse('الدورة الصيفية 2026 م')" style="cursor:pointer;border:2px solid var(--gold);border-radius:var(--r);overflow:hidden;transition:transform .2s;background:var(--white);box-shadow:var(--shadow);"
+             onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="background:linear-gradient(135deg,var(--gold),var(--gold-l));padding:22px 18px;color:#fff;position:relative;overflow:hidden;">
+            <div style="position:absolute;left:-18px;top:-18px;width:80px;height:80px;background:rgba(255,255,255,.12);border-radius:50%;"></div>
+            <div style="font-size:2rem;">☀️</div>
+            <div style="font-size:1.15rem;font-weight:800;font-family:'Amiri',serif;margin-top:8px;">الدورة الصيفية 2026 م</div>
+          </div>
+          <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;color:var(--light);">📅 <span id="cp-card-count">—</span> يوم</span>
+            <span style="font-size:.8rem;color:var(--gold);font-weight:700;">عرض الجدول ←</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="card-body">
-      <div class="sched-grid">
-        <div class="sched-head"></div>
-        <div class="sched-head">السبت</div>
-        <div class="sched-head">الأحد</div>
-        <div class="sched-head">الاثنين</div>
-        <div class="sched-head">الثلاثاء</div>
-        <div class="sched-head">الأربعاء</div>
+  </div>
 
-        <div class="sched-time">٤—٥ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-
-        <div class="sched-time">٥—٦ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell gold-cell">إجازة</div>
-        <div class="sched-cell"></div>
-
-        <div class="sched-time">٦—٧ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
+  <div id="cp-detail" class="card" style="display:none;">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="cursor:pointer;color:var(--gold);font-weight:700;" onclick="closeCourse()">← رجوع للدورات</span>
+        <span style="color:var(--light);">|</span>
+        <div class="card-title" id="cp-detail-title">الدورة الصيفية 2026 م</div>
       </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="addCpRow()">➕ صف جديد</button>
+        <button class="btn btn-primary btn-sm" onclick="saveCpAll()">💾 حفظ التعديلات</button>
+      </div>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+      <table class="tbl" id="cp-table" style="min-width:1100px;">
+        <thead>
+          <tr>
+            <th style="width:42px;">م</th>
+            <th style="width:90px;">اليوم</th>
+            <th style="width:120px;">التاريخ</th>
+            <th>منهج التجويد</th>
+            <th>منهج الكنوز الأثرية</th>
+            <th>منهج التلقين الجماعي</th>
+            <th>جدول الأنشطة التربوية</th>
+            <th style="width:54px;"></th>
+          </tr>
+        </thead>
+        <tbody id="cp-tbody">
+          <tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;">جاري التحميل…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -4309,56 +4316,8 @@ function loadBranchCounts() {
 // STATIC BRANCH DATA (from Excel)
 // ══════════════════════════════════════
 const BRANCH_DATA = {
-  'الأبطال': [
-    { teacher: 'أحمد حسن', color: '#1a7a4a', students: ['عبدالرحمن محفوظ','أحمد السيد سعد','محمد أسامة محمد','مروان رمضان','حسن أحمد محمد','محمد هاني محمود','أدم أسامة جمال'] },
-    { teacher: 'أحمد ربيع', color: '#0f5c36', students: ['حازم عمرو كامل','ساجد محمد سمير','أحمد محمد إمام','عمار محمد ممدوح','أحمد ماجد سعد','محمد أحمد إبراهيم','أحمد يوسف أحمد'] },
-    { teacher: 'أنس محمد زكي', color: '#25a05f', students: ['عمر أحمد قاسم','حمزة محمود سعيد','عامر رمضان محمد','محمد سيد أبوالمجد','عبيدة محمد فؤاد'] },
-    { teacher: 'حمزة حسني', color: '#1a7a4a', students: ['حمزة عماد سيد','ياسين محمد','عزالدين وائل','معاذ تامر رسلان','عمار حمادة','يوسف عيد محمود'] },
-    { teacher: 'عبدالرحمن شريف', color: '#0f5c36', students: ['حمزة محمود مصطفى','حمزة محمد أحمد','عمر محمد جميل','حسين مليجي حسين','مالك مصطفى'] },
-    { teacher: 'عبدالرحمن مصطفى', color: '#25a05f', students: ['معاذ أحمد إبراهيم','عبدالرحمن أحمد إبراهيم','محمد أحمد جبريل','مصطفى مدحت ورداني','معاذ وليد','محمد محمود عبدالعاطي'] },
-    { teacher: 'عبدالله هاني', color: '#1a7a4a', students: ['يوسف محفوظ','أحمد صبري','عبدالرحمن محمد درويش','مهند محمد السيد'] },
-    { teacher: 'عمر أبو المكارم', color: '#0f5c36', students: ['عمر محمود يوسف','عمر أحمد جمال فخري','أحمد محمد صلاح','كريم محمد يوسف','محمد وائل'] },
-    { teacher: 'مازن إسلام', color: '#25a05f', students: ['معاذ مدحت الورداني','عبد المنعم محمد','عمر هاني','عمر وائل عبد الرحمن','عمر السيد فتحي','مروان سيد عطية'] },
-    { teacher: 'محمد سيف', color: '#1a7a4a', students: ['عمر رضا محمد','أحمد أشرف إبراهيم','أدم مصطفى','عبدالمجيد شريف','محمد مصطفى عصمت','البراء وائل','أنس صلاح','محمد عمرو رمضان','عمر إبراهيم عبد المجيد','محمد جمال','حسين عصام'] },
-    { teacher: 'مصطفى محمد', color: '#0f5c36', students: ['قاصد أشرف قاصد','عمير هاني','حمزة حنفي عباس','مروان أحمد محمد','عبدالله أحمد سمير','عمر جمال لطفي','محمد محمود محمد','عمر محمد شعراوي','محمد رمضان محمد','محمود علي وفيق','أدم محمد محمد','مصطفى رمضان','محمود محمد سليم'] },
-    { teacher: 'معاذ إسلام', color: '#25a05f', students: ['حسن محمود عبدالله','علي أحمد علي','أدم محمد عادل','حمزة سيد إبراهيم','يوسف أحمد محمد'] },
-    { teacher: 'ياسين أسامة', color: '#1a7a4a', students: ['حمزة حسن علي','مازن أحمد جبريل','يامن عمر','عمر حمادة','أياد وليد','سليم محمد خليل'] },
-  ],
-  'الرواد': [
-    { teacher: 'أحمد السيد', color: '#2196a3', students: ['الحبيب أحمد حسين','حسين مليجي','مازن أحمد صالح','يوسف أحمد عبدالرحمن','حمزة شريف','عبدالله محمود عبد العاطي','عمر أحمد سمير'] },
-    { teacher: 'أحمد حسن', color: '#15616d', students: ['معاذ محمد همام','يوسف أحمد عباس','سيف شهاب','أحمد سيد سعد','حلمي محمد حلمي'] },
-    { teacher: 'عبدالرحمن محمد إبراهيم', color: '#2196a3', students: ['يوسف رمضان','أسر عادل السيد','معاذ أحمد محمد','حمزة إسلام'] },
-    { teacher: 'مالك أحمد سمير', color: '#15616d', students: ['آسر محمود محمد','يوسف خالد محمود','عبدالرحمن صابر','مالك أحمد صالح','عاطف عمرو عاطف','حسام محمد عبدالفتاح','مالك محمود محمد'] },
-    { teacher: 'محمد تامر', color: '#2196a3', students: ['بلال محمد أحمد','ورداني مدحت الورداني','محمد أحمد عبدالله','أبي محمد همام','كريم محمد عباس'] },
-    { teacher: 'محمد سيف', color: '#15616d', students: ['عبدالرحمن محمد عادل','محمد أحمد محمود','محمد ماجد صبحي','أدم محمود عبدالعاطي','موسى أشرف','عبدالرحمن عيد'] },
-    { teacher: 'محمود هاني', color: '#2196a3', students: ['عمر أشرف محمد','أياد محمود عبدالله','محمد علي وفيق','محمد عماد','سليم محمد سليم','سيف محمد سيد'] },
-  ],
-  'البنات': [
-    { teacher: 'جهاد محمد إبراهيم', color: '#9b59b6', sub: 'الملكات', students: ['مريم محمد سليم','سجدة أحمد النبراوي','منة الله حسين','مريم خالد','جنى وليد','ساندي شهاب','ملك هاني','الاء محمد','فاطمة خالد','سما محمد ذكي'] },
-    { teacher: 'سلمى محمد إبراهيم', color: '#6c3483', sub: 'الملكات', students: ['ايتن أحمد مجاهد','حبيبة اليبد','رباب محمد','عائشة محمود','نور رضا','نوال هيثم','رشا محمود','جنى هشام','هنا محمد','فرح أكرم'] },
-    { teacher: 'عائشة خالد', color: '#9b59b6', sub: 'الملكات', students: ['سارة أحمد الأحمدي','ملك محمد خليل','حنين عادل','ريتاج محمد','جنى أحمد محمود','رودينا أحمد الأحمدي','مريم محمد حلمي','روضة محمد','اية محمد'] },
-    { teacher: 'ضحى فهمي', color: '#6c3483', sub: 'الملكات', students: ['ساندي عماد','سارة عماد','بسملة عمر','منة الله أحمد','جنى عبد العزيز','ايتن عصام','مريم أحمد هلال','انفال علي','نور خالد','ريتاج حمدي'] },
-    { teacher: 'سارة حمادة', color: '#9b59b6', sub: 'الأميرات', students: ['يسر وائل','رحيق محمود','خديجة حسن','سما ياسر','نور محمد رمضان'] },
-    { teacher: 'لوجين أحمد قاسم', color: '#6c3483', sub: 'الأميرات', students: ['سجدة محمد صلاح','جوري يوسف أحمد','عائشة أحمد أبو العلا','لارا أحمد مجاهد','ملك المعتصم','جنى هاني','تسنيم ماجد'] },
-    { teacher: 'مريم مصطفى', color: '#9b59b6', sub: 'الأميرات', students: ['حنبن أحمد عبد الرحمن','سجدة أحمد نجاح','جنى محمد سعيد','يارا ياسر','فريدة حسن','سلمى وليد'] },
-    { teacher: 'سلمى حمادة', color: '#6c3483', sub: 'الأميرات', students: ['حور محمود','رغد محمد سعيد','ردينا هيثم','دارين ماجد','ريتال أحمد','سدرة محمد'] },
-    { teacher: 'نور أحمد', color: '#9b59b6', sub: 'الأميرات', students: ['هدى محمود','خديجة أشرف','خديجة مصطفى','سلمى خالد','أسماء محمد'] },
-    { teacher: 'سارة مصطفى', color: '#6c3483', sub: 'الأميرات', students: ['إسراء خالد','خديجة محمود','تسنيم محمد فؤاد','ندى السيد','سمية محمد','ايسل رمضان'] },
-  ],
-  'تحفيظ الكبار': [
-    { teacher: 'محمد عبدالحليم', color: '#b8860b', students: ['محمد رمضان','محمد الحسيني','ابو القاسم محمد','طه محمد','محمد اشرف','يوسف عشماوي'] },
-    { teacher: 'فهد محمد على', color: '#a0720a', students: ['محمد اسامه','جاسر محمد','محمد تامر رسلان','مصطفى تامر','عبدالرحمن شريف','حسين وليد'] },
-    { teacher: 'سيد محمد', color: '#c8920a', students: ['عبد الله عمر','على أحمد','عمر أبو المكارم','إيهاب محمد محمود','محمد منصور'] },
-    { teacher: 'مصطفى أسامة', color: '#b8860b', students: ['مازن إسلام','معاذ إسلام','عمر عماد حمزة','مازن أسامة','مصطفى محمد','عمار رضا'] },
-    { teacher: 'طارق مبروك', color: '#a0720a', students: ['إبراهيم سيد','عبد الرحمن أحمد عبدرب النبي','سيد محروس','محمد زكى محمد','أحمد مصطفى','إبراهيم سيد'] },
-    { teacher: 'محمد شريف', color: '#c8920a', students: ['أحمد أشرف','ممدوح عبد العليم','عمر سمير','ياسين السيد','عبدالله خالد','عصام هانى'] },
-    { teacher: 'عبد الرحمن مسعد', color: '#b8860b', students: ['ياسين أسامة','مروان تامر','يوسف محمد سعيد','عبد الله رضا','مالك أحمد سمير'] },
-    { teacher: 'أحمد ربيع', color: '#a0720a', students: ['محمد صبرى','محمد محفوظ','عمر عماد','عبد الرحمن رجب','عبد الرحمن أحمد','محمد نجاح'] },
-    { teacher: 'محمد إيهاب', color: '#c8920a', students: ['عبد الرحمن محمد','عمر مصطفى','عم نور','خالد ناصر','عمر محمد السيد حجاب'] },
-    { teacher: 'محمد ناصر', color: '#b8860b', students: ['أحمد عماد','محمود هانى','ياسين عبد الرحمن','عبد الرحمن ناصر'] },
-    { teacher: 'عبد الرحمن مصطفى (الأحد)', color: '#a0720a', students: ['أنس محمد زكى','مصطفى محمد','محمد صبحى','محمد أبو القاسم'] },
-    { teacher: 'عبد الرحمن مصطفى (الجمعة)', color: '#c8920a', students: ['على أحمد حسين','خالد عادل','محمد منير إبراهيم','محمد سيد محمد','عادل محمود على','عمر على أحمد'] },
-  ],
+  // فارغ عمداً — يُعمَّر بالكامل من قاعدة البيانات عبر hydrateBranchDataFromDB()
+  'الأبطال': [], 'الرواد': [], 'البنات': [], 'تحفيظ الكبار': [], 'الملكات': [], 'الأميرات': [],
 };
 
 // ── Student data helpers (localStorage) ──
@@ -4755,8 +4714,8 @@ async function pbSendMsg() {
   // ابحث عن ولي الأمر في قاعدة البيانات
   let parentId = null;
   try {
-    const { data } = await db.from('parents')
-      .select('id').eq('student_name', _pbCtxStudent).maybeSingle();
+    const { data } = await db.from('users')
+      .select('id').eq('role','parent').eq('full_name', _pbCtxStudent).maybeSingle();
     if (data) parentId = data.id;
   } catch(e) {}
   await _sendMessageToUser({
@@ -7133,38 +7092,37 @@ function loadSupervisorsData() {
   return SUPERVISORS_DATA_STATIC;
 }
 
-const SUPERVISORS_DATA_STATIC = [
-  // ── الأبطال ──
-  // عصام هاني: مشرف الأبطال — 7 معلمين
-  { id:'sv1', name:'عصام هاني', branch:'الأبطال', branches:['الأبطال'],
-    teacherList:['أحمد حسن','أنس محمد زكي','عبدالرحمن شريف','عبدالله هاني','مازن إسلام','محمد سيف','معاذ إسلام'] },
-  // خالد ناصر: مشرف الأبطال — 6 معلمين
-  { id:'sv2', name:'خالد ناصر', branch:'الأبطال', branches:['الأبطال'],
-    teacherList:['أحمد ربيع','حمزة حسني','عبدالرحمن مصطفى','عمر أبو المكارم','مصطفى محمد','ياسين أسامة'] },
-  // ── الرواد ──
-  // عصام هاني: مشرف الرواد — 4 معلمين
-  { id:'sv3', name:'عصام هاني', branch:'الرواد', branches:['الرواد'],
-    teacherList:['أحمد السيد','عبدالرحمن محمد إبراهيم','محمد تامر','محمود هاني'] },
-  // خالد ناصر: مشرف الرواد — 3 معلمين
-  { id:'sv4', name:'خالد ناصر', branch:'الرواد', branches:['الرواد'],
-    teacherList:['أحمد حسن','مالك أحمد سمير','محمد سيف'] },
-  // ── البنات ──
-  // أسماء محمد: مشرفة البنات — الملكات 5 معلمات
-  { id:'sv5', name:'أسماء محمد', branch:'البنات', branches:['البنات'],
-    teacherList:['جهاد محمد إبراهيم','عائشة خالد','سارة حمادة','لوجين أحمد قاسم','سارة مصطفى'] },
-  // مريم تامر: مشرفة البنات — الأميرات 5 معلمات
-  { id:'sv6', name:'مريم تامر', branch:'البنات', branches:['البنات'],
-    teacherList:['سلمى محمد إبراهيم','ضحى فهمي','مريم مصطفى','سلمى حمادة','نور أحمد'] },
-  // ── تحفيظ الكبار ──
-  // أحمد سليمان: مشرف تحفيظ الكبار — 6 معلمين
-  { id:'sv7', name:'أحمد سليمان', branch:'تحفيظ الكبار', branches:['تحفيظ الكبار'],
-    teacherList:['محمد عبدالحليم','سيد محمد','طارق مبروك','محمد شريف','أحمد ربيع','محمد إيهاب'] },
-  // عبدالله هاني: مشرف تحفيظ الكبار — 6 معلمين
-  { id:'sv8', name:'عبدالله هاني', branch:'تحفيظ الكبار', branches:['تحفيظ الكبار'],
-    teacherList:['فهد محمد على','مصطفى أسامة','عبد الرحمن مسعد','محمد ناصر','عبد الرحمن مصطفى (الأحد)','عبد الرحمن مصطفى (الجمعة)'] },
-];
+const SUPERVISORS_DATA_STATIC = []; // أُفرغ — البيانات تُبنى live من قاعدة البيانات
 
-const SUPERVISORS_DATA = loadSupervisorsData();
+// بناء بيانات المشرفين live: لكل مشرف، شُعبه ومعلموه عبر supervisor_id والحلقات
+async function buildSupervisorsLive(){
+  try{
+    const { data:brs } = await db.from('branches').select('id,name');
+    const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
+    const grp = bn => (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
+    const { data:sups }     = await db.from('users').select('id,full_name').eq('role','supervisor');
+    const { data:teachers } = await db.from('users').select('id,full_name,supervisor_id').eq('role','teacher');
+    const { data:circles }  = await db.from('circles').select('teacher_id,branch_id');
+    const tBranch = {};
+    (circles||[]).forEach(c => {
+      if (!c.teacher_id) return;
+      const bn = brName[c.branch_id]; if (!bn) return;
+      (tBranch[c.teacher_id] = tBranch[c.teacher_id] || new Set()).add(grp(bn));
+    });
+    const out = [];
+    (sups||[]).forEach(sv => {
+      const mine = (teachers||[]).filter(t => t.supervisor_id === sv.id);
+      const byBranch = {};
+      mine.forEach(t => { (tBranch[t.id] || new Set()).forEach(bg => { (byBranch[bg] = byBranch[bg] || []).push(t.full_name); }); });
+      Object.keys(byBranch).forEach(bg => {
+        out.push({ name: sv.full_name, lname: '', branch: bg, branches: [bg], teacherList: [...new Set(byBranch[bg])] });
+      });
+    });
+    return out;
+  }catch(e){ console.warn('buildSupervisorsLive failed:', e); return []; }
+}
+
+let SUPERVISORS_DATA = []; // يُملأ live في init عبر buildSupervisorsLive()
 // ══════════════════════════════════════════════════════════
 // HYDRATE: إعادة بناء BRANCH_DATA من Supabase (حلقات + طلاب أحياء)
 // المشرف يرى معلماته فقط عبر supervisor_id؛ المدير يرى الكل
@@ -7256,6 +7214,38 @@ async function hydrateBranchDataFromDB(){
   }catch(e){ console.warn('hydrate BRANCH_DATA failed:', e); }
 }
 
+// أيقونة حلقة المشرف كمعلم (يظهر فقط للمشرف الذي يدرّس حلقة، مثل عبدالله هاني)
+async function renderMyTeachingCircle(){
+  try{
+    const cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
+    if(!cu.id) return;
+    const { data:circles } = await db.from('circles')
+      .select('id,name,branch_id,branches(name)')
+      .eq('teacher_id', cu.id);
+    if(!circles || !circles.length) return;   // ليس معلّماً لأي حلقة
+    const box = document.getElementById('db-my-teaching');
+    if(!box) return;
+    const cards = await Promise.all(circles.map(async c=>{
+      const { count } = await db.from('students').select('id',{count:'exact',head:true}).eq('circle_id', c.id);
+      const branch = (c.branches && c.branches.name) || '';
+      return `<div onclick="window.location.href='dashboard_teacher.html'" title="افتح حلقتك بأدوات المعلم"
+        style="cursor:pointer;background:var(--white);border:1.5px solid var(--border);border-top:3px solid var(--gold);border-radius:var(--r);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .18s;"
+        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
+        onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--gold-pale,#fdf3dc);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📖</div>
+        <div style="flex:1;">
+          <div style="font-size:1rem;font-weight:800;color:var(--forest);">${c.name||'حلقتي'}</div>
+          <div style="font-size:.78rem;color:var(--mid);margin-top:2px;">حلقتك كمعلم${branch?(' — شعبة '+branch):''} · ${count||0} طالب</div>
+        </div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--gold);">فتح بأدوات المعلم ›</div>
+      </div>`;
+    }));
+    box.innerHTML = `<div class="card-title" style="margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:1rem;color:var(--forest);">🎓 حلقتي كمعلم</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">${cards.join('')}</div>`;
+    box.style.display = 'block';
+  }catch(e){ console.log('my teaching circle:', e); }
+}
+
 async function init(){
   loadUserTheme();
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -7263,7 +7253,12 @@ async function init(){
     window.location.href = 'login.html'; return;
   }
 
+  // ── تأكد أن جلسة Supabase جاهزة قبل أي قراءة (وإلا تُقرأ كـ anon فتظهر فارغة) ──
+  const { data: { session: _sess } } = await db.auth.getSession();
+  if (!_sess) { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; return; }
+
   await hydrateBranchDataFromDB();   // ← بناء BRANCH_DATA من Supabase قبل أي رسم
+  renderMyTeachingCircle();          // ← أيقونة حلقة المشرف كمعلم (لو له حلقة)
   await buildGenderIndex();          // ← فهرس الجنس لمنع تسرّب بيانات الجنس الآخر
   if(!MY_GENDER){                    // تأكيد جنس المشرف من DB لو hydrate ماحددهوش
     const _cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
@@ -7311,6 +7306,8 @@ async function init(){
   // ══ تحديد بيانات المشرف — يشتغل لكل الأدوار ══
   {
     const userFull = (currentUser.full_name || '').trim();
+    SUPERVISORS_DATA = await buildSupervisorsLive();   // ← بيانات المشرفين live من القاعدة
+    updateSupervisorStats();                            // ← ملء كروت الشُّعب من البيانات الحية
     // نجمع كل entries الخاصة بهذا المشرف (قد يشرف على أكثر من شعبة)
     const svEntries = SUPERVISORS_DATA ? SUPERVISORS_DATA.filter(s => {
       const svFullName = s.name && s.lname ? (s.name + ' ' + s.lname) : (s.name || '');
@@ -7345,6 +7342,12 @@ async function init(){
       window.ADMIN_BRANCH_FILTER = svBranches.map(b => branchKeyMap[b]).filter(Boolean);
       if (!window.ADMIN_BRANCH_FILTER.length) window.ADMIN_BRANCH_FILTER = null;
       applyBranchFilter();
+
+      // إخفاء «الخطط والمقررات» لمشرف تحفيظ الكبار فقط (الدورة الصيفية مش بتخصهم)
+      if (window.ADMIN_BRANCH_FILTER && window.ADMIN_BRANCH_FILTER.length === 1 && window.ADMIN_BRANCH_FILTER[0] === 'kebar') {
+        const schItem = document.querySelector('.sb-item[onclick*="\'schedule\'"]');
+        if (schItem) schItem.style.display = 'none';
+      }
 
       // شارة الشعبة في السايدبار
       const badge = document.getElementById('sb-supervisor-badge');
@@ -7408,9 +7411,9 @@ async function loadDashboardCounts(){
   try {
     const [sr, tr, cr, pr] = await Promise.all([
       db.from('students').select('id', {count:'exact',head:true}),
-      db.from('teachers').select('id', {count:'exact',head:true}),
+      db.from('users').select('id', {count:'exact',head:true}).eq('role','teacher'),
       db.from('circles').select('id', {count:'exact',head:true}),
-      db.from('parents').select('id', {count:'exact',head:true}),
+      db.from('users').select('id', {count:'exact',head:true}).eq('role','parent'),
     ]);
     const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent = val ?? '—'; };
     set('qs-students', sr.count ?? '—');
@@ -8156,6 +8159,101 @@ openModal = function(id) {
   }
 };
 
+
+// ══════════════════════════════════════
+// CURRICULUM (الخطط والمقررات) — live من Supabase
+// ══════════════════════════════════════
+let CP_ROWS = [];
+const CP_COURSE = 'الدورة الصيفية 2026 م';
+
+async function loadCurriculum(){
+  const { data, error } = await db.from('curriculum_plan')
+    .select('*').eq('course', CP_COURSE).order('sort_order', { ascending:true });
+  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
+  else CP_ROWS = data || [];
+  const cnt = document.getElementById('cp-card-count');
+  if (cnt) cnt.textContent = CP_ROWS.length || '\u0660';
+  renderCpTable();
+}
+
+function openCourse(name){
+  document.getElementById('cp-courses').style.display = 'none';
+  document.getElementById('cp-detail').style.display = 'block';
+  document.getElementById('cp-detail-title').textContent = name;
+  renderCpTable();
+}
+function closeCourse(){
+  const d = document.getElementById('cp-detail'), c = document.getElementById('cp-courses');
+  if (d) d.style.display = 'none';
+  if (c) c.style.display = 'block';
+}
+
+function cpCell(id, field, val){
+  const v = (val == null ? '' : String(val)).replace(/"/g,'&quot;');
+  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+v+'</textarea></td>';
+}
+
+function renderCpTable(){
+  const tb = document.getElementById('cp-tbody');
+  if (!tb) return;
+  if (!CP_ROWS.length){
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">\ud83d\udcd6</span>\u0644\u0645 \u062a\u064f\u0633\u062c\u0651\u0644 \u062e\u0637\u0629 \u0628\u0639\u062f \u2014 \u0627\u0636\u063a\u0637 \u00ab\u2795 \u0635\u0641 \u062c\u062f\u064a\u062f\u00bb</td></tr>';
+    return;
+  }
+  tb.innerHTML = CP_ROWS.map(function(r,i){ return ''
+    + '<tr>'
+    + '<td style="text-align:center;font-weight:700;">'+(i+1)+'</td>'
+    + cpCell(r.id,'day',r.day)
+    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+(r.date||'')+'" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
+    + cpCell(r.id,'tajweed',r.tajweed)
+    + cpCell(r.id,'kunooz',r.kunooz)
+    + cpCell(r.id,'talqeen',r.talqeen)
+    + cpCell(r.id,'activity',r.activity)
+    + '<td style="text-align:center;"><button title="\u062d\u0630\u0641" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);display:inline-flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background=\'var(--red-pale)\'" onmouseout="this.style.background=\'none\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>'
+    + '</tr>';
+  }).join('');
+}
+
+async function addCpRow(){
+  const maxOrder = CP_ROWS.reduce(function(m,r){ return Math.max(m, r.sort_order||0); }, 0);
+  const { data, error } = await db.from('curriculum_plan')
+    .insert({ course: CP_COURSE, day:'', date:null, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
+    .select().single();
+  if (error){ showToast('\u274c '+error.message); return; }
+  CP_ROWS.push(data);
+  renderCpTable();
+  showToast('\u2795 \u0623\u064f\u0636\u064a\u0641 \u0635\u0641 \u2014 \u0627\u0645\u0644\u0623\u0647 \u062b\u0645 \u0627\u062d\u0641\u0638');
+}
+
+async function deleteCpRow(id){
+  if (!confirm('\u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0635\u0641\u061f')) return;
+  const { error } = await db.from('curriculum_plan').delete().eq('id', id);
+  if (error){ showToast('\u274c '+error.message); return; }
+  CP_ROWS = CP_ROWS.filter(function(r){ return r.id !== id; });
+  renderCpTable();
+  showToast('\ud83d\uddd1\ufe0f \u062a\u0645 \u0627\u0644\u062d\u0630\u0641');
+}
+
+async function saveCpAll(){
+  const map = {};
+  document.querySelectorAll('#cp-tbody [data-id]').forEach(function(el){
+    const id = el.dataset.id, f = el.dataset.field;
+    (map[id] = map[id] || {})[f] = el.value;
+  });
+  const ids = Object.keys(map);
+  if (!ids.length){ showToast('\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0627 \u064a\u064f\u062d\u0641\u0638'); return; }
+  showToast('\u23f3 \u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638...');
+  let ok = 0, fail = 0;
+  for (const id of ids){
+    const patch = map[id];
+    if (patch.date === '') patch.date = null;
+    const { error } = await db.from('curriculum_plan').update(patch).eq('id', id);
+    if (error){ fail++; console.error(error); } else ok++;
+  }
+  await loadCurriculum();
+  showToast(fail ? ('\u26a0\ufe0f \u062d\u064f\u0641\u0638 '+ok+' \u0648\u0641\u0634\u0644 '+fail) : ('\u2705 \u062d\u064f\u0641\u0638\u062a \u0643\u0644 \u0627\u0644\u062a\u0639\u062f\u064a\u0644\u0627\u062a ('+ok+')'));
+}
+
 // ── NAVIGATION ──
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -8185,6 +8283,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'memorization') loadSupMemo();
   if (pageId === 'messages') initMessages();
   if (pageId === 'reports') loadReports();
+  if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -8298,7 +8397,23 @@ async function loadSupervisors() {
 
 function updateSupervisorStats() {
   const el = document.getElementById('stat-supervisors');
-  if (el) el.textContent = SUPERVISORS.length;
+  // عدد المشرفين الفريدين (بالاسم) من البيانات الحية
+  const uniqueNames = [...new Set((SUPERVISORS_DATA||[]).map(s => (s.name||'').trim()).filter(Boolean))];
+  if (el) el.textContent = uniqueNames.length || (typeof SUPERVISORS!=='undefined' ? SUPERVISORS.length : 0);
+
+  // كروت الشُّعب: عدد وأسماء المشرفين لكل شعبة (live)
+  const keyToBranch = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات', kebar:'تحفيظ الكبار' };
+  document.querySelectorAll('[data-branch-key]').forEach(card => {
+    const bn = keyToBranch[card.getAttribute('data-branch-key')];
+    if (!bn) return;
+    const names = [...new Set((SUPERVISORS_DATA||[])
+      .filter(s => s.branch === bn || (s.branches||[]).includes(bn))
+      .map(s => (s.name||'').trim()).filter(Boolean))];
+    const cEl = card.querySelector('[data-sv-count]');
+    const nEl = card.querySelector('[data-sv-names]');
+    if (cEl) cEl.textContent = names.length || '٠';
+    if (nEl) nEl.textContent = names.join(' · ') || '—';
+  });
 }
 
 function updateSupervisorBranchCards() { updateSupervisorStats(); }
@@ -10019,7 +10134,7 @@ const WK_TOTAL   = 12;
 const WK_AR_NUM  = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر'];
 const WK_DAYNAME = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const WK_MONTHS  = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-let   WK_CURRENT = 0;
+let   WK_CURRENT = 0;   // يُضبط على الأسبوع الحالي عند أول رسم
 const WK_LOGO    = 'data:image/png;base64,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';
 
 function wkAr(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
@@ -10049,11 +10164,15 @@ function wkBranchDays(branchName){
   return [0,1,3,4,5];
 }
 
-// تواريخ الأسبوع السبعة
+// أحد الأسبوع الذي يقع فيه تاريخ معيّن (getDay: 0=أحد)
+function wkSundayOf(dt){ const x=new Date(dt); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
+const WK_BASE = wkSundayOf(WK_START);   // أحد أسبوع بداية الترم
+
+// تواريخ الأسبوع السبعة (الأحد→السبت، متوافقة مع getDay)
 function wkWeekDates(wIdx){
   const arr=[];
   for(let i=0;i<7;i++){
-    const d=new Date(WK_START); d.setDate(WK_START.getDate()+wIdx*7+i); arr.push(d);
+    const d=new Date(WK_BASE); d.setDate(WK_BASE.getDate()+wIdx*7+i); arr.push(d);
   }
   return arr;
 }
@@ -10103,14 +10222,16 @@ async function wkLoadRealData(wkIdx){
     });
   }catch(e){ console.log('wk att:', e); }
   try{
-    const { data:rec } = await db.from('recitation_records')
+    const gMap = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'إعادة' };
+    const { data:mem } = await db.from('memorization')
       .select('student_id,date,type,grade').gte('date',isoStart).lte('date',isoEnd);
-    (rec||[]).forEach(r=>{
+    (mem||[]).forEach(r=>{
       const nm=id2name[r.student_id]; if(!nm) return;
       const k=r.date+'|'+nm; window.WK_REAL[k]=window.WK_REAL[k]||{};
-      if(r.type==='review') window.WK_REAL[k].rev=r.grade; else window.WK_REAL[k].mem=r.grade;
+      const g=gMap[r.grade]||r.grade;
+      if(r.type==='review') window.WK_REAL[k].rev=g; else window.WK_REAL[k].mem=g;
     });
-  }catch(e){ console.log('wk rec:', e); }
+  }catch(e){ console.log('wk mem:', e); }
   window._WK_LOADED_WEEKS[wk]=true;
 }
 
@@ -10147,6 +10268,12 @@ function wkDaySummary(branchName, iso){
 
 // ── رسم الصفحة ──
 async function renderWeekly(){
+  // اضبط على الأسبوع الحالي (أول مرة فقط)
+  if(!window._wkInit){
+    const diff = Math.floor((wkSundayOf(new Date()) - WK_BASE) / (7*86400000));
+    WK_CURRENT = Math.max(0, Math.min(WK_TOTAL-1, diff));
+    window._wkInit = true;
+  }
   await wkLoadRealData();
   const dates = wkWeekDates(WK_CURRENT);
   document.getElementById('wk-week-title').textContent  = 'الأسبوع '+WK_AR_NUM[WK_CURRENT];

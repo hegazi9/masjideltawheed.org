@@ -257,6 +257,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   background:rgba(255,255,255,.06);border-radius:var(--r-sm);
   display:flex;align-items:center;gap:10px;
   border:1px solid rgba(255,255,255,.08);
+  box-shadow:none;
 }
 .sb-avatar{
   width:36px;height:36px;border-radius:50%;flex-shrink:0;
@@ -266,7 +267,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 }
 .sb-uname{font-size:.82rem;font-weight:700;color:#fff;}
 .sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);}
-.sb-online{width:7px;height:7px;background:#52c77c;border-radius:50%;margin-right:auto;flex-shrink:0;box-shadow:0 0 6px #52c77c;}
+.sb-online{width:7px;height:7px;background:#52c77c;border-radius:50%;margin-right:auto;flex-shrink:0;}
 
 .sb-nav{flex:1;overflow-y:auto;padding:8px 12px;}
 .sb-nav::-webkit-scrollbar{width:3px;}
@@ -769,16 +770,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   font-weight: 700;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const { createClient } = supabase;
-  const db = createClient(
-    'https://mybjyoxfmbivamasxhyw.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08'
-  );
-  window.db = db;
-  console.log('✅ Supabase connected');
-</script>
 </head>
 <body>
 
@@ -843,7 +834,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
 
     <div class="sb-section">العمليات</div>
-    <div class="sb-item" onclick="nav(this,'schedule')" style="display:none;">
+    <div class="sb-item" onclick="nav(this,'schedule')">
       <span class="sb-icon">📖</span> الخطط والمقررات
     </div>
     <div class="sb-item" onclick="nav(this,'reports')">
@@ -2343,45 +2334,60 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
      PAGE: SCHEDULE
 ══════════════════════════════════════════════════════ -->
 <div id="page-schedule" class="page">
-  <div class="section-title">🗓️ الجداول الأسبوعية</div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">جدول الحلقات — هذا الأسبوع</div>
-      <div style="display:flex;gap:8px;">
-        <span class="badge bg-green">حلقة نشطة</span>
-        <span class="badge bg-gold">إجازة</span>
+  <div class="section-title">📖 الخطط والمقررات</div>
+
+  <!-- صناديق الدورات -->
+  <div id="cp-courses" class="card">
+    <div class="card-head"><div class="card-title">الدورات</div></div>
+    <div class="card-body">
+      <div id="cp-courses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">
+        <div onclick="openCourse('الدورة الصيفية 2026 م')" style="cursor:pointer;border:2px solid var(--gold);border-radius:var(--r);overflow:hidden;transition:transform .2s;background:var(--white);box-shadow:var(--shadow);"
+             onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="background:linear-gradient(135deg,var(--gold),var(--gold-l));padding:22px 18px;color:#fff;position:relative;overflow:hidden;">
+            <div style="position:absolute;left:-18px;top:-18px;width:80px;height:80px;background:rgba(255,255,255,.12);border-radius:50%;"></div>
+            <div style="font-size:2rem;">☀️</div>
+            <div style="font-size:1.15rem;font-weight:800;font-family:'Amiri',serif;margin-top:8px;">الدورة الصيفية 2026 م</div>
+          </div>
+          <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;color:var(--light);">📅 <span id="cp-card-count">—</span> يوم</span>
+            <span style="font-size:.8rem;color:var(--gold);font-weight:700;">عرض الجدول ←</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="card-body">
-      <div class="sched-grid">
-        <div class="sched-head"></div>
-        <div class="sched-head">السبت</div>
-        <div class="sched-head">الأحد</div>
-        <div class="sched-head">الاثنين</div>
-        <div class="sched-head">الثلاثاء</div>
-        <div class="sched-head">الأربعاء</div>
+  </div>
 
-        <div class="sched-time">٤—٥ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-
-        <div class="sched-time">٥—٦ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell gold-cell">إجازة</div>
-        <div class="sched-cell"></div>
-
-        <div class="sched-time">٦—٧ م</div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
-        <div class="sched-cell"></div>
+  <!-- تفاصيل الدورة -->
+  <div id="cp-detail" class="card" style="display:none;">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="cursor:pointer;color:var(--gold);font-weight:700;" onclick="closeCourse()">← رجوع للدورات</span>
+        <span style="color:var(--light);">|</span>
+        <div class="card-title" id="cp-detail-title">الدورة الصيفية 2026 م</div>
       </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="addCpRow()">➕ صف جديد</button>
+        <button class="btn btn-primary btn-sm" onclick="saveCpAll()">💾 حفظ التعديلات</button>
+      </div>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+      <table class="tbl" id="cp-table" style="min-width:1100px;">
+        <thead>
+          <tr>
+            <th style="width:42px;">م</th>
+            <th style="width:90px;">اليوم</th>
+            <th style="width:120px;">التاريخ</th>
+            <th>منهج التجويد</th>
+            <th>منهج الكنوز الأثرية</th>
+            <th>منهج التلقين الجماعي</th>
+            <th>جدول الأنشطة التربوية</th>
+            <th style="width:54px;"></th>
+          </tr>
+        </thead>
+        <tbody id="cp-tbody">
+          <tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;">جاري التحميل…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -4203,7 +4209,7 @@ async function loadStudents() {
   const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
   const { data: brs } = await db.from('branches').select('id,name');
   const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
-  const { data: us } = await db.from('users').select('id,full_name').eq('role','teacher');
+  const { data: us } = await db.from('users').select('id,full_name');
   const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
   const { data: circles } = await db.from('circles').select('id,name,teachers,branch_id');
   const cName = {}, cTeacher = {}, cBranch = {};
@@ -4277,56 +4283,8 @@ function loadBranchCounts() {
 // STATIC BRANCH DATA (from Excel)
 // ══════════════════════════════════════
 const BRANCH_DATA = {
-  'الأبطال': [
-    { teacher: 'أحمد حسن', color: '#1a7a4a', students: ['عبدالرحمن محفوظ','أحمد السيد سعد','محمد أسامة محمد','مروان رمضان','حسن أحمد محمد','محمد هاني محمود','أدم أسامة جمال'] },
-    { teacher: 'أحمد ربيع', color: '#0f5c36', students: ['حازم عمرو كامل','ساجد محمد سمير','أحمد محمد إمام','عمار محمد ممدوح','أحمد ماجد سعد','محمد أحمد إبراهيم','أحمد يوسف أحمد'] },
-    { teacher: 'أنس محمد زكي', color: '#25a05f', students: ['عمر أحمد قاسم','حمزة محمود سعيد','عامر رمضان محمد','محمد سيد أبوالمجد','عبيدة محمد فؤاد'] },
-    { teacher: 'حمزة حسني', color: '#1a7a4a', students: ['حمزة عماد سيد','ياسين محمد','عزالدين وائل','معاذ تامر رسلان','عمار حمادة','يوسف عيد محمود'] },
-    { teacher: 'عبدالرحمن شريف', color: '#0f5c36', students: ['حمزة محمود مصطفى','حمزة محمد أحمد','عمر محمد جميل','حسين مليجي حسين','مالك مصطفى'] },
-    { teacher: 'عبدالرحمن مصطفى', color: '#25a05f', students: ['معاذ أحمد إبراهيم','عبدالرحمن أحمد إبراهيم','محمد أحمد جبريل','مصطفى مدحت ورداني','معاذ وليد','محمد محمود عبدالعاطي'] },
-    { teacher: 'عبدالله هاني', color: '#1a7a4a', students: ['يوسف محفوظ','أحمد صبري','عبدالرحمن محمد درويش','مهند محمد السيد'] },
-    { teacher: 'عمر أبو المكارم', color: '#0f5c36', students: ['عمر محمود يوسف','عمر أحمد جمال فخري','أحمد محمد صلاح','كريم محمد يوسف','محمد وائل'] },
-    { teacher: 'مازن إسلام', color: '#25a05f', students: ['معاذ مدحت الورداني','عبد المنعم محمد','عمر هاني','عمر وائل عبد الرحمن','عمر السيد فتحي','مروان سيد عطية'] },
-    { teacher: 'محمد سيف', color: '#1a7a4a', students: ['عمر رضا محمد','أحمد أشرف إبراهيم','أدم مصطفى','عبدالمجيد شريف','محمد مصطفى عصمت','البراء وائل','أنس صلاح','محمد عمرو رمضان','عمر إبراهيم عبد المجيد','محمد جمال','حسين عصام'] },
-    { teacher: 'مصطفى محمد', color: '#0f5c36', students: ['قاصد أشرف قاصد','عمير هاني','حمزة حنفي عباس','مروان أحمد محمد','عبدالله أحمد سمير','عمر جمال لطفي','محمد محمود محمد','عمر محمد شعراوي','محمد رمضان محمد','محمود علي وفيق','أدم محمد محمد','مصطفى رمضان','محمود محمد سليم'] },
-    { teacher: 'معاذ إسلام', color: '#25a05f', students: ['حسن محمود عبدالله','علي أحمد علي','أدم محمد عادل','حمزة سيد إبراهيم','يوسف أحمد محمد'] },
-    { teacher: 'ياسين أسامة', color: '#1a7a4a', students: ['حمزة حسن علي','مازن أحمد جبريل','يامن عمر','عمر حمادة','أياد وليد','سليم محمد خليل'] },
-  ],
-  'الرواد': [
-    { teacher: 'أحمد السيد', color: '#2196a3', students: ['الحبيب أحمد حسين','حسين مليجي','مازن أحمد صالح','يوسف أحمد عبدالرحمن','حمزة شريف','عبدالله محمود عبد العاطي','عمر أحمد سمير'] },
-    { teacher: 'أحمد حسن', color: '#15616d', students: ['معاذ محمد همام','يوسف أحمد عباس','سيف شهاب','أحمد سيد سعد','حلمي محمد حلمي'] },
-    { teacher: 'عبدالرحمن محمد إبراهيم', color: '#2196a3', students: ['يوسف رمضان','أسر عادل السيد','معاذ أحمد محمد','حمزة إسلام'] },
-    { teacher: 'مالك أحمد سمير', color: '#15616d', students: ['آسر محمود محمد','يوسف خالد محمود','عبدالرحمن صابر','مالك أحمد صالح','عاطف عمرو عاطف','حسام محمد عبدالفتاح','مالك محمود محمد'] },
-    { teacher: 'محمد تامر', color: '#2196a3', students: ['بلال محمد أحمد','ورداني مدحت الورداني','محمد أحمد عبدالله','أبي محمد همام','كريم محمد عباس'] },
-    { teacher: 'محمد سيف', color: '#15616d', students: ['عبدالرحمن محمد عادل','محمد أحمد محمود','محمد ماجد صبحي','أدم محمود عبدالعاطي','موسى أشرف','عبدالرحمن عيد'] },
-    { teacher: 'محمود هاني', color: '#2196a3', students: ['عمر أشرف محمد','أياد محمود عبدالله','محمد علي وفيق','محمد عماد','سليم محمد سليم','سيف محمد سيد'] },
-  ],
-  'البنات': [
-    { teacher: 'جهاد محمد إبراهيم', color: '#9b59b6', sub: 'الملكات', students: ['مريم محمد سليم','سجدة أحمد النبراوي','منة الله حسين','مريم خالد','جنى وليد','ساندي شهاب','ملك هاني','الاء محمد','فاطمة خالد','سما محمد ذكي'] },
-    { teacher: 'سلمى محمد إبراهيم', color: '#6c3483', sub: 'الملكات', students: ['ايتن أحمد مجاهد','حبيبة اليبد','رباب محمد','عائشة محمود','نور رضا','نوال هيثم','رشا محمود','جنى هشام','هنا محمد','فرح أكرم'] },
-    { teacher: 'عائشة خالد', color: '#9b59b6', sub: 'الملكات', students: ['سارة أحمد الأحمدي','ملك محمد خليل','حنين عادل','ريتاج محمد','جنى أحمد محمود','رودينا أحمد الأحمدي','مريم محمد حلمي','روضة محمد','اية محمد'] },
-    { teacher: 'ضحى فهمي', color: '#6c3483', sub: 'الملكات', students: ['ساندي عماد','سارة عماد','بسملة عمر','منة الله أحمد','جنى عبد العزيز','ايتن عصام','مريم أحمد هلال','انفال علي','نور خالد','ريتاج حمدي'] },
-    { teacher: 'سارة حمادة', color: '#9b59b6', sub: 'الأميرات', students: ['يسر وائل','رحيق محمود','خديجة حسن','سما ياسر','نور محمد رمضان'] },
-    { teacher: 'لوجين أحمد قاسم', color: '#6c3483', sub: 'الأميرات', students: ['سجدة محمد صلاح','جوري يوسف أحمد','عائشة أحمد أبو العلا','لارا أحمد مجاهد','ملك المعتصم','جنى هاني','تسنيم ماجد'] },
-    { teacher: 'مريم مصطفى', color: '#9b59b6', sub: 'الأميرات', students: ['حنبن أحمد عبد الرحمن','سجدة أحمد نجاح','جنى محمد سعيد','يارا ياسر','فريدة حسن','سلمى وليد'] },
-    { teacher: 'سلمى حمادة', color: '#6c3483', sub: 'الأميرات', students: ['حور محمود','رغد محمد سعيد','ردينا هيثم','دارين ماجد','ريتال أحمد','سدرة محمد'] },
-    { teacher: 'نور أحمد', color: '#9b59b6', sub: 'الأميرات', students: ['هدى محمود','خديجة أشرف','خديجة مصطفى','سلمى خالد','أسماء محمد'] },
-    { teacher: 'سارة مصطفى', color: '#6c3483', sub: 'الأميرات', students: ['إسراء خالد','خديجة محمود','تسنيم محمد فؤاد','ندى السيد','سمية محمد','ايسل رمضان'] },
-  ],
-  'تحفيظ الكبار': [
-    { teacher: 'محمد عبدالحليم', color: '#b8860b', students: ['محمد رمضان','محمد الحسيني','ابو القاسم محمد','طه محمد','محمد اشرف','يوسف عشماوي'] },
-    { teacher: 'فهد محمد على', color: '#a0720a', students: ['محمد اسامه','جاسر محمد','محمد تامر رسلان','مصطفى تامر','عبدالرحمن شريف','حسين وليد'] },
-    { teacher: 'سيد محمد', color: '#c8920a', students: ['عبد الله عمر','على أحمد','عمر أبو المكارم','إيهاب محمد محمود','محمد منصور'] },
-    { teacher: 'مصطفى أسامة', color: '#b8860b', students: ['مازن إسلام','معاذ إسلام','عمر عماد حمزة','مازن أسامة','مصطفى محمد','عمار رضا'] },
-    { teacher: 'طارق مبروك', color: '#a0720a', students: ['إبراهيم سيد','عبد الرحمن أحمد عبدرب النبي','سيد محروس','محمد زكى محمد','أحمد مصطفى','إبراهيم سيد'] },
-    { teacher: 'محمد شريف', color: '#c8920a', students: ['أحمد أشرف','ممدوح عبد العليم','عمر سمير','ياسين السيد','عبدالله خالد','عصام هانى'] },
-    { teacher: 'عبد الرحمن مسعد', color: '#b8860b', students: ['ياسين أسامة','مروان تامر','يوسف محمد سعيد','عبد الله رضا','مالك أحمد سمير'] },
-    { teacher: 'أحمد ربيع', color: '#a0720a', students: ['محمد صبرى','محمد محفوظ','عمر عماد','عبد الرحمن رجب','عبد الرحمن أحمد','محمد نجاح'] },
-    { teacher: 'محمد إيهاب', color: '#c8920a', students: ['عبد الرحمن محمد','عمر مصطفى','عم نور','خالد ناصر','عمر محمد السيد حجاب'] },
-    { teacher: 'محمد ناصر', color: '#b8860b', students: ['أحمد عماد','محمود هانى','ياسين عبد الرحمن','عبد الرحمن ناصر'] },
-    { teacher: 'عبد الرحمن مصطفى (الأحد)', color: '#a0720a', students: ['أنس محمد زكى','مصطفى محمد','محمد صبحى','محمد أبو القاسم'] },
-    { teacher: 'عبد الرحمن مصطفى (الجمعة)', color: '#c8920a', students: ['على أحمد حسين','خالد عادل','محمد منير إبراهيم','محمد سيد محمد','عادل محمود على','عمر على أحمد'] },
-  ],
+  // فارغ عمداً — يُعمَّر بالكامل من قاعدة البيانات عبر hydrateBranchDataFromDB()
+  'الأبطال': [], 'الرواد': [], 'البنات': [], 'تحفيظ الكبار': [], 'الملكات': [], 'الأميرات': [],
 };
 
 // ── Student data helpers (localStorage) ──
@@ -4702,8 +4660,8 @@ async function pbSendMsg() {
   // ابحث عن ولي الأمر في قاعدة البيانات
   let parentId = null;
   try {
-    const { data } = await db.from('parents')
-      .select('id').eq('student_name', _pbCtxStudent).maybeSingle();
+    const { data } = await db.from('users')
+      .select('id').eq('role','parent').eq('full_name', _pbCtxStudent).maybeSingle();
     if (data) parentId = data.id;
   } catch(e) {}
   await _sendMessageToUser({
@@ -4807,7 +4765,7 @@ async function loadTeachers() {
   let data, error;
   ({ data, error } = await db
     .from('users')
-    .select('id, full_name, phone, username, is_active, branch_id')
+    .select('id, full_name, phone, username, is_active, branch_id, supervisor_id')
     .eq('role', 'teacher'));
 
   if (error) {
@@ -5660,8 +5618,21 @@ async function addTeacher() {
 
   if (!fname || !lname) { showToast('⚠️ اكتب الاسم والعائلة'); return; }
 
+  // إضافة معلم بحساب دخول حقيقي تتم عبر «أداة الإدارة» (Supabase Auth + كلمة مرور آمنة)
+  showToast('ℹ️ لإضافة معلم بحساب دخول، استخدم أداة الإدارة — لضمان إنشاء الحساب وكلمة المرور بشكل آمن');
+  return;
+
+  // eslint-disable-next-line no-unreachable
   const fullName = fname + ' ' + lname;
   showToast('⏳ جارٍ إضافة المعلم...');
+
+  // حلّ اسم الشعبة المختارة → branch_id حقيقي من جدول branches
+  let branchId = null;
+  if (branches.length) {
+    const { data: brs } = await db.from('branches').select('id,name');
+    const hit = (brs || []).find(b => b.name === branches[0]);
+    if (hit) branchId = hit.id;
+  }
 
   // Store extra fields in notes as JSON (if notes column exists)
   const extraData = {};
@@ -5671,32 +5642,31 @@ async function addTeacher() {
   if (idNum) extraData.id_number = idNum;
   const notesJson = Object.keys(extraData).length ? JSON.stringify(extraData) : null;
 
-  // Try insert with notes field first
-  let userRow, userErr;
-  ({ data: userRow, error: userErr } = await db.from('users').insert({
+  const baseRow = {
     full_name: fullName,
     role: 'teacher',
     phone: phone || null,
     username: username,
     is_active: true,
-    notes: notesJson,
-  }).select().single());
+    branch_id: branchId,
+  };
 
-  // If notes column doesn't exist, retry without it
-  if (userErr && userErr.message && userErr.message.includes('notes')) {
-    ({ data: userRow, error: userErr } = await db.from('users').insert({
-      full_name: fullName,
-      role: 'teacher',
-      phone: phone || null,
-      username: username,
-      is_active: true,
-    }).select().single());
+  // محاولة الإدراج بكل الأعمدة، ثم تراجع تدريجي لو عمود مش موجود
+  let userRow, userErr;
+  ({ data: userRow, error: userErr } = await db.from('users').insert(baseRow).select().single());
+
+  if (userErr && userErr.message) {
+    const m = userErr.message;
+    const retry = { ...baseRow };
+    if (m.includes('notes'))         delete retry.notes;
+    if (m.includes('branch_id'))     delete retry.branch_id;
+    ({ data: userRow, error: userErr } = await db.from('users').insert(retry).select().single());
   }
 
   if (userErr) { console.error(userErr); showToast('❌ خطأ: ' + userErr.message); return; }
 
   closeModal('modal-add-teacher');
-  showToast('✅ تم إضافة المعلم — اسم المستخدم: ' + username);
+  showToast('✅ تم إضافة المعلم — اسم المستخدم: ' + username + ' • كلمة السر: ' + password);
 
   // Reset
   ['t-fname','t-lname','t-fname-en','t-lname-en','t-phone','t-email','t-address','t-education','t-job','t-licenses','t-id-num','t-username','t-password'].forEach(id => {
@@ -5709,7 +5679,13 @@ async function addTeacher() {
   document.getElementById('t-cv-drop').textContent = 'قم بادراج الملف هنا :';
   tIdImgData = null; tCvFileName = '';
 
-  await loadTeachers();
+  await loadTeachers();                 // يحدّث مصفوفة TEACHERS الحيّة من DB
+  await hydrateBranchDataFromDB();      // يعيد بناء BRANCH_DATA من القاعدة (مش ثابت)
+  renderTeacherBranchCards();           // يحدّث كروت الشُّعب
+  if (document.getElementById('tv-detail') && document.getElementById('tv-detail').style.display === 'block') {
+    const lbl = (document.getElementById('tvd-branch-label')?.textContent || '').replace(/^[^ ]+\s*/, '').trim();
+    if (BRANCH_META[lbl]) renderTeacherBranchDetail(lbl, BRANCH_META[lbl]);
+  }
   await loadParents();
 }
 
@@ -5908,7 +5884,7 @@ async function loadParents() {
   let data, error;
   ({ data, error } = await db
     .from('users')
-    .select('id, full_name, phone, username, is_active, notes, created_at')
+    .select('id, full_name, phone, username, is_active, created_at')
     .eq('role', 'parent')
     .order('created_at', { ascending: false }));
 
@@ -6568,7 +6544,7 @@ async function hydrateBranchDataFromDB(){
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
 
     // خريطة id→اسم المعلم (لترجمة الحلقات اللي teachers فيها IDs)
-    const { data:us } = await db.from('users').select('id,full_name').eq('role','teacher');
+    const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
 
@@ -6578,6 +6554,9 @@ async function hydrateBranchDataFromDB(){
       const { data:ts } = await db.from('users').select('full_name').eq('role','teacher').eq('supervisor_id', cu.id);
       if (ts && ts.length) myTeachers = new Set(ts.map(t => t.full_name));
     }
+
+    // كل المعلمين بشعبهم (لإظهار المعلم الجديد حتى لو لسه ملوش حلقة)
+    const { data:allT } = await db.from('users').select('id,full_name,branch_id,phone').eq('role','teacher');
 
     const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,branch_id,schedule');
     const { data:students } = await db.from('students')
@@ -6610,6 +6589,27 @@ async function hydrateBranchDataFromDB(){
       colorIdx[bn]++;
       BRANCH_DATA[key].push(item);
       (svbt[key] = svbt[key] || []).push(tName);
+    });
+
+    // ── المعلمون اللي ليهم شعبة بس لسه ملهمش حلقة (مثلاً المُضاف حديثاً) ──
+    const shownNames = new Set();
+    Object.values(BRANCH_DATA).forEach(arr => (arr||[]).forEach(it => shownNames.add(it.teacher)));
+    (allT||[]).forEach(t => {
+      if (!t.branch_id) return;
+      if (shownNames.has(t.full_name)) return;
+      if (myTeachers && !myTeachers.has(t.full_name)) return;
+      const bn = brName[t.branch_id] || '';
+      if (!bn) return;
+      const key = (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
+      if (!BRANCH_DATA[key]) BRANCH_DATA[key] = [];
+      const pal = PAL[bn] || ['#1e5c36','#2d7a50'];
+      colorIdx[bn] = colorIdx[bn] || 0;
+      const item = { teacher:t.full_name, color:pal[colorIdx[bn] % pal.length], students:[], phone:t.phone || '' };
+      if (bn === 'الملكات' || bn === 'الأميرات') item.sub = bn;
+      colorIdx[bn]++;
+      BRANCH_DATA[key].push(item);
+      shownNames.add(t.full_name);
+      (svbt[key] = svbt[key] || []).push(t.full_name);
     });
 
     // لو مشرف: ثبّت قوائم معلميه بالأسماء الحقيقية (للفلاتر اللاحقة)
@@ -6665,7 +6665,7 @@ async function getAdmStudents(){
   try {
     const { data:brs } = await db.from('branches').select('id,name');
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
-    const { data:us } = await db.from('users').select('id,full_name').eq('role','teacher');
+    const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const { data:circles } = await db.from('circles').select('id,name,teachers,branch_id');
     const cName={}, cTeacher={}, cBranch={};
@@ -7088,6 +7088,10 @@ async function init(){
   if (!currentUser || currentUser.role !== 'admin') {
     window.location.href = 'login.html'; return;
   }
+
+  // ── تأكد أن جلسة Supabase جاهزة قبل أي قراءة من القاعدة (وإلا تُقرأ كـ anon فتظهر فارغة) ──
+  const { data: { session: _sess } } = await db.auth.getSession();
+  if (!_sess) { localStorage.removeItem('currentUser'); window.location.href = 'login.html'; return; }
   // map: اسم في الـ DB → الاسم المعروض + التيتل
   const ADMIN_MAP = {
     'الشيخ علاء عارف' : { display: 'الشيخ علاء عارف',   title: 'مدير المدرسة' },
@@ -7125,6 +7129,14 @@ async function init(){
   }
   applyBranchFilter();
 
+  // إخفاء «الخطط والمقررات» لمستخدمي تحفيظ الكبار (الدورة الصيفية مش بتخصهم)
+  if (window.ADMIN_BRANCH_FILTER && window.ADMIN_BRANCH_FILTER.length === 1 && window.ADMIN_BRANCH_FILTER[0] === 'kebar') {
+    const schItem = document.querySelector('.sb-item[onclick*="\'schedule\'"]');
+    if (schItem) schItem.style.display = 'none';
+    const schIg = document.querySelector('.ig-btn[onclick*="\'schedule\'"]');
+    if (schIg) schIg.style.display = 'none';
+  }
+
   document.getElementById('tb-date').textContent =
     new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
@@ -7151,6 +7163,7 @@ async function init(){
 
   showToast('⏳ جارٍ تحميل البيانات...');
   await hydrateBranchDataFromDB();   // عمّر BRANCH_DATA من القاعدة (يستبدل الثابت القديم)
+  await loadSupervisors();           // عمّر SUPERVISORS قبل عرض المعلمين (لإظهار المشرف المتابع)
   await Promise.all([loadStudents(), loadTeachers(), loadAnnouncements(), loadNotifications()]);
   renderTeacherBranchCards();        // أعد رسم صناديق الشعب بالبيانات الحقيقية
   loadDashboardCounts();
@@ -7164,9 +7177,9 @@ async function loadDashboardCounts(){
   try {
     const [sr, tr, cr, pr] = await Promise.all([
       db.from('students').select('id', {count:'exact',head:true}),
-      db.from('teachers').select('id', {count:'exact',head:true}),
+      db.from('users').select('id', {count:'exact',head:true}).eq('role','teacher'),
       db.from('circles').select('id', {count:'exact',head:true}),
-      db.from('parents').select('id', {count:'exact',head:true}),
+      db.from('users').select('id', {count:'exact',head:true}).eq('role','parent'),
     ]);
     const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent = val ?? '—'; };
     set('qs-students', sr.count ?? '—');
@@ -8064,6 +8077,101 @@ function svViewReport(i){
   openModal('modal-report-detail');
 }
 
+
+// ══════════════════════════════════════
+// CURRICULUM (الخطط والمقررات) — live من Supabase
+// ══════════════════════════════════════
+let CP_ROWS = [];
+const CP_COURSE = 'الدورة الصيفية 2026 م';
+
+async function loadCurriculum(){
+  const { data, error } = await db.from('curriculum_plan')
+    .select('*').eq('course', CP_COURSE).order('sort_order', { ascending:true });
+  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
+  else CP_ROWS = data || [];
+  const cnt = document.getElementById('cp-card-count');
+  if (cnt) cnt.textContent = CP_ROWS.length || '\u0660';
+  renderCpTable();
+}
+
+function openCourse(name){
+  document.getElementById('cp-courses').style.display = 'none';
+  document.getElementById('cp-detail').style.display = 'block';
+  document.getElementById('cp-detail-title').textContent = name;
+  renderCpTable();
+}
+function closeCourse(){
+  const d = document.getElementById('cp-detail'), c = document.getElementById('cp-courses');
+  if (d) d.style.display = 'none';
+  if (c) c.style.display = 'block';
+}
+
+function cpCell(id, field, val){
+  const v = (val == null ? '' : String(val)).replace(/"/g,'&quot;');
+  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+v+'</textarea></td>';
+}
+
+function renderCpTable(){
+  const tb = document.getElementById('cp-tbody');
+  if (!tb) return;
+  if (!CP_ROWS.length){
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">\ud83d\udcd6</span>\u0644\u0645 \u062a\u064f\u0633\u062c\u0651\u0644 \u062e\u0637\u0629 \u0628\u0639\u062f \u2014 \u0627\u0636\u063a\u0637 \u00ab\u2795 \u0635\u0641 \u062c\u062f\u064a\u062f\u00bb</td></tr>';
+    return;
+  }
+  tb.innerHTML = CP_ROWS.map(function(r,i){ return ''
+    + '<tr>'
+    + '<td style="text-align:center;font-weight:700;">'+(i+1)+'</td>'
+    + cpCell(r.id,'day',r.day)
+    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+(r.date||'')+'" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
+    + cpCell(r.id,'tajweed',r.tajweed)
+    + cpCell(r.id,'kunooz',r.kunooz)
+    + cpCell(r.id,'talqeen',r.talqeen)
+    + cpCell(r.id,'activity',r.activity)
+    + '<td style="text-align:center;"><button title="حذف" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);display:inline-flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background=\'var(--red-pale)\'" onmouseout="this.style.background=\'none\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>'
+    + '</tr>';
+  }).join('');
+}
+
+async function addCpRow(){
+  const maxOrder = CP_ROWS.reduce(function(m,r){ return Math.max(m, r.sort_order||0); }, 0);
+  const { data, error } = await db.from('curriculum_plan')
+    .insert({ course: CP_COURSE, day:'', date:null, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
+    .select().single();
+  if (error){ showToast('\u274c '+error.message); return; }
+  CP_ROWS.push(data);
+  renderCpTable();
+  showToast('\u2795 \u0623\u064f\u0636\u064a\u0641 \u0635\u0641 \u2014 \u0627\u0645\u0644\u0623\u0647 \u062b\u0645 \u0627\u062d\u0641\u0638');
+}
+
+async function deleteCpRow(id){
+  if (!confirm('\u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0635\u0641\u061f')) return;
+  const { error } = await db.from('curriculum_plan').delete().eq('id', id);
+  if (error){ showToast('\u274c '+error.message); return; }
+  CP_ROWS = CP_ROWS.filter(function(r){ return r.id !== id; });
+  renderCpTable();
+  showToast('\ud83d\uddd1\ufe0f \u062a\u0645 \u0627\u0644\u062d\u0630\u0641');
+}
+
+async function saveCpAll(){
+  const map = {};
+  document.querySelectorAll('#cp-tbody [data-id]').forEach(function(el){
+    const id = el.dataset.id, f = el.dataset.field;
+    (map[id] = map[id] || {})[f] = el.value;
+  });
+  const ids = Object.keys(map);
+  if (!ids.length){ showToast('\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0627 \u064a\u064f\u062d\u0641\u0638'); return; }
+  showToast('\u23f3 \u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638...');
+  let ok = 0, fail = 0;
+  for (const id of ids){
+    const patch = map[id];
+    if (patch.date === '') patch.date = null;
+    const { error } = await db.from('curriculum_plan').update(patch).eq('id', id);
+    if (error){ fail++; console.error(error); } else ok++;
+  }
+  await loadCurriculum();
+  showToast(fail ? ('\u26a0\ufe0f \u062d\u064f\u0641\u0638 '+ok+' \u0648\u0641\u0634\u0644 '+fail) : ('\u2705 \u062d\u064f\u0641\u0638\u062a \u0643\u0644 \u0627\u0644\u062a\u0639\u062f\u064a\u0644\u0627\u062a ('+ok+')'));
+}
+
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -8090,6 +8198,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'attendance') loadAdminAttendance();
   if (pageId === 'messages') initMessages();
   if (pageId === 'reports') loadReports();
+  if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -8167,45 +8276,48 @@ let SUPERVISORS = [], SUPERVISORS_FILTERED = [], SV_SELECTED = new Set();
 let svPage = 1, svRowsPerPage = 10, svSortField = '', svSortDir = 1;
 
 async function loadSupervisors() {
-  // Static data with real teacher assignments from BRANCH_DATA
-  // Abtal: 13 teachers split randomly — عصام: 7, خالد: 6
-  // Rowad: 7 teachers split randomly  — عصام: 4, خالد: 3
-  SUPERVISORS = [
-    {
-      id:'sv1', name:'عصام', lname:'هاني', branch:'الأبطال',
-      teacherList: ['أحمد حسن','أنس محمد زكي','عبدالرحمن شريف','عبدالله هاني','مازن إسلام','محمد سيف','معاذ إسلام'],
-    },
-    {
-      id:'sv2', name:'خالد', lname:'ناصر', branch:'الأبطال',
-      teacherList: ['أحمد ربيع','حمزة حسني','عبدالرحمن مصطفى','عمر أبو المكارم','مصطفى محمد','ياسين أسامة'],
-    },
-    {
-      id:'sv3', name:'عصام', lname:'هاني', branch:'الرواد',
-      teacherList: ['أحمد السيد','عبدالرحمن محمد إبراهيم','محمد تامر','محمود هاني'],
-    },
-    {
-      id:'sv4', name:'خالد', lname:'ناصر', branch:'الرواد',
-      teacherList: ['أحمد حسن','مالك أحمد سمير','محمد سيف'],
-    },
-    {
-      id:'sv5', name:'أسماء', lname:'محمد', branch:'البنات',
-      teacherList: ['جهاد محمد إبراهيم','عائشة خالد','سارة حمادة','لوجين أحمد قاسم','سارة مصطفى'],
-    },
-    {
-      id:'sv6', name:'مريم', lname:'تامر', branch:'البنات',
-      teacherList: ['سلمى محمد إبراهيم','ضحى فهمي','مريم مصطفى','سلمى حمادة','نور أحمد'],
-    },
-    {
-      id:'sv7', name:'أحمد', lname:'سليمان', branch:'تحفيظ الكبار',
-      teacherList: ['محمد عبدالحليم','سيد محمد','طارق مبروك','محمد شريف','أحمد ربيع','محمد إيهاب'],
-    },
-    {
-      id:'sv8', name:'عبدالله', lname:'هاني', branch:'تحفيظ الكبار',
-      teacherList: ['فهد محمد على','مصطفى أسامة','عبد الرحمن مسعد','محمد ناصر','عبد الرحمن مصطفى (الأحد)','عبد الرحمن مصطفى (الجمعة)'],
-    },
-  ];
+  // ── live من قاعدة البيانات (لا بيانات ثابتة) ──
+  try {
+    const { data:brs }   = await db.from('branches').select('id,name');
+    const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
+    const grp = bn => (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
 
-  // Compute teachers/students counts dynamically from BRANCH_DATA
+    const { data:sups }     = await db.from('users').select('id,full_name').eq('role','supervisor');
+    const { data:teachers } = await db.from('users').select('id,full_name,supervisor_id').eq('role','teacher');
+    const { data:circles }  = await db.from('circles').select('teacher_id,branch_id');
+
+    // معلم → مجموعة شُعبه (قد يدرّس في أكثر من شعبة)
+    const tBranch = {};
+    (circles||[]).forEach(c => {
+      if (!c.teacher_id) return;
+      const bn = brName[c.branch_id]; if (!bn) return;
+      (tBranch[c.teacher_id] = tBranch[c.teacher_id] || new Set()).add(bn);
+    });
+
+    // مشرف واحد قد يظهر تحت أكثر من شعبة → سجل لكل (مشرف × شعبة)
+    const out = [];
+    (sups||[]).forEach(sv => {
+      const mine = (teachers||[]).filter(t => t.supervisor_id === sv.id);
+      const byBranch = {};
+      mine.forEach(t => {
+        const setb = tBranch[t.id] || new Set();
+        setb.forEach(bn => { const g = grp(bn); (byBranch[g] = byBranch[g] || []).push(t.full_name); });
+      });
+      const parts = (sv.full_name || '').trim().split(' ');
+      Object.keys(byBranch).forEach(bg => {
+        out.push({
+          id: 'sv-' + sv.id + '-' + bg,
+          name: parts[0] || sv.full_name,
+          lname: parts.slice(1).join(' '),
+          branch: bg,
+          teacherList: [...new Set(byBranch[bg])],
+        });
+      });
+    });
+    SUPERVISORS = out;
+  } catch(e) { console.warn('loadSupervisors live failed:', e); SUPERVISORS = []; }
+
+  // أعداد المعلمين/الطلاب من BRANCH_DATA المُحمّل من القاعدة
   SUPERVISORS.forEach(sv => {
     sv.teachers = sv.teacherList.length;
     const branchItems = BRANCH_DATA[sv.branch] || [];

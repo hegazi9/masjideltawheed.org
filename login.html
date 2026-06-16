@@ -421,36 +421,46 @@ async function doLogin() {
   btn.disabled = true;
 
   try {
-    // ١ — جيب بيانات المستخدم من جدول users بالـ username
+    // ١ — تسجيل دخول حقيقي عبر Supabase Auth (الباسورد بيتحقق في السيرفر)
+    const { data: authData, error: authErr } = await db.auth.signInWithPassword({
+      email: usernameVal.toLowerCase(),
+      password: passVal,
+    });
+
+    if (authErr || !authData || !authData.user)
+      throw new Error('wrong_pass');
+
+    // ٢ — جيب صف المستخدم من جدول users عبر auth_id
     const { data: userRows, error: userErr } = await db
       .from('users')
       .select('*')
-      .eq('username', usernameVal)
+      .eq('auth_id', authData.user.id)
       .eq('is_active', true)
       .limit(1);
 
-    if (userErr || !userRows || userRows.length === 0)
+    if (userErr || !userRows || userRows.length === 0) {
+      await db.auth.signOut();
       throw new Error('not_found');
+    }
 
     const userData = userRows[0];
 
-    // ٢ — تحقق من كلمة المرور
-    if (!userData.password_plain || userData.password_plain !== passVal)
-      throw new Error('wrong_pass');
-
     // ٣ — تحقق من الدور
-    if (userData.role !== selectedRole)
+    if (userData.role !== selectedRole) {
+      await db.auth.signOut();
       throw new Error('role_mismatch');
+    }
 
-    // ٤ — حفظ بيانات المستخدم
+    // ٤ — حفظ بيانات المستخدم (من غير الباسورد إطلاقاً)
+    delete userData.password_plain;
     localStorage.setItem('currentUser', JSON.stringify(userData));
     showWelcome(userData);
 
   } catch (err) {
     console.error(err);
     const errMsgs = {
-      not_found:    'اسم المستخدم غير موجود',
-      wrong_pass:   'كلمة المرور غير صحيحة',
+      not_found:    'الحساب غير مفعّل أو غير موجود',
+      wrong_pass:   'اسم المستخدم أو كلمة المرور غير صحيحة',
       role_mismatch:'نوع الحساب غير مطابق — تحقق من اختيارك',
     };
     showAlert(errMsgs[err.message] || 'حدث خطأ، حاول مرة أخرى');

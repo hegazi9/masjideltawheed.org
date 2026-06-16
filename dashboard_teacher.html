@@ -797,6 +797,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
   <div class="sb-footer">
     <div class="sb-ayah">﴿ خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ ﴾</div>
+    <div id="sb-back-sup" onclick="window.location.href='dashboard_supervisor.html'" title="رجوع لِلوحة الإشراف" style="display:none;cursor:pointer;background:rgba(200,146,10,.18);color:var(--gold-l,#f0b429);padding:7px 12px;border-radius:9px;font-size:.82rem;font-weight:700;margin-bottom:8px;text-align:center;">🔙 رجوع للإشراف</div>
     <div class="sb-logout" onclick="confirmLogout()" title="تسجيل خروج">🚪</div>
   </div>
 </aside>
@@ -844,6 +845,20 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card-head"><div class="card-title">⚡ بدء الحلقة</div></div>
     <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="navPage('students')">👨‍🎓 فتح جدول الحلقة والتسميع</button>
+    </div>
+  </div>
+
+  <!-- ══ الخطط والمقررات (عرض فقط) ══ -->
+  <div class="card" id="tcp-section" style="display:none;">
+    <div class="card-head">
+      <div class="card-title">📖 الخطط والمقررات — الدورة الصيفية 2026 م</div>
+      <span style="font-size:.74rem;color:var(--light);">اضغط على اليوم لعرض خطته</span>
+    </div>
+    <div class="card-body">
+      <div id="tcp-cal" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;">
+        <div style="color:var(--light);padding:14px;">جاري التحميل…</div>
+      </div>
+      <div id="tcp-detail" style="display:none;margin-top:18px;"></div>
     </div>
   </div>
 </div>
@@ -1379,9 +1394,17 @@ const SCHED_MAP = {
   'تحفيظ الكبار':[{day:'الجمعة'}],
 };
 function genderOf(branch){ return (branch==='الملكات'||branch==='الأميرات')?'إناث':'ذكور'; }
+// مجموعة الشعبة لبحث الطالب الزائر: شباب (أبطال+رواد) / بنات (ملكات+أميرات) / كبار
+function branchGroup(b){
+  if(b==='الأبطال'||b==='الرواد') return 'shabab';
+  if(b==='الملكات'||b==='الأميرات') return 'banat';
+  if(b==='تحفيظ الكبار'||b==='تحفيظ كبار') return 'kibar';
+  return 'other';
+}
 
 // ── فهرس جنس المستخدمين (منع تسرّب بيانات الجنس الآخر في البحث/الرسائل) ──
 let MY_GENDER='ذكور', USER_GENDER={}, NAME_GENDER={}, BR_GENDER={};
+let MY_GROUP='shabab'; // مجموعة شعبة المعلم (لبحث الطالب الزائر)
 function isUuidV(v){ return typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(v); }
 function normG(g){ return (g==='إناث'||g==='أنثى'||g==='انثى'||g==='بنات')?'إناث':'ذكور'; }
 async function buildGenderIndex(){
@@ -1500,7 +1523,14 @@ function closeSidebar(){ document.querySelector('.sidebar').classList.remove('op
 // ══ BOOT ══
 async function boot(){
   cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
-  if(!cu.id || (cu.role!=='teacher' && cu.role!=='admin')){ window.location.href='login.html'; return; }
+  if(!cu.id || (cu.role!=='teacher' && cu.role!=='admin' && cu.role!=='supervisor')){ window.location.href='login.html'; return; }
+
+  // ── تأكد أن جلسة Supabase جاهزة قبل أي قراءة (وإلا تُقرأ كـ anon فتظهر فارغة) ──
+  const { data: { session: _sess } } = await db.auth.getSession();
+  if(!_sess){ localStorage.removeItem('currentUser'); window.location.href='login.html'; return; }
+
+  // مشرف يدرّس حلقة (مثل عبدالله هاني): أظهر زرار الرجوع للإشراف
+  if(cu.role==='supervisor'){ const bb=document.getElementById('sb-back-sup'); if(bb) bb.style.display='block'; }
   const fn=(cu.full_name||'المعلم').trim();
   document.getElementById('sb-user-name').textContent=fn;
   document.getElementById('sb-user-avatar').textContent=fn[0]||'م';
@@ -1515,7 +1545,7 @@ async function boot(){
   // حلقاتي
   try{
     const {data}=await db.from('circles').select('*');
-    MY_CIRCLES=(data||[]).filter(c=>(c.teachers||[]).includes(fn)).map(c=>({
+    MY_CIRCLES=(data||[]).filter(c=> c.teacher_id===cu.id || (c.teachers||[]).includes(cu.id) || (c.teachers||[]).includes(fn)).map(c=>({
       id:c.id, key:c.name_ar||c.name||'حلقة', name:c.name_ar||c.name||'حلقة', branch:BRANCH_MAP[c.branch_id]||c.branch||'—', gender:c.gender||'—',
       type:c.type||'—', schedule:c.schedule||[], students_count:c.students_count||0, _static:false
     }));
@@ -1537,6 +1567,7 @@ async function boot(){
   }catch(e){ MY_STUDENTS=[]; }
 
   ACTIVE_CIRCLE_ID = MY_CIRCLES[0]?.id || null;
+  MY_GROUP = branchGroup(MY_CIRCLES[0]?.branch || '');   // مجموعة شعبة المعلم (لبحث الزائر)
   MY_GENDER = (MY_CIRCLES.find(c=>c.gender==='ذكور'||c.gender==='إناث')||{}).gender || genderOf(MY_CIRCLES[0]?.branch||'') || 'ذكور';
   await buildGenderIndex();
   const _fg = genderOfUser({id:cu.id, name:cu.full_name, role:'teacher'});
@@ -1591,6 +1622,68 @@ function renderDashboard(){
   const qt=document.getElementById('qs-train'); if(qt) qt.textContent=(window._trainCount!=null?window._trainCount:'—');
   const todayC=MY_CIRCLES.filter(circleMeetsToday).map(x=>x.name);
   document.getElementById('qs-today').textContent=todayC.length?todayC.length:'لا يوجد';
+  loadTeacherCurriculum();
+}
+
+// ══ الخطط والمقررات — عرض فقط للمعلم (يقرأ نفس جدول المدير/المشرف) ══
+let TCP_ROWS = [];
+const TCP_AR_MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function tcpFmtDate(d){
+  if(!d) return '—';
+  const p=d.split('-'); if(p.length!==3) return d;
+  return (+p[2])+' '+(TCP_AR_MONTHS[(+p[1])-1]||'')+' '+p[0];
+}
+async function loadTeacherCurriculum(){
+  const sec=document.getElementById('tcp-section');
+  if(!sec) return;
+  // إخفاء كامل لمعلمي تحفيظ الكبار فقط
+  const branches=[...new Set(MY_CIRCLES.map(c=>c.branch))];
+  const onlyKebar = branches.length>0 && branches.every(b=>b==='تحفيظ الكبار');
+  if(onlyKebar){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  const cal=document.getElementById('tcp-cal');
+  try{
+    const {data,error}=await db.from('curriculum_plan')
+      .select('*').eq('course','الدورة الصيفية 2026 م').order('sort_order',{ascending:true});
+    if(error) throw error;
+    TCP_ROWS=data||[];
+  }catch(e){ TCP_ROWS=[]; }
+  if(!TCP_ROWS.length){
+    cal.innerHTML='<div style="color:var(--light);padding:14px;">لم تُسجَّل خطة بعد</div>';
+    return;
+  }
+  const todayISO=D();
+  cal.innerHTML=TCP_ROWS.map(function(r,i){
+    const isToday=r.date===todayISO;
+    return '<div onclick="showTcpDay('+i+',this)" style="cursor:pointer;border:2px solid '+(isToday?'var(--jade)':'var(--border)')+';border-radius:var(--r-sm);padding:10px 8px;text-align:center;background:'+(isToday?'var(--pale)':'var(--white)')+';transition:all .18s;" onmouseover="this.style.borderColor=\'var(--jade)\'" onmouseout="this.style.borderColor=\''+(isToday?'var(--jade)':'var(--border)')+'\'">'
+      +'<div style="font-weight:800;font-size:.86rem;color:var(--forest);">'+(r.day||'—')+'</div>'
+      +'<div style="font-size:.72rem;color:var(--light);margin-top:3px;direction:ltr;">'+(r.date||'')+'</div>'
+      +(isToday?'<div style="font-size:.64rem;color:var(--jade);font-weight:700;margin-top:3px;">اليوم</div>':'')
+      +'</div>';
+  }).join('');
+  // افتح اليوم الحالي تلقائياً إن وُجد
+  const ti=TCP_ROWS.findIndex(function(r){return r.date===todayISO;});
+  if(ti>=0) showTcpDay(ti);
+}
+function showTcpDay(i){
+  const r=TCP_ROWS[i]; if(!r) return;
+  const box=document.getElementById('tcp-detail');
+  const row=function(label,icon,val){
+    return '<div style="display:flex;gap:10px;padding:12px 14px;background:var(--pale);border-radius:var(--r-sm);border-right:3px solid var(--jade);">'
+      +'<span style="font-size:.8rem;color:var(--mid);font-weight:700;min-width:170px;">'+icon+' '+label+'</span>'
+      +'<span style="font-size:.84rem;color:var(--ink);flex:1;white-space:pre-wrap;">'+((val&&String(val).trim())?val:'<span style=\"color:var(--light);\">لا يوجد</span>')+'</span>'
+      +'</div>';
+  };
+  box.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+    +'<span style="background:var(--jade);color:#fff;padding:5px 14px;border-radius:20px;font-size:.85rem;font-weight:700;">'+(r.day||'—')+'</span>'
+    +'<span style="font-size:.82rem;color:var(--light);direction:ltr;">'+tcpFmtDate(r.date)+'</span></div>'
+    +'<div style="display:flex;flex-direction:column;gap:9px;">'
+    +row('منهج التجويد','📗',r.tajweed)
+    +row('منهج الكنوز الأثرية','📕',r.kunooz)
+    +row('منهج التلقين الجماعي','📘',r.talqeen)
+    +row('جدول الأنشطة التربوية','🎯',r.activity)
+    +'</div>';
+  box.style.display='block';
 }
 function circleCard(c){
   const n=studentsOf(c).length, today=circleMeetsToday(c);
@@ -1785,13 +1878,18 @@ function openGuestSearch(){
   document.getElementById('guest-results').innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">اكتب اسم الطالب للبحث...</div>';
   openModal('modal-guest');
 }
-function renderGuestResults(q){
+async function renderGuestResults(q){
   q=(q||'').trim();
   const box=document.getElementById('guest-results');
   if(q.length<2){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">اكتب حرفين على الأقل...</div>'; return; }
   const cur=activeCircle();
   const existing=new Set(studentsOf(cur).map(s=>s.name));
-  const res=allSchoolStudents().filter(s=>s.name.includes(q) && !existing.has(s.name)).slice(0,30);
+  let res=[];
+  try{
+    const { data } = await db.rpc('search_students', { q });
+    res=(data||[]).map(s=>({ name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
+      .filter(s=>!existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
+  }catch(e){ res=[]; }
   if(!res.length){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">لا توجد نتائج</div>'; return; }
   box.innerHTML=res.map((s,i)=>`<div onclick="pickGuest(${i})" data-i="${i}" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background='#fff'">
     <div class="avatar" style="width:30px;height:30px;font-size:.76rem;">${s.name[0]}</div>
@@ -2940,9 +3038,8 @@ function renderProfile(){
     </div>`;
 }
 async function changePassword(){
-  const v=document.getElementById('set-newpass').value.trim(); if(v.length<4){ showToast('⚠️ كلمة المرور قصيرة'); return; }
-  try{ await db.from('users').update({password_plain:v}).eq('id',cu.id); showToast('🔒 تم تغيير كلمة المرور'); document.getElementById('set-newpass').value=''; }
-  catch(e){ showToast('❌ خطأ'); }
+  // تغيير كلمة المرور يتم عبر أداة الإدارة (Supabase Auth) — لا تُخزَّن كلمات مرور في الجداول
+  showToast('🔒 تغيير كلمة المرور يتم من إدارة المدرسة عبر أداة الإدارة');
 }
 
 // ══ REPORTS (طباعة RTL) ══
