@@ -3594,9 +3594,14 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="fg"><label>رقم الهاتف</label><input type="tel" id="edit-s-phone"></div>
         <div class="fg"><label>الشعبة</label>
-          <select id="edit-s-branch" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+          <select id="edit-s-branch" onchange="fillEsCircles()" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
             <option>الأبطال</option><option>الرواد</option>
             <option>الملكات</option><option>الأميرات</option><option>تحفيظ الكبار</option>
+          </select>
+        </div>
+        <div class="fg"><label>الحلقة (للنقل)</label>
+          <select id="edit-s-circle" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+            <option value="">-- اختر الحلقة --</option>
           </select>
         </div>
         <div class="fg"><label>الحفظ (أجزاء)</label><input type="number" id="edit-s-mem" min="0" max="30" step="0.5"></div>
@@ -4223,6 +4228,7 @@ async function loadStudents() {
   STUDENTS = (data || []).map((s, i) => ({
     id: s.id,
     idx: i + 1,
+    circle_id: s.circle_id || null,
     name: s.users?.full_name || 'بدون اسم',
     phone: s.users?.phone || '—',
     circle: s.circle_id ? (cName[s.circle_id] || '—') : '—',
@@ -6479,9 +6485,14 @@ async function addStudentToDB() {
 
   if (!fname || !lname) { showToast('⚠️ الاسم والعائلة مطلوبان'); return; }
   if (!branchName) { showToast('⚠️ اختر الشعبة أولاً'); return; }
+  if (!circleId) { showToast('⚠️ اختر الحلقة (لازمة لظهور الطالب عند المعلم)'); return; }
 
   const fullName = [fname, mname, lname].filter(Boolean).join(' ');
   showToast('⏳ جارٍ تسجيل الطالب...');
+
+  // بيانات الحلقة (المعلم والشعبة منها مباشرة — العلاقة المضمونة)
+  const { data: circleRow } = await db.from('circles')
+    .select('teacher_id, branch_id').eq('id', circleId).single();
 
   const { data: userRow, error: userErr } = await db.from('users').insert({
     full_name: fullName, role: 'student',
@@ -6490,20 +6501,22 @@ async function addStudentToDB() {
 
   if (userErr) { showToast('❌ خطأ: ' + userErr.message); return; }
 
-  const { data: branchData } = await db.from('branches').select('id').eq('name', branchName).single();
-
   const payload = {
-    user_id: userRow.id, teacher_id: teacherId || null,
-    branch_id: branchData?.id || null,
+    user_id: userRow.id,
+    circle_id: circleId,
+    teacher_id: circleRow?.teacher_id || teacherId || null,
+    branch_id: circleRow?.branch_id || null,
     memorized_parts: mem, notes: notes || null, is_active: true,
   };
-  if (circleId) payload.circle_id = circleId;
 
-  let { error: stuErr } = await db.from('students').insert(payload);
-  // لو عمود circle_id مش موجود، أعد المحاولة بدونه
-  if (stuErr && circleId) { delete payload.circle_id; ({ error: stuErr } = await db.from('students').insert(payload)); }
+  const { error: stuErr } = await db.from('students').insert(payload);
 
-  if (stuErr) { showToast('❌ خطأ: ' + stuErr.message); return; }
+  if (stuErr) {
+    // امسح صف المستخدم اليتيم حتى لا يتراكم
+    await db.from('users').delete().eq('id', userRow.id);
+    showToast('❌ خطأ: ' + stuErr.message);
+    return;
+  }
 
   closeModal('modal-add-student');
   showToast('✅ تم تسجيل الطالب بنجاح!');
@@ -6831,10 +6844,20 @@ function editStudent(id) {
   document.getElementById('edit-s-lname').value = parts.slice(1).join(' ') || '';
   document.getElementById('edit-s-phone').value = s.phone === '—' ? '' : s.phone;
   document.getElementById('edit-s-mem').value = s.mem;
-  document.getElementById('edit-s-branch').value = s.circle;
+  document.getElementById('edit-s-branch').value = s.branch;
+  fillEsCircles(s.circle_id);
   document.getElementById('edit-s-status').value = String(s.is_active);
   document.getElementById('edit-s-notes').value = s.notes || '';
   openModal('modal-edit-student');
+}
+
+// ملء حلقات مودال تعديل الطالب حسب الشعبة المختارة
+function fillEsCircles(selectedId){
+  const br=document.getElementById('edit-s-branch')?.value||'';
+  const sel=document.getElementById('edit-s-circle'); if(!sel) return;
+  const list=(typeof CIRCLES!=='undefined'?CIRCLES:[]).filter(c=>!br||c.branch===br);
+  sel.innerHTML='<option value="">-- اختر الحلقة --</option>'+
+    list.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.name}</option>`).join('');
 }
 
 async function saveEditStudent() {
@@ -6845,6 +6868,7 @@ async function saveEditStudent() {
   const mem = parseFloat(document.getElementById('edit-s-mem').value || '0');
   const is_active = document.getElementById('edit-s-status').value === 'true';
   const notes = document.getElementById('edit-s-notes').value.trim();
+  const circleId = document.getElementById('edit-s-circle')?.value || null;
 
   if (!fname) { showToast('⚠️ اكتب اسم الطالب'); return; }
 
@@ -6852,8 +6876,17 @@ async function saveEditStudent() {
   if (stuData?.user_id) {
     await db.from('users').update({ full_name: fname + ' ' + lname, phone: phone || null }).eq('id', stuData.user_id);
   }
-  const { error } = await db.from('students').update({ memorized_parts: mem, is_active, notes: notes || null }).eq('id', id);
-  if (error) { showToast('❌ خطأ في التعديل'); return; }
+
+  const upd = { memorized_parts: mem, is_active, notes: notes || null };
+  // نقل الطالب لحلقة (يجلب المعلم والشعبة من الحلقة)
+  if (circleId) {
+    const { data: cr } = await db.from('circles').select('teacher_id, branch_id').eq('id', circleId).single();
+    upd.circle_id = circleId;
+    if (cr) { upd.teacher_id = cr.teacher_id; upd.branch_id = cr.branch_id; }
+  }
+
+  const { error } = await db.from('students').update(upd).eq('id', id);
+  if (error) { showToast('❌ خطأ في التعديل: ' + error.message); return; }
 
   closeModal('modal-edit-student');
   showToast('✅ تم تعديل بيانات الطالب!');
