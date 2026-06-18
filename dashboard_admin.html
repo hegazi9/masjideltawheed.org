@@ -7197,7 +7197,7 @@ async function init(){
   showToast('⏳ جارٍ تحميل البيانات...');
   await hydrateBranchDataFromDB();   // عمّر BRANCH_DATA من القاعدة (يستبدل الثابت القديم)
   await loadSupervisors();           // عمّر SUPERVISORS قبل عرض المعلمين (لإظهار المشرف المتابع)
-  await Promise.all([loadStudents(), loadTeachers(), loadAnnouncements(), loadNotifications()]);
+  await Promise.all([loadStudents(), loadTeachers(), loadCircles(), loadAnnouncements(), loadNotifications()]);
   renderTeacherBranchCards();        // أعد رسم صناديق الشعب بالبيانات الحقيقية
   loadDashboardCounts();
   initParentBranchCounts();
@@ -7615,6 +7615,8 @@ const DAYS_AR = ['السبت','الأحد','الاثنين','الثلاثاء','
 
 async function loadCircles() {
   try {
+    const { data: brs } = await db.from('branches').select('id,name');
+    const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
     const { data, error } = await db
       .from('circles')
       .select('*')
@@ -7625,7 +7627,9 @@ async function loadCircles() {
       name: c.name_ar || c.name || '—',
       name_en: c.name_en || '',
       type: c.type || '—',
-      branch: c.branch || '—',
+      branch: brName[c.branch_id] || c.branch || '—',
+      branch_id: c.branch_id || null,
+      teacher_id: c.teacher_id || null,
       gender: c.gender || '—',
       teachers: c.teachers || [],
       students_count: c.students_count || 0,
