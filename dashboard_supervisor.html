@@ -1115,6 +1115,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <div class="section-title" style="margin-bottom:4px;">👨‍🎓 الطلاب</div>
       <div style="font-size:.8rem;color:var(--light);">اختر الشعبة لعرض تفاصيلها</div>
     </div>
+    <button class="btn btn-primary" onclick="openAddStudent()">➕ إضافة طالب</button>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;" id="branches-grid">
@@ -3461,115 +3462,25 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
 <!-- Add Student -->
 <div class="overlay" id="modal-add-student">
-  <div class="modal" style="max-width:680px;max-height:92vh;overflow-y:auto;">
+  <div class="modal" style="max-width:480px;">
     <div class="modal-head">
       <div class="modal-title">👨&#x200D;🎓 إضافة طالب جديد</div>
       <button class="modal-close" onclick="closeModal('modal-add-student')">✕</button>
     </div>
-    <div class="modal-body" style="padding:0;">
-
-      <!-- المعلومات الشخصية -->
-      <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:11px 18px;">
-        <span style="color:rgba(255,255,255,.85);font-size:.82rem;font-weight:700;">👤 المعلومات الشخصية للطالب</span>
+    <div class="modal-body" style="padding:20px 22px;">
+      <div class="fg" style="margin-bottom:14px;">
+        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">اسم الطالب رباعي *</label>
+        <input type="text" id="ns-fullname" placeholder="مثال: محمد أحمد علي حسن" autocomplete="off"
+          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
       </div>
-      <div style="padding:16px 18px;border-bottom:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-          <div class="fg"><label>الاسم *</label><input type="text" id="ns-fname" placeholder="الاسم الأول"></div>
-          <div class="fg"><label>اسم الأب</label><input type="text" id="ns-mname" placeholder="اسم الأب"></div>
-          <div class="fg"><label>العائلة *</label><input type="text" id="ns-lname" placeholder="اسم العائلة"></div>
-          <div class="fg"><label>الجنس</label>
-            <select id="ns-gender" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-              <option value="male">ذكر</option><option value="female">أنثى</option>
-            </select>
-          </div>
-          <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="ns-dob"></div>
-          <div class="fg"><label>مكان الميلاد</label><input type="text" id="ns-pob" placeholder="المدينة"></div>
-          <div class="fg"><label>الجنسية</label><input type="text" id="ns-nationality" placeholder="مصري"></div>
-          <div class="fg"><label>نوع الهوية</label>
-            <select id="ns-id-type" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-              <option value="">-- اختر --</option>
-              <option value="national">هوية وطنية</option>
-              <option value="birth">شهادة ميلاد</option>
-              <option value="passport">جواز سفر</option>
-            </select>
-          </div>
-          <div class="fg"><label>رقم الهوية</label><input type="text" id="ns-id-num" placeholder="رقم الهوية"></div>
-        </div>
-        <div class="fg" style="margin-top:4px;"><label>العنوان</label><input type="text" id="ns-address" placeholder="العنوان الكامل"></div>
+      <div class="fg" style="margin-bottom:4px;">
+        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">الحلقة *</label>
+        <select id="ns-circle"
+          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+          <option value="">-- جارٍ تحميل حلقاتك... --</option>
+        </select>
+        <div style="font-size:.76rem;color:var(--mid);margin-top:6px;">تظهر هنا الحلقات التي تشرف عليها فقط</div>
       </div>
-
-      <!-- معلومات الحساب -->
-      <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:11px 18px;">
-        <span style="color:rgba(255,255,255,.85);font-size:.82rem;font-weight:700;">🔐 معلومات تخص الحساب</span>
-      </div>
-      <div style="padding:16px 18px;border-bottom:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="fg"><label>اسم المستخدم</label>
-            <div style="display:flex;gap:8px;">
-              <input type="text" id="ns-username" placeholder="سيتم توليده تلقائياً" style="flex:1;">
-              <button type="button" class="btn btn-ghost btn-sm" onclick="genSU()">🔄</button>
-            </div>
-          </div>
-          <div class="fg"><label>كلمة السر</label>
-            <div style="display:flex;gap:8px;">
-              <input type="text" id="ns-password" placeholder="سيتم توليدها تلقائياً" style="flex:1;">
-              <button type="button" class="btn btn-ghost btn-sm" onclick="genSP()">🔄</button>
-            </div>
-          </div>
-        </div>
-        <div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 13px;font-size:.79rem;color:var(--mid);margin-top:4px;">
-          💡 سيتمكن الطالب من الدخول للنظام باستخدام اسم المستخدم وكلمة السر
-        </div>
-      </div>
-
-      <!-- البيانات الصحية -->
-      <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:11px 18px;">
-        <span style="color:rgba(255,255,255,.85);font-size:.82rem;font-weight:700;">🏥 البيانات الصحية</span>
-      </div>
-      <div style="padding:16px 18px;border-bottom:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-
-          <div class="fg"><label>يعاني من مرض؟</label>
-            <select id="ns-sick" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-              <option value="no">لا</option><option value="yes">نعم</option>
-            </select>
-          </div>
-          <div class="fg"><label>سبب المرض</label><input type="text" id="ns-sick-reason" placeholder="اختياري"></div>
-        </div>
-      </div>
-
-      <!-- بيانات التواصل -->
-      <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:11px 18px;">
-        <span style="color:rgba(255,255,255,.85);font-size:.82rem;font-weight:700;">📞 بيانات التواصل</span>
-      </div>
-      <div style="padding:16px 18px;border-bottom:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="fg"><label>رقم الهاتف</label><input type="tel" id="ns-phone" placeholder="01xxxxxxxxx"></div>
-          <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="ns-email" placeholder="اختياري"></div>
-        </div>
-      </div>
-
-      <!-- بيانات أولياء الأمور -->
-      <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:11px 18px;">
-        <span style="color:rgba(255,255,255,.85);font-size:.82rem;font-weight:700;">👨‍👦 بيانات أولياء الأمر</span>
-      </div>
-      <div style="padding:16px 18px;border-bottom:1px solid var(--border);">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="fg"><label>هاتف الأب</label><input type="tel" id="ns-father-phone" placeholder="01xxxxxxxxx"></div>
-          <div class="fg"><label>هاتف الأم</label><input type="tel" id="ns-mother-phone" placeholder="01xxxxxxxxx"></div>
-          <div class="fg"><label>حالة الأب</label>
-            <select id="ns-father-status" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-              <option value="alive">على قيد الحياة</option><option value="dead">متوفى</option>
-            </select>
-          </div>
-          <div class="fg"><label>حالة الأم</label>
-            <select id="ns-mother-status" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-              <option value="alive">على قيد الحياة</option><option value="dead">متوفاة</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
     </div>
     <div class="modal-foot" style="justify-content:center;gap:16px;">
       <button class="btn btn-primary" style="min-width:130px;" onclick="addStudent()">➕ إضافة</button>
@@ -4204,6 +4115,7 @@ async function loadStudents() {
       branches(name),
       teacher:users!students_teacher_id_fkey(full_name)
     `)
+    .eq('is_active', true)
     .order('created_at', { ascending: false });
 
   if (error) { console.error('students error:', error); return; }
@@ -4376,7 +4288,6 @@ function buildKebarCard(teacher, students, color) {
         <div style="font-weight:700;font-size:.95rem;">👨‍🏫 المعلم ${teacher}</div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="background:rgba(255,255,255,.2);padding:2px 12px;border-radius:10px;font-size:.75rem;">${students.length} طالب</span>
-          <button onclick="openAddStudentForTeacher('${safeId}','${teacher}')" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:4px 12px;font-size:.75rem;cursor:pointer;font-family:Tajawal;font-weight:700;">➕ إضافة</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
@@ -4408,7 +4319,6 @@ function buildCircleCard(teacher, students, color, isFemale) {
         <div style="font-weight:700;font-size:.95rem;">${icon} ${prefix} ${teacher}</div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="background:rgba(255,255,255,.2);padding:2px 12px;border-radius:10px;font-size:.75rem;">${students.length} طالب</span>
-          <button onclick="openAddStudentForTeacher('${safeId}','${teacher}')" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:4px 12px;font-size:.75rem;cursor:pointer;font-family:Tajawal;font-weight:700;">➕ إضافة طالب</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
@@ -6528,42 +6438,57 @@ function genSU(){document.getElementById('ns-username').value='student'+Date.now
 function genSP(){const c='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';let p='';for(let i=0;i<8;i++)p+=c[Math.floor(Math.random()*c.length)];document.getElementById('ns-password').value=p;}
 
 async function addStudentToDB() {
-  const fname  = document.getElementById('ns-fname')?.value?.trim();
-  const mname  = document.getElementById('ns-mname')?.value?.trim() || '';
-  const lname  = document.getElementById('ns-lname')?.value?.trim();
-  const circle = document.getElementById('ns-circle')?.value;
-  const phone  = document.getElementById('ns-phone')?.value?.trim() ||
-                 document.getElementById('ns-father-phone')?.value?.trim();
-  const mem    = parseFloat(document.getElementById('ns-mem')?.value || '0');
-  const notes  = document.getElementById('ns-notes')?.value?.trim();
-  const teacherId = document.getElementById('ns-teacher')?.value || null;
-  const username = document.getElementById('ns-username')?.value?.trim() || 'student_'+Date.now().toString().slice(-6);
+  const fullName = document.getElementById('ns-fullname')?.value?.trim();
+  const circleId = document.getElementById('ns-circle')?.value || null;
+  const username = 'student_' + Date.now().toString().slice(-7);
 
-  if (!fname || !lname) { showToast('⚠️ الاسم والعائلة مطلوبان'); return; }
-  if (!circle) { showToast('⚠️ اختر الشعبة أولاً'); return; }
+  if (!fullName) { showToast('⚠️ اكتب اسم الطالب رباعي'); return; }
+  if (fullName.split(/\s+/).filter(Boolean).length < 2) { showToast('⚠️ اكتب الاسم كامل (رباعي)'); return; }
+  if (!circleId) { showToast('⚠️ اختر الحلقة'); return; }
 
-  const fullName = [fname, mname, lname].filter(Boolean).join(' ');
+  // تأكيد الدور — الإضافة للمشرف فقط
+  const myRole = (await db.rpc('my_role')).data;
+  if (myRole !== 'supervisor') { showToast('⛔ هذه الإضافة للمشرف فقط — أنت داخل كـ ' + (myRole || 'غير معروف')); return; }
+
   showToast('⏳ جارٍ تسجيل الطالب...');
 
-  const { data: userRow, error: userErr } = await db.from('users').insert({
-    full_name: fullName, role: 'student',
-    phone: phone || null, username: username, is_active: true,
-  }).select().single();
+  // بيانات الحلقة (المعلم والشعبة منها مباشرة — العلاقة المضمونة)
+  const { data: circleRow, error: cErr } = await db.from('circles')
+    .select('teacher_id, branch_id').eq('id', circleId).single();
+  if (cErr || !circleRow) { showToast('❌ تعذّر قراءة بيانات الحلقة — حاول تاني'); return; }
+  if (!circleRow.teacher_id) { showToast('⚠️ الحلقة دي مالهاش معلّم مُسند — راجع المدير'); return; }
 
-  if (userErr) { showToast('❌ خطأ: ' + userErr.message); return; }
-
-  const { data: branchData } = await db.from('branches').select('id').eq('name', circle).single();
-
-  const { error: stuErr } = await db.from('students').insert({
-    user_id: userRow.id, teacher_id: teacherId || null,
-    branch_id: branchData?.id || null,
-    memorized_parts: mem, notes: notes || null, is_active: true,
+  // إنشاء حساب المستخدم — نتجنّب .select() ونقرأ الصف بقراءة منفصلة (RLS قد ترجّع select فاضي)
+  const uIns = await db.from('users').insert({
+    full_name: fullName, role: 'student', username: username, is_active: true,
   });
+  if (uIns.error || !(uIns.status === 201 || uIns.status === 200)) {
+    showToast('❌ تعذّر إنشاء حساب الطالب: ' + (uIns.error?.message || 'استجابة ' + uIns.status));
+    return;
+  }
+  const { data: userRow } = await db.from('users').select('id').eq('username', username).single();
+  if (!userRow?.id) { showToast('❌ تعذّر جلب حساب الطالب بعد إنشائه'); return; }
 
-  if (stuErr) { showToast('❌ خطأ: ' + stuErr.message); return; }
+  const payload = {
+    user_id: userRow.id,
+    circle_id: circleId,
+    teacher_id: circleRow.teacher_id,
+    branch_id: circleRow.branch_id || null,
+    memorized_parts: 0, is_active: true,
+  };
+
+  // نتجنّب .select() بعد insert — نتأكد من النجاح عبر status
+  const { error: stuErr, status: stuStatus } = await db.from('students').insert(payload);
+  const inserted = !stuErr && (stuStatus === 201 || stuStatus === 200);
+  if (!inserted) {
+    await db.from('users').delete().eq('id', userRow.id);
+    showToast('❌ فشل تسجيل الطالب: ' + (stuErr?.message || 'استجابة غير متوقعة (' + stuStatus + ')'));
+    return;
+  }
 
   closeModal('modal-add-student');
   showToast('✅ تم تسجيل الطالب بنجاح!');
+  window._supStudents = null; // إعادة تحميل طلاب المشرف
   await loadStudents();
 }
 
@@ -7748,6 +7673,31 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open'));
 });
 function addStudent() { addStudentToDB(); }
+
+// فتح مودال إضافة طالب — يعرض حلقات المشرف فقط
+async function openAddStudent(){
+  const fn=document.getElementById('ns-fullname'); if(fn) fn.value='';
+  const sel=document.getElementById('ns-circle');
+  if(sel) sel.innerHTML='<option value="">-- جارٍ تحميل حلقاتك... --</option>';
+  const title=document.querySelector('#modal-add-student .modal-title'); if(title) title.innerHTML='👨‍🎓 إضافة طالب جديد';
+  const addBtn=document.querySelector('#modal-add-student .modal-foot .btn-primary');
+  if(addBtn){ addBtn.textContent='➕ إضافة'; addBtn.onclick=()=>addStudent(); }
+  openModal('modal-add-student');
+
+  // جلب حلقات المشرف عبر الدالة الأمنية (نفس مصدر RLS)
+  try{
+    const { data: ids } = await db.rpc('my_supervised_circle_ids');
+    const cids = (ids||[]).map(r => (typeof r==='string'? r : r.my_supervised_circle_ids)).filter(Boolean);
+    if(!cids.length){ if(sel) sel.innerHTML='<option value="">لا توجد حلقات تشرف عليها</option>'; return; }
+    const { data: circles } = await db.from('circles').select('id,name').in('id', cids);
+    if(sel){
+      sel.innerHTML='<option value="">-- اختر الحلقة --</option>'+
+        (circles||[]).map(c=>`<option value="${c.id}">${c.name||'حلقة'}</option>`).join('');
+    }
+  }catch(e){
+    if(sel) sel.innerHTML='<option value="">تعذّر تحميل الحلقات</option>';
+  }
+}
 
 async function delStudent(id){
   if(!confirm('هل تريد حذف هذا الطالب؟'))return;
