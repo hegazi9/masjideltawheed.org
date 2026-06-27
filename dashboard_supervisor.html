@@ -1117,6 +1117,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-primary" onclick="openAddStudent()">➕ إضافة طالب</button>
+      <button class="btn btn-gold" onclick="openMoveStudent()">⇄ نقل طالب</button>
       <button class="btn btn-danger" onclick="openDelStudent()">🗑 حذف طالب</button>
     </div>
   </div>
@@ -3521,6 +3522,54 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
   </div>
 </div>
+
+<!-- Move Student -->
+<div class="overlay" id="modal-move-student">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">⇄ نقل طالب إلى حلقة أخرى</div>
+      <button class="modal-close" onclick="closeModal('modal-move-student')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 22px;">
+      <div class="fg" style="margin-bottom:12px;">
+        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">١. ابحث عن الطالب بالاسم</label>
+        <input type="text" id="mv-search" placeholder="اكتب اسم الطالب..." oninput="filterMoveStudents()" autocomplete="off"
+          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">تصفية بالحلقة الحالية (اختياري)</label>
+        <select id="mv-from-circle" onchange="filterMoveStudents()"
+          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+          <option value="">-- كل حلقاتك --</option>
+        </select>
+      </div>
+      <div id="mv-results" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:16px;">
+        <div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم الطالب للبحث</div>
+      </div>
+      <div id="mv-selected-box" style="display:none;">
+        <div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.85rem;">
+          <span style="color:var(--mid);">الطالب المحدد:</span>
+          <span id="mv-selected-name" style="font-weight:800;color:var(--emerald);"></span>
+        </div>
+        <div class="fg" style="margin-bottom:4px;">
+          <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">٢. اختر الحلقة المنقول إليها</label>
+          <select id="mv-to-circle"
+            style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+            <option value="">-- اختر الحلقة --</option>
+          </select>
+          <div style="font-size:.76rem;color:var(--mid);margin-top:6px;">يمكنك النقل بين حلقاتك التي تشرف عليها فقط</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-gold" style="min-width:130px;" onclick="confirmMoveStudent()">⇄ تأكيد النقل</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-move-student')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Student -->
+<div class="overlay" id="modal-edit-student">
   <div class="modal" style="max-width:560px;">
     <div class="modal-head">
       <div class="modal-title">✏️ تعديل بيانات الطالب</div>
@@ -4204,13 +4253,13 @@ async function svLoadTeachersFromDB() {
   try {
     const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (cu.role !== 'supervisor' || !cu.id) return false;
-    const { data: ts } = await db.from('users').select('full_name, branch_id').eq('role','teacher').eq('supervisor_id', cu.id);
+    const { data: ts } = await db.from('users').select('full_name, branch_id').eq('supervisor_id', cu.id);
     if (!ts || !ts.length) return false; // لا يوجد ربط فعلي بعد → نُبقي السلوك القديم
     const { data: brs } = await db.from('branches').select('id, name');
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
 
-    // خريطة id→اسم المعلم (تترجم الحلقات اللي teachers فيها IDs)
-    const { data:us } = await db.from('users').select('id,full_name').eq('role','teacher');
+    // خريطة id→اسم المعلم (تترجم الحلقات اللي teachers فيها IDs) — كل الأدوار لدعم المزدوج
+    const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
     const toKey = { 'الأبطال':'الأبطال','الرواد':'الرواد','الملكات':'البنات','الأميرات':'البنات','البنات':'البنات','تحفيظ الكبار':'تحفيظ الكبار' };
@@ -6519,7 +6568,17 @@ async function addStudentToDB() {
   closeModal('modal-add-student');
   showToast('✅ تم تسجيل الطالب بنجاح!');
   window._supStudents = null; // إعادة تحميل طلاب المشرف
-  await loadStudents();
+  await refreshSupervisorData();
+}
+
+// تحديث شامل بعد أي عملية (إضافة/نقل/حذف) — يعيد بناء كل شيء من DB
+async function refreshSupervisorData(){
+  window._supStudents = null;
+  await hydrateBranchDataFromDB();   // يعيد بناء BRANCH_DATA (طلاب/حلقات/معلمين) من DB
+  await loadStudents();              // يحدّث جدول الطلاب
+  if (typeof renderTeacherBranchCards === 'function') renderTeacherBranchCards(); // أعداد الطلاب جنب كل معلم
+  if (typeof loadDashboardCounts === 'function') loadDashboardCounts();
+  if (typeof loadBranchCounts === 'function') loadBranchCounts();
 }
 
 
@@ -6561,23 +6620,24 @@ async function getSupStudents(){
   const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
   const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
   try {
-    // خريطة id→اسم لكل المعلمين (لترجمة circles.teachers لو IDs)
-    const { data:us } = await db.from('users').select('id,full_name').eq('role','teacher');
+    // خريطة id→اسم لكل المستخدمين (لترجمة circles.teachers لو IDs) — كل الأدوار لدعم المزدوج
+    const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}, nameById = {}; (us||[]).forEach(u => { uName[u.id] = u.full_name; nameById[u.full_name] = u.id; });
 
     // معلمو هذا المشرف (بالاسم) — المدير يشوف الكل
     let myTeacherNames = null;
     if (cu.role === 'supervisor' && cu.id){
-      const { data:ts } = await db.from('users').select('full_name').eq('role','teacher').eq('supervisor_id', cu.id);
+      const { data:ts } = await db.from('users').select('full_name').eq('supervisor_id', cu.id);
       myTeacherNames = new Set((ts||[]).map(t => t.full_name));
     }
 
     // الحلقات + ربط كل حلقة باسم معلمها
-    const { data:circles } = await db.from('circles').select('id,name,teachers,branch_id');
+    const { data:circles } = await db.from('circles').select('id,name,teachers,teacher_id,branch_id');
     const circleTeacher = {}, myCircleIds = new Set();
     (circles||[]).forEach(c => {
       let t = (c.teachers || [])[0];
       if (isUuid(t)) t = uName[t] || t;
+      if (!t && c.teacher_id) t = uName[c.teacher_id] || null;
       circleTeacher[c.id] = t || '—';
       if (!myTeacherNames || myTeacherNames.has(t)) myCircleIds.add(c.id);
     });
@@ -6808,7 +6868,7 @@ async function saveEditStudent() {
 
   closeModal('modal-edit-student');
   showToast('✅ تم تعديل بيانات الطالب!');
-  await loadStudents();
+  await refreshSupervisorData();
 }
 
 // ══════════════════════════════════════
@@ -7087,6 +7147,42 @@ let MY_GENDER=null, USER_GENDER={}, NAME_GENDER={}, BR_GENDER={};
 function isUuidV(v){ return typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(v); }
 function normG(g){ return (g==='إناث'||g==='أنثى'||g==='انثى'||g==='بنات')?'إناث':'ذكور'; }
 function genderOfBranchName(b){ return (b==='الملكات'||b==='الأميرات'||b==='البنات')?'إناث':'ذكور'; }
+/* ═══ تأنيث تلقائي لشعب البنات (الملكات/الأميرات) ═══ */
+var FEM_RULES=(function(){var raw=[
+['المعلمين','المعلمات'],['المعلمون','المعلمات'],['معلمين','معلمات'],['معلمون','معلمات'],['معلمي','معلمات'],
+['المشرفين','المشرفات'],['المشرفون','المشرفات'],['مشرفين','مشرفات'],['مشرفون','مشرفات'],
+['الطلاب','الطالبات'],['طلابي','طالباتي'],['طلابك','طالباتك'],['طلابه','طالباتها'],['طلاب','طالبات'],
+['الحاضرين','الحاضرات'],['حاضرين','حاضرات'],['الغائبين','الغائبات'],['غائبين','غائبات'],
+['المتأخرين','المتأخرات'],['متأخرين','متأخرات'],['الزائرين','الزائرات'],['زائرين','زائرات'],
+['المعلّمين','المعلّمات'],['معلّمين','معلّمات'],['المعلّم','المعلّمة'],['معلّم','معلّمة'],
+['المعلم','المعلمة'],['معلم','معلمة'],['المشرف','المشرفة'],['مشرف','مشرفة'],
+['الطالب','الطالبة'],['طالب','طالبة'],['الزائر','الزائرة'],['زائر','زائرة'],
+['الحاضر','الحاضرة'],['حاضر','حاضرة'],['الغائب','الغائبة'],['غائب','غائبة'],
+['المتأخر','المتأخرة'],['متأخر','متأخرة'],['الأستاذ','الأستاذة'],['أستاذ','أستاذة'],
+['نشطين','نشيطات'],['متفوقين','متفوقات']];
+return raw.map(function(p){return [new RegExp(p[0]+'(?![\\u0621-\\u064A])','g'),p[1]];});
+})();
+function feminizeStr(s){ if(!s) return s; for(var i=0;i<FEM_RULES.length;i++){ s=s.replace(FEM_RULES[i][0],FEM_RULES[i][1]); } return s; }
+function feminizeEl(root){ if(!root||!root.nodeType) return;
+  if(root.nodeType===3){ var v=feminizeStr(root.nodeValue); if(v!==root.nodeValue) root.nodeValue=v; return; }
+  if(root.nodeType!==1) return;
+  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+    var p=n.parentNode; if(!p) return NodeFilter.FILTER_REJECT;
+    var t=p.nodeName; if(t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA') return NodeFilter.FILTER_REJECT;
+    return /[\u0621-\u064A]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }});
+  var arr=[],c; while((c=w.nextNode())) arr.push(c);
+  for(var k=0;k<arr.length;k++){ var nv=feminizeStr(arr[k].nodeValue); if(nv!==arr[k].nodeValue) arr[k].nodeValue=nv; }
+}
+var _femOn=false;
+function enableFeminize(){ if(_femOn) return; _femOn=true;
+  try{ feminizeEl(document.body); }catch(e){}
+  try{ new MutationObserver(function(muts){
+    for(var i=0;i<muts.length;i++){ var m=muts[i];
+      if(m.type==='characterData'){ feminizeEl(m.target); }
+      else { for(var j=0;j<m.addedNodes.length;j++) feminizeEl(m.addedNodes[j]); }
+    }
+  }).observe(document.body,{childList:true,subtree:true,characterData:true}); }catch(e){}
+}
 async function buildGenderIndex(){
   try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BR_GENDER[b.id]=genderOfBranchName(b.name)); }catch(e){}
   try{ const {data}=await db.from('students').select('user_id,branch_id'); (data||[]).forEach(s=>{ if(s.user_id) USER_GENDER[String(s.user_id)]=BR_GENDER[s.branch_id]||'ذكور'; }); }catch(e){}
@@ -7113,19 +7209,19 @@ async function hydrateBranchDataFromDB(){
     const { data:brs } = await db.from('branches').select('id,name');
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
 
-    // خريطة id→اسم المعلم (لترجمة الحلقات اللي teachers فيها IDs)
-    const { data:us } = await db.from('users').select('id,full_name').eq('role','teacher');
+    // خريطة id→اسم المعلم (لترجمة الحلقات اللي teachers فيها IDs) — كل الأدوار لدعم المزدوج
+    const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
 
-    // معلمات المشرف (فلترة) — لو مدير نسيبها null = الكل
+    // معلمات المشرف (فلترة) — لو مدير نسيبها null = الكل. كل الأدوار لدعم المزدوج
     let myTeachers = null;
     if (cu.role === 'supervisor' && cu.id){
-      const { data:ts } = await db.from('users').select('full_name').eq('role','teacher').eq('supervisor_id', cu.id);
+      const { data:ts } = await db.from('users').select('full_name').eq('supervisor_id', cu.id);
       if (ts && ts.length) myTeachers = new Set(ts.map(t => t.full_name));
     }
 
-    const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,branch_id,schedule');
+    const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,teacher_id,branch_id,schedule');
     const { data:students } = await db.from('students')
       .select('circle_id,branch_id,users!students_user_id_fkey(full_name)')
       .eq('is_active', true);
@@ -7145,6 +7241,7 @@ async function hydrateBranchDataFromDB(){
       const bn = brName[c.branch_id] || '';
       let tName = (c.teachers || [])[0];
       if (isUuid(tName)) tName = uName[tName] || tName;
+      if (!tName && c.teacher_id) tName = uName[c.teacher_id] || null;
       if (!tName) return;
       if (myTeachers && !myTeachers.has(tName)) return;        // مش معلمة المشرف
       const key = (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
@@ -7218,6 +7315,7 @@ async function init(){
     const _cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
     if(_cu.role==='supervisor') MY_GENDER = USER_GENDER[String(_cu.id)] || NAME_GENDER[(_cu.full_name||'').trim()] || null;
   }
+  if(MY_GENDER==='إناث') enableFeminize();   // صياغة مؤنثة لشعب البنات
   // map: اسم في الـ DB → الاسم المعروض + التيتل
   const ADMIN_MAP = {
     'الشيخ علاء عارف' : { display: 'الشيخ علاء عارف',   title: 'مدير المدرسة' },
@@ -7797,7 +7895,86 @@ async function confirmDelStudent(id, name){
   showToast('✅ تم حذف الطالب نهائياً');
   DEL_LIST=DEL_LIST.filter(s=>s.id!==id);
   filterDelStudents();
-  await loadStudents();
+  await refreshSupervisorData();
+}
+
+// ── نقل الطالب (بين حلقات المشرف) ──
+let MV_SELECTED_ID = null;
+let MV_LIST = [];
+let MV_CIRCLES = [];
+
+async function openMoveStudent(){
+  MV_SELECTED_ID = null;
+  const s=document.getElementById('mv-search'); if(s) s.value='';
+  const box=document.getElementById('mv-selected-box'); if(box) box.style.display='none';
+  const res=document.getElementById('mv-results');
+  if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">جارٍ التحميل...</div>';
+  openModal('modal-move-student');
+  try{
+    const { data: ids } = await db.rpc('my_supervised_circle_ids');
+    const cids=(ids||[]).map(r=>(typeof r==='string'?r:r.my_supervised_circle_ids)).filter(Boolean);
+    if(!cids.length){ if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">لا توجد حلقات تشرف عليها</div>'; return; }
+    const { data: circles } = await db.from('circles').select('id,name').in('id',cids);
+    MV_CIRCLES=circles||[];
+    const cName={}; MV_CIRCLES.forEach(c=>cName[c.id]=c.name||'حلقة');
+    const from=document.getElementById('mv-from-circle');
+    if(from) from.innerHTML='<option value="">-- كل حلقاتك --</option>'+MV_CIRCLES.map(c=>`<option value="${c.id}">${c.name||'حلقة'}</option>`).join('');
+    const to=document.getElementById('mv-to-circle');
+    if(to) to.innerHTML='<option value="">-- اختر الحلقة --</option>'+MV_CIRCLES.map(c=>`<option value="${c.id}">${c.name||'حلقة'}</option>`).join('');
+    const { data: studs } = await db.from('students')
+      .select('id,circle_id,is_active,users!students_user_id_fkey(full_name)')
+      .in('circle_id',cids).eq('is_active',true);
+    MV_LIST=(studs||[]).map(s=>({ id:s.id, circle_id:s.circle_id, name:s.users?.full_name||'بدون اسم', circle:cName[s.circle_id]||'—' }));
+    if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم الطالب للبحث</div>';
+  }catch(e){
+    if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--red);font-size:.85rem;">تعذّر تحميل البيانات</div>';
+  }
+}
+
+function filterMoveStudents(){
+  const q=(document.getElementById('mv-search')?.value||'').trim();
+  const cid=document.getElementById('mv-from-circle')?.value||'';
+  const box=document.getElementById('mv-results');
+  if(!box) return;
+  let list=MV_LIST.slice();
+  if(cid) list=list.filter(s=>s.circle_id===cid);
+  if(q) list=list.filter(s=>(s.name||'').includes(q));
+  if(!q && !cid){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم الطالب للبحث</div>'; return; }
+  if(!list.length){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">لا توجد نتائج</div>'; return; }
+  box.innerHTML=list.slice(0,50).map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.88rem;color:var(--ink);">${s.name||'بدون اسم'}</div>
+        <div style="font-size:.74rem;color:var(--light);">${s.circle||'—'}</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="selectMoveStudent('${s.id}','${(s.name||'').replace(/'/g,'')}')">اختيار</button>
+    </div>`).join('');
+}
+
+function selectMoveStudent(id, name){
+  MV_SELECTED_ID = id;
+  const nm=document.getElementById('mv-selected-name'); if(nm) nm.textContent=name;
+  const box=document.getElementById('mv-selected-box'); if(box) box.style.display='';
+  const res=document.getElementById('mv-results');
+  if(res) res.innerHTML='<div style="padding:12px;text-align:center;color:var(--jade);font-size:.82rem;font-weight:700;">✓ تم اختيار الطالب — اختر الحلقة الجديدة بالأسفل</div>';
+}
+
+async function confirmMoveStudent(){
+  if(!MV_SELECTED_ID){ showToast('⚠️ ابحث واختر الطالب أولاً'); return; }
+  const toCircle=document.getElementById('mv-to-circle')?.value||'';
+  if(!toCircle){ showToast('⚠️ اختر الحلقة المنقول إليها'); return; }
+  showToast('⏳ جارٍ النقل...');
+  const { data: cr, error: cErr } = await db.from('circles').select('teacher_id,branch_id').eq('id',toCircle).single();
+  if(cErr || !cr){ showToast('❌ تعذّر قراءة الحلقة'); return; }
+  if(!cr.teacher_id){ showToast('⚠️ الحلقة المنقول إليها مالهاش معلّم'); return; }
+  const { error, status } = await db.from('students')
+    .update({ circle_id: toCircle, teacher_id: cr.teacher_id, branch_id: cr.branch_id })
+    .eq('id', MV_SELECTED_ID);
+  if(error){ showToast('❌ خطأ في النقل: '+error.message); return; }
+  if(status!==204 && status!==200){ showToast('⚠️ لم يتم النقل (تحقق من الصلاحية)'); return; }
+  closeModal('modal-move-student');
+  showToast('✅ تم نقل الطالب بنجاح');
+  await refreshSupervisorData();
 }
 
 function printStudentList(){
@@ -10037,7 +10214,7 @@ async function svFetchCircleLive(branchName, teacherName){
   // 1) Resolve teacher id via flexible name match (tolerates spaces/parentheses)
   const clean = String(teacherName||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
   const norm  = x => String(x||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-  const { data: tAll } = await db.from('users').select('id, full_name').eq('role','teacher');
+  const { data: tAll } = await db.from('users').select('id, full_name');
   if(!tAll || !tAll.length) return null;
   let tRow = tAll.find(t => norm(t.full_name) === clean)
           || tAll.find(t => norm(t.full_name).startsWith(clean) || clean.startsWith(norm(t.full_name)))
