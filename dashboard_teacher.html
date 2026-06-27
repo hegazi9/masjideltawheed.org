@@ -837,7 +837,15 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
   <div class="qs-row">
     <div class="qs-card" onclick="navPage('circles')"><div class="qs-icon">🕌</div><div><div class="qs-val" id="qs-circles">0</div><div class="qs-lbl">حلقاتي</div></div></div>
+    <div class="qs-card" onclick="navPage('attendance')"><div class="qs-icon">📅</div><div><div class="qs-val" id="qs-today">—</div><div class="qs-lbl">حلقة اليوم</div></div></div>
     <div class="qs-card" onclick="navPage('training')"><div class="qs-icon">🎓</div><div><div class="qs-val" id="qs-train">—</div><div class="qs-lbl">تأهيل المعلمين</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">⚡ بدء الحلقة</div></div>
+    <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="navPage('students')">👨‍🎓 فتح جدول الحلقة والتسميع</button>
+    </div>
   </div>
 
   <!-- ══ الخطط والمقررات (عرض فقط) ══ -->
@@ -1386,42 +1394,6 @@ const SCHED_MAP = {
   'تحفيظ الكبار':[{day:'الجمعة'}],
 };
 function genderOf(branch){ return (branch==='الملكات'||branch==='الأميرات')?'إناث':'ذكور'; }
-/* ═══ تأنيث تلقائي لشعب البنات (الملكات/الأميرات) ═══ */
-var FEM_RULES=(function(){var raw=[
-['المعلمين','المعلمات'],['المعلمون','المعلمات'],['معلمين','معلمات'],['معلمون','معلمات'],['معلمي','معلمات'],
-['المشرفين','المشرفات'],['المشرفون','المشرفات'],['مشرفين','مشرفات'],['مشرفون','مشرفات'],
-['الطلاب','الطالبات'],['طلابي','طالباتي'],['طلابك','طالباتك'],['طلابه','طالباتها'],['طلاب','طالبات'],
-['الحاضرين','الحاضرات'],['حاضرين','حاضرات'],['الغائبين','الغائبات'],['غائبين','غائبات'],
-['المتأخرين','المتأخرات'],['متأخرين','متأخرات'],['الزائرين','الزائرات'],['زائرين','زائرات'],
-['المعلّمين','المعلّمات'],['معلّمين','معلّمات'],['المعلّم','المعلّمة'],['معلّم','معلّمة'],
-['المعلم','المعلمة'],['معلم','معلمة'],['المشرف','المشرفة'],['مشرف','مشرفة'],
-['الطالب','الطالبة'],['طالب','طالبة'],['الزائر','الزائرة'],['زائر','زائرة'],
-['الحاضر','الحاضرة'],['حاضر','حاضرة'],['الغائب','الغائبة'],['غائب','غائبة'],
-['المتأخر','المتأخرة'],['متأخر','متأخرة'],['الأستاذ','الأستاذة'],['أستاذ','أستاذة'],
-['نشطين','نشيطات'],['متفوقين','متفوقات']];
-return raw.map(function(p){return [new RegExp(p[0]+'(?![\\u0621-\\u064A])','g'),p[1]];});
-})();
-function feminizeStr(s){ if(!s) return s; for(var i=0;i<FEM_RULES.length;i++){ s=s.replace(FEM_RULES[i][0],FEM_RULES[i][1]); } return s; }
-function feminizeEl(root){ if(!root||!root.nodeType) return;
-  if(root.nodeType===3){ var v=feminizeStr(root.nodeValue); if(v!==root.nodeValue) root.nodeValue=v; return; }
-  if(root.nodeType!==1) return;
-  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
-    var p=n.parentNode; if(!p) return NodeFilter.FILTER_REJECT;
-    var t=p.nodeName; if(t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA') return NodeFilter.FILTER_REJECT;
-    return /[\u0621-\u064A]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }});
-  var arr=[],c; while((c=w.nextNode())) arr.push(c);
-  for(var k=0;k<arr.length;k++){ var nv=feminizeStr(arr[k].nodeValue); if(nv!==arr[k].nodeValue) arr[k].nodeValue=nv; }
-}
-var _femOn=false;
-function enableFeminize(){ if(_femOn) return; _femOn=true;
-  try{ feminizeEl(document.body); }catch(e){}
-  try{ new MutationObserver(function(muts){
-    for(var i=0;i<muts.length;i++){ var m=muts[i];
-      if(m.type==='characterData'){ feminizeEl(m.target); }
-      else { for(var j=0;j<m.addedNodes.length;j++) feminizeEl(m.addedNodes[j]); }
-    }
-  }).observe(document.body,{childList:true,subtree:true,characterData:true}); }catch(e){}
-}
 // مجموعة الشعبة لبحث الطالب الزائر: شباب (أبطال+رواد) / بنات (ملكات+أميرات) / كبار
 function branchGroup(b){
   if(b==='الأبطال'||b==='الرواد') return 'shabab';
@@ -1513,17 +1485,6 @@ function findStu(id){
 }
 
 // ══ NAVIGATION ══
-// ═══ نظام التنقّل بالمكدّس (Navigation Stack) ═══
-window.NAV_STACK = ['dashboard'];
-const NAV_ROOTS = new Set(['dashboard','messages','announcements','settings','circles','reports','training']);
-function navPushState(pageId){
-  if (NAV_ROOTS.has(pageId)) {
-    NAV_STACK = (pageId === 'dashboard') ? ['dashboard'] : ['dashboard', pageId];
-  } else {
-    if (NAV_STACK[NAV_STACK.length-1] !== pageId) NAV_STACK.push(pageId);
-  }
-  history.pushState({ stack: NAV_STACK.slice(), page: pageId }, '', '#' + pageId);
-}
 function navPage(pageId){ const el=document.querySelector(`.sb-item[onclick*="'${pageId}'"]`); nav(el,pageId); }
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1533,7 +1494,7 @@ function nav(el, pageId, fromPopstate){
   if(el&&el.classList) el.classList.add('active');
   if(typeof patchThemeOnNav==='function') patchThemeOnNav();
   const tb=document.getElementById('tb-title'); if(tb) tb.textContent=PAGE_TITLES[pageId]||'';
-  if(!fromPopstate) navPushState(pageId);
+  if(!fromPopstate) history.pushState({page:pageId},'','#'+pageId);
   if(pageId==='dashboard') renderDashboard();
   if(pageId==='circles') renderCircles();
   if(pageId==='students') renderStudents();
@@ -1546,13 +1507,7 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='announcements') loadAnnouncements();
   if(pageId==='settings') renderProfile();
 }
-window.addEventListener('popstate',e=>{
-  const stack=(e.state&&e.state.stack)?e.state.stack.slice():['dashboard'];
-  NAV_STACK=stack;
-  const top=stack[stack.length-1]||'dashboard';
-  nav(null,top,true);
-});
-history.replaceState({ stack:['dashboard'], page:'dashboard' }, '');
+window.addEventListener('popstate',e=>{ const p=(e.state&&e.state.page)||'dashboard'; nav(null,p,true); });
 
 // ══ TOAST / MODAL / LOGOUT ══
 let toastTimer;
@@ -1617,7 +1572,6 @@ async function boot(){
   await buildGenderIndex();
   const _fg = genderOfUser({id:cu.id, name:cu.full_name, role:'teacher'});
   if(_fg) MY_GENDER = _fg;   // تأكيد الجنس من DB (يمنع تسرّب الجنس الآخر في الاتجاهين)
-  if(MY_GENDER==='إناث') enableFeminize();   // صياغة مؤنثة لشعب البنات
   try{
     const [{data:ss},{data:cs},{data:us}] = await Promise.all([
       db.from('students').select('circle_id,branch_id,users!students_user_id_fkey(full_name)').eq('is_active',true),
@@ -1667,7 +1621,7 @@ function renderDashboard(){
   document.getElementById('qs-circles').textContent=MY_CIRCLES.length;
   const qt=document.getElementById('qs-train'); if(qt) qt.textContent=(window._trainCount!=null?window._trainCount:'—');
   const todayC=MY_CIRCLES.filter(circleMeetsToday).map(x=>x.name);
-  const qd=document.getElementById('qs-today'); if(qd) qd.textContent=todayC.length?todayC.length:'لا يوجد';
+  document.getElementById('qs-today').textContent=todayC.length?todayC.length:'لا يوجد';
   loadTeacherCurriculum();
 }
 
@@ -1786,7 +1740,7 @@ function renderStudents(){
           <button class="btn btn-xs btn-outline" data-v="absent" onclick="setAtt('${s.id}','absent')">غائب</button>
         </div>
         <div id="late-${s.id}" style="display:none;margin-top:5px;">
-          <input type="number" min="1" max="300" placeholder="دقائق" id="latemin-${s.id}" onchange="setLate('${s.id}')"
+          <input type="number" min="1" placeholder="دقائق" id="latemin-${s.id}" onchange="setLate('${s.id}')"
             style="width:78px;padding:4px 8px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.74rem;text-align:center;">
         </div>
       </td>
@@ -1995,7 +1949,7 @@ function setAtt(sid,val){
   document.getElementById('late-'+sid).style.display = val==='late'?'block':'none';
   saveAtt(sid,val,null);
 }
-function setLate(sid){ const el=document.getElementById('latemin-'+sid); let m=parseInt(el.value)||null; if(m){ if(m>300)m=300; if(m<1)m=1; el.value=m; } REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
+function setLate(sid){ const m=parseInt(document.getElementById('latemin-'+sid).value)||null; REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
 async function saveAtt(sid,status,mins){
   const s=findStu(sid); if(s&&(s._static||s._guest)){ showToast('📌 سُجّل محلياً'); return; }
   try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}); }
