@@ -117,6 +117,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   // Supabase inline
   const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
@@ -768,6 +770,20 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   background: var(--pale);
   color: var(--emerald);
   font-weight: 700;
+}
+/* ── تقارير المدير ── */
+.rpt-lbl{display:block;font-size:.74rem;font-weight:700;color:var(--mid);margin-bottom:6px;}
+.rpt-inp{width:100%;height:42px;padding:0 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'Tajawal',sans-serif;font-size:.86rem;color:var(--ink);background:var(--white);outline:none;transition:border-color .15s;}
+.rpt-inp:focus{border-color:var(--jade);}
+.rpt-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.rpt-table th{background:var(--pale);color:var(--forest);font-weight:700;padding:10px 8px;text-align:center;font-size:.76rem;border-bottom:2px solid var(--border);white-space:nowrap;}
+.rpt-table td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);color:var(--mid);}
+.rpt-table tr:last-child td{border-bottom:none;}
+.rpt-table tbody tr:hover{background:var(--bg);}
+@media print{
+  .sidebar,.topbar,.rpt-noprint{display:none!important;}
+  .main{margin:0!important;}
+  .page{padding:0!important;}
 }
 </style>
 </head>
@@ -2594,16 +2610,253 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
      PAGE: REPORTS
 ══════════════════════════════════════════════════════ -->
 <div id="page-reports" class="page">
-  <div class="section-title">📄 تقارير الجلسات الإشرافية</div>
-  <div style="font-size:.82rem;color:var(--light);margin-bottom:18px;">سجلّ كل الجلسات الإشرافية بكل الشعب — بتاريخ الجلسة واسم المشرف القائم بها.</div>
-  <div class="card" style="margin-bottom:0;">
-    <div class="card-head">
-      <div class="card-title">🗂️ سجلّ الجلسات</div>
-      <span class="badge bg-gray" id="reports-count">—</span>
+  <div class="section-title">📄 مركز التقارير</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:22px;">اختر نوع التقرير المطلوب — كل البيانات حيّة من قاعدة البيانات بالتواريخ.</div>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+
+    <!-- تقارير الطلاب -->
+    <div onclick="nav(null,'rep-students')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(30,92,54,.25);">👨‍🎓</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تقارير الطلاب</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">حضور وحفظ ومراجعة طالب في فترة محددة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
+      </div>
     </div>
-    <div id="reports-body" style="overflow-x:auto;">
-      <div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
+
+    <!-- تقارير المعلمين -->
+    <div onclick="nav(null,'rep-teachers')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(200,146,10,.25);">👨‍🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تقارير المعلمين</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">نشاط المعلم وتسميعاته المسجّلة في فترة محددة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
     </div>
+
+    <!-- تقارير الحلقات -->
+    <div onclick="nav(null,'rep-circles')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--blue),#2588c4);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(29,111,164,.25);">🕌</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تقارير الحلقات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">أداء حلقة معلم وطلابها في فترة محددة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--blue);">‹</div>
+      </div>
+    </div>
+
+    <!-- المتابعة الأسبوعية -->
+    <div onclick="nav(null,'rep-weekly')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cc4);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(107,63,160,.25);">📅</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">المتابعة الأسبوعية</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">متابعة كل الشعب أسبوعاً بأسبوع بالأيام</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
+      </div>
+    </div>
+
+    <!-- تقارير المشرفين -->
+    <div onclick="nav(null,'rep-supervisors')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--red);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(192,57,43,.25);">🧭</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تقارير المشرفين</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">الجلسات الإشرافية لشعبة في فترة محددة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--red);">‹</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: تقرير الطلاب
+══════════════════════════════════════════════════════ -->
+<div id="page-rep-students" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تقارير الطلاب</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">👨‍🎓 تقرير طالب</div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px;">
+      <div style="flex:1;min-width:220px;">
+        <label class="rpt-lbl">اسم الطالب</label>
+        <input id="rep-st-name" class="rpt-inp" list="rep-st-list" placeholder="ابحث باسم الطالب..." autocomplete="off">
+        <datalist id="rep-st-list"></datalist>
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">من تاريخ</label>
+        <input id="rep-st-from" type="date" class="rpt-inp">
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">إلى تاريخ</label>
+        <input id="rep-st-to" type="date" class="rpt-inp">
+      </div>
+      <button class="btn btn-primary" onclick="rptRunStudent()" style="height:42px;">📊 أظهر التقرير</button>
+    </div>
+  </div>
+
+  <div id="rep-st-out"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: تقرير المعلمين
+══════════════════════════════════════════════════════ -->
+<div id="page-rep-teachers" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تقارير المعلمين</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">👨‍🏫 تقرير معلم</div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px;">
+      <div style="flex:1;min-width:220px;">
+        <label class="rpt-lbl">اسم المعلم</label>
+        <input id="rep-tc-name" class="rpt-inp" list="rep-tc-list" placeholder="ابحث باسم المعلم..." autocomplete="off">
+        <datalist id="rep-tc-list"></datalist>
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">من تاريخ</label>
+        <input id="rep-tc-from" type="date" class="rpt-inp">
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">إلى تاريخ</label>
+        <input id="rep-tc-to" type="date" class="rpt-inp">
+      </div>
+      <button class="btn btn-gold" onclick="rptRunTeacher()" style="height:42px;">📊 أظهر التقرير</button>
+    </div>
+  </div>
+
+  <div id="rep-tc-out"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: تقرير الحلقات
+══════════════════════════════════════════════════════ -->
+<div id="page-rep-circles" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تقارير الحلقات</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">🕌 تقرير حلقة</div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px;">
+      <div style="flex:1;min-width:220px;">
+        <label class="rpt-lbl">الحلقة (اسم المعلم / الحلقة)</label>
+        <input id="rep-cr-name" class="rpt-inp" list="rep-cr-list" placeholder="ابحث باسم المعلم أو الحلقة..." autocomplete="off">
+        <datalist id="rep-cr-list"></datalist>
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">من تاريخ</label>
+        <input id="rep-cr-from" type="date" class="rpt-inp">
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">إلى تاريخ</label>
+        <input id="rep-cr-to" type="date" class="rpt-inp">
+      </div>
+      <button class="btn btn-primary" onclick="rptRunCircle()" style="height:42px;background:var(--blue);border-color:var(--blue);">📊 أظهر التقرير</button>
+    </div>
+  </div>
+
+  <div id="rep-cr-out"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: تقارير المشرفين
+══════════════════════════════════════════════════════ -->
+<div id="page-rep-supervisors" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تقارير المشرفين</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">🧭 تقرير الجلسات الإشرافية</div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px;">
+      <div style="flex:1;min-width:200px;">
+        <label class="rpt-lbl">الشعبة</label>
+        <select id="rep-sv-branch" class="rpt-inp">
+          <option value="">كل الشعب</option>
+          <option value="الأبطال">الأبطال</option>
+          <option value="الرواد">الرواد</option>
+          <option value="الملكات">الملكات</option>
+          <option value="الأميرات">الأميرات</option>
+          <option value="تحفيظ الكبار">تحفيظ الكبار</option>
+        </select>
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">من تاريخ</label>
+        <input id="rep-sv-from" type="date" class="rpt-inp">
+      </div>
+      <div style="min-width:150px;">
+        <label class="rpt-lbl">إلى تاريخ</label>
+        <input id="rep-sv-to" type="date" class="rpt-inp">
+      </div>
+      <button class="btn btn-primary" onclick="rptRunSupervisor()" style="height:42px;background:var(--red);border-color:var(--red);">📊 أظهر التقرير</button>
+    </div>
+  </div>
+
+  <div id="rep-sv-out"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: المتابعة الأسبوعية (المدير — كل الشعب)
+══════════════════════════════════════════════════════ -->
+<div id="page-rep-weekly" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>المتابعة الأسبوعية</span>
+  </div>
+
+  <!-- شريط أدوات: اختيار الأسبوع + مشاركة -->
+  <div class="card" style="margin-bottom:18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-outline btn-sm" id="awk-prev" onclick="adminWeeklyPrev()" title="الأسبوع السابق">‹</button>
+        <div style="text-align:center;min-width:210px;">
+          <div style="font-size:.98rem;font-weight:800;color:var(--forest);" id="awk-week-title">الأسبوع الأول</div>
+          <div style="font-size:.72rem;color:var(--light);margin-top:2px;" id="awk-week-range">—</div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="awk-next" onclick="adminWeeklyNext()" title="الأسبوع التالي">›</button>
+        <span class="badge bg-gray" id="awk-week-counter" style="margin-right:6px;">أسبوع ١ / ١٢</span>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="rptExportPdf('awk-capture','المتابعة-الأسبوعية')" style="display:flex;align-items:center;gap:6px;">📄 PDF</button>
+    </div>
+  </div>
+
+  <div id="awk-capture">
+    <div class="stats-row" id="awk-stats" style="margin-bottom:18px;">
+      <div class="empty" style="padding:24px;grid-column:1/-1;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
+    </div>
+    <div id="awk-branches" style="display:flex;flex-direction:column;gap:18px;"></div>
   </div>
 </div>
 
@@ -6524,6 +6777,9 @@ const PAGE_TITLES = {
   employees:'👔 الموظفون',att_students:'📅 حضور الطلاب',att_teachers:'📅 حضور المعلمين',
   att_employees:'📅 حضور الموظفين',memorization:'✅ الحفظ والمراجعة',
   schedule:'📖 الخطط والمقررات',reports:'📄 التقارير',stats:'📊 الإحصاءات',
+  'rep-students':'👨‍🎓 تقارير الطلاب','rep-teachers':'👨‍🏫 تقارير المعلمين',
+  'rep-circles':'🕌 تقارير الحلقات','rep-weekly':'📅 المتابعة الأسبوعية',
+  'rep-supervisors':'🧭 تقارير المشرفين',
   exams:'✍️ الامتحانات',golden:'🏅 السجل الذهبي',cards:'🪪 بطاقات الطلاب',
   reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'💰 الشؤون المالية',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
@@ -8391,6 +8647,11 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'attendance') loadAdminAttendance();
   if (pageId === 'messages') initMessages();
   if (pageId === 'reports') loadReports();
+  if (pageId === 'rep-students') rptInitIndex().then(()=>rptFillDatalist('student'));
+  if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
+  if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
+  if (pageId === 'rep-weekly')   rptInitIndex().then(()=>adminRenderWeekly());
+  if (pageId === 'rep-supervisors') rptInitSupervisor();
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
@@ -10930,6 +11191,35 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') hideStudentMenu
   </div>
 </div>
 
+<!-- ══ مودال: تفاصيل صغيرة (أسماء طلاب / تقديرات) ══ -->
+<div class="overlay" id="modal-rpt-pop">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div class="modal-title" id="rpt-pop-title">تفاصيل</div>
+      <button class="modal-close" onclick="closeModal('modal-rpt-pop')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:64vh;overflow-y:auto;" id="rpt-pop-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-rpt-pop')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال: المتابعة الأسبوعية — جداول اليوم ══ -->
+<div class="overlay" id="modal-awk-day">
+  <div class="modal" style="max-width:920px;">
+    <div class="modal-head">
+      <div class="modal-title" id="awkday-title">تفاصيل اليوم</div>
+      <button class="modal-close" onclick="closeModal('modal-awk-day')">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:74vh;overflow-y:auto;" id="awkday-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-gold" onclick="rptExportPdf('awkday-body','متابعة-اليوم')" style="display:flex;align-items:center;gap:6px;">📄 PDF</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-awk-day')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let _adminMenuTarget = null;
 let _adminLongPressTimer = null;
@@ -11957,6 +12247,813 @@ window.SFILE = (function(){
   }
   return { open, close, tab, ask, save, setName };
 })();
+</script>
+
+
+<script>
+// ══════════════════════════════════════════════════════
+// مركز التقارير (المدير) — بيانات حيّة من Supabase بالتواريخ
+// ══════════════════════════════════════════════════════
+function rptAr(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+const RPT_DAYS_AR  = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const RPT_MONTHS   = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const RPT_GRADE_AR = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'إعادة' };
+const RPT_GRADE_PT = { excellent:15, very_good:10, good:5, retry:0 };
+const RPT_GRADE_BG = { excellent:'bg-green', very_good:'bg-blue', good:'bg-gold', retry:'bg-red' };
+const RPT_ATT_AR   = { present:'حاضر', late:'متأخر', absent:'غائب', excused:'معذور' };
+const RPT_ATT_BG   = { present:'bg-green', late:'bg-gold', absent:'bg-red', excused:'bg-blue' };
+
+function rptFmtDate(iso){
+  if(!iso) return '—';
+  const [y,m,d] = String(iso).split('-');
+  if(!y||!m||!d) return iso;
+  return rptAr(parseInt(d))+' '+RPT_MONTHS[parseInt(m)-1]+' '+rptAr(y);
+}
+function rptDayName(iso){
+  const d = new Date(iso+'T00:00:00');
+  return isNaN(d) ? '—' : RPT_DAYS_AR[d.getDay()];
+}
+function rptToday(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function rptDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+// عدد الآيات في سجل تسميع واحد
+function rptAyahCount(af, at){
+  const a = parseInt(af), b = parseInt(at);
+  if(isNaN(a)) return 0;
+  if(isNaN(b)) return 1;
+  return Math.abs(b - a) + 1;
+}
+// عدد أيام الدراسة المتوقّعة لشعبة بين تاريخين (حسب أيام الشعبة)
+function rptExpectedDays(branchName, fromIso, toIso){
+  const days = (AWK_BRANCHES.find(b=>b.name===branchName)||{}).days || [0,1,3,4,5];
+  let n=0; const d=new Date(fromIso+'T00:00:00'); const end=new Date(toIso+'T00:00:00');
+  while(d<=end){ if(days.indexOf(d.getDay())>-1) n++; d.setDate(d.getDate()+1); }
+  return n;
+}
+
+// ── الفهرس الموحّد (يُبنى مرة، cached) ──
+window.RPT = window.RPT || null;
+async function rptInitIndex(force){
+  if(window.RPT && !force) return window.RPT;
+  const idx = { branches:{}, teachers:[], teacherById:{}, circles:[], students:[],
+                circleById:{}, opt:{ student:{}, teacher:{}, circle:{} } };
+  try{
+    const { data:brs } = await db.from('branches').select('id,name');
+    (brs||[]).forEach(b=> idx.branches[b.id]=b.name);
+
+    const { data:us } = await db.from('users').select('id,full_name,role,branch_id');
+    const uName = {};
+    (us||[]).forEach(u=>{
+      uName[u.id]=u.full_name;
+      if(u.role==='teacher'){
+        const t={ id:u.id, name:u.full_name, branch_id:u.branch_id, branch_name:idx.branches[u.branch_id]||'' };
+        idx.teachers.push(t); idx.teacherById[u.id]=t;
+      }
+    });
+    const isUuid = v => typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
+
+    const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,teacher_id,branch_id,schedule');
+    (circles||[]).forEach(c=>{
+      let tid = c.teacher_id;
+      let tn  = (c.teachers||[])[0];
+      if(isUuid(tn)){ if(!tid) tid=tn; tn=uName[tn]||tn; }
+      if(!tn && tid) tn = uName[tid] || tid;
+      const bn = idx.branches[c.branch_id] || '';
+      const co = { id:c.id, name:(c.name||c.name_ar||tn||'حلقة'), teacher_id:tid||null,
+                   teacher_name:tn||'—', branch_id:c.branch_id, branch_name:bn,
+                   schedule:c.schedule, students:[] };
+      idx.circles.push(co); idx.circleById[c.id]=co;
+    });
+
+    const { data:students } = await db.from('students')
+      .select('id,circle_id,branch_id,users!students_user_id_fkey(full_name)')
+      .eq('is_active', true);
+    (students||[]).forEach(s=>{
+      const nm = (s.users&&s.users.full_name) || 'طالب';
+      const co = s.circle_id ? idx.circleById[s.circle_id] : null;
+      const so = { id:s.id, name:nm, circle_id:s.circle_id,
+                   circle_name: co?co.name:'—', teacher_name: co?co.teacher_name:'—',
+                   branch_id: s.branch_id||(co?co.branch_id:null),
+                   branch_name: idx.branches[s.branch_id]||(co?co.branch_name:'') };
+      idx.students.push(so);
+      if(co) co.students.push(so);
+    });
+
+    // ── خيارات الـ datalist (labels مميزة) ──
+    const nameCount = {};
+    idx.students.forEach(s=> nameCount[s.name]=(nameCount[s.name]||0)+1 );
+    idx.students.forEach(s=>{
+      let lbl = s.name;
+      if(nameCount[s.name]>1) lbl = s.name+' — '+(s.teacher_name||s.branch_name||'');
+      while(idx.opt.student[lbl]) lbl += ' ';
+      idx.opt.student[lbl]=s;
+    });
+    idx.teachers.forEach(t=>{
+      let lbl = t.name + (t.branch_name?(' ('+t.branch_name+')'):'');
+      while(idx.opt.teacher[lbl]) lbl += ' ';
+      idx.opt.teacher[lbl]=t;
+    });
+    const cNameCount = {};
+    idx.circles.forEach(c=> cNameCount[c.name]=(cNameCount[c.name]||0)+1 );
+    idx.circles.forEach(c=>{
+      let lbl = c.name;
+      if(cNameCount[c.name]>1 || c.name===c.teacher_name) lbl = c.teacher_name+' — '+c.name+(c.branch_name?(' / '+c.branch_name):'');
+      while(idx.opt.circle[lbl]) lbl += ' ';
+      idx.opt.circle[lbl]=c;
+    });
+  }catch(e){ console.warn('rptInitIndex:', e); }
+  window.RPT = idx;
+  return idx;
+}
+
+function rptFillDatalist(kind){
+  const map = { student:['rep-st-list','student','rep-st-from','rep-st-to'],
+                teacher:['rep-tc-list','teacher','rep-tc-from','rep-tc-to'],
+                circle:['rep-cr-list','circle','rep-cr-from','rep-cr-to'] }[kind];
+  if(!map || !window.RPT) return;
+  const dl = document.getElementById(map[0]);
+  if(dl){
+    dl.innerHTML = Object.keys(window.RPT.opt[map[1]]).sort((a,b)=>a.localeCompare(b,'ar'))
+      .map(l=>`<option value="${l.replace(/"/g,'&quot;')}">`).join('');
+  }
+  const f=document.getElementById(map[2]), t=document.getElementById(map[3]);
+  if(f && !f.value) f.value = rptDaysAgo(30);
+  if(t && !t.value) t.value = rptToday();
+}
+
+function rptResolve(kind, val){
+  const opt = window.RPT && window.RPT.opt[kind];
+  if(!opt) return null;
+  if(opt[val]) return opt[val];
+  const v = (val||'').trim();
+  if(opt[v]) return opt[v];
+  // تطابق جزئي بالاسم
+  const k = Object.keys(opt).find(l=> l===v || l.startsWith(v+' ') || l.startsWith(v+' — '));
+  return k ? opt[k] : null;
+}
+
+function rptValidRange(fromId, toId){
+  const f = document.getElementById(fromId).value;
+  const t = document.getElementById(toId).value;
+  if(!f || !t){ showToast('⚠️ اختر الفترة من / إلى'); return null; }
+  if(f > t){ showToast('⚠️ تاريخ البداية بعد النهاية'); return null; }
+  return { from:f, to:t };
+}
+
+// ── تصدير PDF لأي عنصر ──
+async function rptExportPdf(elId, fname){
+  const el = document.getElementById(elId);
+  if(!el){ return; }
+  if(!window.html2canvas || !(window.jspdf||window.jsPDF)){ window.print(); return; }
+  showToast('⏳ جاري تجهيز ملف PDF...');
+  try{
+    const canvas = await html2canvas(el, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    const img = canvas.toDataURL('image/jpeg', 0.92);
+    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    const pdf = new JsPDF('p','mm','a4');
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = pdf.internal.pageSize.getHeight();
+    const iw = pw - 12;
+    const ih = canvas.height * iw / canvas.width;
+    let left = ih, pos = 6;
+    pdf.addImage(img, 'JPEG', 6, pos, iw, ih);
+    left -= (ph - 12);
+    while(left > 0){
+      pos = left - ih + 6;
+      pdf.addPage();
+      pdf.addImage(img, 'JPEG', 6, pos, iw, ih);
+      left -= (ph - 12);
+    }
+    pdf.save((fname||'تقرير')+'.pdf');
+  }catch(e){ console.warn('pdf:', e); window.print(); }
+}
+
+// ── شارة درجة / حضور ──
+function rptGradeBadge(g){
+  if(!g||g==='—') return '<span style="color:var(--light);">—</span>';
+  return `<span class="badge ${RPT_GRADE_BG[g]||'bg-gray'}" style="font-size:.68rem;">${RPT_GRADE_AR[g]||g}</span>`;
+}
+function rptAttBadge(s){
+  if(!s||s==='—') return '<span style="color:var(--light);">—</span>';
+  return `<span class="badge ${RPT_ATT_BG[s]||'bg-gray'}" style="font-size:.68rem;">${RPT_ATT_AR[s]||s}</span>`;
+}
+function rptStatCard(cls, icon, val, lbl, sub){
+  return `<div class="stat-card ${cls}"><span class="stat-icon">${icon}</span><div class="stat-val">${val}</div><div class="stat-lbl">${lbl}</div><div class="stat-sub">${sub||''}</div></div>`;
+}
+function rptHeaderCard(title, sub, rows){
+  const meta = rows.map(r=>`<div style="display:flex;flex-direction:column;gap:2px;">
+      <span style="font-size:.68rem;color:var(--light);">${r[0]}</span>
+      <span style="font-size:.92rem;font-weight:800;color:var(--forest);">${r[1]}</span></div>`).join('');
+  return `<div class="card" style="margin-bottom:16px;border-top:3px solid var(--jade);">
+    <div style="padding:18px 20px;">
+      <div style="font-size:1.15rem;font-weight:900;color:var(--forest);font-family:'Amiri',serif;">${title}</div>
+      <div style="font-size:.78rem;color:var(--light);margin-top:3px;margin-bottom:14px;">${sub}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;">${meta}</div>
+    </div></div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// تقرير الطالب
+// ══════════════════════════════════════════════════════
+async function rptRunStudent(){
+  const s = rptResolve('student', document.getElementById('rep-st-name').value);
+  if(!s){ showToast('⚠️ اختر طالباً من القائمة'); return; }
+  const rg = rptValidRange('rep-st-from','rep-st-to'); if(!rg) return;
+  const out = document.getElementById('rep-st-out');
+  out.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
+  let att=[], mem=[];
+  try{
+    const a = await db.from('attendance').select('date,status').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    att = a.data||[];
+    const m = await db.from('memorization').select('date,type,grade,surah_from,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    mem = m.data||[];
+  }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
+
+  // فهرسة باليوم
+  const byDate = {};
+  att.forEach(a=>{ (byDate[a.date]=byDate[a.date]||{}).att=a.status; });
+  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0;
+  mem.forEach(r=>{
+    const d=(byDate[r.date]=byDate[r.date]||{});
+    const ay = rptAyahCount(r.ayah_from, r.ayah_to);
+    if(r.type==='review'){ d.rev=r.grade; revCnt++; revAyat+=ay; }
+    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; newCnt++; hifzAyat+=ay; }
+    if(r.notes) d.notes=(d.notes?d.notes+' / ':'')+r.notes;
+    if(RPT_GRADE_PT[r.grade]!=null){ ptsSum+=RPT_GRADE_PT[r.grade]; gradeN++; }
+  });
+  const present=att.filter(a=>a.status==='present').length;
+  const late=att.filter(a=>a.status==='late').length;
+  const absent=att.filter(a=>a.status==='absent').length;
+  const excused=att.filter(a=>a.status==='excused').length;
+  const avgPt = gradeN ? Math.round(ptsSum/gradeN*10)/10 : 0;
+
+  const dates = Object.keys(byDate).sort();
+  const head = rptHeaderCard('تقرير الطالب: '+s.name,
+    'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
+    [['الحلقة',s.circle_name],['المعلم',s.teacher_name],['الشعبة',s.branch_name||'—'],['عدد الأيام المسجّلة',rptAr(dates.length)]]);
+
+  const stats = `<div class="stats-row" style="margin-bottom:16px;">
+    ${rptStatCard('green','✅',rptAr(present),'حاضر',(late?('+ '+rptAr(late)+' متأخر'):''))}
+    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة')}
+    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة')}
+    ${rptStatCard('purple','⭐',rptAr(avgPt),'متوسط الدرجة','من ١٥')}
+  </div>`;
+
+  let rows;
+  if(!dates.length){
+    rows = '<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد سجلات في هذه الفترة</div>';
+  } else {
+    const trs = dates.map(d=>{
+      const x=byDate[d];
+      const ayat = (x.af!=null&&x.af!=='') ? (rptAr(x.af)+(x.at?(' - '+rptAr(x.at)):'')) : '—';
+      const surah = x.surah || (x.mem?'—':'');
+      return `<tr>
+        <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${rptFmtDate(d)}</td>
+        <td>${rptDayName(d)}</td>
+        <td>${rptAttBadge(x.att)}</td>
+        <td>${surah||'—'}</td>
+        <td>${ayat}</td>
+        <td>${rptGradeBadge(x.mem)}</td>
+        <td>${rptGradeBadge(x.rev)}</td>
+        <td style="font-size:.74rem;color:var(--light);max-width:160px;">${x.notes||'—'}</td>
+      </tr>`;
+    }).join('');
+    rows = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي بالتواريخ</div>
+      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-st-out','تقرير-${s.name}')">📄 PDF</button></div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:760px;">
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+  out.innerHTML = head + stats + rows;
+}
+
+// ══════════════════════════════════════════════════════
+// تقرير المعلم
+// ══════════════════════════════════════════════════════
+async function rptRunTeacher(){
+  const t = rptResolve('teacher', document.getElementById('rep-tc-name').value);
+  if(!t){ showToast('⚠️ اختر معلماً من القائمة'); return; }
+  const rg = rptValidRange('rep-tc-from','rep-tc-to'); if(!rg) return;
+  const out = document.getElementById('rep-tc-out');
+  out.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
+
+  const circles = window.RPT.circles.filter(c=>c.teacher_id===t.id);
+  const studentIds = [].concat(...circles.map(c=>c.students.map(s=>s.id)));
+  const stuCount = studentIds.length;
+  const id2name = {}; circles.forEach(c=>c.students.forEach(s=>id2name[s.id]=s.name));
+
+  let mem=[], att=[], sess=[];
+  try{
+    const m = await db.from('memorization').select('student_id,date,type,grade').eq('recorded_by',t.id).gte('date',rg.from).lte('date',rg.to);
+    mem = m.data||[];
+    if(studentIds.length){
+      const a = await db.from('attendance').select('student_id,date,status,late_minutes').in('student_id',studentIds).gte('date',rg.from).lte('date',rg.to);
+      att = a.data||[];
+    }
+    const sv = await db.from('supervisory_sessions').select('*').eq('teacher_name',t.name).gte('session_date',rg.from).lte('session_date',rg.to).order('session_date',{ascending:false});
+    sess = sv.data||[];
+  }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
+
+  // فهرسة باليوم (مع تفاصيل بالأسماء للـ popups)
+  const blank=()=>({rec:0,new:0,rev:0,pres:0,tot:0,lateMin:0,
+    newC:{excellent:0,very_good:0,good:0,retry:0}, revC:{excellent:0,very_good:0,good:0,retry:0},
+    newList:[], revList:[], attList:[]});
+  const byDate = {};
+  let gExc=0,gVg=0,gGood=0,gRetry=0,newCnt=0,revCnt=0;
+  mem.forEach(r=>{
+    const d=(byDate[r.date]=byDate[r.date]||blank());
+    const nm=id2name[r.student_id]||'طالب';
+    d.rec++;
+    if(r.type==='review'){ d.rev++; revCnt++; if(d.revC[r.grade]!=null)d.revC[r.grade]++; d.revList.push({name:nm,grade:r.grade}); }
+    else { d.new++; newCnt++; if(d.newC[r.grade]!=null)d.newC[r.grade]++; d.newList.push({name:nm,grade:r.grade}); }
+    if(r.grade==='excellent')gExc++; else if(r.grade==='very_good')gVg++; else if(r.grade==='good')gGood++; else if(r.grade==='retry')gRetry++;
+  });
+  let totLateMin=0, presentDays=new Set();
+  att.forEach(a=>{
+    const d=(byDate[a.date]=byDate[a.date]||blank());
+    d.tot++;
+    const nm=id2name[a.student_id]||'طالب';
+    if(a.status==='present'||a.status==='late') d.pres++;
+    if(a.status==='late'){ d.lateMin+=(a.late_minutes||0); }
+    d.attList.push({name:nm,status:a.status,min:a.late_minutes||0});
+  });
+  const dates = Object.keys(byDate).sort();
+  dates.forEach(d=>presentDays.add(d));
+  // دقائق تأخير المعلم نفسه — من الجلسات الإشرافية
+  sess.forEach(s=>{ if(s.attendance==='متأخر') totLateMin += (s.late_min||0); });
+  window.RPT_TC_DAYS = byDate;
+  const totalRec = mem.length;
+  const activeDays = dates.length;
+  const expectedDays = rptExpectedDays(t.branch_name, rg.from, rg.to);
+
+  const head = rptHeaderCard('تقرير المعلم: '+t.name,
+    'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
+    [['الشعبة',t.branch_name||'—'],['عدد الحلقات',rptAr(circles.length)],['عدد الطلاب',rptAr(stuCount)],['أيام النشاط',rptAr(activeDays)]]);
+
+  const stats = `<div class="stats-row" style="margin-bottom:16px;">
+    ${rptStatCard('green','📝',rptAr(totalRec),'إجمالي التسميعات','مسجّلة')}
+    ${rptStatCard('blue','📅',rptAr(activeDays),'عدد أيام الحضور',rptAr(activeDays)+' / '+rptAr(expectedDays)+' يوم')}
+    ${rptStatCard('gold','⏱️',rptAr(totLateMin),'دقائق تأخير المعلم','من الجلسات الإشرافية')}
+    ${rptStatCard('purple','⭐',rptAr(gExc),'ممتاز',rptAr(gVg)+' ج.جداً')}
+  </div>`;
+
+  // ── الجلسات الإشرافية للمعلم ──
+  let sessHtml;
+  if(!sess.length){
+    sessHtml = `<div class="card" style="margin-bottom:16px;"><div class="card-head"><div class="card-title">🧭 الجلسات الإشرافية</div><span class="badge bg-gray">٠</span></div>
+      <div class="empty" style="padding:22px;"><span class="empty-icon">📭</span>لا توجد جلسات إشرافية لهذا المعلم في الفترة</div></div>`;
+  } else {
+    window.RPT_TC_SESS = sess;
+    const srows = sess.map((s,i)=>`<tr>
+      <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${svFmtReportDate(s.session_date)}</td>
+      <td style="color:var(--emerald);font-weight:700;">${s.supervisor_name||'—'}</td>
+      <td>${svPillarBadges(s.pillars)}</td>
+      <td><span class="badge ${s.attendance==='غائب'?'bg-red':'bg-green'}" style="font-size:.66rem;">${s.attendance||'—'}</span></td>
+      <td style="text-align:center;"><button class="btn btn-outline btn-xs" onclick="rptTcSess(${i})">👁️ عرض</button></td>
+    </tr>`).join('');
+    sessHtml = `<div class="card" style="margin-bottom:16px;"><div class="card-head"><div class="card-title">🧭 الجلسات الإشرافية</div><span class="badge bg-gray">${rptAr(sess.length)}</span></div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:600px;">
+      <thead><tr><th>التاريخ</th><th>المشرف</th><th>نوع الجلسة</th><th>الحضور</th><th></th></tr></thead>
+      <tbody>${srows}</tbody></table></div></div>`;
+  }
+
+  // جدول الحلقات
+  const circRows = circles.length ? circles.map(c=>`<tr>
+      <td style="font-weight:700;color:var(--forest);">${c.name}</td>
+      <td>${c.branch_name||'—'}</td>
+      <td>${rptAr(c.students.length)}</td></tr>`).join('')
+    : '<tr><td colspan="3" style="color:var(--light);">لا حلقات</td></tr>';
+  const circleTable = `<div class="card" style="margin-bottom:16px;"><div class="card-head"><div class="card-title">🕌 حلقات المعلم</div></div>
+    <table class="rpt-table"><thead><tr><th>الحلقة</th><th>الشعبة</th><th>عدد الطلاب</th></tr></thead><tbody>${circRows}</tbody></table></div>`;
+
+  let daily;
+  if(!dates.length){
+    daily = '<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا يوجد نشاط في هذه الفترة</div>';
+  } else {
+    const trs = dates.map(d=>{
+      const x=byDate[d];
+      const pct = x.tot ? Math.round(x.pres/x.tot*100) : 0;
+      return `<tr>
+        <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${rptFmtDate(d)}</td>
+        <td>${rptDayName(d)}</td>
+        <td style="font-weight:800;color:var(--emerald);">${rptAr(x.rec)}</td>
+        <td style="cursor:${x.new?'pointer':'default'};" ${x.new?`onclick="rptTcPop('${d}','new')" title="عرض الأسماء"`:''}>${rptGradeCounts(x.newC, x.new)}</td>
+        <td style="cursor:${x.rev?'pointer':'default'};" ${x.rev?`onclick="rptTcPop('${d}','rev')" title="عرض الأسماء"`:''}>${rptGradeCounts(x.revC, x.rev)}</td>
+        <td style="cursor:${x.tot?'pointer':'default'};color:var(--blue);font-weight:700;" ${x.tot?`onclick="rptTcPop('${d}','att')" title="عرض الحضور"`:''}>${x.tot?(rptAr(x.pres)+' / '+rptAr(x.tot)+' ('+rptAr(pct)+'%)'):'—'}</td>
+      </tr>`;
+    }).join('');
+    daily = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 النشاط اليومي بالتواريخ</div>
+      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-tc-out','تقرير-${t.name}')">📄 PDF</button></div>
+      <div style="font-size:.72rem;color:var(--light);padding:6px 14px 0;">اضغط على خلية «جديد» أو «مراجعة» أو «الحضور» لعرض أسماء الطلاب.</div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:720px;">
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>تسميعات</th><th>جديد (التقديرات)</th><th>مراجعة (التقديرات)</th><th>الحضور المسجّل</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+  out.innerHTML = head + stats + sessHtml + circleTable + daily;
+}
+
+// شارات أعداد التقديرات داخل خلية
+function rptGradeCounts(c, tot){
+  if(!tot) return '<span style="color:var(--light);">—</span>';
+  const map=[['excellent','م','bg-green'],['very_good','جج','bg-blue'],['good','ج','bg-gold'],['retry','إع','bg-red']];
+  const parts = map.filter(m=>c[m[0]]>0).map(m=>`<span class="badge ${m[2]}" style="font-size:.6rem;padding:2px 6px;margin:1px;">${rptAr(c[m[0]])} ${m[1]}</span>`);
+  return parts.join('') || '<span style="color:var(--light);">—</span>';
+}
+
+// popup يومي لتقرير المعلم
+function rptTcPop(iso, kind){
+  const d = (window.RPT_TC_DAYS||{})[iso]; if(!d) return;
+  const ttl = document.getElementById('rpt-pop-title');
+  const body = document.getElementById('rpt-pop-body');
+  const head = rptFmtDate(iso)+' — '+rptDayName(iso);
+  if(kind==='att'){
+    ttl.textContent = '🟢 الحضور — '+head;
+    const order={present:0,late:1,excused:2,absent:3};
+    const list=d.attList.slice().sort((a,b)=>(order[a.status]-order[b.status]));
+    const rows=list.map(a=>`<tr><td style="text-align:right;font-weight:700;color:var(--forest);">${a.name}</td>
+      <td>${rptAttBadge(a.status)}</td><td>${a.status==='late'&&a.min?rptAr(a.min)+' د':'—'}</td></tr>`).join('')
+      || '<tr><td colspan="3" style="color:var(--light);">لا بيانات</td></tr>';
+    body.innerHTML = `<table class="rpt-table"><thead><tr><th style="text-align:right;">الطالب</th><th>الحالة</th><th>تأخير</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else {
+    const list = kind==='new'? d.newList : d.revList;
+    ttl.textContent = (kind==='new'?'📖 الحفظ الجديد — ':'🔁 المراجعة — ')+head;
+    const ord={excellent:0,very_good:1,good:2,retry:3};
+    const sorted=list.slice().sort((a,b)=>(ord[a.grade]-ord[b.grade]));
+    const rows=sorted.map(x=>`<tr><td style="text-align:right;font-weight:700;color:var(--forest);">${x.name}</td>
+      <td>${rptGradeBadge(x.grade)}</td></tr>`).join('')
+      || '<tr><td colspan="2" style="color:var(--light);">لا بيانات</td></tr>';
+    body.innerHTML = `<table class="rpt-table"><thead><tr><th style="text-align:right;">الطالب</th><th>التقدير</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  openModal('modal-rpt-pop');
+}
+
+// عرض جلسة إشرافية من تقرير المعلم (يعيد استخدام مودال التفاصيل)
+function rptTcSess(i){
+  const r=(window.RPT_TC_SESS||[])[i]; if(!r) return;
+  window.SV_REPORTS_CACHE = window.RPT_TC_SESS;
+  svViewReport(i);
+}
+
+// ══════════════════════════════════════════════════════
+// تقرير الحلقة
+// ══════════════════════════════════════════════════════
+async function rptRunCircle(){
+  const c = rptResolve('circle', document.getElementById('rep-cr-name').value);
+  if(!c){ showToast('⚠️ اختر حلقة من القائمة'); return; }
+  const rg = rptValidRange('rep-cr-from','rep-cr-to'); if(!rg) return;
+  const out = document.getElementById('rep-cr-out');
+  out.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
+
+  const studs = c.students.slice();
+  const sids = studs.map(s=>s.id);
+  let att=[], mem=[];
+  try{
+    if(sids.length){
+      const a = await db.from('attendance').select('student_id,date,status').in('student_id',sids).gte('date',rg.from).lte('date',rg.to);
+      att = a.data||[];
+      const m = await db.from('memorization').select('student_id,date,type,grade').in('student_id',sids).gte('date',rg.from).lte('date',rg.to);
+      mem = m.data||[];
+    }
+  }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
+
+  // لكل طالب (نفصل نقاط الحفظ عن المراجعة)
+  const perStu = {};
+  studs.forEach(s=> perStu[s.id]={present:0,late:0,absent:0,excused:0,hPts:0,hN:0,rPts:0,rN:0});
+  att.forEach(a=>{ const p=perStu[a.student_id]; if(p&&p[a.status]!=null) p[a.status]++; });
+  mem.forEach(r=>{ const p=perStu[r.student_id]; if(p&&RPT_GRADE_PT[r.grade]!=null){
+    if(r.type==='review'){ p.rPts+=RPT_GRADE_PT[r.grade]; p.rN++; } else { p.hPts+=RPT_GRADE_PT[r.grade]; p.hN++; }
+  }});
+
+  // ملخص يومي
+  const byDate = {};
+  att.forEach(a=>{ const d=(byDate[a.date]=byDate[a.date]||{pres:0,tot:0,rec:0,pts:0,gN:0}); d.tot++; if(a.status==='present'||a.status==='late')d.pres++; });
+  mem.forEach(r=>{ const d=(byDate[r.date]=byDate[r.date]||{pres:0,tot:0,rec:0,pts:0,gN:0}); d.rec++; if(RPT_GRADE_PT[r.grade]!=null){d.pts+=RPT_GRADE_PT[r.grade];d.gN++;} });
+  const dates = Object.keys(byDate).sort();
+
+  const totPresent = att.filter(a=>a.status==='present'||a.status==='late').length;
+  const attPct = att.length ? Math.round(totPresent/att.length*100) : 0;
+
+  // توزيع تقديرات الحفظ والمراجعة
+  const hDist={excellent:0,very_good:0,good:0,retry:0}, rDist={excellent:0,very_good:0,good:0,retry:0};
+  mem.forEach(r=>{ const t=r.type==='review'?rDist:hDist; if(t[r.grade]!=null)t[r.grade]++; });
+  window.RPT_CR_DIST = { hifz:hDist, rev:rDist };
+  const hTot=hDist.excellent+hDist.very_good+hDist.good+hDist.retry;
+  const rTot=rDist.excellent+rDist.very_good+rDist.good+rDist.retry;
+
+  const head = rptHeaderCard('تقرير الحلقة: '+c.name,
+    'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
+    [['المعلم',c.teacher_name],['الشعبة',c.branch_name||'—'],['عدد الطلاب',rptAr(studs.length)],['أيام مسجّلة',rptAr(dates.length)]]);
+
+  const stats = `<div class="stats-row" style="margin-bottom:16px;">
+    ${rptStatCard('green','📅',rptAr(attPct)+'%','متوسط الحضور','')}
+    ${rptStatCard('blue','📝',rptAr(mem.length),'إجمالي التسميعات','')}
+    <div class="stat-card gold" style="cursor:pointer;" onclick="rptCrPop('hifz')" title="عرض التوزيع"><span class="stat-icon">📖</span><div class="stat-val">${rptAr(hTot)}</div><div class="stat-lbl">تقديرات الحفظ</div><div class="stat-sub">اضغط للتفاصيل ›</div></div>
+    <div class="stat-card purple" style="cursor:pointer;" onclick="rptCrPop('rev')" title="عرض التوزيع"><span class="stat-icon">🔁</span><div class="stat-val">${rptAr(rTot)}</div><div class="stat-lbl">تقديرات المراجعة</div><div class="stat-sub">اضغط للتفاصيل ›</div></div>
+  </div>`;
+
+  // جدول الطلاب
+  let stuTable;
+  if(!studs.length){
+    stuTable = '<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا طلاب في هذه الحلقة</div>';
+  } else {
+    const trs = studs.map(s=>{
+      const p=perStu[s.id];
+      const hAvg = p.hN ? Math.round(p.hPts/p.hN*10)/10 : 0;
+      const rAvg = p.rN ? Math.round(p.rPts/p.rN*10)/10 : 0;
+      return `<tr>
+        <td style="font-weight:700;color:var(--forest);text-align:right;">${s.name}</td>
+        <td style="color:var(--jade);font-weight:700;">${rptAr(p.present)}</td>
+        <td style="color:var(--gold);">${rptAr(p.late)}</td>
+        <td style="color:var(--red);">${rptAr(p.absent)}</td>
+        <td style="font-weight:800;color:var(--gold);">${p.hN?rptAr(hAvg):'—'}</td>
+        <td style="font-weight:800;color:var(--purple);">${p.rN?rptAr(rAvg):'—'}</td>
+      </tr>`;
+    }).join('');
+    stuTable = `<div class="card" style="margin-bottom:16px;"><div class="card-head"><div class="card-title">👥 ملخّص الطلاب في الفترة</div>
+      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-cr-out','تقرير-حلقة-${c.teacher_name}')">📄 PDF</button></div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:600px;">
+      <thead><tr><th style="text-align:right;">الطالب</th><th>حاضر</th><th>متأخر</th><th>غائب</th><th>متوسط درجة الحفظ</th><th>متوسط درجة المراجعة</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+
+  // جدول يومي
+  let daily = '';
+  if(dates.length){
+    const trs = dates.map(d=>{
+      const x=byDate[d];
+      const pct = x.tot ? Math.round(x.pres/x.tot*100) : 0;
+      const avg = x.gN ? Math.round(x.pts/x.gN*10)/10 : 0;
+      return `<tr>
+        <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${rptFmtDate(d)}</td>
+        <td>${rptDayName(d)}</td>
+        <td>${x.tot?(rptAr(x.pres)+' / '+rptAr(x.tot)+' ('+rptAr(pct)+'%)'):'—'}</td>
+        <td>${rptAr(x.rec)}</td>
+        <td style="font-weight:800;color:var(--purple);">${x.gN?rptAr(avg):'—'}</td>
+      </tr>`;
+    }).join('');
+    daily = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 الملخّص اليومي بالتواريخ</div></div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:520px;">
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>تسميعات</th><th>متوسط الدرجة</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+  out.innerHTML = head + stats + stuTable + daily;
+}
+
+// popup توزيع تقديرات الحلقة
+function rptCrPop(kind){
+  const dist=(window.RPT_CR_DIST||{})[kind]; if(!dist) return;
+  document.getElementById('rpt-pop-title').textContent = (kind==='hifz'?'📖 تقديرات الحفظ':'🔁 تقديرات المراجعة');
+  const tot=dist.excellent+dist.very_good+dist.good+dist.retry;
+  const map=[['excellent','ممتاز','bg-green'],['very_good','جيد جداً','bg-blue'],['good','جيد','bg-gold'],['retry','إعادة','bg-red']];
+  const rows=map.map(m=>{
+    const n=dist[m[0]]||0; const pct=tot?Math.round(n/tot*100):0;
+    return `<tr><td style="text-align:right;"><span class="badge ${m[2]}">${m[1]}</span></td>
+      <td style="font-weight:800;color:var(--forest);">${rptAr(n)}</td>
+      <td style="color:var(--light);">${rptAr(pct)}%</td></tr>`;
+  }).join('');
+  document.getElementById('rpt-pop-body').innerHTML =
+    `<table class="rpt-table"><thead><tr><th style="text-align:right;">التقدير</th><th>العدد</th><th>النسبة</th></tr></thead><tbody>${rows}</tbody>
+     <tfoot><tr style="border-top:2px solid var(--border);"><td style="text-align:right;font-weight:800;">الإجمالي</td><td style="font-weight:800;color:var(--emerald);">${rptAr(tot)}</td><td>—</td></tr></tfoot></table>`;
+  openModal('modal-rpt-pop');
+}
+
+// ══════════════════════════════════════════════════════
+// المتابعة الأسبوعية (المدير — كل الشعب الخمسة)
+// ══════════════════════════════════════════════════════
+const AWK_START   = new Date(2026, 5, 12);   // 12 يونيو 2026
+const AWK_TOTAL   = 12;
+const AWK_NUM     = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر'];
+const AWK_BRANCHES = [
+  { name:'الأبطال',       days:[0,1,3,4,5], emoji:'⚔️', accent:'#1a7a4a', bg:'#e8f5ee' },
+  { name:'الرواد',        days:[0,1,3,4,5], emoji:'🚀', accent:'#2196a3', bg:'#e6f6f8' },
+  { name:'الملكات',       days:[6,2],       emoji:'👑', accent:'#9b59b6', bg:'#f3e9f8' },
+  { name:'الأميرات',      days:[6,2],       emoji:'👸', accent:'#e84393', bg:'#fdeaf3' },
+  { name:'تحفيظ الكبار',  days:[5],         emoji:'📖', accent:'#b8860b', bg:'#fdf3dc' }
+];
+let AWK_CURRENT = 0;
+window._awkInit = false;
+window.AWK_DATA = window.AWK_DATA || {};
+window._AWK_LOADED = window._AWK_LOADED || {};
+
+function awkSundayOf(dt){ const x=new Date(dt); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
+const AWK_BASE = awkSundayOf(AWK_START);
+function awkWeekDates(w){ const a=[]; for(let i=0;i<7;i++){ const d=new Date(AWK_BASE); d.setDate(AWK_BASE.getDate()+w*7+i); a.push(d);} return a; }
+function awkIso(d){ const m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+m+'-'+dd; }
+function awkFmt(d){ return rptAr(d.getDate())+' '+RPT_MONTHS[d.getMonth()]; }
+
+function awkBranchCircles(branchName){
+  return (window.RPT?window.RPT.circles:[]).filter(c=>c.branch_name===branchName);
+}
+
+async function awkLoadWeek(w){
+  if(window._AWK_LOADED[w]) return;
+  const dates = awkWeekDates(w);
+  const isoStart=awkIso(dates[0]), isoEnd=awkIso(dates[6]);
+  try{
+    const { data:att } = await db.from('attendance').select('student_id,date,status').gte('date',isoStart).lte('date',isoEnd);
+    (att||[]).forEach(a=>{ const k=a.date+'|'+a.student_id; (window.AWK_DATA[k]=window.AWK_DATA[k]||{}).att=a.status; });
+  }catch(e){ console.log('awk att:',e); }
+  try{
+    const { data:mem } = await db.from('memorization').select('student_id,date,type,grade').gte('date',isoStart).lte('date',isoEnd);
+    (mem||[]).forEach(r=>{ const k=r.date+'|'+r.student_id; const o=(window.AWK_DATA[k]=window.AWK_DATA[k]||{}); if(r.type==='review')o.rev=r.grade; else o.mem=r.grade; });
+  }catch(e){ console.log('awk mem:',e); }
+  window._AWK_LOADED[w]=true;
+}
+
+function awkDaySummary(branchName, iso){
+  const circles = awkBranchCircles(branchName);
+  let tot=0,pres=0,memOk=0,revOk=0;
+  circles.forEach(c=> c.students.forEach(s=>{
+    tot++;
+    const d=window.AWK_DATA[iso+'|'+s.id]||{};
+    if(d.att && d.att!=='absent') pres++;
+    if(d.mem && d.mem!=='retry') memOk++;
+    if(d.rev && d.rev!=='retry') revOk++;
+  }));
+  const pct=n=> tot?Math.round(n/tot*100):0;
+  return { teachers:circles.length, students:tot, attPct:pct(pres), memPct:pct(memOk), revPct:pct(revOk) };
+}
+
+function awkBar(lbl, pct, color){
+  return `<div style="display:flex;align-items:center;gap:6px;">
+    <span style="font-size:.64rem;color:var(--light);width:38px;flex-shrink:0;">${lbl}</span>
+    <div style="flex:1;height:5px;background:var(--border);border-radius:3px;"><div style="height:5px;border-radius:3px;background:${color};width:${pct}%;"></div></div>
+    <span style="font-size:.64rem;font-weight:700;color:var(--mid);min-width:30px;text-align:left;">${rptAr(pct)}%</span>
+  </div>`;
+}
+
+function adminWeeklyPrev(){ if(AWK_CURRENT>0){ AWK_CURRENT--; adminRenderWeekly(); } }
+function adminWeeklyNext(){ if(AWK_CURRENT<AWK_TOTAL-1){ AWK_CURRENT++; adminRenderWeekly(); } }
+
+async function adminRenderWeekly(){
+  await rptInitIndex();
+  if(!window._awkInit){
+    const diff = Math.floor((awkSundayOf(new Date()) - AWK_BASE) / (7*86400000));
+    AWK_CURRENT = Math.max(0, Math.min(AWK_TOTAL-1, diff));
+    window._awkInit = true;
+  }
+  await awkLoadWeek(AWK_CURRENT);
+  const dates = awkWeekDates(AWK_CURRENT);
+  const setT=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  setT('awk-week-title','الأسبوع '+AWK_NUM[AWK_CURRENT]);
+  setT('awk-week-range', awkFmt(dates[0])+' — '+awkFmt(dates[6])+' '+rptAr(dates[6].getFullYear()));
+  setT('awk-week-counter','أسبوع '+rptAr(AWK_CURRENT+1)+' / '+rptAr(AWK_TOTAL));
+  const pb=document.getElementById('awk-prev'), nb=document.getElementById('awk-next');
+  if(pb) pb.disabled = AWK_CURRENT===0;
+  if(nb) nb.disabled = AWK_CURRENT===AWK_TOTAL-1;
+
+  // إحصائيات الأسبوع
+  let gCircles=0, gStudents=0, attA=[], memA=[], revA=[];
+  AWK_BRANCHES.forEach(b=>{
+    const cs = awkBranchCircles(b.name);
+    gCircles += cs.length;
+    gStudents += cs.reduce((t,c)=>t+c.students.length,0);
+    b.days.forEach(di=>{
+      const iso=awkIso(dates[di]); const sm=awkDaySummary(b.name,iso);
+      if(sm.students){ attA.push(sm.attPct); memA.push(sm.memPct); revA.push(sm.revPct); }
+    });
+  });
+  const avg=a=> a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):0;
+  document.getElementById('awk-stats').innerHTML =
+    rptStatCard('green','🕌',rptAr(gCircles),'إجمالي الحلقات',rptAr(gStudents)+' طالب')+
+    rptStatCard('blue','📅',rptAr(avg(attA))+'%','متوسط الحضور','هذا الأسبوع')+
+    rptStatCard('gold','📖',rptAr(avg(memA))+'%','إنجاز التسميع','هذا الأسبوع')+
+    rptStatCard('purple','🔁',rptAr(avg(revA))+'%','إنجاز المراجعة','هذا الأسبوع');
+
+  // نوافذ الشعب
+  document.getElementById('awk-branches').innerHTML = AWK_BRANCHES.map(b=>{
+    const circles = awkBranchCircles(b.name);
+    const cardsHtml = b.days.map(di=>{
+      const d=dates[di]; const iso=awkIso(d); const sm=awkDaySummary(b.name,iso);
+      const col = sm.memPct>=80?'#1a7a4a':sm.memPct>=60?'#c8920a':'#c0392b';
+      const sB = b.name.replace(/'/g,"\\'");
+      const dLbl = RPT_DAYS_AR[di];
+      return `<div onclick="adminWeeklyOpenDay('${sB}','${iso}','${dLbl}')" title="تفاصيل ${dLbl}"
+        style="flex:1;min-width:140px;cursor:pointer;border:1.5px solid var(--border);border-top:3px solid ${col};border-radius:var(--r);padding:13px 12px;transition:all .18s;background:var(--white);"
+        onmouseover="this.style.borderColor='${b.accent}';this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.borderTopColor='${col}';this.style.transform='';this.style.boxShadow=''">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+          <div><div style="font-size:.92rem;font-weight:800;color:var(--forest);">${dLbl}</div>
+          <div style="font-size:.68rem;color:var(--light);margin-top:1px;">${awkFmt(d)}</div></div>
+          <div style="text-align:center;"><div style="font-size:1.15rem;font-weight:900;color:${col};line-height:1;">${rptAr(sm.memPct)}%</div>
+          <div style="font-size:.55rem;color:var(--light);margin-top:2px;">إنجاز</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          ${awkBar('حضور', sm.attPct, sm.attPct>=80?'var(--jade)':sm.attPct>=60?'var(--gold)':'var(--red)')}
+          ${awkBar('تسميع', sm.memPct, col)}
+          ${awkBar('مراجعة', sm.revPct, 'var(--blue)')}
+        </div>
+        <div style="margin-top:9px;font-size:.66rem;color:${b.accent};font-weight:700;text-align:center;">عرض الجداول ›</div>
+      </div>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:0;border-top:3px solid ${b.accent};">
+      <div class="card-head" style="background:${b.bg};">
+        <div class="card-title" style="display:flex;align-items:center;gap:8px;font-size:1.02rem;">
+          <span style="font-size:1.25rem;">${b.emoji}</span> شعبة ${b.name}
+          <span style="font-size:.72rem;font-weight:600;color:var(--mid);margin-right:6px;">— ${rptAr(circles.length)} حلقات</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:14px;">${cardsHtml||'<div class="empty" style="padding:14px;width:100%;"><span class="empty-icon">📭</span>لا حلقات</div>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function adminWeeklyOpenDay(branchName, iso, dayLabel){
+  awkLoadWeek(AWK_CURRENT).then(()=>{
+    const b = AWK_BRANCHES.find(x=>x.name===branchName) || AWK_BRANCHES[0];
+    const titleEl = document.getElementById('awkday-title');
+    if(titleEl) titleEl.innerHTML = `${b.emoji} شعبة ${branchName} — ${dayLabel} <span style="font-weight:600;color:var(--light);font-size:.8rem;">${rptFmtDate(iso)}</span>`;
+    const body = document.getElementById('awkday-body');
+    const circles = awkBranchCircles(branchName);
+    if(!circles.length){ body.innerHTML='<div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا توجد حلقات في هذه الشعبة</div>'; openModal('modal-awk-day'); return; }
+    body.innerHTML = circles.map(c=>{
+      const rows = c.students.map(s=>{
+        const d=window.AWK_DATA[iso+'|'+s.id]||{};
+        return `<tr>
+          <td style="text-align:right;font-weight:700;color:var(--forest);">${s.name}</td>
+          <td>${rptAttBadge(d.att)}</td>
+          <td>${rptGradeBadge(d.mem)}</td>
+          <td>${rptGradeBadge(d.rev)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="4" style="color:var(--light);">لا طلاب</td></tr>';
+      return `<div style="margin-bottom:16px;">
+        <div style="font-size:.92rem;font-weight:800;color:var(--forest);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          🕌 ${c.name} <span style="font-size:.72rem;font-weight:600;color:var(--light);">— ${c.teacher_name} — ${rptAr(c.students.length)} طالب</span></div>
+        <table class="rpt-table"><thead><tr><th style="text-align:right;">الطالب</th><th>الحضور</th><th>الحفظ</th><th>المراجعة</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+    }).join('');
+    openModal('modal-awk-day');
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// تقارير المشرفين — الجلسات الإشرافية حسب الشعبة والفترة
+// ══════════════════════════════════════════════════════
+function rptInitSupervisor(){
+  const f=document.getElementById('rep-sv-from'), t=document.getElementById('rep-sv-to');
+  if(f && !f.value) f.value=rptDaysAgo(30);
+  if(t && !t.value) t.value=rptToday();
+}
+
+async function rptRunSupervisor(){
+  const branch=document.getElementById('rep-sv-branch').value;
+  const rg=rptValidRange('rep-sv-from','rep-sv-to'); if(!rg) return;
+  const out=document.getElementById('rep-sv-out');
+  out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
+  let rows=[];
+  try{
+    let q=db.from('supervisory_sessions').select('*').gte('session_date',rg.from).lte('session_date',rg.to).order('session_date',{ascending:false});
+    if(branch) q=q.eq('branch',branch);
+    const {data,error}=await q;
+    if(error) throw error;
+    rows=data||[];
+  }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل الجلسات</div>'; return; }
+
+  window.SV_REPORTS_CACHE = rows;
+  const supSet=new Set(), tchSet=new Set();
+  let presentN=0;
+  rows.forEach(r=>{ if(r.supervisor_name)supSet.add(r.supervisor_name); if(r.teacher_name)tchSet.add(r.teacher_name); if(r.attendance && r.attendance!=='غائب')presentN++; });
+  const attPct = rows.length ? Math.round(presentN/rows.length*100) : 0;
+
+  const head = rptHeaderCard('تقرير الجلسات الإشرافية — '+(branch||'كل الشعب'),
+    'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
+    [['الشعبة',branch||'كل الشعب'],['عدد الجلسات',rptAr(rows.length)],['عدد المشرفين',rptAr(supSet.size)],['معلمون مُقيَّمون',rptAr(tchSet.size)]]);
+
+  const stats = `<div class="stats-row" style="margin-bottom:16px;">
+    ${rptStatCard('green','🧭',rptAr(rows.length),'إجمالي الجلسات','في الفترة')}
+    ${rptStatCard('blue','👤',rptAr(supSet.size),'المشرفون','شاركوا')}
+    ${rptStatCard('gold','👨‍🏫',rptAr(tchSet.size),'معلمون مُقيَّمون','')}
+    ${rptStatCard('purple','✅',rptAr(attPct)+'%','حضور المعلمين','للجلسات')}
+  </div>`;
+
+  let body;
+  if(!rows.length){
+    body = '<div class="card" style="margin-bottom:0;"><div class="empty" style="padding:36px;"><span class="empty-icon">📭</span>لا توجد جلسات إشرافية في هذه الفترة</div></div>';
+  } else {
+    const cards = rows.map((r,i)=>{
+      const attBg = r.attendance==='غائب'?'bg-red':'bg-green';
+      const lateTxt = (r.attendance==='متأخر'&&r.late_min)?(' ('+rptAr(r.late_min)+'د)'):'';
+      const notes = r.other ? `<div style="margin-top:10px;padding:11px 13px;background:var(--gold-pale);border-radius:var(--r-sm);border-right:3px solid var(--gold);font-size:.82rem;color:var(--forest);"><strong>📝 ملاحظات المشرف:</strong> ${r.other}</div>` : '';
+      return `<div style="border:1px solid var(--border);border-right:3px solid var(--emerald);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;background:var(--white);">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:9px;">
+          <span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
+          <span class="badge bg-blue">👤 ${r.supervisor_name||'—'}</span>
+          <span class="badge bg-gold">👨‍🏫 ${r.teacher_name||'—'}</span>
+          <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
+          <span class="badge ${attBg}">الحضور: ${r.attendance||'—'}${lateTxt}</span>
+          <button class="btn btn-outline btn-xs rpt-noprint" style="margin-right:auto;" onclick="svViewReport(${i})">👁️ التفاصيل الكاملة</button>
+        </div>
+        <div style="font-size:.74rem;color:var(--light);margin-bottom:4px;">نوع الجلسة (المحاور المُقيَّمة):</div>
+        <div>${svPillarBadges(r.pillars)}</div>
+        ${notes}
+      </div>`;
+    }).join('');
+    body = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">🗂️ الجلسات بالتواريخ</div>
+      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-sv-out','تقرير-الجلسات-${branch||'الكل'}')">📄 PDF</button></div>
+      <div style="padding:14px;">${cards}</div></div>`;
+  }
+  out.innerHTML = head + stats + body;
+}
+
 </script>
 
 </body>
