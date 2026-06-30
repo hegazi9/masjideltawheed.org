@@ -12338,6 +12338,35 @@ async function rptInitIndex(force){
       if(co) co.students.push(so);
     });
 
+    // ── تقييد بالنطاق (admin_scope الموحّد) — الفلترة بملكية الحلقة لا users.branch_id ──
+    const allowIds = window.ADMIN_ALLOWED_BRANCH_IDS;
+    if(allowIds){
+      // الحلقات داخل الشعب المسموحة
+      idx.circles = idx.circles.filter(c=> c.branch_id && allowIds.has(c.branch_id));
+      idx.circleById = {}; idx.circles.forEach(c=>{ c.students=[]; idx.circleById[c.id]=c; });
+      // المعلمون = أصحاب حلقات في الشعب المسموحة (يدعم الأدوار المزدوجة وbranch_id الناقص)
+      const okTeacherIds = new Set(idx.circles.map(c=>c.teacher_id).filter(Boolean));
+      const kept = idx.teachers.filter(t=> okTeacherIds.has(t.id));
+      const keptIds = new Set(kept.map(t=>t.id));
+      idx.teachers = kept;
+      idx.teacherById = {};
+      idx.teachers.forEach(t=>{
+        if(!t.branch_name){ const c=idx.circles.find(x=>x.teacher_id===t.id); if(c){ t.branch_id=c.branch_id; t.branch_name=c.branch_name; } }
+        idx.teacherById[t.id]=t;
+      });
+      // أصحاب حلقات غير مُدرجين كمعلمين (دور مزدوج)
+      okTeacherIds.forEach(tid=>{
+        if(!keptIds.has(tid)){
+          const c=idx.circles.find(x=>x.teacher_id===tid);
+          const t={ id:tid, name:(c&&c.teacher_name)||'معلم', branch_id:c?c.branch_id:null, branch_name:c?c.branch_name:'' };
+          idx.teachers.push(t); idx.teacherById[tid]=t;
+        }
+      });
+      // الطلاب = ضمن الحلقات المسموحة
+      idx.students = idx.students.filter(s=> s.circle_id && idx.circleById[s.circle_id]);
+      idx.students.forEach(s=>{ const co=idx.circleById[s.circle_id]; if(co) co.students.push(s); });
+    }
+
     // ── خيارات الـ datalist (labels مميزة) ──
     const nameCount = {};
     idx.students.forEach(s=> nameCount[s.name]=(nameCount[s.name]||0)+1 );
@@ -12378,6 +12407,16 @@ function rptFillDatalist(kind){
   const f=document.getElementById(map[2]), t=document.getElementById(map[3]);
   if(f && !f.value) f.value = rptDaysAgo(30);
   if(t && !t.value) t.value = rptToday();
+}
+
+// أسماء الشعب المسموحة للمدير الحالي (null = الكل) — موحّد من admin_scope
+function rptAllowedBranchNames(){
+  const ids = window.ADMIN_ALLOWED_BRANCH_IDS;
+  if(!ids) return null;
+  const names = new Set();
+  const br = (window.RPT && window.RPT.branches) || {};
+  Object.keys(br).forEach(id=>{ if(ids.has(id)) names.add(br[id]); });
+  return names;
 }
 
 function rptResolve(kind, val){
@@ -12579,7 +12618,7 @@ async function rptRunTeacher(){
   const dates = Object.keys(byDate).sort();
   dates.forEach(d=>presentDays.add(d));
   // دقائق تأخير المعلم نفسه — من الجلسات الإشرافية
-  sess.forEach(s=>{ if(s.attendance==='متأخر') totLateMin += (s.late_min||0); });
+  sess.forEach(s=>{ if(s.attendance==='متأخر') totLateMin += (parseInt(s.late_min,10) || 0); });
   window.RPT_TC_DAYS = byDate;
   const totalRec = mem.length;
   const activeDays = dates.length;
@@ -12901,9 +12940,13 @@ async function adminRenderWeekly(){
   if(pb) pb.disabled = AWK_CURRENT===0;
   if(nb) nb.disabled = AWK_CURRENT===AWK_TOTAL-1;
 
+  // الشعب المسموحة حسب نطاق المدير
+  const allowNames = rptAllowedBranchNames();
+  const branches = AWK_BRANCHES.filter(b=> !allowNames || allowNames.has(b.name));
+
   // إحصائيات الأسبوع
   let gCircles=0, gStudents=0, attA=[], memA=[], revA=[];
-  AWK_BRANCHES.forEach(b=>{
+  branches.forEach(b=>{
     const cs = awkBranchCircles(b.name);
     gCircles += cs.length;
     gStudents += cs.reduce((t,c)=>t+c.students.length,0);
@@ -12920,7 +12963,7 @@ async function adminRenderWeekly(){
     rptStatCard('purple','🔁',rptAr(avg(revA))+'%','إنجاز المراجعة','هذا الأسبوع');
 
   // نوافذ الشعب
-  document.getElementById('awk-branches').innerHTML = AWK_BRANCHES.map(b=>{
+  document.getElementById('awk-branches').innerHTML = branches.map(b=>{
     const circles = awkBranchCircles(b.name);
     const cardsHtml = b.days.map(di=>{
       const d=dates[di]; const iso=awkIso(d); const sm=awkDaySummary(b.name,iso);
@@ -12988,10 +13031,17 @@ function adminWeeklyOpenDay(branchName, iso, dayLabel){
 // ══════════════════════════════════════════════════════
 // تقارير المشرفين — الجلسات الإشرافية حسب الشعبة والفترة
 // ══════════════════════════════════════════════════════
-function rptInitSupervisor(){
+async function rptInitSupervisor(){
+  await rptInitIndex();
   const f=document.getElementById('rep-sv-from'), t=document.getElementById('rep-sv-to');
   if(f && !f.value) f.value=rptDaysAgo(30);
   if(t && !t.value) t.value=rptToday();
+  // تقييد قائمة الشعب بنطاق المدير
+  const sel=document.getElementById('rep-sv-branch');
+  const allow=rptAllowedBranchNames();
+  if(sel && allow){
+    [...sel.options].forEach(o=>{ if(o.value && !allow.has(o.value)) o.remove(); });
+  }
 }
 
 async function rptRunSupervisor(){
@@ -13007,6 +13057,10 @@ async function rptRunSupervisor(){
     if(error) throw error;
     rows=data||[];
   }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل الجلسات</div>'; return; }
+
+  // تقييد بالنطاق (لو «كل الشعب» مع نطاق مقيّد)
+  const allowNames = rptAllowedBranchNames();
+  if(allowNames) rows = rows.filter(r=> !r.branch || allowNames.has(r.branch));
 
   window.SV_REPORTS_CACHE = rows;
   const supSet=new Set(), tchSet=new Set();
