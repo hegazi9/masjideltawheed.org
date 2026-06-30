@@ -1426,6 +1426,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-outline btn-sm" id="sv-back-btn" onclick="svShowBranches()" style="display:none;">← رجوع</button>
+      <button class="btn btn-gold" onclick="openMoveTeacher()">⇄ نقل معلم</button>
       <button class="btn btn-primary" onclick="openAddSupervisor()">➕ إضافة مشرف</button>
     </div>
   </div>
@@ -1648,24 +1649,40 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<!-- ══ DIALOG: CONFIRM TRANSFER TEACHER ══ -->
-<div class="overlay" id="modal-sv-confirm-transfer">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-head" style="background:linear-gradient(135deg,var(--emerald),var(--jade));">
-      <div class="modal-title">⇄ تأكيد نقل المعلم</div>
-      <button class="modal-close" onclick="closeModal('modal-sv-confirm-transfer')">✕</button>
+<!-- ══ MODAL: MOVE TEACHER ══ -->
+<div class="overlay" id="modal-move-teacher">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">⇄ نقل معلم إلى مشرف آخر</div>
+      <button class="modal-close" onclick="closeModal('modal-move-teacher')">✕</button>
     </div>
-    <div class="modal-body" style="text-align:center;padding:28px 24px;">
-      <div style="margin-bottom:16px;display:flex;justify-content:center;">
-        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(30,92,54,.25);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+    <div class="modal-body" style="padding:20px 22px;">
+      <div class="fg" style="margin-bottom:12px;">
+        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">١. ابحث عن المعلم بالاسم</label>
+        <input type="text" id="mvt-search" placeholder="اكتب اسم المعلم..." oninput="filterMoveTeachers()" autocomplete="off"
+          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+      </div>
+      <div id="mvt-results" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:16px;">
+        <div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>
+      </div>
+      <div id="mvt-selected-box" style="display:none;">
+        <div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.85rem;">
+          <span style="color:var(--mid);">المعلم المحدد:</span>
+          <span id="mvt-selected-name" style="font-weight:800;color:var(--emerald);"></span>
+          <span id="mvt-current-sup" style="color:var(--light);font-size:.8rem;"></span>
+        </div>
+        <div class="fg" style="margin-bottom:4px;">
+          <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">٢. اختر المشرف المنقول إليه</label>
+          <select id="mvt-to-sup"
+            style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
+            <option value="">-- اختر المشرف --</option>
+          </select>
         </div>
       </div>
-            <div id="sv-transfer-msg" style="font-size:.92rem;font-weight:700;color:var(--forest);line-height:1.7;"></div>
     </div>
-    <div class="modal-foot" style="justify-content:center;gap:10px;">
-      <button class="btn btn-primary" onclick="svTransferYes()">✅ نعم</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-sv-confirm-transfer')">❌ لا</button>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-gold" style="min-width:130px;" onclick="confirmMoveTeacher()">⇄ تأكيد النقل</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-move-teacher')">إلغاء</button>
     </div>
   </div>
 </div>
@@ -8862,13 +8879,11 @@ function svRenderDetailCards(cfg, list) {
     const initials = (sv.name[0] || '') + (sv.lname[0] || '');
     const other = SUPERVISORS.find(s => s.branch === sv.branch && s.id !== sv.id);
     const teacherRows = (sv.teacherList || []).map(tName => {
-      const tEsc = tName.replace(/\\/g,'').replace(/'/g,"\\'");
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);font-size:.83rem;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
         <div style="display:flex;align-items:center;gap:9px;">
           <div style="width:30px;height:30px;border-radius:50%;background:${cfg.color1};display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0;">${tName[0]}</div>
           <span style="font-weight:600;color:var(--ink);">${tName}</span>
         </div>
-        <button onclick="svShowTransferMenu(event,'${sv.id}','${tEsc}')" style="background:var(--pale);border:1.5px solid var(--border);border-radius:6px;padding:3px 10px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:Tajawal;color:var(--emerald);white-space:nowrap;">⇄ نقل</button>
       </div>`;
     }).join('');
 
@@ -8904,86 +8919,105 @@ function svRenderDetailCards(cfg, list) {
   }).join('');
 }
 
-// ── Transfer state ──
-let svTransferState = { fromId: null, teacherName: null, toId: null };
+// ══════════════════════════════════════
+// نقل المعلم بين المشرفين (بنمط نقل الطالب)
+// يحدّث users.supervisor_id + circles.supervisor_id معاً
+// ══════════════════════════════════════
+let MVT_TEACHERS = [];        // [{id, name, supId, supName}]
+let MVT_SUPERVISORS = [];     // [{id, name}]
+let MVT_SELECTED = null;      // {id, name, supId}
 
-function svShowTransferMenu(e, fromId, teacherName) {
-  e.stopPropagation();
-  // Close any open transfer menu
-  document.querySelectorAll('.sv-transfer-dropdown').forEach(d => d.remove());
+async function openMoveTeacher(){
+  MVT_SELECTED = null;
+  const s=document.getElementById('mvt-search'); if(s) s.value='';
+  const box=document.getElementById('mvt-selected-box'); if(box) box.style.display='none';
+  const res=document.getElementById('mvt-results');
+  if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">جارٍ التحميل...</div>';
+  openModal('modal-move-teacher');
+  await loadMoveTeacherData();
+  if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>';
+}
 
-  const from = SUPERVISORS.find(s => s.id === fromId);
-  if (!from) return;
+// قراءة المعلمين والمشرفين live من DB
+async function loadMoveTeacherData(){
+  try{
+    const { data:sups } = await db.from('users').select('id,full_name').eq('role','supervisor').order('full_name');
+    MVT_SUPERVISORS = (sups||[]).map(s=>({ id:s.id, name:s.full_name||'مشرف' }));
+    const supName={}; MVT_SUPERVISORS.forEach(s=>supName[s.id]=s.name);
 
-  // Other supervisors in same branch
-  const others = SUPERVISORS.filter(s => s.branch === from.branch && s.id !== fromId);
-  if (!others.length) { showToast('لا يوجد مشرفون آخرون في هذه الشعبة', 'error'); return; }
+    const { data:teachers } = await db.from('users').select('id,full_name,supervisor_id').eq('role','teacher').order('full_name');
+    MVT_TEACHERS = (teachers||[]).map(t=>({
+      id:t.id, name:t.full_name||'معلم',
+      supId:t.supervisor_id||null,
+      supName: t.supervisor_id ? (supName[t.supervisor_id]||'—') : 'بدون مشرف'
+    }));
 
-  const btn = e.currentTarget;
-  const rect = btn.getBoundingClientRect();
-  const menu = document.createElement('div');
-  menu.className = 'sv-transfer-dropdown';
-  menu.style.cssText = `position:fixed;z-index:950;background:var(--white);border-radius:var(--r-sm);
-    box-shadow:0 8px 28px rgba(0,0,0,.18);border:1px solid var(--border);min-width:170px;overflow:hidden;`;
-  menu.style.left = Math.max(4, rect.right - 170) + 'px';
-  menu.style.top  = (rect.bottom + 4) + 'px';
+    // عمارة قائمة المشرفين
+    const sel=document.getElementById('mvt-to-sup');
+    if(sel) sel.innerHTML='<option value="">-- اختر المشرف --</option>'+
+      MVT_SUPERVISORS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  }catch(e){
+    MVT_TEACHERS=[]; MVT_SUPERVISORS=[];
+    const res=document.getElementById('mvt-results');
+    if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--red);font-size:.85rem;">تعذّر التحميل</div>';
+  }
+}
 
-  menu.innerHTML = `<div style="padding:7px 12px;font-size:.72rem;font-weight:700;color:var(--light);background:var(--pale);border-bottom:1px solid var(--border);">نقل إلى:</div>` +
-    others.map(sv => `<div onclick="svAskTransfer('${fromId}','${teacherName.replace(/'/g,"\\'")}','${sv.id}')" 
-      style="padding:10px 14px;font-size:.84rem;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:8px;"
-      onmouseenter="this.style.background='var(--pale)'" onmouseleave="this.style.background=''">
-      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--mint));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0;">${sv.name[0]}${sv.lname[0]}</div>
-      ${sv.name} ${sv.lname}
+function filterMoveTeachers(){
+  const q=(document.getElementById('mvt-search')?.value||'').trim();
+  const box=document.getElementById('mvt-results');
+  if(!box) return;
+  if(!q){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>'; return; }
+  const list=MVT_TEACHERS.filter(t=>(t.name||'').includes(q));
+  if(!list.length){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">لا توجد نتائج</div>'; return; }
+  box.innerHTML=list.slice(0,50).map(t=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.88rem;color:var(--ink);">${t.name}</div>
+        <div style="font-size:.74rem;color:var(--light);">المشرف الحالي: ${t.supName}</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="selectMoveTeacher('${t.id}')">اختيار</button>
     </div>`).join('');
-
-  document.body.appendChild(menu);
-  setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
 }
 
-function svAskTransfer(fromId, teacherName, toId) {
-  document.querySelectorAll('.sv-transfer-dropdown').forEach(d => d.remove());
-  const to = SUPERVISORS.find(s => s.id === toId);
-  if (!to) return;
-  svTransferState = { fromId, teacherName, toId };
-  const msg = document.getElementById('sv-transfer-msg');
-  if (msg) msg.textContent = 'هل أنت متأكد من نقل المعلم ' + teacherName + ' إلى المشرف ' + to.name + ' ' + to.lname + '؟';
-  openModal('modal-sv-confirm-transfer');
+function selectMoveTeacher(id){
+  const t=MVT_TEACHERS.find(x=>x.id===id);
+  if(!t) return;
+  MVT_SELECTED = { id:t.id, name:t.name, supId:t.supId };
+  const nm=document.getElementById('mvt-selected-name'); if(nm) nm.textContent=t.name;
+  const cur=document.getElementById('mvt-current-sup'); if(cur) cur.textContent=' (الحالي: '+t.supName+')';
+  const box=document.getElementById('mvt-selected-box'); if(box) box.style.display='';
+  const res=document.getElementById('mvt-results');
+  if(res) res.innerHTML='<div style="padding:12px;text-align:center;color:var(--jade);font-size:.82rem;font-weight:700;">✓ تم اختيار المعلم — اختر المشرف الجديد بالأسفل</div>';
+  // استبعاد المشرف الحالي من القائمة (اختياري للوضوح)
+  const sel=document.getElementById('mvt-to-sup');
+  if(sel) sel.innerHTML='<option value="">-- اختر المشرف --</option>'+
+    MVT_SUPERVISORS.map(s=>`<option value="${s.id}"${s.id===t.supId?' disabled':''}>${s.name}${s.id===t.supId?' (الحالي)':''}</option>`).join('');
 }
 
-async function svTransferYes() {
-  const { fromId, teacherName, toId } = svTransferState;
-  const from = SUPERVISORS.find(s => s.id === fromId);
-  const to   = SUPERVISORS.find(s => s.id === toId);
-  if (!from || !to) return;
-  // ── الكتابة في DB: ربط المعلم بالمشرف الجديد ──
-  try {
-    const norm = x => String(x||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-    const tn = norm(teacherName);
-    const { data: ts } = await db.from('users').select('id, full_name').eq('role','teacher');
-    const tRow = (ts||[]).find(t=>norm(t.full_name)===tn)
-              || (ts||[]).find(t=>norm(t.full_name).includes(tn)||tn.includes(norm(t.full_name)));
-    if (tRow) { const {error}=await db.from('users').update({supervisor_id: toId}).eq('id', tRow.id); if(error) throw error; }
-    else showToast('⚠️ تعذّر مطابقة المعلم في قاعدة البيانات');
-  } catch(e){ showToast('⚠️ تعذّر تحديث قاعدة البيانات: '+(e.message||e.code||'')); }
-  from.teacherList = (from.teacherList || []).filter(t => t !== teacherName);
-  if (!to.teacherList) to.teacherList = [];
-  if (!to.teacherList.includes(teacherName)) to.teacherList.push(teacherName);
-  [from, to].forEach(sv => {
-    sv.teachers = sv.teacherList.length;
-    const branchItems = BRANCH_DATA[sv.branch] || [];
-    sv.students = sv.teacherList.reduce((sum, tName) => {
-      const item = branchItems.find(i => i.teacher === tName);
-      return sum + (item ? item.students.length : 0);
-    }, 0);
-  });
-  closeModal('modal-sv-confirm-transfer');
-  showToast('✅ تم نقل المعلم ' + teacherName + ' بنجاح');
-  saveSupervisorsToStorage();
-  svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null);
-}
+async function confirmMoveTeacher(){
+  if(!MVT_SELECTED){ showToast('⚠️ ابحث واختر المعلم أولاً'); return; }
+  const toSup=document.getElementById('mvt-to-sup')?.value||'';
+  if(!toSup){ showToast('⚠️ اختر المشرف المنقول إليه'); return; }
+  if(toSup===MVT_SELECTED.supId){ showToast('⚠️ المعلم تابع لهذا المشرف بالفعل'); return; }
+  showToast('⏳ جارٍ النقل...');
 
-function svTransferTeacher(fromId, teacherName, toId) {
-  svAskTransfer(fromId, teacherName, toId);
+  // 1) تحديث supervisor_id في users (لوحة المدير/المشرف تقرأه)
+  const { error: uErr, status: uStat } = await db.from('users')
+    .update({ supervisor_id: toSup }).eq('id', MVT_SELECTED.id);
+  if(uErr){ showToast('❌ خطأ في النقل: '+uErr.message); return; }
+  if(uStat!==204 && uStat!==200){ showToast('⚠️ لم يتم النقل (تحقق من الصلاحية)'); return; }
+
+  // 2) تحديث supervisor_id في كل حلقات المعلم (المشرف يقرأ حلقاته عبر circles.supervisor_id)
+  const { error: cErr } = await db.from('circles')
+    .update({ supervisor_id: toSup }).eq('teacher_id', MVT_SELECTED.id);
+  if(cErr){ showToast('⚠️ تم تحديث المعلم لكن تعذّر تحديث الحلقات: '+cErr.message); }
+
+  closeModal('modal-move-teacher');
+  showToast('✅ تم نقل المعلم '+MVT_SELECTED.name+' بنجاح');
+  await refreshAdminData();
+  if (typeof loadSupervisors === 'function') await loadSupervisors();
+  if(svCurrentBranchKey) svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null);
 }
 
 

@@ -1713,9 +1713,10 @@ function renderCircles(){
 }
 
 // ══ STUDENTS PAGE ══
-function renderStudents(){
+async function renderStudents(){
   const c=activeCircle(); document.getElementById('st-circle-name').textContent=c?c.name+' — '+c.branch:'—';
   reflectReportDay();
+  await loadGuestsForCircle(c);
   const tb=document.getElementById('students-body');
   if(!c){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--light);padding:36px;">🔒 لا توجد حلقة اليوم — تظهر طلاب الحلقة في مواعيدها المحددة فقط</td></tr>'; return; }
   const q=(document.getElementById('st-search')?.value||'').trim();
@@ -1887,8 +1888,8 @@ async function renderGuestResults(q){
   let res=[];
   try{
     const { data } = await db.rpc('search_students', { q });
-    res=(data||[]).map(s=>({ name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
-      .filter(s=>!existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
+    res=(data||[]).map(s=>({ id:s.id, name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
+      .filter(s=>s.id && !existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
   }catch(e){ res=[]; }
   if(!res.length){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">لا توجد نتائج</div>'; return; }
   box.innerHTML=res.map((s,i)=>`<div onclick="pickGuest(${i})" data-i="${i}" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background='#fff'">
@@ -1907,24 +1908,51 @@ function pickGuest(i){
   document.getElementById('guest-selected').style.display='block';
   document.getElementById('gs-confirm').style.display='inline-flex';
 }
-function confirmGuest(){
+async function confirmGuest(){
   if(!_guestPick){ showToast('⚠️ اختر طالباً أولاً'); return; }
+  if(!_guestPick.id){ showToast('⚠️ تعذّر تحديد الطالب'); return; }
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
-  if(GUEST_STUDENTS[key].some(g=>g.name===_guestPick.name)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
-  const gid='guest_'+Date.now();
-  GUEST_STUDENTS[key].push({ id:gid, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
-  REC_STATE[gid]={};
+  if(GUEST_STUDENTS[key].some(g=>g.id===_guestPick.id)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
+  // حفظ الضيف في قاعدة البيانات (يبقى بعد الريفريش)
+  try{
+    const { error } = await db.from('circle_guests').insert({
+      circle_id:c.id, student_id:_guestPick.id, guest_date:REPORT_DATE,
+      student_name:_guestPick.name, student_branch:_guestPick.branch, student_teacher:_guestPick.teacher, added_by:cu.id
+    });
+    if(error && error.code!=='23505'){ showToast('❌ تعذّر حفظ الضيف: '+(error.message||error.code||'')); return; }
+  }catch(e){ showToast('❌ خطأ في الاتصال أثناء إضافة الضيف'); return; }
+  GUEST_STUDENTS[key].push({ id:_guestPick.id, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
+  REC_STATE[_guestPick.id]=REC_STATE[_guestPick.id]||{};
   closeModal('modal-guest');
-  renderStudents();
-  showToast('✅ تمت إضافة الطالب الضيف لهذا اليوم');
+  await renderStudents();
+  showToast('✅ تمت إضافة الطالب الضيف');
 }
-function removeGuest(gid){
+async function removeGuest(gid){
   const c=activeCircle(); const key=guestKey(c);
+  try{ await db.from('circle_guests').delete().eq('circle_id',c.id).eq('student_id',gid).eq('guest_date',REPORT_DATE); }catch(e){}
   if(GUEST_STUDENTS[key]) GUEST_STUDENTS[key]=GUEST_STUDENTS[key].filter(g=>g.id!==gid);
   delete REC_STATE[gid];
-  renderStudents();
+  await renderStudents();
   showToast('🗑️ أُزيل الطالب الضيف');
+}
+// ── تحميل الطلاب الضيوف المحفوظين لهذه الحلقة + التاريخ من DB ──
+let _guestsLoaded={};
+async function loadGuestsForCircle(c){
+  if(!c) return;
+  const key=guestKey(c);
+  if(_guestsLoaded[key]){ return; }
+  try{
+    const {data}=await db.from('circle_guests')
+      .select('student_id,student_name,student_branch,student_teacher')
+      .eq('circle_id',c.id).eq('guest_date',REPORT_DATE);
+    GUEST_STUDENTS[key]=(data||[]).filter(g=>g.student_id).map(g=>({
+      id:g.student_id, name:g.student_name||'طالب', branch:g.student_branch||'—',
+      teacher:g.student_teacher||'—', mem:0, points:0, notes:'', _guest:true
+    }));
+    GUEST_STUDENTS[key].forEach(g=>{ REC_STATE[g.id]=REC_STATE[g.id]||{}; });
+    _guestsLoaded[key]=true;
+  }catch(e){ GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[]; }
 }
 
 async function doUploadReport(){
@@ -1951,7 +1979,7 @@ function setAtt(sid,val){
 }
 function setLate(sid){ const m=parseInt(document.getElementById('latemin-'+sid).value)||null; REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
 async function saveAtt(sid,status,mins){
-  const s=findStu(sid); if(s&&(s._static||s._guest)){ showToast('📌 سُجّل محلياً'); return; }
+  const s=findStu(sid); if(s&&s._static){ showToast('📌 سُجّل محلياً'); return; }
   try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}); }
   catch(e){ try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,recorded_by:cu.id}],{onConflict:'student_id,date'}); }catch(e2){} }
 }
@@ -2043,7 +2071,7 @@ async function saveEval(){
   await ensureRecStopped();
   let audioUrl=prev?prev.audio_url:null, audioMsg='', audioPath=null;
   const hasBlob=_audioBlob && _audioBlob.size>0;
-  if(hasBlob && (s._static||s._guest)){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
+  if(hasBlob && s._static){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
   else if(hasBlob){
     try{
       audioPath='rec_'+sid+'_'+type+'_'+Date.now()+'.webm';
@@ -2054,7 +2082,7 @@ async function saveEval(){
   } else if(_audioBlob){ audioMsg=' • ⚠️ التسجيل فارغ'; }
   rec.audio_url=audioUrl;
   // حفظ في قاعدة البيانات
-  if(!s._static && !s._guest){
+  if(!s._static){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
@@ -2073,7 +2101,7 @@ async function saveEval(){
 
 // ── تحميل تسميع اليوم المسجّل مسبقاً (مزامنة) ──
 async function loadTodayRecitation(list){
-  const real=list.filter(s=>!s._static && !s._guest); if(!real.length) return;
+  const real=list.filter(s=>!s._static); if(!real.length) return;
   const ids=real.map(s=>s.id);
   try{
     const {data}=await db.from('attendance').select('student_id,status,late_minutes').in('student_id',ids).eq('date',D());
@@ -2118,9 +2146,9 @@ function renderPoints(){
   </tr>`).join('');
 }
 async function grantCard(id,type,pts){
-  const s=MY_STUDENTS.find(x=>x.id===id); if(!s) return;
+  const s=findStu(id); if(!s) return;
   try{ await db.from('points_cards').insert({student_id:id,card_type:type,points:pts,date:D(),recorded_by:cu.id}); }catch(e){}
-  s.points+=pts; try{ await db.from('students').update({total_points:s.points}).eq('id',id); }catch(e){}
+  s.points+=pts; if(!s._static && !s._guest){ try{ await db.from('students').update({total_points:s.points}).eq('id',id); }catch(e){} }
   const bal=document.getElementById('pt-bal-'+id); if(bal) bal.textContent='⭐ '+s.points;
   showToast('🏆 تم منح كرت ('+pts+' نقطة) لـ '+s.name);
 }
@@ -2299,12 +2327,13 @@ async function openStudentFile(sid){
   const s=findStu(sid); if(!s) return; _stfId=sid;
   document.getElementById('stf-header-name').textContent=s.name;
   let d={}, memo=[], am={};
-  if(!s._guest){
-    try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
-    if(!s._static){
-      try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){}
-      try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){}
+  if(!s._static){
+    // الملف الشامل (student_files) للطلاب الحقيقيين فقط — RLS تمنعه للضيف
+    if(!s._guest){
+      try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
     }
+    try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){}
+    try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){}
   }
   // دمج تسميع اليوم المسجّل محلياً (static/guest + اللي لسه اتسجّل قبل ما يتحفظ)
   const live=(typeof REC_STATE!=='undefined'&&REC_STATE[sid])||{};
@@ -2333,7 +2362,8 @@ function collectStf(){
 async function doStfSave(){
   const sid=_stfId; if(!sid){ closeModal('modal-stfile-confirm'); return; }
   const s=findStu(sid);
-  if(s&&(s._static||s._guest)){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
+  if(s&&s._static){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
+  if(s&&s._guest){ closeModal('modal-stfile-confirm'); showToast('ℹ️ الملف الشامل يُحفظ عند معلم الطالب الأصلي — تقييمك وتسميعك له محفوظ بالفعل'); return; }
   const d=collectStf();
   try{
     const {data:ex}=await db.from('student_files').select('id').eq('student_id',sid).maybeSingle();
