@@ -12411,9 +12411,20 @@ async function rptInitIndex(force){
       idx.opt.student[lbl]=s;
     });
     idx.teachers.forEach(t=>{
-      let lbl = t.name + (t.branch_name?(' ('+t.branch_name+')'):'');
-      while(idx.opt.teacher[lbl]) lbl += ' ';
-      idx.opt.teacher[lbl]=t;
+      const tcs = idx.circles.filter(c=>c.teacher_id===t.id);
+      if(tcs.length<=1){
+        let lbl = t.name + (t.branch_name?(' ('+t.branch_name+')'):'');
+        while(idx.opt.teacher[lbl]) lbl += ' ';
+        idx.opt.teacher[lbl]=t;
+      } else {
+        // معلم بأكثر من حلقة → خيار منفصل لكل حلقة (بيانات مفصولة)
+        tcs.forEach(c=>{
+          const to = Object.assign({}, t, {circle_id:c.id, circle_name:c.name, branch_name:c.branch_name||t.branch_name});
+          let lbl = t.name+' — '+(c.branch_name||c.name)+' / '+c.name;
+          while(idx.opt.teacher[lbl]) lbl += ' ';
+          idx.opt.teacher[lbl]=to;
+        });
+      }
     });
     const cNameCount = {};
     idx.circles.forEach(c=> cNameCount[c.name]=(cNameCount[c.name]||0)+1 );
@@ -12470,6 +12481,14 @@ function rptValidRange(fromId, toId){
   if(!f || !t){ showToast('⚠️ اختر الفترة من / إلى'); return null; }
   if(f > t){ showToast('⚠️ تاريخ البداية بعد النهاية'); return null; }
   return { from:f, to:t };
+}
+
+// مطابقة شعبة الجلسة الإشرافية بشعبة الحلقة (مع دمج شعب البنات)
+function rptBranchMatch(sessBranch, circleBranch){
+  if(!sessBranch || !circleBranch) return true;
+  if(sessBranch===circleBranch) return true;
+  const girls=['البنات','الملكات','الأميرات'];
+  return girls.includes(sessBranch) && girls.includes(circleBranch);
 }
 
 // ── تصدير PDF لأي عنصر ──
@@ -12609,14 +12628,18 @@ async function rptRunTeacher(){
   const out = document.getElementById('rep-tc-out');
   out.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
 
-  const circles = window.RPT.circles.filter(c=>c.teacher_id===t.id);
+  const circles = t.circle_id ? window.RPT.circles.filter(c=>c.id===t.circle_id)
+                              : window.RPT.circles.filter(c=>c.teacher_id===t.id);
   const studentIds = [].concat(...circles.map(c=>c.students.map(s=>s.id)));
   const stuCount = studentIds.length;
   const id2name = {}; circles.forEach(c=>c.students.forEach(s=>id2name[s.id]=s.name));
+  const scopeBranch = t.circle_id ? (circles[0]?circles[0].branch_name:t.branch_name) : t.branch_name;
 
   let mem=[], att=[], sess=[];
   try{
-    const m = await db.from('memorization').select('student_id,date,type,grade').eq('recorded_by',t.id).gte('date',rg.from).lte('date',rg.to);
+    let mq = db.from('memorization').select('student_id,date,type,grade').eq('recorded_by',t.id).gte('date',rg.from).lte('date',rg.to);
+    if(t.circle_id) mq = studentIds.length ? mq.in('student_id',studentIds) : mq.eq('student_id','__none__');
+    const m = await mq;
     mem = m.data||[];
     if(studentIds.length){
       const a = await db.from('attendance').select('student_id,date,status,late_minutes').in('student_id',studentIds).gte('date',rg.from).lte('date',rg.to);
@@ -12624,6 +12647,7 @@ async function rptRunTeacher(){
     }
     const sv = await db.from('supervisory_sessions').select('*').eq('teacher_name',t.name).gte('session_date',rg.from).lte('session_date',rg.to).order('session_date',{ascending:false});
     sess = sv.data||[];
+    if(t.circle_id) sess = sess.filter(s=>rptBranchMatch(s.branch, scopeBranch));
   }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
 
   // فهرسة باليوم (مع تفاصيل بالأسماء للـ popups)
@@ -12658,9 +12682,9 @@ async function rptRunTeacher(){
   const activeDays = dates.length;
   const expectedDays = rptExpectedDays(t.branch_name, rg.from, rg.to);
 
-  const head = rptHeaderCard('تقرير المعلم: '+t.name,
+  const head = rptHeaderCard('تقرير المعلم: '+t.name + (t.circle_id?(' — حلقة '+(t.circle_name||'')):''),
     'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
-    [['الشعبة',t.branch_name||'—'],['عدد الحلقات',rptAr(circles.length)],['عدد الطلاب',rptAr(stuCount)],['أيام النشاط',rptAr(activeDays)]]);
+    [['الشعبة',scopeBranch||t.branch_name||'—'],['عدد الحلقات',rptAr(circles.length)],['عدد الطلاب',rptAr(stuCount)],['أيام النشاط',rptAr(activeDays)]]);
 
   const stats = `<div class="stats-row" style="margin-bottom:16px;">
     ${rptStatCard('green','📝',rptAr(totalRec),'إجمالي التسميعات','مسجّلة')}
@@ -13096,6 +13120,15 @@ async function rptRunSupervisor(){
   const allowNames = rptAllowedBranchNames();
   if(allowNames) rows = rows.filter(r=> !r.branch || allowNames.has(r.branch));
 
+  // ── الملاحظات العامة المرفوعة من المشرفين ──
+  let notes=[];
+  try{
+    let nq=db.from('supervisor_notes').select('*').gte('note_date',rg.from).lte('note_date',rg.to).order('note_date',{ascending:false});
+    if(branch) nq=nq.eq('branch',branch);
+    const {data}=await nq; notes=data||[];
+  }catch(e){ console.log('sv notes:', e); }
+  if(allowNames) notes = notes.filter(n=> !n.branch || allowNames.has(n.branch));
+
   window.SV_REPORTS_CACHE = rows;
   const supSet=new Set(), tchSet=new Set();
   let presentN=0;
@@ -13139,7 +13172,27 @@ async function rptRunSupervisor(){
       <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-sv-out','تقرير-الجلسات-${branch||'الكل'}')">📄 PDF</button></div>
       <div style="padding:14px;">${cards}</div></div>`;
   }
-  out.innerHTML = head + stats + body;
+
+  // ── قسم الملاحظات العامة المرفوعة من المشرفين ──
+  let notesHtml;
+  if(!notes.length){
+    notesHtml = `<div class="card" style="margin:16px 0 0;border-top:3px solid var(--gold);"><div class="card-head" style="background:var(--gold-pale);"><div class="card-title">📝 ملاحظات المشرفين العامة</div><span class="badge bg-gray">٠</span></div>
+      <div class="empty" style="padding:26px;"><span class="empty-icon">📭</span>لا توجد ملاحظات عامة مرفوعة في هذه الفترة</div></div>`;
+  } else {
+    const nCards = notes.map(n=>`
+      <div style="border:1px solid var(--border);border-right:3px solid var(--gold);border-radius:var(--r);padding:13px 15px;margin-bottom:11px;background:var(--white);">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+          <span class="badge bg-gray">📅 ${svFmtReportDate(n.note_date)}</span>
+          <span class="badge bg-blue">👤 ${n.supervisor_name||'—'}</span>
+          ${n.branch?`<span class="badge bg-gold">🏫 ${n.branch}</span>`:''}
+        </div>
+        <div style="font-size:.86rem;color:var(--forest);line-height:1.9;white-space:pre-wrap;">${String(n.content||'').replace(/</g,'&lt;')}</div>
+      </div>`).join('');
+    notesHtml = `<div class="card" style="margin:16px 0 0;border-top:3px solid var(--gold);"><div class="card-head" style="background:var(--gold-pale);"><div class="card-title">📝 ملاحظات المشرفين العامة</div><span class="badge bg-gray">${rptAr(notes.length)}</span></div>
+      <div style="padding:14px;">${nCards}</div></div>`;
+  }
+
+  out.innerHTML = head + stats + body + notesHtml;
 }
 
 </script>
