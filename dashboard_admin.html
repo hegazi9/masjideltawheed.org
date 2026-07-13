@@ -126,6 +126,7 @@
   window.db = supabase.createClient(_SB_URL, _SB_KEY);
 </script>
 <script src="theme.js"></script>
+<script src="mushaf_madani.js"></script>
 
 <style>
 /* ── THEME CSS VARS (يتغير بـ theme.js) ── */
@@ -1261,7 +1262,10 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="section-title" style="margin-bottom:4px;">👨‍🏫 إدارة المعلمين</div>
         <div style="font-size:.8rem;color:var(--light);">إجمالي <span id="stat-teachers">—</span> معلم في المدرسة</div>
       </div>
-      <button class="btn btn-primary" onclick="openAddTeacher()">➕ إضافة معلم</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="openTeacherSearchEdit()">✏️ تعديل بيانات</button>
+        <button class="btn btn-primary" onclick="openAddTeacher()">➕ إضافة معلم</button>
+      </div>
     </div>
 
     <!-- 4 Branch Cards -->
@@ -2677,6 +2681,21 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       </div>
     </div>
 
+    <!-- تحضير الدروس -->
+    <div onclick="nav(null,'rep-lessons')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(107,63,160,.25);">📝</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تحضير الدروس</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مراجعة تحضيرات المعلمين والموافقة عليها</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
+      </div>
+    </div>
+
     <!-- المتابعة الأسبوعية -->
     <div onclick="nav(null,'rep-weekly')"
       style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
@@ -2713,6 +2732,36 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══════════════════════════════════════════════════════
      PAGE: تقرير الطلاب
 ══════════════════════════════════════════════════════ -->
+<!-- PAGE: مراجعة تحضير الدروس -->
+<div id="page-rep-lessons" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تحضير الدروس</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">📝 مراجعة تحضير الدروس</div>
+  <div id="rep-lessons-out"></div>
+</div>
+
+<!-- MODAL: مراجعة تحضير درس -->
+<div class="overlay" id="modal-prep-review">
+  <div class="modal" style="max-width:880px;width:94%;">
+    <div class="modal-head"><div class="modal-title">📝 مراجعة تحضير الدرس</div><button class="modal-close" onclick="closeModal('modal-prep-review')">✕</button></div>
+    <div class="modal-body">
+      <div id="prep-sheet" style="background:#fff;"></div>
+      <div id="prep-approved-tag" style="display:none;margin-top:14px;padding:12px;background:var(--pale);border:1.5px solid var(--mint);border-radius:10px;color:var(--emerald);font-weight:800;text-align:center;">✅ تم اعتماد هذا التحضير ومنح ٥٠ نقطة للمعلم</div>
+      <div style="margin-top:14px;">
+        <label style="font-weight:700;color:var(--forest);font-size:.82rem;">ملاحظات المشرف (تظهر للمعلم عند الإرجاع)</label>
+        <textarea id="prep-note" rows="3" placeholder="اكتب ملاحظاتك…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:Tajawal;font-size:.85rem;margin-top:6px;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot" id="prep-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="approvePrep()">✅ موافقة (+٥٠ نقطة)</button>
+      <button class="btn btn-danger" onclick="returnPrep()">↩️ إرجاع بملاحظات</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-prep-review')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <div id="page-rep-students" class="page">
   <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
     <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
@@ -4073,12 +4122,27 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="ctx-item" onclick="ctxSendMessage()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
       <span style="font-size:1rem;">💬</span> إرسال رسالة
     </div>
-    <div class="ctx-item" onclick="ctxEditTeacher()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
-      <span style="font-size:1rem;">✏️</span> تعديل البيانات
-    </div>
     <div style="height:1px;background:var(--border);margin:4px 0;"></div>
     <div class="ctx-item" onclick="ctxDeleteTeacher()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;color:var(--red);transition:background .15s;" onmouseover="this.style.background='var(--red-pale)'" onmouseout="this.style.background=''">
       <span style="font-size:1rem;">🗑️</span> حذف من القائمة
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: البحث عن معلم لتعديل بياناته ══ -->
+<div class="overlay" id="modal-teacher-search">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-head">
+      <div class="modal-title">✏️ تعديل بيانات معلم</div>
+      <button class="modal-close" onclick="closeModal('modal-teacher-search')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="position:relative;margin-bottom:12px;">
+        <input type="text" id="tsearch-input" placeholder="🔍 اكتب اسم المعلم..." autocomplete="off"
+          oninput="filterTeacherSearch()"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:.9rem;">
+      </div>
+      <div id="tsearch-results" style="max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:6px;"></div>
     </div>
   </div>
 </div>
@@ -5016,11 +5080,19 @@ async function loadTeachers() {
   let data, error;
   ({ data, error } = await db
     .from('users')
-    .select('id, full_name, phone, username, is_active, branch_id, supervisor_id')
+    .select('id, full_name, phone, username, is_active, branch_id, supervisor_id, dob')
     .eq('role', 'teacher'));
 
   if (error) {
-    // جرب بدون branch_id و notes
+    // جرب بدون branch_id
+    ({ data, error } = await db
+      .from('users')
+      .select('id, full_name, phone, username, is_active, dob')
+      .eq('role', 'teacher'));
+  }
+
+  if (error) {
+    // فولباك أخير: من غير عمود dob (لو لسه ماتعملش)
     ({ data, error } = await db
       .from('users')
       .select('id, full_name, phone, username, is_active')
@@ -5050,6 +5122,8 @@ function processTeachers(data, branchMap) {
       gender: extra.gender || '—',
       circle: branchMap[t.branch_id] || extra.circle || '—',
       phone: t.phone || '—',
+      dob: t.dob || '',
+      age: calcAge(t.dob),
       email: extra.email || '—',
       id_type: extra.id_type || '—',
       id_number: extra.id_number || '—',
@@ -5143,6 +5217,18 @@ function closeTeacherBranch() {
   document.getElementById('tv-branches').style.display = 'block';
 }
 
+// حساب السن تلقائيًا من تاريخ الميلاد (يتحدث كل يوم)
+function calcAge(dob){
+  if(!dob) return null;
+  const d = new Date(dob);
+  if(isNaN(d.getTime())) return null;
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if(m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+  return (a >= 0 && a < 120) ? a : null;
+}
+
 function renderTeacherBranchDetail(branchName, meta) {
   const grid  = document.getElementById('tvd-teachers-grid');
   const empty = document.getElementById('tvd-empty');
@@ -5183,8 +5269,9 @@ function renderTeacherBranchDetail(branchName, meta) {
 
     // بيانات إضافية من Supabase لو موجودة
     const matched = matchTeacher(tName);
-    const phone   = item.phone || (matched?.phone && matched.phone !== '—' ? matched.phone : '—');
-    const age     = item.age   || matched?.age || '—';
+    const phone   = (item.phone && item.phone !== '—') ? item.phone : (matched?.phone && matched.phone !== '—' ? matched.phone : '—');
+    const _age    = (item.age != null ? item.age : (calcAge(item.dob) != null ? calcAge(item.dob) : matched?.age));
+    const age     = (_age != null && _age !== '') ? _age : '—';
     const level   = item.level || matched?.level || 'غير محدد';
     const tId     = matched?.id || '';
     const safeId  = tName.replace(/\s+/g,'_').replace(/[()]/g,'');
@@ -5448,6 +5535,103 @@ function ctxEditTeacher() {
   openCardEditTeacherByName(_ctxTeacherName, _ctxTeacherBranch);
 }
 
+// ── تعديل بيانات معلم عبر البحث (يجيب live من القاعدة) ──
+let TSEARCH_LIST = [];
+
+async function openTeacherSearchEdit() {
+  openModal('modal-teacher-search');
+  const inp = document.getElementById('tsearch-input');
+  if (inp) inp.value = '';
+  const box = document.getElementById('tsearch-results');
+  if (box) box.innerHTML = '<div style="text-align:center;color:var(--light);padding:24px;font-size:.85rem;">⏳ جاري تحميل المعلمين...</div>';
+
+  // جيب المعلمين مباشرة من القاعدة — بمن فيهم أصحاب الحلقات بأدوار مزدوجة (زي عبدالله هاني)
+  let rows = [];
+  const circleBranchByUid = {};
+  try {
+    // ١) أصحاب الحلقات (teacher_id) — دي اللي بتضمن المعلم صاحب دور مزدوج
+    const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(v);
+    const teacherIds = new Set();
+    const { data: circles } = await db.from('circles').select('teacher_id,teachers,branch_id');
+    (circles || []).forEach(c => {
+      if (isUuid(c.teacher_id)) { teacherIds.add(c.teacher_id); if (!circleBranchByUid[c.teacher_id]) circleBranchByUid[c.teacher_id] = c.branch_id; }
+      if (Array.isArray(c.teachers)) c.teachers.forEach(x => { if (isUuid(x)) { teacherIds.add(x); if (!circleBranchByUid[x]) circleBranchByUid[x] = c.branch_id; } });
+    });
+    // ٢) كل المستخدمين، وناخد role=teacher أو صاحب حلقة
+    let r = await db.from('users').select('id,full_name,phone,dob,branch_id,role');
+    if (r.error) r = await db.from('users').select('id,full_name,phone,branch_id,role');
+    rows = (r.data || []).filter(u => u.role === 'teacher' || teacherIds.has(u.id));
+  } catch (e) { rows = []; }
+
+  const bmap = {};
+  try { const { data: bs } = await db.from('branches').select('id,name'); (bs || []).forEach(b => bmap[b.id] = b.name); } catch (e) {}
+
+  TSEARCH_LIST = rows.map(t => ({
+    id: t.id,
+    full_name: t.full_name || 'بدون اسم',
+    phone: t.phone || '—',
+    dob: t.dob || '',
+    circle: bmap[t.branch_id] || bmap[circleBranchByUid[t.id]] || '—',
+  })).sort((a, b) => (a.full_name || '').localeCompare(b.full_name || '', 'ar'));
+
+  renderTeacherSearchResults('');
+  setTimeout(() => inp && inp.focus(), 120);
+}
+
+function filterTeacherSearch() {
+  renderTeacherSearchResults(document.getElementById('tsearch-input').value);
+}
+
+function renderTeacherSearchResults(q) {
+  const box = document.getElementById('tsearch-results');
+  if (!box) return;
+  const norm = s => (s || '').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ').trim();
+  const nq = norm(q);
+  let list = TSEARCH_LIST.slice();
+  if (nq) list = list.filter(t => norm(t.full_name).includes(nq));
+
+  if (!list.length) {
+    box.innerHTML = `<div style="text-align:center;color:var(--light);padding:24px;font-size:.85rem;">${nq ? 'مفيش معلم بالاسم ده' : 'مفيش معلمين'}</div>`;
+    return;
+  }
+  box.innerHTML = list.map(t => {
+    const initial = (t.full_name || '؟').trim().charAt(0);
+    const br = t.circle && t.circle !== '—' ? t.circle : '';
+    return `<div onclick="pickTeacherForEdit('${t.id}')"
+      style="display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--jade);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">${initial}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.9rem;">${t.full_name}</div>
+        <div style="font-size:.74rem;color:var(--light);">${br}${br && t.phone && t.phone!=='—' ? ' • ' : ''}${t.phone && t.phone!=='—' ? t.phone : ''}</div>
+      </div>
+      <span style="color:var(--jade);font-size:1.1rem;">✏️</span>
+    </div>`;
+  }).join('');
+}
+
+function pickTeacherForEdit(id) {
+  // فضّل بيانات TEACHERS الكاملة لو موجودة، وإلا ابنِ من نتيجة البحث
+  let t = (typeof TEACHERS !== 'undefined' ? TEACHERS : []).find(x => String(x.id) === String(id));
+  if (!t) {
+    const s = TSEARCH_LIST.find(x => String(x.id) === String(id));
+    if (!s) { showToast('⚠️ المعلم مش موجود'); return; }
+    const parts = (s.full_name || '').split(' ');
+    t = {
+      id: s.id, full_name: s.full_name,
+      name: parts[0] || '', lname: parts.slice(1).join(' '),
+      phone: s.phone || '—', email: '—', gender: '—',
+      id_type: '—', id_number: '—', is_active: true,
+      dob: s.dob || '', circle: s.circle || '—',
+    };
+  }
+  _ctxTeacherId     = t.id;
+  _ctxTeacherName   = t.full_name;
+  _ctxTeacherBranch = (t.circle && t.circle !== '—') ? t.circle : _ctxTeacherBranch;
+  closeModal('modal-teacher-search');
+  openCardEditTeacher(t);
+}
+
 function openCardEditTeacher(t) {
   document.getElementById('card-edit-t-id').value    = t.id;
   document.getElementById('card-edit-t-name').value  = t.full_name;
@@ -5471,7 +5655,12 @@ function openCardEditTeacher(t) {
 }
 
 function openCardEditTeacherByName(tName, branchName) {
-  // ابحث في BRANCH_DATA عن بيانات مخزنة للمعلم ده
+  // لو المعلم موجود في users (Supabase) افتح المسار اللي بيحفظ في القاعدة تلقائيًا
+  const _n = s => (s || '').replace(/\s+/g, ' ').trim();
+  const dbMatch = (typeof TEACHERS !== 'undefined' ? TEACHERS : []).find(t => _n(t.full_name) === _n(tName));
+  if (dbMatch) { openCardEditTeacher(dbMatch); return; }
+
+  // وإلا (معلم لسه مش متسجّل) نفتح بالاسم فقط من BRANCH_DATA
   let stored = null;
   Object.values(BRANCH_DATA).forEach(arr => {
     const found = arr.find(item => item.teacher === tName);
@@ -5577,31 +5766,32 @@ async function doSaveCardEdit() {
   const oldName     = _ctxTeacherName;
   const newAge      = dob ? Math.floor((new Date() - new Date(dob)) / (365.25 * 24 * 3600 * 1000)) : undefined;
 
-  // ١ — حدّث Supabase لو في ID
+  // ١ — حدّث Supabase لو في ID (بتأكيد فعلي إن الصف اتحدّث)
   if (id) {
-    const extraData = {};
-    if (email)  extraData.email     = email;
-    if (gender) extraData.gender    = gender;
-    if (idType) extraData.id_type   = idType;
-    if (idNum)  extraData.id_number = idNum;
-    const notesJson = Object.keys(extraData).length ? JSON.stringify(extraData) : null;
+    const payload = { full_name: newFullName, phone: phone || null, is_active, dob: dob || null };
+    let hasDob = true;
 
-    let error;
-    ({ error } = await db.from('users').update({
-      full_name: newFullName,
-      phone: phone || null,
-      is_active,
-      notes: notesJson,
-    }).eq('id', id));
+    let { data: upd, error } = await db.from('users')
+      .update(payload).eq('id', id).select('id, phone, dob');
 
-    if (error?.message?.includes('notes')) {
-      ({ error } = await db.from('users').update({
-        full_name: newFullName,
-        phone: phone || null,
-        is_active,
-      }).eq('id', id));
+    // لو عمود dob لسه مش موجود، أعد المحاولة من غيره
+    if (error && /dob|column/i.test(error.message || '')) {
+      hasDob = false;
+      delete payload.dob;
+      ({ data: upd, error } = await db.from('users')
+        .update(payload).eq('id', id).select('id, phone'));
     }
-    if (error) { console.error(error); showToast('❌ خطأ في الحفظ'); return; }
+
+    if (error) { console.error(error); showToast('❌ خطأ في الحفظ: ' + (error.message || '')); return; }
+
+    // RLS ممكن ترجّع نجاح بصفر صفوف — لازم نتأكد
+    if (!upd || upd.length === 0) {
+      showToast('⛔ التعديل مرفوض من RLS — محتاج سياسة UPDATE للمدير على users');
+      return;
+    }
+    if (!hasDob && dob) {
+      showToast('⚠️ اتحفظ من غير الميلاد — عمود dob مش موجود بعد');
+    }
   }
 
   // ٢ — حدّث الذاكرة فوراً (BRANCH_DATA + TEACHERS)
@@ -6795,6 +6985,7 @@ const PAGE_TITLES = {
   att_employees:'📅 حضور الموظفين',memorization:'✅ الحفظ والمراجعة',
   schedule:'📖 الخطط والمقررات',reports:'📄 التقارير',stats:'📊 الإحصاءات',
   'rep-students':'👨‍🎓 تقارير الطلاب','rep-teachers':'👨‍🏫 تقارير المعلمين',
+  'rep-lessons':'📝 مراجعة تحضير الدروس',
   'rep-circles':'🕌 تقارير الحلقات','rep-weekly':'📅 المتابعة الأسبوعية',
   'rep-supervisors':'🧭 تقارير المشرفين',
   exams:'✍️ الامتحانات',golden:'🏅 السجل الذهبي',cards:'🪪 بطاقات الطلاب',
@@ -6833,7 +7024,12 @@ async function hydrateBranchDataFromDB(){
     }
 
     // كل المعلمين بشعبهم (لإظهار المعلم الجديد حتى لو لسه ملوش حلقة)
-    const { data:allT } = await db.from('users').select('id,full_name,branch_id,phone').eq('role','teacher');
+    const { data:allT } = await db.from('users').select('id,full_name,branch_id,phone,dob').eq('role','teacher');
+    // خريطة اسم المعلم → { هاتف, تاريخ ميلاد } لعرض السن + الهاتف على الكروت
+    const tMeta = {};
+    (allT||[]).forEach(t => {
+      tMeta[t.full_name] = { phone: t.phone || '', dob: t.dob || '' };
+    });
 
     const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,teacher_id,branch_id,schedule');
     const { data:students } = await db.from('students')
@@ -6892,6 +7088,14 @@ async function hydrateBranchDataFromDB(){
       shownNames.add(t.full_name);
       (svbt[key] = svbt[key] || []).push(t.full_name);
     });
+
+    // ألحق الهاتف + تاريخ الميلاد + السن بكل كارت (المصدر: users في القاعدة)
+    Object.values(BRANCH_DATA).forEach(arr => (arr||[]).forEach(it => {
+      const meta = tMeta[it.teacher];
+      if (!meta) return;
+      if (meta.phone) it.phone = meta.phone;
+      if (meta.dob)   { it.dob = meta.dob; it.age = calcAge(meta.dob); }
+    }));
 
     // لو مشرف: ثبّت قوائم معلميه بالأسماء الحقيقية (للفلاتر اللاحقة)
     if (myTeachers){
@@ -8667,6 +8871,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'rep-students') rptInitIndex().then(()=>rptFillDatalist('student'));
   if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
   if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
+  if (pageId === 'rep-lessons') loadLessonReviews();
   if (pageId === 'rep-weekly')   rptInitIndex().then(()=>adminRenderWeekly());
   if (pageId === 'rep-supervisors') rptInitSupervisor();
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
@@ -12544,6 +12749,73 @@ function rptHeaderCard(title, sub, rows){
 }
 
 // ══════════════════════════════════════════════════════
+// مراجعة تحضير الدروس (المدير يرى الكل)
+// ══════════════════════════════════════════════════════
+function lpStatusBadge(st){
+  const m={submitted:['قيد المراجعة','bg-blue'],approved:['معتمَد','bg-green'],returned:['مُعاد بملاحظات','bg-red'],draft:['مسودة','bg-gray']};
+  const x=m[st]||m.draft; return '<span class="badge '+x[1]+'">'+x[0]+'</span>';
+}
+async function loadLessonReviews(){
+  const out=document.getElementById('rep-lessons-out');
+  out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let rows=[];
+  try{ const {data}=await db.from('lesson_preps').select('*').in('status',['submitted','returned','approved']).order('submitted_at',{ascending:false}); rows=data||[]; }
+  catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر التحميل</div>'; return; }
+  const ids=[...new Set(rows.map(r=>r.teacher_id))]; const names={};
+  if(ids.length){ try{ const {data}=await db.from('users').select('id,full_name').in('id',ids); (data||[]).forEach(u=>names[u.id]=u.full_name); }catch(e){} }
+  window._LP_ROWS={}; rows.forEach(r=>window._LP_ROWS[r.id]=r);
+  if(!rows.length){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد تحضيرات مُرسلة للمراجعة</div>'; return; }
+  const pending=rows.filter(r=>r.status==='submitted'), others=rows.filter(r=>r.status!=='submitted');
+  const rowHtml=(r)=>'<tr>'+
+    '<td style="font-weight:700;color:var(--forest);">'+(names[r.teacher_id]||'—')+'</td>'+
+    '<td>'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+'</td>'+
+    '<td>'+((r.title||'—'))+'</td>'+
+    '<td style="white-space:nowrap;">'+(r.date||'—')+'</td>'+
+    '<td>'+lpStatusBadge(r.status)+'</td>'+
+    '<td><button class="btn btn-primary btn-sm" onclick="openPrepReview(\''+r.id+'\')">مراجعة</button></td></tr>';
+  const tbl=(list,empty)=>'<div style="overflow-x:auto;"><table class="rpt-table" style="min-width:680px;"><thead><tr><th>المعلم</th><th>المادة</th><th>عنوان الدرس</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead><tbody>'+(list.map(rowHtml).join('')||('<tr><td colspan="6" style="text-align:center;color:var(--light);padding:16px;">'+empty+'</td></tr>'))+'</tbody></table></div>';
+  out.innerHTML='<div class="card"><div class="card-head"><div class="card-title">📥 بانتظار المراجعة ('+rptAr(pending.length)+')</div></div>'+tbl(pending,'لا يوجد')+'</div>'+
+    (others.length?('<div class="card" style="margin-top:16px;"><div class="card-head"><div class="card-title">📋 مراجَعة سابقاً</div></div>'+tbl(others,'—')+'</div>'):'');
+}
+function lpSheetHtml(r){
+  const d=r.data||{};
+  const esc=(v)=>(v||'—').replace(/</g,'&lt;');
+  const rws=(d.rows||[]).map(x=>'<tr><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.during)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;text-align:center;">'+esc(x.time)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.assess)+'</td></tr>').join('')||'<tr><td colspan="3" style="text-align:center;color:var(--light);padding:10px;">—</td></tr>';
+  const block=(t,v)=>'<div style="margin-bottom:8px;"><div style="font-weight:700;color:var(--jade);font-size:.8rem;">'+t+'</div><div style="white-space:pre-wrap;font-size:.82rem;color:var(--ink);">'+esc(v)+'</div></div>';
+  return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><b style="font-family:Amiri,serif;color:var(--forest);">تحضير الدرس: '+esc(r.title)+'</b><span style="font-size:.78rem;color:var(--light);">'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+'</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div>'+block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure)+'</div>'+
+    '<div><div style="font-weight:700;color:var(--forest);font-size:.82rem;margin-bottom:6px;">المساحة الإبداعية (أثناء الشرح / الزمن / التقويم)</div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:var(--pale);"><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">أثناء الشرح</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;width:56px;">الزمن</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">التقويم</th></tr></thead><tbody>'+rws+'</tbody></table></div></div>';
+}
+function openPrepReview(id){
+  const r=window._LP_ROWS[id]; if(!r) return; window._LP_CUR=id;
+  document.getElementById('prep-sheet').innerHTML=lpSheetHtml(r);
+  document.getElementById('prep-note').value=r.supervisor_note||'';
+  const approved=r.status==='approved';
+  document.getElementById('prep-approved-tag').style.display=approved?'block':'none';
+  document.getElementById('prep-actions').style.display=approved?'none':'flex';
+  openModal('modal-prep-review');
+}
+async function approvePrep(){
+  const id=window._LP_CUR; if(!id) return;
+  try{
+    const {data,error}=await db.rpc('approve_lesson_prep',{p_id:id});
+    if(error) throw error;
+    if(data&&data.ok){ showToast(data.awarded?'✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم':'✅ تمت الموافقة (النقاط ممنوحة سابقاً)'); closeModal('modal-prep-review'); loadLessonReviews(); }
+    else showToast('⚠️ '+((data&&data.msg)==='forbidden'?'لا تملك صلاحية على هذا المعلم':'تعذّرت الموافقة'));
+  }catch(e){ showToast('❌ تعذّرت الموافقة: '+(e.message||e.code||'')); }
+}
+async function returnPrep(){
+  const id=window._LP_CUR; if(!id) return;
+  const note=document.getElementById('prep-note').value.trim();
+  if(!note){ showToast('⚠️ اكتب الملاحظة قبل الإرجاع'); return; }
+  try{
+    const {error}=await db.from('lesson_preps').update({status:'returned',supervisor_note:note,reviewed_at:new Date().toISOString()}).eq('id',id);
+    if(error) throw error;
+    showToast('📌 تم إرجاع التحضير للمعلم بالملاحظات'); closeModal('modal-prep-review'); loadLessonReviews();
+  }catch(e){ showToast('❌ تعذّر الإرجاع: '+(e.message||e.code||'')); }
+}
+
+// ══════════════════════════════════════════════════════
 // تقرير الطالب
 // ══════════════════════════════════════════════════════
 async function rptRunStudent(){
@@ -12556,19 +12828,20 @@ async function rptRunStudent(){
   try{
     const a = await db.from('attendance').select('date,status').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
     att = a.data||[];
-    const m = await db.from('memorization').select('date,type,grade,surah_from,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    const m = await db.from('memorization').select('date,type,grade,surah_from,surah_to,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
     mem = m.data||[];
   }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
 
   // فهرسة باليوم
   const byDate = {};
   att.forEach(a=>{ (byDate[a.date]=byDate[a.date]||{}).att=a.status; });
-  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0;
+  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0, hifzFaces=0, revFaces=0;
   mem.forEach(r=>{
     const d=(byDate[r.date]=byDate[r.date]||{});
     const ay = rptAyahCount(r.ayah_from, r.ayah_to);
-    if(r.type==='review'){ d.rev=r.grade; revCnt++; revAyat+=ay; }
-    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; newCnt++; hifzAyat+=ay; }
+    const fc = (typeof madaniFaces==='function') ? madaniFaces(r.surah_from, r.ayah_from, r.surah_to, r.ayah_to) : 0;
+    if(r.type==='review'){ d.rev=r.grade; d.revFaces=(d.revFaces||0)+fc; revCnt++; revAyat+=ay; revFaces+=fc; }
+    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; d.newFaces=(d.newFaces||0)+fc; newCnt++; hifzAyat+=ay; hifzFaces+=fc; }
     if(r.notes) d.notes=(d.notes?d.notes+' / ':'')+r.notes;
     if(RPT_GRADE_PT[r.grade]!=null){ ptsSum+=RPT_GRADE_PT[r.grade]; gradeN++; }
   });
@@ -12585,8 +12858,8 @@ async function rptRunStudent(){
 
   const stats = `<div class="stats-row" style="margin-bottom:16px;">
     ${rptStatCard('green','✅',rptAr(present),'حاضر',(late?('+ '+rptAr(late)+' متأخر'):''))}
-    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة')}
-    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة')}
+    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة • '+rptAr(hifzFaces)+' وجه')}
+    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة • '+rptAr(revFaces)+' وجه')}
     ${rptStatCard('purple','⭐',rptAr(avgPt),'متوسط الدرجة','من ١٥')}
   </div>`;
 
@@ -12604,6 +12877,7 @@ async function rptRunStudent(){
         <td>${rptAttBadge(x.att)}</td>
         <td>${surah||'—'}</td>
         <td>${ayat}</td>
+        <td>${((x.newFaces||0)+(x.revFaces||0))?rptAr((x.newFaces||0)+(x.revFaces||0)):'—'}</td>
         <td>${rptGradeBadge(x.mem)}</td>
         <td>${rptGradeBadge(x.rev)}</td>
         <td style="font-size:.74rem;color:var(--light);max-width:160px;">${x.notes||'—'}</td>
@@ -12612,7 +12886,7 @@ async function rptRunStudent(){
     rows = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي بالتواريخ</div>
       <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-st-out','تقرير-${s.name}')">📄 PDF</button></div>
       <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:760px;">
-      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الأوجه</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
       <tbody>${trs}</tbody></table></div></div>`;
   }
   out.innerHTML = head + stats + rows;

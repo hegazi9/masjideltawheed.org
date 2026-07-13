@@ -135,6 +135,7 @@
   window.db = supabase.createClient(_SB_URL, _SB_KEY);
 </script>
 <script src="theme.js"></script>
+<script src="mushaf_madani.js"></script>
 
 
 <style>
@@ -2725,6 +2726,51 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
         <div style="font-size:1.3rem;color:var(--blue);">‹</div>
       </div>
+    </div>
+
+    <!-- تحضير الدروس -->
+    <div onclick="nav(null,'rep-lessons')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(107,63,160,.25);">📝</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تحضير الدروس</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مراجعة تحضيرات المعلمين والموافقة عليها</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: مراجعة تحضير الدروس -->
+<div id="page-rep-lessons" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تحضير الدروس</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">📝 مراجعة تحضير الدروس</div>
+  <div id="rep-lessons-out"></div>
+</div>
+
+<!-- MODAL: مراجعة تحضير درس -->
+<div class="overlay" id="modal-prep-review">
+  <div class="modal" style="max-width:880px;width:94%;">
+    <div class="modal-head"><div class="modal-title">📝 مراجعة تحضير الدرس</div><button class="modal-close" onclick="closeModal('modal-prep-review')">✕</button></div>
+    <div class="modal-body">
+      <div id="prep-sheet" style="background:#fff;"></div>
+      <div id="prep-approved-tag" style="display:none;margin-top:14px;padding:12px;background:var(--pale);border:1.5px solid var(--mint);border-radius:10px;color:var(--emerald);font-weight:800;text-align:center;">✅ تم اعتماد هذا التحضير ومنح ٥٠ نقطة للمعلم</div>
+      <div style="margin-top:14px;">
+        <label style="font-weight:700;color:var(--forest);font-size:.82rem;">ملاحظات المشرف (تظهر للمعلم عند الإرجاع)</label>
+        <textarea id="prep-note" rows="3" placeholder="اكتب ملاحظاتك…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:Tajawal;font-size:.85rem;margin-top:6px;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot" id="prep-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="approvePrep()">✅ موافقة (+٥٠ نقطة)</button>
+      <button class="btn btn-danger" onclick="returnPrep()">↩️ إرجاع بملاحظات</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-prep-review')">إغلاق</button>
     </div>
   </div>
 </div>
@@ -6725,6 +6771,7 @@ const PAGE_TITLES = {
   att_employees:'📅 حضور الموظفين',memorization:'✅ الحفظ والمراجعة',
   schedule:'📖 الخطط والمقررات',reports:'📄 التقارير',stats:'📊 الإحصاءات',
   'rep-students':'👨‍🎓 تقارير الطلاب','rep-teachers':'👨‍🏫 تقارير المعلمين','rep-circles':'🕌 تقارير الحلقات',
+  'rep-lessons':'📝 مراجعة تحضير الدروس',
   exams:'✍️ الامتحانات',golden:'🏅 السجل الذهبي',cards:'🪪 بطاقات الطلاب',
   reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'💰 الشؤون المالية',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
@@ -8639,6 +8686,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'rep-students') rptInitIndex().then(()=>rptFillDatalist('student'));
   if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
   if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
+  if (pageId === 'rep-lessons') loadLessonReviews();
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
@@ -9926,12 +9974,17 @@ function svFmtArDate(iso){
 }
 
 // ── تخزين الجلسة (Supabase + كاش) ──
+// المفتاح يشمل الشعبة: نفس المعلم في الأبطال والرواد له جلستان منفصلتان
 window.SV_SESSIONS = window.SV_SESSIONS || {};
-function svSessKey(date, teacher){ return date+'__'+String(teacher).replace(/\s+/g,'_'); }
+function svSessKey(date, teacher, branch){ return date+'__'+String(teacher).replace(/\s+/g,'_')+'__'+String(branch||''); }
+
+// شعبة المعلم الافتراضية (fallback فقط لو لم تُمرّر الشعبة)
+function svTeacherBranch(teacher){ return (window.SV_SESS_BRANCH && window.SV_SESS_BRANCH[teacher]) || ''; }
 
 // قراءة من الكاش (متزامنة — تُملأ من svPreloadSessions)
-function svLoadSession(date, teacher){
-  return window.SV_SESSIONS[svSessKey(date,teacher)] || {};
+function svLoadSession(date, teacher, branch){
+  const b = branch || svTeacherBranch(teacher);
+  return window.SV_SESSIONS[svSessKey(date,teacher,b)] || {};
 }
 
 // تحميل كل جلسات شعب المشرف من Supabase إلى الكاش
@@ -9952,7 +10005,7 @@ async function svPreloadSessions(branches){
     const { data, error } = await q;
     if(error){ console.log('preload sessions:', error.message); return; }
     (data||[]).forEach(r=>{
-      window.SV_SESSIONS[svSessKey(r.session_date, r.teacher_name)] = {
+      window.SV_SESSIONS[svSessKey(r.session_date, r.teacher_name, r.branch)] = {
         attendance: r.attendance||'',
         lateMin:    r.late_min||'',
         scores:     r.scores||{},
@@ -9965,15 +10018,15 @@ async function svPreloadSessions(branches){
   }catch(e){ console.log('preload sessions ex:', e); }
 }
 
-// حفظ/تحديث جلسة في Supabase + الكاش
-async function svSaveSessionData(date, teacher, obj){
-  window.SV_SESSIONS[svSessKey(date,teacher)] = obj;   // كاش فوري
+// حفظ/تحديث جلسة في Supabase + الكاش (مقيّدة بالشعبة)
+async function svSaveSessionData(date, teacher, obj, branch){
+  const b = branch || svTeacherBranch(teacher);
+  window.SV_SESSIONS[svSessKey(date,teacher,b)] = obj;   // كاش فوري
   const cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
-  const branch = (window.SV_SESS_BRANCH && window.SV_SESS_BRANCH[teacher]) || '';
   const row = {
     session_date: date,
     teacher_name: teacher,
-    branch:       branch,
+    branch:       b,
     supervisor_id:   String(cu.id||''),
     supervisor_name: cu.full_name||'',
     attendance:   obj.attendance||'',
@@ -9985,8 +10038,18 @@ async function svSaveSessionData(date, teacher, obj){
     saved_at:     new Date().toISOString(),
   };
   try{
-    const { error } = await db.from('supervisory_sessions')
-      .upsert(row, { onConflict: 'session_date,teacher_name' });
+    // بحث عن صف قائم لنفس (التاريخ + المعلم + الشعبة) — بلا اعتماد على قيد فريد
+    const { data: rows, error: selErr } = await db.from('supervisory_sessions')
+      .select('id,branch').eq('session_date',date).eq('teacher_name',teacher);
+    if(selErr){ console.log('sess sel:', selErr.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
+    let target = (rows||[]).find(r=> (r.branch||'')===b);
+    if(!target)   target = (rows||[]).find(r=> !r.branch);   // صف قديم بلا شعبة → رقّيه لهذه الشعبة
+    let error;
+    if(target){
+      ({ error } = await db.from('supervisory_sessions').update(row).eq('id', target.id));
+    } else {
+      ({ error } = await db.from('supervisory_sessions').insert(row));
+    }
     if(error){ console.log('save session:', error.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
     return true;
   }catch(e){ console.log('save session ex:', e); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
@@ -10036,7 +10099,7 @@ function svBuildBranchTable(branchName){
       const name    = t.name;
       const rowId   = key+'_'+svHash(name);
       const nameEsc = name.replace(/'/g,"\\'");
-      const rec  = svLoadSession(date, name);
+      const rec  = svLoadSession(date, name, branchName);
       const att  = rec.attendance || '';
       const lateShow = att==='متأخر';
       const sessCell = rec.done
@@ -10098,23 +10161,23 @@ function svAttChange(sel, branch, teacher, rowId){
   const wrap = document.getElementById('latewrap-'+rowId);
   if(wrap) wrap.style.display = (sel.value==='متأخر') ? 'inline-flex' : 'none';
   const date = svCurrentCircleDate(branch);
-  const rec  = svLoadSession(date, teacher);
+  const rec  = svLoadSession(date, teacher, branch);
   rec.attendance = sel.value;
   if(sel.value!=='متأخر') rec.lateMin = '';
-  svSaveSessionData(date, teacher, rec);
+  svSaveSessionData(date, teacher, rec, branch);
 }
 function svLateChange(inp, branch, teacher){
   const date = svCurrentCircleDate(branch);
-  const rec  = svLoadSession(date, teacher);
+  const rec  = svLoadSession(date, teacher, branch);
   rec.lateMin = inp.value;
-  svSaveSessionData(date, teacher, rec);
+  svSaveSessionData(date, teacher, rec, branch);
 }
 
 // ── فتح مودال التقييم ──
 function svOpenEvalModal(branch, teacher, pillarKey, dateOverride){
   const date = dateOverride || svCurrentCircleDate(branch);
   window.SV_EVAL_CTX   = {branch, teacher, date, pillarKey: pillarKey||null};
-  const rec = svLoadSession(date, teacher);
+  const rec = svLoadSession(date, teacher, branch);
   window.SV_EVAL_STATE = Object.assign({}, rec.scores||{});
   const sec = pillarKey ? SV_EVAL_SECTIONS.find(s=>s.key===pillarKey) : null;
   document.getElementById('sv-eval-title').textContent = 'تقييم المعلم/ ' + teacher;
@@ -10177,7 +10240,7 @@ function svConfirmSaveSession(){ openModal('modal-sv-confirm'); }
 function svCancelSaveSession(){ closeModal('modal-sv-confirm'); }   // يبقى مودال التقييم مفتوحاً
 async function svDoSaveSession(){
   const ctx = window.SV_EVAL_CTX; if(!ctx) { closeModal('modal-sv-confirm'); return; }
-  const rec = Object.assign({}, svLoadSession(ctx.date, ctx.teacher));
+  const rec = Object.assign({}, svLoadSession(ctx.date, ctx.teacher, ctx.branch));
   rec.scores  = Object.assign({}, window.SV_EVAL_STATE);
   const ot = document.getElementById('sv-eval-other');
   rec.other   = ot ? ot.value : '';
@@ -10188,7 +10251,7 @@ async function svDoSaveSession(){
   closeModal('modal-sv-confirm');
   closeModal('modal-sv-eval');
   showToast('⏳ جارٍ الحفظ...');
-  const ok = await svSaveSessionData(ctx.date, ctx.teacher, rec);
+  const ok = await svSaveSessionData(ctx.date, ctx.teacher, rec, ctx.branch);
   svRenderDashboard(svGetMyBranches());
   if(ok) showToast(ctx.pillarKey ? '✅ تم حفظ تقييم الركن' : '✅ تم حفظ الجلسة الإشرافية');
 }
@@ -10238,7 +10301,7 @@ function svBuildSessionsSchedule(branches){
         const t = teachers[i % teachers.length];
         const p = SV_SESS_PILLARS[i % SV_SESS_PILLARS.length];
         const nameEsc = t.name.replace(/'/g,"\'");
-        const rec  = svLoadSession(d.iso, t.name);
+        const rec  = svLoadSession(d.iso, t.name, b);
         const done = !!(rec.pillars && rec.pillars[p.key]);
         const isToday = d.iso===todayIso;
         const first = t.name.split(' ').slice(0,2).join(' ');
@@ -10468,9 +10531,9 @@ async function svFetchCircleLive(branchName, teacherName){
 
   // 4) الحضور لهذا اليوم
   const { data: attData } = await db.from('attendance')
-    .select('student_id, status').in('student_id', allIds).eq('date', date);
-  const attMap = {};
-  (attData||[]).forEach(a => { attMap[a.student_id] = a.status; });
+    .select('student_id, status, late_minutes').in('student_id', allIds).eq('date', date);
+  const attMap = {}, lateMap = {};
+  (attData||[]).forEach(a => { attMap[a.student_id] = a.status; lateMap[a.student_id] = a.late_minutes||0; });
 
   // 5) التسميع لهذا اليوم (حفظ + مراجعة)
   const { data: memData } = await db.from('memorization')
@@ -10482,7 +10545,7 @@ async function svFetchCircleLive(branchName, teacherName){
   });
 
   const gradeAr = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'حاول مرة أخرى' };
-  const attAr   = { present:'حاضر', late:'متأخر ٣٠ دقيقة', absent:'غائب' };
+  const attAr   = { present:'حاضر', absent:'غائب' };
 
   // 6) نقاط الطلاب (مجموع من points_cards)  [#3]
   const ptsMap = {};
@@ -10500,7 +10563,9 @@ async function svFetchCircleLive(branchName, teacherName){
 
   const rows = allStudents.map(s => {
     const attRaw = attMap[s.id];
-    const att = attRaw ? (attAr[attRaw]||attRaw) : 'لم يُسجَّل';
+    let att;
+    if(attRaw==='late'){ const mn=lateMap[s.id]||0; att = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
+    else att = attRaw ? (attAr[attRaw]||attRaw) : 'لم يُسجَّل';
     const memG = memMap[s.id], revG = revMap[s.id];
     const mem = (att==='غائب') ? '—' : (memG ? (gradeAr[memG]||memG) : '—');
     const rev = (att==='غائب') ? '—' : (revG ? (gradeAr[revG]||revG) : '—');
@@ -10688,13 +10753,16 @@ async function wkLoadRealData(wkIdx){
   const isoStart = allIso[0], isoEnd = allIso[allIso.length-1];
   const id2name = {};
   Object.keys(window._WK_NAME2ID||{}).forEach(nm=>window._WK_NAME2ID[nm].forEach(id=>id2name[id]=nm));
-  const statusMap = { present:'حاضر', late:'متأخر ٣٠ دقيقة', absent:'غائب', excused:'معذور' };
+  const statusMap = { present:'حاضر', absent:'غائب', excused:'معذور' };
   try{
     const { data:att } = await db.from('attendance')
-      .select('student_id,date,status').gte('date',isoStart).lte('date',isoEnd);
+      .select('student_id,date,status,late_minutes').gte('date',isoStart).lte('date',isoEnd);
     (att||[]).forEach(a=>{
       const nm=id2name[a.student_id]; if(!nm) return;
-      const k=a.date+'|'+nm; (window.WK_REAL[k]=window.WK_REAL[k]||{}).att=statusMap[a.status]||a.status;
+      let v;
+      if(a.status==='late'){ const mn=a.late_minutes||0; v = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
+      else v = statusMap[a.status]||a.status;
+      const k=a.date+'|'+nm; (window.WK_REAL[k]=window.WK_REAL[k]||{}).att=v;
     });
   }catch(e){ console.log('wk att:', e); }
   try{
@@ -11066,83 +11134,161 @@ function waMaxStreak(arr, matchFn){
 }
 
 // تحليل شعبة لأسبوع معيّن
+// ══════════════════════════════════════════════════════
+// محرّك التنبيهات — بيانات حقيقية بالـ ID على نطاق الشهر المحيط بالأسبوع
+// ══════════════════════════════════════════════════════
+window.WA_ANALYSIS = window.WA_ANALYSIS || {};
+
+// حدود الشهر التقويمي الذي تقع فيه بداية الأسبوع
+function waMonthRange(weekIdx){
+  const ref = wkWeekDates(weekIdx, 'الأبطال')[0];   // أحد بداية الأسبوع (مرجع)
+  const mStart = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  const mEnd   = new Date(ref.getFullYear(), ref.getMonth()+1, 0);
+  return { from: wkIso(mStart), to: wkIso(mEnd) };
+}
+
+// تحميل بيانات التحليل من Supabase (الشهر) وتخزينها بالكاش
+async function waLoadAnalysis(weekIdx){
+  if(window.WA_ANALYSIS[weekIdx]) return window.WA_ANALYSIS[weekIdx];
+  const mr = waMonthRange(weekIdx);
+  const A = { month: mr, attByStu:{}, memByStu:{}, sessByTB:{}, stuName:{}, stuCircle:{} };
+
+  const circleIds = [];
+  svGetMyBranches().forEach(b=> svBranchCircles(b).forEach(c=>{ if(c.circleId) circleIds.push(c.circleId); }));
+
+  const stuIds = [];
+  try{
+    if(circleIds.length){
+      const { data:studs } = await db.from('students')
+        .select('id,circle_id,users!students_user_id_fkey(full_name)')
+        .in('circle_id', circleIds).eq('is_active', true);
+      (studs||[]).forEach(s=>{
+        A.stuName[s.id]   = (s.users&&s.users.full_name)||'طالب';
+        A.stuCircle[s.id] = s.circle_id;
+        stuIds.push(s.id);
+      });
+    }
+  }catch(e){ console.log('wa studs:', e); }
+
+  try{
+    if(stuIds.length){
+      const { data:att } = await db.from('attendance')
+        .select('student_id,date,status,late_minutes')
+        .in('student_id', stuIds).gte('date',mr.from).lte('date',mr.to).order('date',{ascending:true});
+      (att||[]).forEach(a=>{ (A.attByStu[a.student_id]=A.attByStu[a.student_id]||[]).push(a); });
+    }
+  }catch(e){ console.log('wa att:', e); }
+
+  try{
+    if(stuIds.length){
+      const { data:mem } = await db.from('memorization')
+        .select('student_id,date,type,grade')
+        .in('student_id', stuIds).gte('date',mr.from).lte('date',mr.to).order('date',{ascending:true});
+      (mem||[]).forEach(m=>{ (A.memByStu[m.student_id]=A.memByStu[m.student_id]||[]).push(m); });
+    }
+  }catch(e){ console.log('wa mem:', e); }
+
+  // الجلسات الإشرافية (حضور/تأخير المعلم) — مفتاح: teacher||branch (منفصل لكل شعبة)
+  try{
+    const { data:sess } = await db.from('supervisory_sessions')
+      .select('teacher_name,branch,session_date,attendance,late_min')
+      .gte('session_date',mr.from).lte('session_date',mr.to).order('session_date',{ascending:true});
+    (sess||[]).forEach(s=>{ const k=(s.teacher_name||'')+'||'+(s.branch||''); (A.sessByTB[k]=A.sessByTB[k]||[]).push(s); });
+  }catch(e){ console.log('wa sess:', e); }
+
+  window.WA_ANALYSIS[weekIdx] = A;
+  return A;
+}
+
+// عتبات التنبيهات
+const WA_TH = { absStreak:3, absScatter:6, tAbsStreak:3, tLateMonth:100, gradeStreak:3, stuLateWeek:100 };
+
+// تحليل شعبة — يقرأ من الكاش (متزامن)
 function waAnalyzeBranch(branchName, weekIdx){
   if(weekIdx===undefined) weekIdx = WA_CURRENT;
-  const dates   = wkWeekDates(weekIdx, branchName);
-  const days    = wkBranchDays(branchName);
-  const sessions= days.map(di=>dates[di]).filter(Boolean).map(d=>wkIso(d)); // تواريخ الحلقات بالترتيب
-  const circles = svBranchCircles(branchName);
-  const alerts  = [];   // تنبيهات
-  const warnings= [];   // إنذارات
+  const alerts=[], warnings=[];
+  const A = (window.WA_ANALYSIS||{})[weekIdx];
+  if(!A) return { alerts, warnings };
 
-  circles.forEach(c=>{
-    const teacher = c.teacher;
-    // جدول كل الجلسات: لكل جلسة صفوف الطلاب
-    const perSession = sessions.map(iso => wkCircleRows(branchName, teacher, iso));
-    const students   = (c.students||[]);
+  // تواريخ أيام الأسبوع المعروض لهذه الشعبة (لقاعدة تأخير الطالب الأسبوعي)
+  const wdates  = wkWeekDates(weekIdx, branchName);
+  const weekSet = new Set(wkBranchDays(branchName).map(di=>wdates[di]).filter(Boolean).map(wkIso));
 
-    // ── المعلم: غائب لو كل طلاب الحلقة غائبين في الجلسة ──
-    const teacherAtt = perSession.map(rows => rows.length && rows.every(r=>r.att==='غائب') ? 'غائب' : 'حاضر');
-    const tAbsStreak = waMaxStreak(teacherAtt, v=>v==='غائب');
-    if(tAbsStreak>=3){
-      if(tAbsStreak>=3 && tAbsStreak<5)
-        alerts.push({type:'red', icon:'🧑‍🏫', text:`المعلم/ ${teacher} — غياب ${wkAr(tAbsStreak)} مرات متتالية`});
-    }
-    if(tAbsStreak>=3){
-      // إنذار المعلم: ٣ متتالية
-      warnings.push({type:'red', icon:'⛔', text:`إنذار: المعلم/ ${teacher} غاب ${wkAr(tAbsStreak)} مرات متتالية خلال الأسبوع`});
-    }
+  svBranchCircles(branchName).forEach(c=>{
+    const teacher = c.teacher, cid = c.circleId;
+    const toInt = v => parseInt(String(v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)),10)||0;
 
-    // ── الطلاب ──
-    students.forEach((sName, si)=>{
-      const seq = perSession.map(rows => rows[si] || {att:'—',mem:'—',rev:'—'});
-      const atts = seq.map(r=>r.att);
-      const mems = seq.map(r=>r.mem);
-      const revs = seq.map(r=>r.rev);
+    // ── المعلم (من الجلسات الإشرافية، مقيّدة بالشعبة) ──
+    const sess = A.sessByTB[teacher+'||'+branchName] || [];
+    const tAbsStreak = waMaxStreak(sess.map(s=>s.attendance), a=>a==='غائب');
+    if(tAbsStreak>=WA_TH.tAbsStreak)
+      warnings.push({type:'red', icon:'⛔', text:`إنذار: المعلم/ ${teacher} غاب ${wkAr(tAbsStreak)} مرات متتالية خلال الشهر`,
+        _detail:{ intro:'أيام غياب المعلم المسجّلة خلال الشهر:', rows: sess.filter(s=>s.attendance==='غائب').map(s=>({date:s.session_date, note:'غائب'})) }});
+    let tLate=0; sess.forEach(s=>{ tLate += toInt(s.late_min); });
+    if(tLate>=WA_TH.tLateMonth)
+      alerts.push({type:'gold', icon:'⏱️', text:`المعلم/ ${teacher} — تأخير ${wkAr(tLate)} دقيقة مجمّعة خلال الشهر`,
+        _detail:{ intro:'أيام تأخير المعلم خلال الشهر:', total:wkAr(tLate)+' دقيقة', rows: sess.map(s=>({d:s.session_date,m:toInt(s.late_min)})).filter(x=>x.m>0).map(x=>({date:x.d, note:wkAr(x.m)+' دقيقة'})) }});
 
-      // غياب طالب متتالي
-      const absStreak = waMaxStreak(atts, v=>v==='غائب');
-      if(absStreak>=5){
-        warnings.push({type:'red', icon:'⛔', text:`إنذار: الطالب ${sName} (حلقة ${teacher}) غاب ${wkAr(absStreak)} مرات متتالية`});
-      } else if(absStreak>=3){
-        alerts.push({type:'red', icon:'🚫', text:`الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absStreak)} مرات متتالية`});
-      }
+    // ── طلاب الحلقة (بالـ id) ──
+    const stuIds = Object.keys(A.stuCircle).filter(id=>A.stuCircle[id]===cid);
+    stuIds.forEach(sid=>{
+      const sName = A.stuName[sid] || 'طالب';
+      const attL  = A.attByStu[sid] || [];       // الشهر، مرتبة بالتاريخ
+      const memAll= A.memByStu[sid] || [];
+      const memL  = memAll.filter(m=>m.type!=='review');   // الحفظ
+      const revL  = memAll.filter(m=>m.type==='review');   // المراجعة
+      const absRows   = attL.filter(a=>a.status==='absent').map(a=>({date:a.date, note:'غائب'}));
+      const gradeRows = (list,g)=> list.filter(m=>m.grade===g).map(m=>({date:m.date, note:g==='good'?'جيد':'إعادة'}));
 
-      // "حاول مرة أخرى" متتالي — حفظ
-      const memRetry = waMaxStreak(mems, v=>v==='حاول مرة أخرى');
-      if(memRetry>=3)
-        alerts.push({type:'gold', icon:'📖', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "حاول مرة أخرى" في الحفظ ${wkAr(memRetry)} مرات متتالية`});
+      // 1) غياب متتالي ≥ 3
+      const absStreak = waMaxStreak(attL.map(a=>a.status), s=>s==='absent');
+      if(absStreak>=WA_TH.absStreak)
+        alerts.push({type:'red', icon:'🚫', text:`الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absStreak)} مرات متتالية`,
+          _detail:{ intro:'الأيام الغائب فيها خلال الشهر:', rows:absRows }});
 
-      // "حاول مرة أخرى" متتالي — مراجعة
-      const revRetry = waMaxStreak(revs, v=>v==='حاول مرة أخرى');
-      if(revRetry>=3)
-        alerts.push({type:'gold', icon:'🔁', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "حاول مرة أخرى" في المراجعة ${wkAr(revRetry)} مرات متتالية`});
+      // 2) غياب متقطع ≥ 6 خلال الشهر
+      const absTotal = attL.filter(a=>a.status==='absent').length;
+      if(absTotal>=WA_TH.absScatter)
+        warnings.push({type:'red', icon:'📛', text:`إنذار: الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absTotal)} مرات متقطعة خلال الشهر`,
+          _detail:{ intro:'الأيام الغائب فيها بالتواريخ:', rows:absRows }});
 
-      // "جيد" متتالي — حفظ ٤ مرات
-      const memGood = waMaxStreak(mems, v=>v==='جيد');
-      if(memGood>=4)
-        alerts.push({type:'blue', icon:'📖', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في الحفظ ${wkAr(memGood)} مرات متتالية`});
+      // 5) تقدير "جيد" متتالي ≥ 3 (حفظ/مراجعة)
+      const memGood = waMaxStreak(memL.map(m=>m.grade), g=>g==='good');
+      if(memGood>=WA_TH.gradeStreak)
+        alerts.push({type:'blue', icon:'📖', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في الحفظ ${wkAr(memGood)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "جيد" في الحفظ:', rows:gradeRows(memL,'good') }});
+      const revGood = waMaxStreak(revL.map(m=>m.grade), g=>g==='good');
+      if(revGood>=WA_TH.gradeStreak)
+        alerts.push({type:'blue', icon:'🔁', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في المراجعة ${wkAr(revGood)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "جيد" في المراجعة:', rows:gradeRows(revL,'good') }});
 
-      // "جيد" متتالي — مراجعة ٤ مرات
-      const revGood = waMaxStreak(revs, v=>v==='جيد');
-      if(revGood>=4)
-        alerts.push({type:'blue', icon:'🔁', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في المراجعة ${wkAr(revGood)} مرات متتالية`});
+      // 6) تقدير "إعادة" متتالي ≥ 3 (حفظ/مراجعة)
+      const memRetry = waMaxStreak(memL.map(m=>m.grade), g=>g==='retry');
+      if(memRetry>=WA_TH.gradeStreak)
+        alerts.push({type:'gold', icon:'📕', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في الحفظ ${wkAr(memRetry)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "إعادة" في الحفظ:', rows:gradeRows(memL,'retry') }});
+      const revRetry = waMaxStreak(revL.map(m=>m.grade), g=>g==='retry');
+      if(revRetry>=WA_TH.gradeStreak)
+        alerts.push({type:'gold', icon:'🔂', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في المراجعة ${wkAr(revRetry)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "إعادة" في المراجعة:', rows:gradeRows(revL,'retry') }});
 
-      // تأخير مجمّع ١٠٠ دقيقة
-      let lateTotal = 0;
-      atts.forEach(a=>{ if(a.indexOf('متأخر')===0) lateTotal += waNum(a); });
-      if(lateTotal>=100)
-        alerts.push({type:'gold', icon:'⏰', text:`الطالب ${sName} (حلقة ${teacher}) — تأخير ${wkAr(lateTotal)} دقيقة مجمّعة خلال الأسبوع`});
-
-// تنبيهات السلوك/الشغب تُرفع من المعلم يدوياً — لا تُولَّد تلقائياً
+      // 7) تأخير الطالب ≥ 100 دقيقة خلال الأسبوع المعروض
+      let lateWeek=0; const lateRows=[];
+      attL.forEach(a=>{ if(weekSet.has(a.date) && a.status==='late'){ lateWeek += (a.late_minutes||0); lateRows.push({date:a.date, note:wkAr(a.late_minutes||0)+' دقيقة'}); } });
+      if(lateWeek>=WA_TH.stuLateWeek)
+        alerts.push({type:'gold', icon:'⏰', text:`الطالب ${sName} (حلقة ${teacher}) — تأخير ${wkAr(lateWeek)} دقيقة خلال الأسبوع`,
+          _detail:{ intro:'أيام التأخير خلال الأسبوع:', total:wkAr(lateWeek)+' دقيقة', rows:lateRows }});
     });
   });
 
-  // ── id ثابت لكل عنصر (مبني على الشعبة+النص+الأسبوع) ──
-  const stamp = (a)=>{ a.id = 'wa_' + weekIdx + '_' + svHash(branchName + '|' + a.text); return a; };
-  alerts.forEach(stamp);
-  warnings.forEach(stamp);
-
+  // id ثابت لكل عنصر + تخزين التفاصيل
+  window.WA_DETAILS = window.WA_DETAILS || {};
+  const stamp = (a)=>{
+    a.id = 'wa_' + weekIdx + '_' + svHash(branchName + '|' + a.text);
+    if(a._detail){ a._detail.title = a.text; window.WA_DETAILS[a.id] = a._detail; delete a._detail; }
+    return a;
+  };
+  alerts.forEach(stamp); warnings.forEach(stamp);
   return { alerts, warnings };
 }
 
@@ -11176,6 +11322,36 @@ function waOpenAction(id, kind, text){
   setTimeout(()=>{ const el=document.getElementById('wa-action-input'); if(el) el.focus(); }, 120);
 }
 
+// ── عرض البيان التفصيلي للتنبيه (التواريخ) ──
+function waShowDetail(id){
+  const d = (window.WA_DETAILS||{})[id];
+  const titleEl = document.getElementById('wa-detail-title');
+  const bodyEl  = document.getElementById('wa-detail-body');
+  if(!titleEl || !bodyEl) return;
+  if(!d){
+    titleEl.textContent = 'بيان التنبيه';
+    bodyEl.innerHTML = '<div class="empty" style="padding:22px;"><span class="empty-icon">📭</span>لا يوجد بيان تفصيلي لهذا التنبيه</div>';
+    openModal('modal-wa-detail'); return;
+  }
+  titleEl.textContent = d.title || 'بيان التنبيه';
+  let html = `<div style="font-size:.85rem;font-weight:700;color:var(--forest);margin-bottom:12px;line-height:1.7;">${d.intro||''}</div>`;
+  if(d.total) html += `<div style="margin-bottom:12px;"><span class="badge bg-gold" style="font-size:.76rem;">الإجمالي: ${d.total}</span></div>`;
+  if(!d.rows || !d.rows.length){
+    html += '<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>لا توجد تواريخ مسجّلة</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:7px;">' + d.rows.map((r,i)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border);border-right:3px solid var(--red);border-radius:var(--r-sm);background:var(--white);">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <span style="width:23px;height:23px;border-radius:50%;background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--mid);font-weight:700;flex-shrink:0;">${wkAr(i+1)}</span>
+          <span style="font-size:.85rem;font-weight:700;color:var(--forest);">${svFmtArDate(r.date)}</span>
+        </div>
+        <span class="badge bg-red" style="font-size:.72rem;flex-shrink:0;">${r.note||''}</span>
+      </div>`).join('') + '</div>';
+  }
+  bodyEl.innerHTML = html;
+  openModal('modal-wa-detail');
+}
+
 // ── حفظ الإجراء ──
 function waSaveAction(){
   if(!WA_ACTION_CTX) return;
@@ -11201,7 +11377,7 @@ function waCurrentWeekIndex(){
 // وتعكس الإجراءات المتخذة (أخضر) وترتّبها أسفل القائمة.
 function waSyncDashboard(){
   const wk   = waCurrentWeekIndex();
-  wkLoadRealData(wk).then(()=>{
+  waLoadAnalysis(wk).then(()=>{
   const acts = waLoadActions();
   window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
 
@@ -11254,8 +11430,8 @@ async function renderWAlerts(){
     WA_CURRENT = waCurrentWeekIndex();
     window._waInit = true;
   }
-  // حمّل بيانات الأسبوع الحقيقية من Supabase قبل التحليل (وإلا تظهر التنبيهات فارغة)
-  await wkLoadRealData(WA_CURRENT);
+  // حمّل بيانات التحليل الحقيقية (بالـ ID على نطاق الشهر) قبل الرصد
+  await waLoadAnalysis(WA_CURRENT);
 
   const dates = wkWeekDates(WA_CURRENT);
   document.getElementById('wa-week-title').textContent  = 'الأسبوع '+WK_AR_NUM[WA_CURRENT];
@@ -11312,7 +11488,7 @@ async function renderWAlerts(){
       return `<div style="display:flex;flex-direction:column;padding:11px 13px;background:${bg};border:1.5px solid ${bd};border-radius:var(--r-sm);margin-bottom:8px;">
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1.1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
-          <div style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;">${a.text}</div>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
           ${actionBtn(a.id,'warning',a.text)}
         </div>
         ${actionLine(a.id)}
@@ -11328,7 +11504,7 @@ async function renderWAlerts(){
       return `<div style="display:flex;flex-direction:column;padding:10px 13px;background:${bg};border-right:3px solid ${bd};border-radius:var(--r-sm);margin-bottom:7px;">
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
-          <div style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;">${a.text}</div>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
           ${actionBtn(a.id,'alert',a.text)}
         </div>
         ${actionLine(a.id)}
@@ -13968,6 +14144,20 @@ function transliterateAr(str) {
   </div>
 </div>
 
+<!-- ══ مودال: البيان التفصيلي للتنبيه (التواريخ) ══ -->
+<div class="overlay" id="modal-wa-detail">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div class="modal-title" id="wa-detail-title" style="font-size:.98rem;line-height:1.6;">بيان التنبيه</div>
+      <button class="modal-close" onclick="closeModal('modal-wa-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="wa-detail-body" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-wa-detail')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ مودال: خيارات المشاركة (واتساب / تيليجرام / تنزيل) ══ -->
 <div class="overlay" id="modal-wk-share">
   <div class="modal" style="max-width:360px;">
@@ -14283,6 +14473,73 @@ function rptHeaderCard(title, sub, rows){
 }
 
 // ══════════════════════════════════════════════════════
+// مراجعة تحضير الدروس (يظهر للمشرف — RLS يقصر على معلميه)
+// ══════════════════════════════════════════════════════
+function lpStatusBadge(st){
+  const m={submitted:['قيد المراجعة','bg-blue'],approved:['معتمَد','bg-green'],returned:['مُعاد بملاحظات','bg-red'],draft:['مسودة','bg-gray']};
+  const x=m[st]||m.draft; return '<span class="badge '+x[1]+'">'+x[0]+'</span>';
+}
+async function loadLessonReviews(){
+  const out=document.getElementById('rep-lessons-out');
+  out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let rows=[];
+  try{ const {data}=await db.from('lesson_preps').select('*').in('status',['submitted','returned','approved']).order('submitted_at',{ascending:false}); rows=data||[]; }
+  catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر التحميل</div>'; return; }
+  const ids=[...new Set(rows.map(r=>r.teacher_id))]; const names={};
+  if(ids.length){ try{ const {data}=await db.from('users').select('id,full_name').in('id',ids); (data||[]).forEach(u=>names[u.id]=u.full_name); }catch(e){} }
+  window._LP_ROWS={}; rows.forEach(r=>window._LP_ROWS[r.id]=r);
+  if(!rows.length){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد تحضيرات مُرسلة للمراجعة</div>'; return; }
+  const pending=rows.filter(r=>r.status==='submitted'), others=rows.filter(r=>r.status!=='submitted');
+  const rowHtml=(r)=>'<tr>'+
+    '<td style="font-weight:700;color:var(--forest);">'+(names[r.teacher_id]||'—')+'</td>'+
+    '<td>'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+'</td>'+
+    '<td>'+((r.title||'—'))+'</td>'+
+    '<td style="white-space:nowrap;">'+(r.date||'—')+'</td>'+
+    '<td>'+lpStatusBadge(r.status)+'</td>'+
+    '<td><button class="btn btn-primary btn-sm" onclick="openPrepReview(\''+r.id+'\')">مراجعة</button></td></tr>';
+  const tbl=(list,empty)=>'<div style="overflow-x:auto;"><table class="rpt-table" style="min-width:680px;"><thead><tr><th>المعلم</th><th>المادة</th><th>عنوان الدرس</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead><tbody>'+(list.map(rowHtml).join('')||('<tr><td colspan="6" style="text-align:center;color:var(--light);padding:16px;">'+empty+'</td></tr>'))+'</tbody></table></div>';
+  out.innerHTML='<div class="card"><div class="card-head"><div class="card-title">📥 بانتظار المراجعة ('+rptAr(pending.length)+')</div></div>'+tbl(pending,'لا يوجد')+'</div>'+
+    (others.length?('<div class="card" style="margin-top:16px;"><div class="card-head"><div class="card-title">📋 مراجَعة سابقاً</div></div>'+tbl(others,'—')+'</div>'):'');
+}
+function lpSheetHtml(r){
+  const d=r.data||{};
+  const esc=(v)=>(v||'—').replace(/</g,'&lt;');
+  const rws=(d.rows||[]).map(x=>'<tr><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.during)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;text-align:center;">'+esc(x.time)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.assess)+'</td></tr>').join('')||'<tr><td colspan="3" style="text-align:center;color:var(--light);padding:10px;">—</td></tr>';
+  const block=(t,v)=>'<div style="margin-bottom:8px;"><div style="font-weight:700;color:var(--jade);font-size:.8rem;">'+t+'</div><div style="white-space:pre-wrap;font-size:.82rem;color:var(--ink);">'+esc(v)+'</div></div>';
+  return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><b style="font-family:Amiri,serif;color:var(--forest);">تحضير الدرس: '+esc(r.title)+'</b><span style="font-size:.78rem;color:var(--light);">'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+'</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div>'+block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure)+'</div>'+
+    '<div><div style="font-weight:700;color:var(--forest);font-size:.82rem;margin-bottom:6px;">المساحة الإبداعية (أثناء الشرح / الزمن / التقويم)</div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:var(--pale);"><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">أثناء الشرح</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;width:56px;">الزمن</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">التقويم</th></tr></thead><tbody>'+rws+'</tbody></table></div></div>';
+}
+function openPrepReview(id){
+  const r=window._LP_ROWS[id]; if(!r) return; window._LP_CUR=id;
+  document.getElementById('prep-sheet').innerHTML=lpSheetHtml(r);
+  document.getElementById('prep-note').value=r.supervisor_note||'';
+  const approved=r.status==='approved';
+  document.getElementById('prep-approved-tag').style.display=approved?'block':'none';
+  document.getElementById('prep-actions').style.display=approved?'none':'flex';
+  openModal('modal-prep-review');
+}
+async function approvePrep(){
+  const id=window._LP_CUR; if(!id) return;
+  try{
+    const {data,error}=await db.rpc('approve_lesson_prep',{p_id:id});
+    if(error) throw error;
+    if(data&&data.ok){ showToast(data.awarded?'✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم':'✅ تمت الموافقة (النقاط ممنوحة سابقاً)'); closeModal('modal-prep-review'); loadLessonReviews(); }
+    else showToast('⚠️ '+((data&&data.msg)==='forbidden'?'لا تملك صلاحية على هذا المعلم':'تعذّرت الموافقة'));
+  }catch(e){ showToast('❌ تعذّرت الموافقة: '+(e.message||e.code||'')); }
+}
+async function returnPrep(){
+  const id=window._LP_CUR; if(!id) return;
+  const note=document.getElementById('prep-note').value.trim();
+  if(!note){ showToast('⚠️ اكتب الملاحظة قبل الإرجاع'); return; }
+  try{
+    const {error}=await db.from('lesson_preps').update({status:'returned',supervisor_note:note,reviewed_at:new Date().toISOString()}).eq('id',id);
+    if(error) throw error;
+    showToast('📌 تم إرجاع التحضير للمعلم بالملاحظات'); closeModal('modal-prep-review'); loadLessonReviews();
+  }catch(e){ showToast('❌ تعذّر الإرجاع: '+(e.message||e.code||'')); }
+}
+
+// ══════════════════════════════════════════════════════
 // تقرير الطالب
 // ══════════════════════════════════════════════════════
 async function rptRunStudent(){
@@ -14295,19 +14552,20 @@ async function rptRunStudent(){
   try{
     const a = await db.from('attendance').select('date,status').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
     att = a.data||[];
-    const m = await db.from('memorization').select('date,type,grade,surah_from,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    const m = await db.from('memorization').select('date,type,grade,surah_from,surah_to,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
     mem = m.data||[];
   }catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل البيانات</div>'; return; }
 
   // فهرسة باليوم
   const byDate = {};
   att.forEach(a=>{ (byDate[a.date]=byDate[a.date]||{}).att=a.status; });
-  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0;
+  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0, hifzFaces=0, revFaces=0;
   mem.forEach(r=>{
     const d=(byDate[r.date]=byDate[r.date]||{});
     const ay = rptAyahCount(r.ayah_from, r.ayah_to);
-    if(r.type==='review'){ d.rev=r.grade; revCnt++; revAyat+=ay; }
-    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; newCnt++; hifzAyat+=ay; }
+    const fc = (typeof madaniFaces==='function') ? madaniFaces(r.surah_from, r.ayah_from, r.surah_to, r.ayah_to) : 0;
+    if(r.type==='review'){ d.rev=r.grade; d.revFaces=(d.revFaces||0)+fc; revCnt++; revAyat+=ay; revFaces+=fc; }
+    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; d.newFaces=(d.newFaces||0)+fc; newCnt++; hifzAyat+=ay; hifzFaces+=fc; }
     if(r.notes) d.notes=(d.notes?d.notes+' / ':'')+r.notes;
     if(RPT_GRADE_PT[r.grade]!=null){ ptsSum+=RPT_GRADE_PT[r.grade]; gradeN++; }
   });
@@ -14324,8 +14582,8 @@ async function rptRunStudent(){
 
   const stats = `<div class="stats-row" style="margin-bottom:16px;">
     ${rptStatCard('green','✅',rptAr(present),'حاضر',(late?('+ '+rptAr(late)+' متأخر'):''))}
-    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة')}
-    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة')}
+    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة • '+rptAr(hifzFaces)+' وجه')}
+    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة • '+rptAr(revFaces)+' وجه')}
     ${rptStatCard('purple','⭐',rptAr(avgPt),'متوسط الدرجة','من ١٥')}
   </div>`;
 
@@ -14343,6 +14601,7 @@ async function rptRunStudent(){
         <td>${rptAttBadge(x.att)}</td>
         <td>${surah||'—'}</td>
         <td>${ayat}</td>
+        <td>${((x.newFaces||0)+(x.revFaces||0))?rptAr((x.newFaces||0)+(x.revFaces||0)):'—'}</td>
         <td>${rptGradeBadge(x.mem)}</td>
         <td>${rptGradeBadge(x.rev)}</td>
         <td style="font-size:.74rem;color:var(--light);max-width:160px;">${x.notes||'—'}</td>
@@ -14351,7 +14610,7 @@ async function rptRunStudent(){
     rows = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي بالتواريخ</div>
       <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-st-out','تقرير-${s.name}')">📄 PDF</button></div>
       <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:760px;">
-      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الأوجه</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
       <tbody>${trs}</tbody></table></div></div>`;
   }
   out.innerHTML = head + stats + rows;

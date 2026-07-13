@@ -22,6 +22,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
@@ -29,6 +31,7 @@
   window.db = supabase.createClient(_SB_URL, _SB_KEY);
 </script>
 <script src="theme.js"></script>
+<script src="mushaf_madani.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal','Noto Color Emoji',sans-serif;}
@@ -766,6 +769,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div>
       <div class="sb-uname" id="sb-user-name">المعلم</div>
       <div class="sb-urole" id="sb-user-role">معلم</div>
+      <div id="sb-user-points" style="margin-top:4px;font-size:.72rem;font-weight:800;color:var(--gold-l,#f0b429);display:flex;align-items:center;gap:4px;">🏆 <span id="sb-points-val">٠</span> نقطة</div>
     </div>
     <div class="sb-online"></div>
   </div>
@@ -778,6 +782,9 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <nav class="sb-nav">
     <div class="sb-section">الرئيسية</div>
     <div class="sb-item active" onclick="nav(this,'dashboard')"><span class="sb-icon">🏠</span> لوحة القيادة</div>
+    <div class="sb-item" onclick="nav(this,'tasks')"><span class="sb-icon">✅</span> المهام اليومية</div>
+    <div class="sb-item" onclick="nav(this,'lessonprep')"><span class="sb-icon">📝</span> تحضير الدروس</div>
+    <div class="sb-item" onclick="nav(this,'strategies')"><span class="sb-icon">🎬</span> استراتيجيات التعلم النشط</div>
     <div class="sb-item" onclick="nav(this,'messages')" style="position:relative;">
       <span class="sb-icon">✉️</span> الرسائل
       <span id="sb-msg-badge" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:.62rem;font-weight:800;border-radius:99px;padding:1px 7px;min-width:18px;text-align:center;line-height:1.6;"></span>
@@ -845,6 +852,25 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card-head"><div class="card-title">⚡ بدء الحلقة</div></div>
     <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="navPage('students')">👨‍🎓 فتح جدول الحلقة والتسميع</button>
+      <button class="btn btn-gold" onclick="navPage('tasks')">✅ المهام اليومية</button>
+      <button class="btn btn-outline" onclick="navPage('lessonprep')">📝 تحضير الدروس</button>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card" style="cursor:pointer;margin:0;" onclick="navPage('tasks')">
+      <div class="card-body" style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:2.2rem;">✅</div>
+        <div><div class="section-title" style="margin:0;">المهام اليومية للحلقة</div>
+        <div style="font-size:.8rem;color:var(--light);">قائمة مهام يومك خطوة بخطوة — وأنهِها لتكسب ٢٠ نقطة</div></div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;margin:0;" onclick="navPage('lessonprep')">
+      <div class="card-body" style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:2.2rem;">📝</div>
+        <div><div class="section-title" style="margin:0;">تحضير دروس المنهج المصاحب والتجويد</div>
+        <div style="font-size:.8rem;color:var(--light);">حضّر درسك واحفظه ليوم الحلقة</div></div>
+      </div>
     </div>
   </div>
 
@@ -892,7 +918,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <span style="font-size:.72rem;color:var(--light);margin-right:auto;">١–٢ ممتاز ١٥ • ٣–٤ جيد جداً ١٠ • ٥–٦ جيد ٥ • +٦ إعادة ٠</span>
     </div>
     <div class="card-body card-body-0">
-      <div style="overflow-x:auto;">
+      <div id="st-normal-wrap" style="overflow-x:auto;">
       <table class="tbl tbl-students">
         <thead><tr>
           <th style="text-align:center;width:42px;">م</th>
@@ -907,6 +933,159 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </tr></thead>
         <tbody id="students-body"></tbody>
       </table>
+      </div>
+      <div id="st-exam-wrap" style="display:none;overflow-x:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ المهام اليومية ══════════════ -->
+<div id="page-tasks" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+      <div class="card-title">✅ المهام اليومية — <span id="tsk-title" style="color:var(--jade);">—</span></div>
+      <span id="tsk-circle" style="font-size:.8rem;color:var(--light);"></span>
+    </div>
+    <div class="card-body">
+      <div id="tsk-list" style="display:flex;flex-direction:column;gap:9px;"></div>
+      <div id="tsk-progress" style="margin-top:16px;"></div>
+      <div id="tsk-done-msg" style="display:none;margin-top:16px;padding:16px 18px;background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;border-radius:var(--r);text-align:center;font-weight:800;font-size:1rem;font-family:Amiri,serif;">
+        🎉 جزاكم الله خيرًا — لقد أنهيت مهامك اليومية بنجاح<br>
+        <span style="font-size:.86rem;font-weight:600;font-family:Tajawal;opacity:.92;">أُضيفت ٢٠ نقطة إلى رصيدك الإجمالي</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ تحضير الدروس ══════════════ -->
+<div id="page-lessonprep" class="page">
+  <!-- شريط التحكم -->
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
+      <div class="card-title">📝 تحضير دروس المنهج المصاحب والتجويد</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:.8rem;color:var(--mid);font-weight:700;">🗓️ التاريخ</span>
+          <input type="date" id="lp-date" onchange="loadLessonPrep()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.82rem;">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:.8rem;color:var(--mid);font-weight:700;">المادة</span>
+          <select id="lp-subject" onchange="loadLessonPrep()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.82rem;">
+            <option value="tajweed">التجويد</option>
+            <option value="manhaj">المنهج المصاحب</option>
+          </select>
+        </div>
+        <span id="lp-status-badge" class="badge bg-gray" style="font-size:.72rem;">مسودة</span>
+      </div>
+    </div>
+    <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-primary btn-sm" onclick="saveLessonPrep()">💾 حفظ المسودة</button>
+      <button class="btn btn-gold btn-sm" onclick="exportLessonPdf()">📄 تصدير PDF</button>
+      <button class="btn btn-outline btn-sm" onclick="submitLessonPrep()">📤 إرسال للمشرف للمراجعة</button>
+      <button class="btn btn-ghost btn-sm" style="margin-right:auto;color:var(--purple);border:1.5px solid var(--purple);" onclick="navPage('strategies')">🎬 استراتيجيات التعلم النشط</button>
+    </div>
+  </div>
+
+  <!-- ملاحظة المشرف عند الإرجاع -->
+  <div id="lp-sup-note" style="display:none;margin-bottom:16px;padding:13px 16px;background:var(--red-pale);border:1.5px solid var(--red);border-radius:var(--r);color:var(--red);font-size:.86rem;font-weight:600;"></div>
+  <div id="lp-approved" style="display:none;margin-bottom:16px;padding:13px 16px;background:var(--pale);border:1.5px solid var(--mint);border-radius:var(--r);color:var(--emerald);font-size:.9rem;font-weight:800;text-align:center;">✅ تمت الموافقة على هذا التحضير من المشرف — أُضيفت ٥٠ نقطة لرصيدك</div>
+
+  <!-- ورقة التحضير (تُصدَّر PDF) -->
+  <div class="card" style="padding:0;">
+    <div id="lp-sheet" style="background:#fff;padding:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--forest);padding-bottom:10px;margin-bottom:14px;">
+        <div style="font-family:Amiri,serif;font-weight:800;font-size:1.15rem;color:var(--forest);">تحضير الدرس</div>
+        <div style="font-family:Amiri,serif;font-size:.9rem;color:var(--jade);">مدرسة التوحيد القرآنية — إصلاح حياة</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <span style="font-weight:800;color:var(--forest);font-size:.9rem;">عنوان الدرس:</span>
+        <input id="lp-title" type="text" placeholder="يُؤخذ تلقائياً من خطة اليوم…" style="flex:1;min-width:220px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.9rem;font-weight:700;color:var(--emerald);outline:none;">
+        <span id="lp-meta" style="font-size:.78rem;color:var(--light);"></span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--forest);border-radius:8px;overflow:hidden;">
+        <!-- يمين: الأهداف + سير الدرس -->
+        <div style="border-left:1.5px solid var(--forest);">
+          <div style="background:var(--pale);color:var(--forest);font-weight:800;text-align:center;padding:8px;border-bottom:1.5px solid var(--forest);font-size:.88rem;">سير الدرس</div>
+          <div style="display:grid;grid-template-columns:1fr 1.3fr;">
+            <div style="border-left:1px solid var(--border);">
+              <div style="background:var(--gold-pale);color:var(--forest);font-weight:700;text-align:center;padding:7px;border-bottom:1px solid var(--border);font-size:.82rem;">الأهداف الدرسية</div>
+              <textarea id="lp-objectives" placeholder="اكتب الأهداف…" style="width:100%;min-height:360px;border:none;padding:10px;font-family:Tajawal;font-size:.82rem;line-height:1.7;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+            </div>
+            <div>
+              <div style="border-bottom:1px solid var(--border);">
+                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">المقدمة:</div>
+                <textarea id="lp-intro" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+              </div>
+              <div style="border-bottom:1px solid var(--border);">
+                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">التمهيد:</div>
+                <textarea id="lp-preface" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+              </div>
+              <div style="border-bottom:1px solid var(--border);">
+                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">عرض الدرس:</div>
+                <textarea id="lp-present" style="width:100%;min-height:110px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+              </div>
+              <div>
+                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">الغلق:</div>
+                <textarea id="lp-closure" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- يسار: أثناء الشرح / الزمن / التقويم -->
+        <div>
+          <div style="background:var(--pale);color:var(--forest);font-weight:800;text-align:center;padding:8px;border-bottom:1.5px solid var(--forest);font-size:.88rem;">المساحة الإبداعية في تحضير الدرس</div>
+          <table style="width:100%;border-collapse:collapse;font-family:Tajawal;">
+            <thead><tr style="background:var(--gold-pale);color:var(--forest);font-size:.82rem;">
+              <th style="padding:7px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);">أثناء الشرح</th>
+              <th style="padding:7px;width:64px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);">الزمن</th>
+              <th style="padding:7px;width:120px;border-bottom:1px solid var(--border);">التقويم</th>
+            </tr></thead>
+            <tbody id="lp-rows"></tbody>
+          </table>
+          <div style="padding:8px;text-align:center;" class="lp-noprint">
+            <button class="btn btn-ghost btn-xs" onclick="lpAddRow()">➕ إضافة صف</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ استراتيجيات التعلم النشط (معرض فيديوهات) ══════════════ -->
+<div id="page-strategies" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+      <div class="card-title">🎬 استراتيجيات التعلم النشط</div>
+      <span style="font-size:.78rem;color:var(--light);">اضغط على أي فيديو لتشغيله</span>
+    </div>
+  </div>
+
+  <!-- المعرض -->
+  <div class="card">
+    <div class="card-head"><div class="card-title" id="strat-count">📚 الفيديوهات</div></div>
+    <div class="card-body">
+      <div id="strat-loading" style="text-align:center;padding:44px 14px;color:var(--light);">
+        <div style="font-size:2rem;">⏳</div><div style="margin-top:8px;font-size:.86rem;">جاري تحميل الفيديوهات…</div>
+      </div>
+      <div id="strat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px;"></div>
+      <div id="strat-fallback" style="display:none;text-align:center;padding:30px;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📡</div>
+        <div style="color:var(--mid);margin-bottom:14px;font-size:.88rem;">تعذّر تحميل الفيديوهات — تأكد من اتصال الإنترنت وحاول مرة أخرى.</div>
+        <button class="btn btn-primary btn-sm" onclick="retryStrategies()">🔄 إعادة المحاولة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ نافذة تشغيل الفيديو (منبثقة) ══ -->
+<div class="overlay" id="modal-strat-video" onclick="if(event.target===this)closeStratVideo()">
+  <div class="modal" style="max-width:920px;width:94%;">
+    <div class="modal-head"><div class="modal-title" id="strat-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeStratVideo()">✕</button></div>
+    <div class="modal-body" style="padding:0;">
+      <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
+        <iframe id="strat-vid-frame" src="" title="فيديو" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen
+          style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
       </div>
     </div>
   </div>
@@ -966,11 +1145,81 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<!-- ══════════════ تدريبي ══════════════ -->
+<!-- ══════════════ تأهيل المعلمين (مستويات ← دورات ← فيديوهات) ══════════════ -->
 <div id="page-training" class="page">
-  <div class="card">
-    <div class="card-head"><div class="card-title">🎓 تأهيل المعلمين — مستواي</div></div>
-    <div class="card-body"><div id="training-body"><div class="empty"><span class="empty-icon">⏳</span>جاري التحميل...</div></div></div>
+
+  <!-- منظر المستويات -->
+  <div id="tr-levels-view">
+    <div class="card">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+        <div class="card-title">🎓 تأهيل المعلمين</div>
+        <span style="font-size:.78rem;color:var(--light);">اختر المستوى لعرض دوراته — كل فيديو تُنهيه = ٥٠ نقطة</span>
+      </div>
+      <div class="card-body">
+        <div id="tr-overall" style="margin-bottom:18px;"></div>
+        <div id="tr-levels-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- منظر دورات المستوى -->
+  <div id="tr-courses-view" style="display:none;">
+    <div class="card">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="trBackToLevels()">← رجوع للمستويات</button>
+        <div class="card-title" id="tr-level-title" style="margin-right:auto;">المستوى</div>
+      </div>
+      <div class="card-body">
+        <div id="tr-level-progress" style="margin-bottom:20px;"></div>
+        <div id="tr-courses-list" style="display:flex;flex-direction:column;gap:22px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ نافذة تشغيل فيديو التأهيل ══ -->
+<div class="overlay" id="modal-tr-video" onclick="if(event.target===this)closeTrVideo()">
+  <div class="modal" style="max-width:940px;width:95%;">
+    <div class="modal-head"><div class="modal-title" id="tr-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeTrVideo()">✕</button></div>
+    <div class="modal-body" style="padding:0;">
+      <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
+        <div id="tr-yt-player" style="position:absolute;inset:0;width:100%;height:100%;"></div>
+      </div>
+      <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);">
+        <div id="tr-vid-status" style="font-size:.82rem;font-weight:700;color:var(--mid);flex:1;min-width:180px;">شاهد الفيديو حتى النهاية لتُسجَّل ٥٠ نقطة تلقائياً.</div>
+        <button id="tr-mark-btn" class="btn btn-primary btn-sm" onclick="trConfirmWatched()">✅ أنهيت المشاهدة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ نافذة اختبار نهاية الدورة ══ -->
+<div class="overlay" id="modal-tr-exam">
+  <div class="modal" style="max-width:720px;width:95%;">
+    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" onclick="closeQuiz()">✕</button></div>
+    <div class="modal-body">
+      <div id="qz-quiz">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <span id="qz-progress-txt" style="font-size:.82rem;font-weight:800;color:var(--emerald);">سؤال ١ من ٢٥</span>
+          <span id="qz-timer" style="font-size:.92rem;font-weight:800;color:var(--emerald);background:var(--pale);border:1px solid var(--border);border-radius:99px;padding:4px 15px;">⏱️ ٣٠:٠٠</span>
+        </div>
+        <div style="height:8px;background:var(--pale);border-radius:99px;overflow:hidden;margin-bottom:14px;">
+          <div id="qz-progress-bar" style="height:100%;width:0;background:linear-gradient(90deg,var(--jade),var(--mint));border-radius:99px;transition:width .3s;"></div>
+        </div>
+        <div id="qz-nav" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
+        <div id="qz-question" style="font-size:1.02rem;font-weight:800;color:var(--forest);line-height:1.7;margin-bottom:16px;"></div>
+        <div id="qz-options" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:20px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;">
+            <button id="qz-prev-btn" class="btn btn-outline btn-sm" onclick="qzPrev()">→ السابق</button>
+            <button id="qz-next-btn" class="btn btn-primary btn-sm" onclick="qzNext()">التالي ←</button>
+          </div>
+          <button id="qz-submit-btn" class="btn btn-gold btn-sm" onclick="qzSubmit()">📊 تسليم وإظهار النتيجة</button>
+        </div>
+      </div>
+      <div id="qz-result" style="display:none;"></div>
+    </div>
   </div>
 </div>
 
@@ -1217,10 +1466,10 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="modal-head"><div class="modal-title" id="ev-title">🎙️ تسميع</div><button class="modal-close" onclick="closeModal('modal-eval')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid-2">
-        <div class="fg"><label>من سورة</label><select id="ev-sfrom" onchange="ayahMax('ev-sfrom','ev-afrom')"></select></div>
-        <div class="fg"><label>من الآية</label><input type="number" min="1" id="ev-afrom" placeholder="رقم الآية"></div>
-        <div class="fg"><label>إلى سورة</label><select id="ev-sto" onchange="ayahMax('ev-sto','ev-ato')"></select></div>
-        <div class="fg"><label>حتى الآية</label><input type="number" min="1" id="ev-ato" placeholder="رقم الآية"></div>
+        <div class="fg"><label>من سورة</label><select id="ev-sfrom" onchange="ayahMax('ev-sfrom','ev-afrom');evAutoFaces()"></select></div>
+        <div class="fg"><label>من الآية</label><input type="number" min="1" id="ev-afrom" placeholder="رقم الآية" oninput="evAutoFaces()"></div>
+        <div class="fg"><label>إلى سورة</label><select id="ev-sto" onchange="ayahMax('ev-sto','ev-ato');evAutoFaces()"></select></div>
+        <div class="fg"><label>حتى الآية</label><input type="number" min="1" id="ev-ato" placeholder="رقم الآية" oninput="evAutoFaces()"></div>
       </div>
 
       <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;">
@@ -1234,10 +1483,16 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <audio id="ev-audio" controls style="display:none;width:100%;margin-top:10px;"></audio>
       </div>
 
-      <div class="fg"><label>عدد الأخطاء</label>
-        <input type="number" min="0" id="ev-errors" placeholder="اكتب عدد الأخطاء" oninput="evGrade()">
-        <div style="font-size:.72rem;color:var(--light);margin-top:4px;">٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠)</div>
+      <div class="form-grid-2">
+        <div class="fg"><label>عدد الأخطاء (الإجمالي)</label>
+          <input type="number" min="0" id="ev-errors" placeholder="اكتب عدد الأخطاء" oninput="evGrade()">
+        </div>
+        <div class="fg"><label>عدد الأوجه المُسمَّعة <span style="color:var(--jade);font-weight:700;font-size:.7rem;">(يُحسب تلقائياً)</span></label>
+          <input type="number" min="1" value="1" id="ev-faces" placeholder="١" oninput="evGrade()">
+          <div id="ev-faces-hint" style="font-size:.68rem;color:var(--light);margin-top:3px;">من المصحف المدني — يمكنك تعديله يدوياً</div>
+        </div>
       </div>
+      <div style="font-size:.72rem;color:var(--light);margin:-4px 0 8px;">٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠) — يُحسب على <b>متوسط الأخطاء في الوجه الواحد</b></div>
       <div style="padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);margin-bottom:14px;text-align:center;font-size:1rem;" id="ev-grade"><span style="color:var(--light);">— أدخل عدد الأخطاء</span></div>
 
       <div class="fg"><label>ملاحظات المعلم على أداء الطالب</label><textarea id="ev-notes" rows="2" placeholder="اكتب ملاحظتك..."></textarea></div>
@@ -1255,6 +1510,36 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
   </div>
 </div>
+
+<!-- ══ MODAL: درجة اختبار (قرآن/منهج/تجويد/نشاط/حفظ/مراجعة) ══ -->
+<div class="overlay" id="modal-exam">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head"><div class="modal-title" id="ex-title">📝 الدرجة</div><button class="modal-close" onclick="closeModal('modal-exam')">✕</button></div>
+    <div class="modal-body">
+      <div id="ex-rec-wrap" style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:8px;">🎙️ التسجيل الصوتي</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-xs" style="background:var(--red);color:#fff;" onclick="exRecStart()">🔴 تسجيل</button>
+          <button class="btn btn-xs btn-outline" onclick="exRecPause()">⏸️ إيقاف مؤقت</button>
+          <button class="btn btn-xs btn-outline" onclick="exRecStop()">⏹️ إيقاف</button>
+          <span id="ex-rec-state" style="font-size:.76rem;font-weight:700;color:var(--mid);"></span>
+        </div>
+        <audio id="ex-audio" controls style="display:none;width:100%;margin-top:10px;"></audio>
+      </div>
+      <div class="fg"><label>عدد الأخطاء الظاهرة</label>
+        <input type="number" min="0" id="ex-errors" placeholder="اكتب عدد الأخطاء" oninput="exCalc()">
+        <div style="font-size:.72rem;color:var(--light);margin-top:4px;">يُخصم كل خطأ درجة واحدة من الدرجة الكاملة</div>
+      </div>
+      <div id="ex-result" style="padding:14px;background:var(--pale);border-radius:var(--r-sm);text-align:center;font-size:1.1rem;font-weight:800;color:var(--forest);font-family:Amiri,serif;">النتيجة: —</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="saveExamGrade()">💾 حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-exam')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="yt-probe" style="position:fixed;width:0;height:0;overflow:hidden;left:-9999px;top:-9999px;"></div>
 
 <!-- ══ MODAL: ملف الطالب ══ -->
 <div class="overlay" id="modal-file">
@@ -1454,9 +1739,11 @@ const PAGE_TITLES = {
   attendance:'📅 الحضور', recitation:'🎙️ التسميع والتقييم', points:'🏆 النقاط والكروت',
   files:'📁 ملفات الطلاب', reports:'📄 تقاريري', training:'🎓 تأهيل المعلمين',
   messages:'✉️ الرسائل', announcements:'📢 الإعلانات', settings:'⚙️ الإعدادات',
+  tasks:'✅ المهام اليومية', lessonprep:'📝 تحضير الدروس', strategies:'🎬 استراتيجيات التعلم النشط',
 };
 
 // ── helpers ──
+function toAr(n){ if(n===''||n==null) return ''; return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]); }
 function errorsToGrade(n){ if(n<=2) return 'excellent'; if(n<=4) return 'very_good'; if(n<=6) return 'good'; return 'retry'; }
 function todayISO(){ return new Date().toISOString().split('T')[0]; }
 function gradeBadge(g){ return `<span style="font-weight:800;color:${GRADE_COLOR[g]};">${GRADE_AR[g]} (${GRADE_PTS[g]})</span>`; }
@@ -1496,6 +1783,9 @@ function nav(el, pageId, fromPopstate){
   const tb=document.getElementById('tb-title'); if(tb) tb.textContent=PAGE_TITLES[pageId]||'';
   if(!fromPopstate) history.pushState({page:pageId},'','#'+pageId);
   if(pageId==='dashboard') renderDashboard();
+  if(pageId==='tasks') renderTasks();
+  if(pageId==='lessonprep') initLessonPrep();
+  if(pageId==='strategies') renderStrategiesPage();
   if(pageId==='circles') renderCircles();
   if(pageId==='students') renderStudents();
   if(pageId==='attendance') renderAttendance();
@@ -1535,6 +1825,7 @@ async function boot(){
   document.getElementById('sb-user-name').textContent=fn;
   document.getElementById('sb-user-avatar').textContent=fn[0]||'م';
   document.getElementById('sb-user-role').textContent=cu.job_title||'معلم';
+  if(typeof refreshMyPoints==='function') refreshMyPoints();
   document.getElementById('wb-hello').textContent='أهلاً المعلم '+fn;
   document.getElementById('tb-date').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
   if(typeof loadUserTheme==='function') loadUserTheme();
@@ -1685,6 +1976,277 @@ function showTcpDay(i){
     +'</div>';
   box.style.display='block';
 }
+// ══════════════ المهام اليومية ══════════════
+const DAILY_TASKS=[
+  'الترحيب بجميع الطلاب والسؤال عن أحوالهم.',
+  'مراجعة غياب الطلاب مع مشرف الغياب.',
+  'مراجعة الشعر والأظافر لليدين والقدمين واللبس مع مشرف السمت.',
+  'البداية في سماع قراءة الطلاب حسب جاهزية الطالب وقدومه وتقييم الطالب ومتابعة صلواته مع تسجيل الجلسة كلها.',
+  'بعد انتهاء الطالب من التسميع ينتقل إلى مشرف منصة النقاط لاستلام النقاط ثم يعود للتسميع على أحد زملائه.',
+  'التلقين الجماعي لورد اليوم كاملًا.',
+  'شرح (المنهج المصاحب أو التجويد أو النشاط التربوي) حسب الجدول المقرر الموجود في الموقع.',
+  'مغادرة الطلاب الذين أنهوا التسميع في بداية الحلقة واستئناف سماع قراءة بقية الطلاب.',
+  'بعد انتهاء الطالب من التسميع ينتقل إلى منصة النقاط لاستلام النقاط ثم مغادرة المسجد فورًا.',
+  'رد مستلزمات الحلقة إلى أماكنها مع نظافة المكان.',
+];
+let TASK_STATE={done:[],completed:false,awarded:0,_row:null};
+async function renderTasks(){
+  const c=activeCircle();
+  const d=new Date(D()+'T00:00:00');
+  document.getElementById('tsk-title').textContent='حلقة يوم '+d.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('tsk-circle').textContent=c?('🕌 '+c.name+' — '+c.branch):'';
+  const listEl=document.getElementById('tsk-list');
+  document.getElementById('tsk-done-msg').style.display='none';
+  if(!c){ listEl.innerHTML='<div class="empty"><span class="empty-icon">🔒</span>لا توجد حلقة اليوم — المهام تظهر في مواعيد الحلقة فقط</div>'; document.getElementById('tsk-progress').innerHTML=''; return; }
+  // حمّل الحالة المحفوظة
+  TASK_STATE={done:new Array(DAILY_TASKS.length).fill(false),completed:false,awarded:0,_row:null};
+  try{
+    const {data}=await db.from('teacher_daily_tasks').select('*').eq('teacher_id',cu.id).eq('circle_id',c.id).eq('date',D()).maybeSingle();
+    if(data){ TASK_STATE._row=data.id; TASK_STATE.awarded=data.points_awarded||0; TASK_STATE.completed=!!data.completed;
+      (data.done_items||[]).forEach((v,i)=>{ if(i<DAILY_TASKS.length) TASK_STATE.done[i]=!!v; }); }
+  }catch(e){}
+  listEl.innerHTML=DAILY_TASKS.map((t,i)=>`
+    <label style="display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:${TASK_STATE.done[i]?'var(--pale)':'var(--bg)'};border:1.5px solid ${TASK_STATE.done[i]?'var(--mint)':'var(--border)'};border-radius:var(--r-sm);cursor:pointer;transition:all .15s;" id="tsk-lbl-${i}">
+      <input type="checkbox" ${TASK_STATE.done[i]?'checked':''} onchange="toggleTask(${i},this.checked)" style="width:19px;height:19px;margin-top:2px;flex-shrink:0;">
+      <span style="font-size:.86rem;font-weight:600;color:var(--ink);line-height:1.5;">${toAr(i+1)}. ${t}</span>
+    </label>`).join('');
+  updateTaskProgress();
+}
+function updateTaskProgress(){
+  const done=TASK_STATE.done.filter(Boolean).length, all=DAILY_TASKS.length;
+  const pct=Math.round(done/all*100);
+  document.getElementById('tsk-progress').innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:6px;"><span>الإنجاز</span><span>${toAr(done)} / ${toAr(all)}</span></div>
+    <div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--jade),var(--mint));transition:width .3s;"></div></div>`;
+  document.getElementById('tsk-done-msg').style.display=(done===all)?'block':'none';
+}
+async function toggleTask(i,checked){
+  TASK_STATE.done[i]=checked;
+  const lbl=document.getElementById('tsk-lbl-'+i);
+  if(lbl){ lbl.style.background=checked?'var(--pale)':'var(--bg)'; lbl.style.borderColor=checked?'var(--mint)':'var(--border)'; }
+  updateTaskProgress();
+  const allDone=TASK_STATE.done.every(Boolean);
+  await saveTasks(allDone);
+  if(allDone && !TASK_STATE.awarded){ await awardTaskPoints(); }
+}
+async function saveTasks(completed){
+  const c=activeCircle(); if(!c) return;
+  const s=cu; if(!s.id) return;
+  const payload={ teacher_id:cu.id, circle_id:c.id, date:D(), done_items:TASK_STATE.done, completed:!!completed, points_awarded:TASK_STATE.awarded||0 };
+  try{ await db.from('teacher_daily_tasks').upsert([payload],{onConflict:'teacher_id,circle_id,date'}); }catch(e){}
+}
+async function awardTaskPoints(){
+  // منح ٢٠ نقطة لرصيد المعلم مرة واحدة لكل حلقة/يوم
+  try{
+    const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
+    const cur=(u&&u.points)||0;
+    const {error}=await db.from('users').update({points:cur+20}).eq('id',cu.id);
+    if(error) throw error;
+    TASK_STATE.awarded=20;
+    await saveTasks(true);
+    if(typeof refreshMyPoints==='function') refreshMyPoints();
+    showToast('🎉 جزاكم الله خيرًا — أُضيفت ٢٠ نقطة لرصيدك');
+  }catch(e){
+    // حتى لو فشل تحديث الرصيد، سجّل الإتمام
+    TASK_STATE.awarded=20; await saveTasks(true);
+    showToast('✅ تم إنهاء المهام — (تعذّر تحديث الرصيد: '+(e.message||e.code||'')+')');
+  }
+}
+
+// ══════════════ تحضير دروس المنهج المصاحب والتجويد ══════════════
+// عنوان الدرس يُؤخذ من خطة اليوم: التجويد→tajweed ، المنهج المصاحب→kunooz
+const LP_PLAN_FIELD={ tajweed:'tajweed', manhaj:'kunooz' };
+let LP_STATE={ id:null, status:'draft', points_awarded:0 };
+function initLessonPrep(){
+  const dt=document.getElementById('lp-date'); if(dt&&!dt.value) dt.value=D();
+  loadLessonPrep();
+}
+function lpSubject(){ return document.getElementById('lp-subject').value; }
+function lpRowHtml(r){
+  r=r||{during:'',time:'',assess:''};
+  return `<tr>
+    <td style="border-bottom:1px solid var(--border);border-left:1px solid var(--border);padding:0;vertical-align:top;">
+      <textarea class="lp-r-during" style="width:100%;min-height:66px;border:none;padding:7px 9px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">${(r.during||'').replace(/</g,'&lt;')}</textarea></td>
+    <td style="border-bottom:1px solid var(--border);border-left:1px solid var(--border);padding:0;vertical-align:top;">
+      <input class="lp-r-time" value="${(r.time||'').replace(/"/g,'&quot;')}" placeholder="د" style="width:100%;border:none;padding:7px 6px;font-family:Tajawal;font-size:.78rem;text-align:center;outline:none;box-sizing:border-box;"></td>
+    <td style="border-bottom:1px solid var(--border);padding:0;vertical-align:top;">
+      <textarea class="lp-r-assess" style="width:100%;min-height:66px;border:none;padding:7px 9px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">${(r.assess||'').replace(/</g,'&lt;')}</textarea></td>
+  </tr>`;
+}
+function lpAddRow(r){ document.getElementById('lp-rows').insertAdjacentHTML('beforeend', lpRowHtml(r)); }
+function lpSetStatusBadge(st){
+  const b=document.getElementById('lp-status-badge');
+  const map={ draft:['مسودة','bg-gray'], submitted:['قيد المراجعة','bg-blue'], approved:['معتمَد ✅','bg-green'], returned:['مُعاد بملاحظات','bg-red'] };
+  const [txt,cls]=map[st]||map.draft; b.textContent=txt; b.className='badge '+cls+'';
+}
+async function loadLessonPrep(){
+  const date=document.getElementById('lp-date').value||D();
+  const subject=lpSubject();
+  // خطة اليوم (عنوان الدرس تلقائياً)
+  let plan=null;
+  try{ const {data}=await db.from('curriculum_plan').select('*').eq('date',date).maybeSingle(); plan=data||null; }catch(e){}
+  const autoTitle=(plan && plan[LP_PLAN_FIELD[subject]] && String(plan[LP_PLAN_FIELD[subject]]).trim()) || '';
+  // التحضير المحفوظ
+  let row=null;
+  try{ const {data}=await db.from('lesson_preps').select('*').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle(); row=data||null; }catch(e){}
+  LP_STATE={ id:row?row.id:null, status:row?(row.status||'draft'):'draft', points_awarded:row?(row.points_awarded||0):0 };
+  const d=(row&&row.data)||{};
+  document.getElementById('lp-title').value = (row&&row.title) || autoTitle;
+  document.getElementById('lp-meta').textContent = 'المادة: '+(subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+new Date(date+'T00:00:00').toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('lp-objectives').value=d.objectives||'';
+  document.getElementById('lp-intro').value=d.intro||'';
+  document.getElementById('lp-preface').value=d.preface||'';
+  document.getElementById('lp-present').value=d.present||'';
+  document.getElementById('lp-closure').value=d.closure||'';
+  const rowsBox=document.getElementById('lp-rows'); rowsBox.innerHTML='';
+  const rows=(d.rows&&d.rows.length)?d.rows:[null,null,null,null];
+  rows.forEach(r=>lpAddRow(r));
+  lpSetStatusBadge(LP_STATE.status);
+  // ملاحظة المشرف / الاعتماد
+  const note=document.getElementById('lp-sup-note'), appr=document.getElementById('lp-approved');
+  if(LP_STATE.status==='returned' && row.supervisor_note){ note.style.display='block'; note.innerHTML='📌 ملاحظة المشرف: '+row.supervisor_note; } else note.style.display='none';
+  appr.style.display=(LP_STATE.status==='approved')?'block':'none';
+}
+function lpCollect(){
+  const rows=[...document.querySelectorAll('#lp-rows tr')].map(tr=>({
+    during:tr.querySelector('.lp-r-during').value.trim(),
+    time:tr.querySelector('.lp-r-time').value.trim(),
+    assess:tr.querySelector('.lp-r-assess').value.trim(),
+  })).filter(r=>r.during||r.time||r.assess);
+  return {
+    objectives:document.getElementById('lp-objectives').value.trim(),
+    intro:document.getElementById('lp-intro').value.trim(),
+    preface:document.getElementById('lp-preface').value.trim(),
+    present:document.getElementById('lp-present').value.trim(),
+    closure:document.getElementById('lp-closure').value.trim(),
+    rows,
+  };
+}
+async function lpUpsert(extra){
+  const date=document.getElementById('lp-date').value||D();
+  const subject=lpSubject();
+  const payload=Object.assign({
+    teacher_id:cu.id, date, subject,
+    circle_id:(activeCircle()||{}).id||null,
+    title:document.getElementById('lp-title').value.trim(),
+    data:lpCollect(), updated_at:new Date().toISOString(),
+  }, extra||{});
+  const {data,error}=await db.from('lesson_preps').upsert([payload],{onConflict:'teacher_id,date,subject'}).select('id,status,points_awarded').maybeSingle();
+  if(error) throw error;
+  if(data){ LP_STATE.id=data.id; LP_STATE.status=data.status; LP_STATE.points_awarded=data.points_awarded; }
+  return data;
+}
+async function saveLessonPrep(){
+  try{ await lpUpsert({status: (LP_STATE.status==='approved'?'approved':'draft')}); lpSetStatusBadge(LP_STATE.status); showToast('✅ تم حفظ المسودة'); }
+  catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+}
+async function submitLessonPrep(){
+  const t=document.getElementById('lp-title').value.trim();
+  if(!t){ showToast('⚠️ اكتب عنوان الدرس أولاً'); return; }
+  try{
+    await lpUpsert({ status:'submitted', supervisor_note:null, submitted_at:new Date().toISOString() });
+    lpSetStatusBadge('submitted');
+    document.getElementById('lp-sup-note').style.display='none';
+    showToast('📤 تم إرسال التحضير للمشرف للمراجعة');
+  }catch(e){ showToast('❌ تعذّر الإرسال: '+(e.message||e.code||'')); }
+}
+async function exportLessonPdf(){
+  const src=document.getElementById('lp-sheet');
+  const JsPDF=(window.jspdf&&window.jspdf.jsPDF)?window.jspdf.jsPDF:null;
+  if(!JsPDF || typeof html2canvas==='undefined'){ showToast('⚠️ تعذّر تحميل أدوات PDF — تحقّق من الاتصال'); return; }
+  showToast('⏳ جاري تجهيز PDF…');
+  // نسخة للطباعة: نحوّل الحقول لنص ثابت (html2canvas قد لا يرسم نص textarea)
+  const clone=src.cloneNode(true);
+  clone.querySelectorAll('.lp-noprint').forEach(e=>e.remove());
+  clone.querySelectorAll('textarea').forEach(t=>{ const d=document.createElement('div'); d.textContent=t.value; d.style.cssText='white-space:pre-wrap;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;min-height:'+ (t.style.minHeight||'40px'); t.parentNode.replaceChild(d,t); });
+  clone.querySelectorAll('input').forEach(inp=>{ const d=document.createElement('div'); d.textContent=inp.value||inp.placeholder||''; d.style.cssText='padding:6px 8px;font-family:Tajawal;font-size:.85rem;font-weight:700;color:var(--emerald);text-align:'+(inp.style.textAlign||'right'); inp.parentNode.replaceChild(d,inp); });
+  const holder=document.createElement('div');
+  holder.style.cssText='position:fixed;left:-9999px;top:0;width:800px;background:#fff;';
+  holder.appendChild(clone); document.body.appendChild(holder);
+  try{
+    const canvas=await html2canvas(clone,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    const pdf=new JsPDF('p','mm','a4'); const pw=210, ph=297;
+    const iw=pw, ih=canvas.height*pw/canvas.width;
+    let left=ih, pos=0;
+    pdf.addImage(canvas,'PNG',0,pos,iw,ih); left-=ph;
+    while(left>0){ pos=left-ih; pdf.addPage(); pdf.addImage(canvas,'PNG',0,pos,iw,ih); left-=ph; }
+    const ttl=(document.getElementById('lp-title').value.trim()||'تحضير-درس');
+    pdf.save('تحضير-'+ttl+'.pdf');
+    showToast('✅ تم إنشاء PDF');
+  }catch(e){ showToast('❌ تعذّر التصدير'); }
+  document.body.removeChild(holder);
+}
+
+// ══════════════ استراتيجيات التعلم النشط (معرض فيديوهات ثابت) ══════════════
+// روابط الفيديوهات ثابتة في الكود — تظهر فوراً وبدون إنترنت.
+// العناوين الحقيقية تُجلب تلقائياً أول فتح أونلاين وتُخزَّن محلياً.
+const AL_VIDEO_IDS = [
+  'guV728zRIDo','w7FYbVcmbtM','sTxjRorroZo','GniYDnAe0Ak','H1pKoy57_6M',
+  'gWIwnPBy6Xw','L2ebs4dGx4c','E4WCLiMxKjs','mpQUlHT9l8s','LJCdUnhjITw',
+  'ywGaBuzf4Ac','rdfHix4rZSs','zZURrxUIAZs','li8VXlk6VoM','NN42c6cYSvg',
+  '8x-1MTAYG80','MCccRJlxcxs','QhSaVeOzfnc','6Nx6wcYhfWQ','-tQcP1mfVlo','TDzBbp52mEs'
+];
+const AL_CACHE_KEY='al_strat_titles_v1';
+let AL_VIDEOS = AL_VIDEO_IDS.map(id=>({id,title:''}));
+let _curStrat=null;
+
+function alLoadCache(){ try{ const s=localStorage.getItem(AL_CACHE_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function alSaveCache(){ try{ localStorage.setItem(AL_CACHE_KEY, JSON.stringify(AL_VIDEOS.filter(v=>v.title).map(v=>({id:v.id,title:v.title})))); }catch(e){} }
+function alMergeCache(){ const c=alLoadCache(); if(!c) return; const m={}; c.forEach(x=>m[x.id]=x.title); AL_VIDEOS.forEach(v=>{ if(!v.title && m[v.id]) v.title=m[v.id]; }); }
+
+function renderStrategiesPage(){
+  alMergeCache();
+  renderStratGrid(AL_VIDEOS);   // يظهر فوراً من القائمة الثابتة
+  refreshTitles();              // يجلب العناوين الحقيقية لو فيه إنترنت
+}
+function retryStrategies(){ renderStratGrid(AL_VIDEOS); refreshTitles(); }
+async function refreshTitles(){
+  let any=false;
+  await Promise.allSettled(AL_VIDEOS.map(async v=>{
+    try{
+      const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+v.id+'&format=json');
+      if(r.ok){ const j=await r.json(); if(j.title){ v.title=j.title; any=true;
+        const el=document.getElementById('strat-t-'+v.id); if(el) el.textContent=j.title;
+        if(_curStrat===v.id){ const pt=document.getElementById('strat-vid-title'); if(pt) pt.textContent='▶️ '+j.title; } } }
+    }catch(e){}
+  }));
+  if(any) alSaveCache();
+}
+function renderStratGrid(list){
+  const ld=document.getElementById('strat-loading'); if(ld)ld.style.display='none';
+  const fb=document.getElementById('strat-fallback'); if(fb)fb.style.display='none';
+  const cnt=document.getElementById('strat-count'); if(cnt)cnt.textContent='📚 الفيديوهات ('+toAr(list.length)+')';
+  const grid=document.getElementById('strat-grid');
+  grid.innerHTML=list.map((v,i)=>`
+    <div style="cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'"
+      onclick="playStrat('${v.id}')">
+      <div style="position:relative;padding-top:56.25%;background:linear-gradient(135deg,#1a2a20,#0f2318);">
+        <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'"
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.08);">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(200,0,0,.92);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;padding-right:3px;box-shadow:0 2px 10px rgba(0,0,0,.35);">▶</div>
+        </div>
+        <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;">${toAr(i+1)}</div>
+      </div>
+      <div id="strat-t-${v.id}" style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">${v.title?v.title.replace(/</g,'&lt;'):('استراتيجية '+toAr(i+1))}</div>
+    </div>`).join('');
+}
+function playStrat(id){
+  _curStrat=id;
+  const origin = location.protocol.indexOf('http')===0 ? ('&origin='+encodeURIComponent(location.origin)) : '';
+  document.getElementById('strat-vid-frame').src='https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0&playsinline=1'+origin;
+  const el=document.getElementById('strat-t-'+id);
+  document.getElementById('strat-vid-title').textContent='▶️ '+((el&&el.textContent)||'الفيديو');
+  openModal('modal-strat-video');
+}
+function closeStratVideo(){
+  document.getElementById('strat-vid-frame').src='';
+  closeModal('modal-strat-video'); _curStrat=null;
+}
+
+
 function circleCard(c){
   const n=studentsOf(c).length, today=circleMeetsToday(c);
   const days=circleDays(c).map(d=>`<span class="badge bg-gold" style="font-size:.68rem;">${d}</span>`).join(' ')||'—';
@@ -1713,14 +2275,18 @@ function renderCircles(){
 }
 
 // ══ STUDENTS PAGE ══
-async function renderStudents(){
+function renderStudents(){
   const c=activeCircle(); document.getElementById('st-circle-name').textContent=c?c.name+' — '+c.branch:'—';
   reflectReportDay();
-  await loadGuestsForCircle(c);
   const tb=document.getElementById('students-body');
   if(!c){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--light);padding:36px;">🔒 لا توجد حلقة اليوم — تظهر طلاب الحلقة في مواعيدها المحددة فقط</td></tr>'; return; }
   const q=(document.getElementById('st-search')?.value||'').trim();
   let list=studentsOf(c); if(q) list=list.filter(s=>s.name.includes(q));
+  // ── وضع الاختبار (الجمعة للأبطال/الرواد • السبت 8أغسطس و12سبتمبر للبنات) ──
+  const exam=examConfig(c);
+  const nw=document.getElementById('st-normal-wrap'), ew=document.getElementById('st-exam-wrap');
+  if(exam){ if(nw)nw.style.display='none'; if(ew)ew.style.display='block'; renderExamTable(c,list,exam); return; }
+  if(nw)nw.style.display=''; if(ew){ ew.style.display='none'; ew.innerHTML=''; }
   const showPlan=planAllowed();
   const thM=document.getElementById('th-memplan'); if(thM) thM.style.display=showPlan?'':'none';
   const thR=document.getElementById('th-revplan'); if(thR) thR.style.display=showPlan?'':'none';
@@ -1759,6 +2325,197 @@ function noteCellBtn(sid){
   const n=REC_STATE[sid]&&REC_STATE[sid].behavior_note;
   if(n) return `<span title="${n.replace(/"/g,'&quot;')}" style="cursor:pointer;font-size:.7rem;font-weight:700;color:var(--purple);background:var(--purple-pale);padding:3px 9px;border-radius:99px;" onclick="openNote('${sid}')">📝 ملاحظة</span>`;
   return `<button class="btn btn-ghost btn-xs" onclick="openNote('${sid}')">📝 إضافة</button>`;
+}
+
+// ══════════════ جدول الاختبار (يوم الجمعة/السبت الامتحاني) ══════════════
+// يُرجع إعداد الاختبار لهذا اليوم أو null إذا كان يوماً عادياً
+function examConfig(c){
+  if(!c) return null;
+  const b=c.branch, date=D(), day=DAYS_AR[new Date(date+'T00:00:00').getDay()];
+  // الأبطال والرواد — كل جمعة اختبار
+  if(b==='الأبطال'||b==='الرواد'){
+    if(day!=='الجمعة') return null;
+    if(date==='2026-08-07') return { kind:'اختبار الشهر الثاني', total:65,
+      cols:[['quran','درجة القرآن',25],['manhaj','درجة المنهج المصاحب',15],['tajweed','درجة التجويد',10],['activity','درجة النشاط التربوي',15]] };
+    if(date==='2026-09-11') return { kind:'الاختبار الربع سنوي', total:105,
+      cols:[['quran','درجة القرآن',40],['manhaj','درجة المنهج المصاحب',25],['tajweed','درجة التجويد',15],['activity','درجة النشاط التربوي',25]] };
+    return { kind:'الاختبار الأسبوعي', total:40,
+      cols:[['quran','درجة القرآن',15],['manhaj','درجة المنهج المصاحب',10],['tajweed','درجة التجويد',5],['activity','درجة النشاط التربوي',10]] };
+  }
+  // الملكات والأميرات — اختبار الشهر الثاني والربع سنوي فقط
+  if(b==='الملكات'||b==='الأميرات'){
+    if(date==='2026-08-08') return { kind:'اختبار الشهر الثاني', total:55,
+      cols:[['quran','درجة القرآن',25],['manhaj','درجة المنهج المصاحب',15],['tajweed','درجة التجويد',15]] };
+    if(date==='2026-09-12') return { kind:'الاختبار الربع سنوي', total:100,
+      cols:[['hifz','درجة الحفظ',25],['review','درجة المراجعة',25],['manhaj','درجة المنهج المصاحب',25],['tajweed','درجة التجويد',25]] };
+    return null;
+  }
+  return null;
+}
+
+// كاش درجات الاختبار لليوم الحالي: EXAM_GR[sid] = { col:{errors,score,max,audio_url} }
+let EXAM_GR={}, EXAM_CFG=null;
+function examScoreOf(sid,col){ return (EXAM_GR[sid]&&EXAM_GR[sid][col])||null; }
+function examFinal(sid){
+  if(!EXAM_CFG) return null;
+  let sum=0, any=false;
+  EXAM_CFG.cols.forEach(([k])=>{ const g=examScoreOf(sid,k); if(g){ sum+=(+g.score||0); any=true; } });
+  return any?sum:null;
+}
+function examCell(sid,col,lbl,max){
+  const g=examScoreOf(sid,col);
+  if(g) return `<span style="cursor:pointer;font-weight:800;color:var(--emerald);background:var(--pale);padding:4px 10px;border-radius:99px;display:inline-block;" onclick="openExamGrade('${sid}','${col}')">${toAr(g.score)}<span style="color:var(--light);font-weight:600;">/${toAr(g.max)}</span></span>`;
+  return `<button class="btn btn-ghost btn-xs" onclick="openExamGrade('${sid}','${col}')">📝 ${lbl.replace('درجة ','')}</button>`;
+}
+function examFinalCell(sid){
+  const f=examFinal(sid);
+  if(f==null) return '<span style="color:var(--light);">—</span>';
+  return `<span style="font-weight:900;color:var(--gold);font-size:.95rem;">${toAr(f)}<span style="color:var(--light);font-weight:600;font-size:.8rem;">/${toAr(EXAM_CFG.total)}</span></span>`;
+}
+function renderExamTable(c,list,exam){
+  EXAM_CFG=exam;
+  const wrap=document.getElementById('st-exam-wrap');
+  const colTh=exam.cols.map(([,lbl])=>`<th style="text-align:center;">${lbl}</th>`).join('');
+  if(!list.length){
+    wrap.innerHTML=`<div class="empty" style="padding:34px;"><span class="empty-icon">🔒</span>لا يوجد طلاب في هذه الحلقة</div>`; return;
+  }
+  const rows=list.map((s,i)=>{
+    if(!REC_STATE[s.id]) REC_STATE[s.id]={};
+    const g=!!s._guest, avColor=g?'background:linear-gradient(135deg,var(--gold),var(--gold-l));':'';
+    const nameTag=g?` <span style="font-size:.62rem;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold-l);padding:1px 7px;border-radius:99px;">ضيف</span>`:'';
+    const gcells=exam.cols.map(([k,lbl,mx])=>`<td style="text-align:center;" id="exg-${s.id}-${k}">${examCell(s.id,k,lbl,mx)}</td>`).join('');
+    return `<tr id="rrow-${s.id}" style="${g?'background:var(--gold-pale);':''}">
+      <td style="text-align:center;color:var(--light);font-size:.78rem;">${toAr(i+1)}</td>
+      <td><div style="display:flex;align-items:center;gap:9px;"><div class="avatar" style="${avColor}">${s.name[0]}</div><strong>${s.name}</strong>${nameTag}</div></td>
+      <td style="text-align:center;">
+        <div style="display:inline-flex;gap:4px;" id="att-${s.id}">
+          <button class="btn btn-xs btn-outline" data-v="present" onclick="setAtt('${s.id}','present')">حاضر</button>
+          <button class="btn btn-xs btn-outline" data-v="late" onclick="setAtt('${s.id}','late')">متأخر</button>
+          <button class="btn btn-xs btn-outline" data-v="absent" onclick="setAtt('${s.id}','absent')">غائب</button>
+        </div>
+        <div id="late-${s.id}" style="display:none;margin-top:5px;">
+          <input type="number" min="1" placeholder="دقائق" id="latemin-${s.id}" onchange="setLate('${s.id}')" style="width:78px;padding:4px 8px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.74rem;text-align:center;">
+        </div>
+      </td>
+      ${gcells}
+      <td style="text-align:center;" id="exfin-${s.id}">${examFinalCell(s.id)}</td>
+      <td style="text-align:center;"><button class="btn btn-ghost btn-xs" onclick="openStudentFile('${s.id}')">📁 الملف</button></td>
+      <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">✕ إزالة</button>`:''}</td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML=`
+    <div style="padding:12px 18px;background:linear-gradient(135deg,var(--gold-pale),#fff);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-weight:800;color:var(--gold);font-size:.9rem;">📋 ${exam.kind}</span>
+      <span style="font-size:.8rem;color:var(--mid);">الدرجة النهائية من <b>${toAr(exam.total)}</b></span>
+      <span style="font-size:.74rem;color:var(--light);margin-right:auto;">اضغط زر الدرجة لتسجيلها — تُحفظ في ملف الطالب</span>
+    </div>
+    <table class="tbl tbl-students" style="min-width:900px;">
+      <thead><tr>
+        <th style="text-align:center;width:42px;">م</th>
+        <th>اسم الطالب</th>
+        <th style="text-align:center;">الحضور</th>
+        ${colTh}
+        <th style="text-align:center;">الدرجة النهائية</th>
+        <th style="text-align:center;">ملف الطالب</th>
+        <th style="text-align:center;">ملاحظات</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  loadTodayRecitation(list);           // مزامنة الحضور
+  loadExamGrades(list);                // تحميل الدرجات المسجّلة من ملفات الطلاب
+}
+async function loadExamGrades(list){
+  const real=list.filter(s=>!s._static&&!s._guest); if(!real.length) return;
+  const ids=real.map(s=>s.id), date=D();
+  try{
+    const {data}=await db.from('student_files').select('student_id,data').in('student_id',ids);
+    (data||[]).forEach(row=>{
+      const ex=row.data&&row.data.exams&&row.data.exams[date];
+      if(ex){ EXAM_GR[row.student_id]=ex; }
+    });
+    real.forEach(s=>reflectExamRow(s.id));
+  }catch(e){}
+}
+function reflectExamRow(sid){
+  if(!EXAM_CFG) return;
+  EXAM_CFG.cols.forEach(([k,lbl,mx])=>{ const el=document.getElementById('exg-'+sid+'-'+k); if(el) el.innerHTML=examCell(sid,k,lbl,mx); });
+  const fin=document.getElementById('exfin-'+sid); if(fin) fin.innerHTML=examFinalCell(sid);
+}
+
+// ── مودال درجة الاختبار + مسجّل صوت مستقل ──
+let EX_CTX={sid:null,col:null,max:0,lbl:''};
+let _exMediaRec=null,_exChunks=[],_exBlob=null,_exState='idle';
+function openExamGrade(sid,col){
+  if(!EXAM_CFG) return;
+  const cfg=EXAM_CFG.cols.find(x=>x[0]===col); if(!cfg) return;
+  const s=findStu(sid); const [,lbl,mx]=cfg;
+  EX_CTX={sid,col,max:mx,lbl};
+  document.getElementById('ex-title').textContent='📝 '+lbl+' — '+(s?s.name:'');
+  const g=examScoreOf(sid,col);
+  document.getElementById('ex-errors').value=(g&&g.errors!=null)?g.errors:'';
+  exResetRecorder();
+  if(g&&g.audio_url){ const a=document.getElementById('ex-audio'); a.src=g.audio_url; a.style.display='block'; }
+  exCalc();
+  openModal('modal-exam');
+}
+function exCalc(){
+  const mx=EX_CTX.max, e=parseInt(document.getElementById('ex-errors').value);
+  const box=document.getElementById('ex-result');
+  if(isNaN(e)){ box.innerHTML='النتيجة: <span style="color:var(--light);">—/'+toAr(mx)+'</span>'; return; }
+  const sc=Math.max(0,mx-e);
+  box.innerHTML='النتيجة: <span style="color:var(--emerald);">'+toAr(sc)+' / '+toAr(mx)+'</span>';
+}
+async function exRecStart(){
+  if(_exState==='paused'){ _exMediaRec.resume(); _exState='recording'; exRecUI(); return; }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
+    _exChunks=[]; const _mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    _exMediaRec=new MediaRecorder(stream,{mimeType:_mime,audioBitsPerSecond:24000});
+    _exMediaRec.ondataavailable=e=>{ if(e.data.size) _exChunks.push(e.data); };
+    _exMediaRec.onstop=()=>{ _exBlob=new Blob(_exChunks,{type:'audio/webm'}); const a=document.getElementById('ex-audio'); a.src=URL.createObjectURL(_exBlob); a.style.display='block'; stream.getTracks().forEach(t=>t.stop()); };
+    _exMediaRec.start(); _exState='recording'; exRecUI();
+  }catch(e){ showToast('🎙️ تعذّر الوصول للميكروفون'); }
+}
+function exRecPause(){ if(_exMediaRec&&_exState==='recording'){ _exMediaRec.pause(); _exState='paused'; exRecUI(); } }
+function exRecStop(){ if(_exMediaRec&&_exState!=='idle'){ _exMediaRec.stop(); _exState='stopped'; exRecUI(); } }
+function exRecUI(){ document.getElementById('ex-rec-state').textContent=_exState==='recording'?'🔴 جارٍ التسجيل...':_exState==='paused'?'⏸️ متوقف مؤقتاً':_exState==='stopped'?'✅ تم التسجيل':''; }
+function exResetRecorder(){ _exMediaRec=null; _exChunks=[]; _exBlob=null; _exState='idle'; const a=document.getElementById('ex-audio'); a.src=''; a.style.display='none'; document.getElementById('ex-rec-state').textContent=''; }
+function exEnsureStopped(){ return new Promise(res=>{ if(!_exMediaRec&&!_exBlob){ res(); return; } const wait=()=>{ let n=0; const t=setInterval(()=>{ if(_exBlob||++n>40){ clearInterval(t); res(); } },40); }; if(_exState==='recording'||_exState==='paused'){ _exMediaRec.addEventListener('stop',wait,{once:true}); try{ _exMediaRec.stop(); }catch(e){ wait(); } _exState='stopped'; exRecUI(); } else { wait(); } }); }
+async function saveExamGrade(){
+  const {sid,col,max,lbl}=EX_CTX; const s=findStu(sid); if(!s) return;
+  const e=parseInt(document.getElementById('ex-errors').value);
+  if(isNaN(e)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
+  const score=Math.max(0,max-e), date=D();
+  // رفع الصوت إن وُجد
+  await exEnsureStopped();
+  let audioUrl=(examScoreOf(sid,col)||{}).audio_url||null, audioMsg='';
+  if(_exBlob&&_exBlob.size>0&&!s._static&&!s._guest){
+    try{
+      const p='exam_'+sid+'_'+col+'_'+Date.now()+'.webm';
+      const up=await db.storage.from('recitations').upload(p,_exBlob,{contentType:'audio/webm',upsert:true});
+      if(!up.error){ const {data}=db.storage.from('recitations').getPublicUrl(p); audioUrl=data.publicUrl; audioMsg=' • 🎧 صوت محفوظ'; }
+      else audioMsg=' • ⚠️ الصوت لم يُرفع';
+    }catch(e2){ audioMsg=' • ⚠️ خطأ Storage'; }
+  }
+  // حدّث الكاش
+  EXAM_GR[sid]=EXAM_GR[sid]||{};
+  EXAM_GR[sid][col]={ errors:e, score, max, audio_url:audioUrl };
+  // احفظ في ملف الطالب (دمج غير متلف لباقي البيانات)
+  if(!s._static&&!s._guest){
+    try{
+      const {data:row}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+      const d=(row&&row.data)||{}; d.exams=d.exams||{}; d.exams[date]=d.exams[date]||{};
+      d.exams[date][col]={ errors:e, score, max, label:lbl, kind:EXAM_CFG.kind, audio_url:audioUrl };
+      d.exams[date]._meta={ kind:EXAM_CFG.kind, total:EXAM_CFG.total };
+      let err;
+      if(row&&row.id){ ({error:err}=await db.from('student_files').update({data:d}).eq('student_id',sid)); }
+      else { ({error:err}=await db.from('student_files').insert({student_id:sid,data:d})); }
+      if(err) throw err;
+    }catch(e3){ showToast('❌ تعذّر الحفظ في ملف الطالب: '+(e3.message||e3.code||'')); return; }
+  }
+  reflectExamRow(sid);
+  closeModal('modal-exam');
+  showToast('✅ '+lbl+': '+toAr(score)+'/'+toAr(max)+audioMsg);
 }
 
 // ══ ATTENDANCE ══
@@ -1888,8 +2645,8 @@ async function renderGuestResults(q){
   let res=[];
   try{
     const { data } = await db.rpc('search_students', { q });
-    res=(data||[]).map(s=>({ id:s.id, name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
-      .filter(s=>s.id && !existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
+    res=(data||[]).map(s=>({ name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
+      .filter(s=>!existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
   }catch(e){ res=[]; }
   if(!res.length){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">لا توجد نتائج</div>'; return; }
   box.innerHTML=res.map((s,i)=>`<div onclick="pickGuest(${i})" data-i="${i}" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background='#fff'">
@@ -1908,51 +2665,24 @@ function pickGuest(i){
   document.getElementById('guest-selected').style.display='block';
   document.getElementById('gs-confirm').style.display='inline-flex';
 }
-async function confirmGuest(){
+function confirmGuest(){
   if(!_guestPick){ showToast('⚠️ اختر طالباً أولاً'); return; }
-  if(!_guestPick.id){ showToast('⚠️ تعذّر تحديد الطالب'); return; }
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
-  if(GUEST_STUDENTS[key].some(g=>g.id===_guestPick.id)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
-  // حفظ الضيف في قاعدة البيانات (يبقى بعد الريفريش)
-  try{
-    const { error } = await db.from('circle_guests').insert({
-      circle_id:c.id, student_id:_guestPick.id, guest_date:REPORT_DATE,
-      student_name:_guestPick.name, student_branch:_guestPick.branch, student_teacher:_guestPick.teacher, added_by:cu.id
-    });
-    if(error && error.code!=='23505'){ showToast('❌ تعذّر حفظ الضيف: '+(error.message||error.code||'')); return; }
-  }catch(e){ showToast('❌ خطأ في الاتصال أثناء إضافة الضيف'); return; }
-  GUEST_STUDENTS[key].push({ id:_guestPick.id, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
-  REC_STATE[_guestPick.id]=REC_STATE[_guestPick.id]||{};
+  if(GUEST_STUDENTS[key].some(g=>g.name===_guestPick.name)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
+  const gid='guest_'+Date.now();
+  GUEST_STUDENTS[key].push({ id:gid, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
+  REC_STATE[gid]={};
   closeModal('modal-guest');
-  await renderStudents();
-  showToast('✅ تمت إضافة الطالب الضيف');
+  renderStudents();
+  showToast('✅ تمت إضافة الطالب الضيف لهذا اليوم');
 }
-async function removeGuest(gid){
+function removeGuest(gid){
   const c=activeCircle(); const key=guestKey(c);
-  try{ await db.from('circle_guests').delete().eq('circle_id',c.id).eq('student_id',gid).eq('guest_date',REPORT_DATE); }catch(e){}
   if(GUEST_STUDENTS[key]) GUEST_STUDENTS[key]=GUEST_STUDENTS[key].filter(g=>g.id!==gid);
   delete REC_STATE[gid];
-  await renderStudents();
+  renderStudents();
   showToast('🗑️ أُزيل الطالب الضيف');
-}
-// ── تحميل الطلاب الضيوف المحفوظين لهذه الحلقة + التاريخ من DB ──
-let _guestsLoaded={};
-async function loadGuestsForCircle(c){
-  if(!c) return;
-  const key=guestKey(c);
-  if(_guestsLoaded[key]){ return; }
-  try{
-    const {data}=await db.from('circle_guests')
-      .select('student_id,student_name,student_branch,student_teacher')
-      .eq('circle_id',c.id).eq('guest_date',REPORT_DATE);
-    GUEST_STUDENTS[key]=(data||[]).filter(g=>g.student_id).map(g=>({
-      id:g.student_id, name:g.student_name||'طالب', branch:g.student_branch||'—',
-      teacher:g.student_teacher||'—', mem:0, points:0, notes:'', _guest:true
-    }));
-    GUEST_STUDENTS[key].forEach(g=>{ REC_STATE[g.id]=REC_STATE[g.id]||{}; });
-    _guestsLoaded[key]=true;
-  }catch(e){ GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[]; }
 }
 
 async function doUploadReport(){
@@ -1979,7 +2709,7 @@ function setAtt(sid,val){
 }
 function setLate(sid){ const m=parseInt(document.getElementById('latemin-'+sid).value)||null; REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
 async function saveAtt(sid,status,mins){
-  const s=findStu(sid); if(s&&s._static){ showToast('📌 سُجّل محلياً'); return; }
+  const s=findStu(sid); if(s&&(s._static||s._guest)){ showToast('📌 سُجّل محلياً'); return; }
   try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}); }
   catch(e){ try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,recorded_by:cu.id}],{onConflict:'student_id,date'}); }catch(e2){} }
 }
@@ -2000,7 +2730,9 @@ function openEval(sid,type){
   document.getElementById('ev-afrom').value=st.ayah_from??'';
   document.getElementById('ev-ato').value=st.ayah_to??'';
   document.getElementById('ev-errors').value=st.errors??'';
+  document.getElementById('ev-faces').value=st.faces??1;
   document.getElementById('ev-notes').value=st.notes??'';
+  evAutoFaces();
   evGrade();
   const pw=document.getElementById('ev-plan-wrap'); if(pw) pw.style.display=planAllowed()?'':'none';
   setPlan(st.plan_done!==undefined?st.plan_done:true);
@@ -2011,11 +2743,27 @@ function openEval(sid,type){
 }
 function evGrade(){
   const v=parseInt(document.getElementById('ev-errors').value);
+  const f=Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
   const box=document.getElementById('ev-grade');
   if(isNaN(v)){ box.innerHTML='<span style="color:var(--light);">— أدخل عدد الأخطاء</span>'; return; }
-  const g=errorsToGrade(v); box.innerHTML=gradeBadge(g);
+  const avg=v/f; const g=errorsToGrade(avg);
+  box.innerHTML=gradeBadge(g)+(f>1?` <span style="font-size:.74rem;color:var(--mid);">— متوسط ${toAr(Math.round(avg*10)/10)} خطأ/وجه على ${toAr(f)} أوجه</span>`:'');
   // اقترح حالة الخطة تلقائياً
   setPlan(g!=='retry');
+}
+// حساب عدد الأوجه تلقائياً من المصحف المدني حسب مدى التسميع
+function evAutoFaces(){
+  if(typeof madaniFaces!=='function') return;
+  const sF=+document.getElementById('ev-sfrom').value+1;   // رقم السورة = الفهرس+1
+  const aF=parseInt(document.getElementById('ev-afrom').value)||1;
+  const sT=+document.getElementById('ev-sto').value+1;
+  const aT=parseInt(document.getElementById('ev-ato').value)||aF;
+  const faces=madaniFaces(sF,aF,sT,aT);
+  const inp=document.getElementById('ev-faces'); if(inp) inp.value=faces;
+  const p1=madaniPageOf(sF,aF), p2=madaniPageOf(sT,aT);
+  const hint=document.getElementById('ev-faces-hint');
+  if(hint) hint.innerHTML=`من صفحة ${toAr(Math.min(p1,p2))} إلى صفحة ${toAr(Math.max(p1,p2))} = <b style="color:var(--jade);">${toAr(faces)}</b> وجه`;
+  evGrade();
 }
 let _evPlan=true;
 function setPlan(done){ _evPlan=done;
@@ -2059,11 +2807,12 @@ async function saveEval(){
   const {sid,type}=REC_CTX; const s=findStu(sid); if(!s) return;
   const errors=parseInt(document.getElementById('ev-errors').value);
   if(isNaN(errors)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
-  const grade=errorsToGrade(errors), pts=GRADE_PTS[grade];
+  const faces=Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
+  const grade=errorsToGrade(errors/faces), pts=GRADE_PTS[grade];
   const rec={
     surah_from:+document.getElementById('ev-sfrom').value, ayah_from:+document.getElementById('ev-afrom').value||null,
     surah_to:+document.getElementById('ev-sto').value, ayah_to:+document.getElementById('ev-ato').value||null,
-    errors, grade, points:pts, notes:document.getElementById('ev-notes').value.trim(), plan_done:_evPlan,
+    errors, faces, grade, points:pts, notes:document.getElementById('ev-notes').value.trim(), plan_done:_evPlan,
   };
   const prev=(REC_STATE[sid]&&REC_STATE[sid][type])||null;
   const delta = pts - (prev?prev.points:0);
@@ -2071,7 +2820,7 @@ async function saveEval(){
   await ensureRecStopped();
   let audioUrl=prev?prev.audio_url:null, audioMsg='', audioPath=null;
   const hasBlob=_audioBlob && _audioBlob.size>0;
-  if(hasBlob && s._static){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
+  if(hasBlob && (s._static||s._guest)){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
   else if(hasBlob){
     try{
       audioPath='rec_'+sid+'_'+type+'_'+Date.now()+'.webm';
@@ -2082,7 +2831,7 @@ async function saveEval(){
   } else if(_audioBlob){ audioMsg=' • ⚠️ التسجيل فارغ'; }
   rec.audio_url=audioUrl;
   // حفظ في قاعدة البيانات
-  if(!s._static){
+  if(!s._static && !s._guest){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
@@ -2101,7 +2850,7 @@ async function saveEval(){
 
 // ── تحميل تسميع اليوم المسجّل مسبقاً (مزامنة) ──
 async function loadTodayRecitation(list){
-  const real=list.filter(s=>!s._static); if(!real.length) return;
+  const real=list.filter(s=>!s._static && !s._guest); if(!real.length) return;
   const ids=real.map(s=>s.id);
   try{
     const {data}=await db.from('attendance').select('student_id,status,late_minutes').in('student_id',ids).eq('date',D());
@@ -2146,9 +2895,9 @@ function renderPoints(){
   </tr>`).join('');
 }
 async function grantCard(id,type,pts){
-  const s=findStu(id); if(!s) return;
+  const s=MY_STUDENTS.find(x=>x.id===id); if(!s) return;
   try{ await db.from('points_cards').insert({student_id:id,card_type:type,points:pts,date:D(),recorded_by:cu.id}); }catch(e){}
-  s.points+=pts; if(!s._static && !s._guest){ try{ await db.from('students').update({total_points:s.points}).eq('id',id); }catch(e){} }
+  s.points+=pts; try{ await db.from('students').update({total_points:s.points}).eq('id',id); }catch(e){}
   const bal=document.getElementById('pt-bal-'+id); if(bal) bal.textContent='⭐ '+s.points;
   showToast('🏆 تم منح كرت ('+pts+' نقطة) لـ '+s.name);
 }
@@ -2217,13 +2966,36 @@ function stfSurahRange(r){
   if(!t||f===t) return f||t;
   return f+' ← '+t;
 }
+// ── كتلة درجات الاختبارات المسجّلة في ملف الطالب ──
+function buildExamsBlock(d){
+  const ex=d.exams||{}; const dates=Object.keys(ex).sort();
+  if(!dates.length) return '';
+  let cards=dates.map(dt=>{
+    const rec=ex[dt]; const meta=rec._meta||{};
+    const cols=Object.keys(rec).filter(k=>k!=='_meta');
+    let sum=0; const rows=cols.map(k=>{ const g=rec[k]; sum+=(+g.score||0);
+      return `<tr><td style="padding:5px 9px;border:1px solid var(--border);">${g.label||k}</td>
+        <td style="padding:5px 9px;border:1px solid var(--border);text-align:center;font-weight:800;color:var(--emerald);">${toAr(g.score)}<span style="color:var(--light);font-weight:600;">/${toAr(g.max)}</span></td>
+        <td style="padding:5px 9px;border:1px solid var(--border);text-align:center;">${g.audio_url?`<button class="btn btn-xs" style="background:var(--jade);color:#fff;" onclick="playRec('${g.audio_url}')">▶️</button>`:'—'}</td></tr>`;
+    }).join('');
+    return `<div style="border:1.5px solid var(--gold-l);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#fff;padding:8px 12px;font-weight:800;font-size:.83rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <span>📋 ${meta.kind||'اختبار'} — ${dt}</span>
+        <span>الدرجة النهائية: ${toAr(sum)}/${toAr(meta.total||'')}</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem;font-family:Tajawal;">
+        <thead><tr style="background:var(--pale);"><th style="padding:6px 9px;border:1px solid var(--border);text-align:right;">البند</th><th style="padding:6px 9px;border:1px solid var(--border);">الدرجة</th><th style="padding:6px 9px;border:1px solid var(--border);">صوت</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+  }).join('');
+  return `<div style="margin-bottom:16px;"><div style="font-weight:800;color:var(--gold);font-size:.9rem;margin-bottom:8px;">🏅 نتائج الاختبارات</div>${cards}</div>`;
+}
 // السجل القرآني = عرض تلقائي لمستوى الحفظ والمراجعة اللي عمله المعلم (جدول memorization + الصوت من recitation_records)
 function buildQuranPane(d){
   const memo=d._memo||[]; const audio=d._audio||{};
   const map={}, order=[];
   memo.forEach(r=>{ const k=(r.date||'').slice(0,7); if(!k) return; if(!map[k]){ map[k]=[]; order.push(k); } map[k].push(r); });
   order.sort();
-  let head=`<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📖 السجل القرآني — يُملأ تلقائياً من مستوى الحفظ والمراجعة</div>
+  let head=buildExamsBlock(d)+`<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📖 السجل القرآني — يُملأ تلقائياً من مستوى الحفظ والمراجعة</div>
     <div style="margin-bottom:14px;"><label style="font-size:.76rem;color:var(--light);display:block;margin-bottom:4px;">الإنجاز الحالي</label><input id="stf-current-achievement" type="text" value="${(d.currentAchievement||'').replace(/"/g,'&quot;')}" placeholder="مثال: تم حفظ جزء عم وتبارك" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:Tajawal;font-size:.83rem;outline:none;box-sizing:border-box;"></div>`;
   if(!order.length){
     return head+`<div style="text-align:center;padding:34px 14px;color:var(--light);background:var(--bg);border-radius:10px;border:1.5px dashed var(--border);"><div style="font-size:2.2rem;">📭</div><div style="margin-top:8px;font-size:.85rem;">لا يوجد سجل تسميع بعد — يظهر هنا تلقائياً بعد تسجيل مستوى الحفظ والمراجعة</div></div>`;
@@ -2327,13 +3099,12 @@ async function openStudentFile(sid){
   const s=findStu(sid); if(!s) return; _stfId=sid;
   document.getElementById('stf-header-name').textContent=s.name;
   let d={}, memo=[], am={};
-  if(!s._static){
-    // الملف الشامل (student_files) للطلاب الحقيقيين فقط — RLS تمنعه للضيف
-    if(!s._guest){
-      try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
+  if(!s._guest){
+    try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
+    if(!s._static){
+      try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){}
+      try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){}
     }
-    try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){}
-    try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){}
   }
   // دمج تسميع اليوم المسجّل محلياً (static/guest + اللي لسه اتسجّل قبل ما يتحفظ)
   const live=(typeof REC_STATE!=='undefined'&&REC_STATE[sid])||{};
@@ -2362,14 +3133,15 @@ function collectStf(){
 async function doStfSave(){
   const sid=_stfId; if(!sid){ closeModal('modal-stfile-confirm'); return; }
   const s=findStu(sid);
-  if(s&&s._static){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
-  if(s&&s._guest){ closeModal('modal-stfile-confirm'); showToast('ℹ️ الملف الشامل يُحفظ عند معلم الطالب الأصلي — تقييمك وتسميعك له محفوظ بالفعل'); return; }
+  if(s&&(s._static||s._guest)){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
   const d=collectStf();
   try{
-    const {data:ex}=await db.from('student_files').select('id').eq('student_id',sid).maybeSingle();
+    const {data:ex}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+    // دمج: نحافظ على درجات الاختبار (exams) وأي مفاتيح أخرى غير المُدارة هنا
+    const merged=Object.assign({}, (ex&&ex.data)||{}, d);
     let error;
-    if(ex&&ex.id){ ({error}=await db.from('student_files').update({data:d}).eq('student_id',sid)); }
-    else { ({error}=await db.from('student_files').insert({student_id:sid,data:d})); }
+    if(ex&&ex.id){ ({error}=await db.from('student_files').update({data:merged}).eq('student_id',sid)); }
+    else { ({error}=await db.from('student_files').insert({student_id:sid,data:merged})); }
     if(error) throw error;
     closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('✅ تم حفظ ملف الطالب');
   }catch(e){ showToast('❌ student_files: '+(e.message||e.code||JSON.stringify(e))); }
@@ -2383,16 +3155,397 @@ async function sendParentNote(){
 }
 
 // ══ TRAINING ══
-async function loadTraining(){
-  const box=document.getElementById('training-body');
-  try{
-    const {data}=await db.from('teacher_training').select('*').eq('teacher_id',cu.id).order('created_at',{ascending:false});
-    window._trainCount=(data||[]).length; const qt=document.getElementById('qs-train'); if(qt) qt.textContent=window._trainCount;
-    if(!data||!data.length){ box.innerHTML='<div class="empty"><span class="empty-icon">🎓</span>لا توجد محاضرات أو اختبارات مسجّلة بعد</div>'; return; }
-    box.innerHTML='<table class="tbl"><thead><tr><th>المحاضرة / الاختبار</th><th>النوع</th><th>الدرجة</th><th>المستوى</th></tr></thead><tbody>'+
-      data.map(t=>`<tr><td><strong>${t.title||t.name||'—'}</strong></td><td>${t.type||'—'}</td><td><span class="badge bg-gold">${t.score??t.grade??'—'}</span></td><td>${t.level||'—'}</td></tr>`).join('')+'</tbody></table>';
-  }catch(e){ box.innerHTML='<div class="empty"><span class="empty-icon">🎓</span>لا توجد بيانات تدريب متاحة</div>'; }
+// ══════════════ تأهيل المعلمين — مستويات ← دورات ← فيديوهات + نقاط ══════════════
+// كل فيديو تُنهي مشاهدته = ٥٠ نقطة تُضاف لرصيد المعلم (users.points) وتُسجَّل في teacher_training_progress.
+// لنقل دورة لمستوى آخر: انقل كائن الدورة {id,name,videos} من مصفوفة courses لمستوى إلى آخر فقط.
+const POINTS_PER_VIDEO = 50;
+const TRAINING_LEVELS = [
+  { id:'l0', name:'المستوى التمهيدي', courses:[
+    { id:'c1', name:'دورة مهارات حفظ القرآن الكريم', videos:['pcU2hnsYUr8','TxdZqPemWKY'] },
+    { id:'c2', name:'دورة مهارات التدريس لمعلم القرآن الكريم', videos:['vr2pGJEn7QQ','vvVvFjR5nuE','N_TD_YKYKxM'] },
+    { id:'c3', name:'مهارات المربي الفعّال', videos:['vZccnTUL9FE','fX_bqJWalNQ','X2Yqjgparb8','RZKRBwc8mH0','WK15OxQ2Ob4','r-y-EjwvG4c','qEbN7IGv6Rg','j0ZlDr4gLWE','VAMywr0XfOg','Gc2Gees4f6Y'] },
+    { id:'c4', name:'مهارات إيصال المعلومة', videos:['6E-1BkQrbB0','NW9sVnxd8k8'] },
+  ]},
+  { id:'l1', name:'المستوى الأول', courses:[] },
+  { id:'l2', name:'المستوى الثاني', courses:[] },
+  { id:'l3', name:'المستوى الثالث', courses:[] },
+  { id:'l4', name:'المستوى الرابع', courses:[] },
+  { id:'l5', name:'المستوى الخامس', courses:[] },
+];
+
+const EXAMS = {"c2": {"title": "الاختبار الشامل لدورة مهارات التدريس", "questions": [{"q": "ما هو الأصل والنموذج الأكمل الذي يجب على معلم حلقات العلوم الشرعية اتباعه؟", "opts": ["المناهج التعليمية الغربية الحديثة", "هدي النبي صلى الله عليه وسلم في التعليم", "التجارب الشخصية للمعلمين السابقين", "النظم الإدارية للمراكز التعليمية"], "a": 1}, {"q": "من هو الصحابي الذي قال عن النبي صلى الله عليه وسلم: «ما رأيت معلماً قبله ولا بعده أحسن تعليماً منه»؟", "opts": ["معاوية بن الحكم السلمي", "عبد الله بن مسعود", "عبد الله بن عباس", "أنس بن مالك"], "a": 0}, {"q": "كيف تعامل النبي صلى الله عليه وسلم مع معاوية بن الحكم عندما تكلم في الصلاة جهلاً؟", "opts": ["زجره ونهاه بشدة أمام الصحابة", "وجهه برفق وعلمه مقصود الصلاة دون تعنيف", "أمره بإعادة الصلاة فوراً", "أعرض عنه ولم يكلمه"], "a": 1}, {"q": "في قصة الأعرابي الذي بال في المسجد، ما التوجيه النبوي الفوري للصحابة؟", "opts": ["أن يزجروه ويخرجوه", "«لا تُزرِموه» أي لا تقطعوا عليه بوله", "أن يعاقبوه بالضرب", "أن يتركوه ويغيّروا مكان الصلاة"], "a": 1}, {"q": "ما دلالة دعاء الأعرابي: «اللهم ارحمني ومحمداً ولا ترحم معنا أحداً»؟", "opts": ["تأثره الشديد برحمة النبي صلى الله عليه وسلم وحسن خلقه مقارنة بشدة الآخرين", "عدم رغبته في دخول الصحابة الجنة", "علمه بفقه الدعاء وشروطه", "رغبته في الانفراد بالتعليم النبوي"], "a": 0}, {"q": "ما الوصف التربوي الذي أطلقه النبي صلى الله عليه وسلم على تضييق الأعرابي للرحمة؟", "opts": ["أخطأت التعبير", "حجّرت واسعاً", "اعتديت في الدعاء", "قصرت في الفهم"], "a": 1}, {"q": "ما أهمية الحلقات القرآنية والشرعية لأبناء المجتمع المتشتت؟", "opts": ["ملء وقت الفراغ فقط", "تمثيل المحضن التربوي الأصيل لبناء الجيل وتقويم السلوك", "تقديم الدعم المادي والإغاثي لهم", "تعليمهم مهارات القتال والدفاع عن النفس"], "a": 1}, {"q": "ما الذي يهدد بقاء الطلاب في الحلقات التقليدية إذا استمر المعلم في استخدام الأساليب الجافة؟", "opts": ["زيادة الحفظ السريع", "هروب وتسرّب الطلاب من الحلقات", "تحسّن الانضباط الإداري", "قوة الترابط بين المعلم والطالب"], "a": 1}, {"q": "ما هي الميزة الأساسية التي تجعل الألعاب الإلكترونية مثل البلاي ستيشن تجذب الأطفال لساعات طويلة؟", "opts": ["السهولة وعدم بذل الجهد", "قوة عنصر الجذب والتشويق والتفاعل", "الفائدة العلمية المباشرة", "تكلفتها المادية البسيطة"], "a": 1}, {"q": "إذا كانت المادة العلمية والتجويدية واحدة في كل الحلقات، فما السبب في إقبال الطلاب على معلم ونفورهم من آخر؟", "opts": ["مكان المسجد وتجهيزاته", "الأساليب والمهارات التدريسية وطريقة تعامل المعلم", "المكافآت المالية الموزعة", "وقت انعقاد الحلقة"], "a": 1}, {"q": "بماذا تميّز الصحابي عبد الله بن مسعود رضي الله عنه في المنظومة التعليمية النبوية؟", "opts": ["إمامة الجيوش العسكرية", "إمامة القراءة والإقراء بالأسلوب الغضّ المتصل", "كثرة كتابة العهود السياسية", "المهارات الاقتصادية والمالية"], "a": 1}, {"q": "ما الهدف العام المحدد لهذه الدورة التربوية كما ورد في الدورة؟", "opts": ["حفظ جزء عمّ كاملاً للمعلمين", "التعرف على الهدي النبوي في التعليم واكتساب المهارات التدريسية بكفاءة", "شرح أحكام التجويد المتقدمة", "كيفية إعداد دبلومات شرعية معتمدة"], "a": 1}, {"q": "ما التعريف الإجرائي لـ «مهارات التدريس» كما لخّصها المحاضر؟", "opts": ["حفظ المتون الشرعية بسرعة", "أنشطة تربوية ووسائل إجرائية يستعملها المعلم لتحقيق أهداف الحلقة بكفاءة", "معاقبة الطلاب المقصّرين بأساليب مبتكرة", "كتابة التقارير الإدارية اليومية للمشرفين"], "a": 1}, {"q": "ما هو التعريف المستنبط للحلقة القرآنية بناءً على الحديث النبوي؟", "opts": ["اجتماع رسمي لتوزيع الجوائز", "اجتماع معلم القرآن مع المتعلمين في بيئة تربوية صالحة لتعلم القرآن وتدارسه", "مسابقة سنوية بين المساجد", "لقاء عائلي غير منتظم"], "a": 1}, {"q": "أي الأماكن يُعتبر المحضن الأفضل والأعلى رتبة لانعقاد الحلقات القرآنية؟", "opts": ["المدارس الخاصة", "بيت من بيوت الله - المسجد", "الملاعب الرياضية", "البيوت السكنية بالتناوب"], "a": 1}, {"q": "من هو الصحابي الذي كان يكتب الوحي بين يدي النبي صلى الله عليه وسلم ويعرضه عليه؟", "opts": ["أبو هريرة", "زيد بن ثابت", "عمر بن الخطاب", "معاذ بن جبل"], "a": 1}, {"q": "ما الدليل في مسند أحمد على أن النبي صلى الله عليه وسلم كان يباشر التعليم بنفسه دائماً؟", "opts": ["كان يُقرئهم القرآن ما لم يكن جُنُباً", "كان يرسل الرسل لتعليم الناس", "كان يكتفي بالوعظ العام يوم الجمعة", "كان يوجّه الصحابة للكتابة فقط"], "a": 0}, {"q": "لمن امتدت جهود النبي صلى الله عليه وسلم الإقرائية والتعليمية بالإضافة إلى الإنس؟", "opts": ["لملوك الأعاجم فقط", "للجن؛ فقد ذهب مع داعي الجن وقرأ عليهم", "لجميع الأمم السابقة", "للمكاتبات السرية فقط"], "a": 1}, {"q": "كيف وصف أنس رضي الله عنه نشاط الصحابة بعد صلاة الفجر في المسجد النبوي؟", "opts": ["كانوا ينامون في المسجد", "كانوا يتحلّقون حِلَقاً يقرؤون القرآن ويتعلمون الفرائض والسنن", "كانوا يغادرون فوراً للتجارة", "كانوا ينتظرون توزيع الغنائم"], "a": 1}, {"q": "ما هي الفضائل الأربع المترتبة على حلقة تدارس القرآن في المسجد كما في الحديث؟", "opts": ["الغنى والجاه والقوة والنصر", "نزول السكينة، وغشيان الرحمة، وحفُّ الملائكة، وذكر الله لهم فيمن عنده", "طول العمر والبركة في الولد والتوفيق وتيسير الرزق", "مغفرة الكبائر ورفعة الدرجات وبطلان السحر وطرد الشياطين"], "a": 1}, {"q": "ما معنى أن النبي صلى الله عليه وسلم كان يتخوّل الصحابة بالموعظة والتعليم؟", "opts": ["يكرر عليهم الكلام طوال اليوم دون انقطاع", "يتخيّر الأوقات المناسبة لئلا يملّوا", "يتركهم شهوراً طويلة دون تعليم", "يعلمهم في السفر فقط دون الحضر"], "a": 1}, {"q": "ما الأثر التربوي لربط الحجارة على بطن النبي صلى الله عليه وسلم وهو يُقرئ أهل الصُّفّة؟", "opts": ["إظهار التعب للصحابة", "علوّ الهمّة والتضحية بالوقت والنفس لتعليم كتاب الله رغم شدة الجوع", "تشجيع الصحابة على الصيام", "كراهة الشبع أثناء التعليم"], "a": 1}, {"q": "ما هو الفرق الدقيق بين «الطريقة» و«الأسلوب» في التدريس؟", "opts": ["الطريقة عامة وشاملة، بينما الأسلوب هو اللمسة الشخصية للمعلم في التنفيذ", "الأسلوب أعمّ من الطريقة دائماً", "الطريقة تخص الطلاب، والأسلوب يخص الإدارة", "لا يوجد أي فرق بينهما وهما مترادفان تماماً"], "a": 0}, {"q": "أي المراحل العمرية تحتاج إلى أسلوب تعامل يعتمد على التشويق والألعاب والقصص المبسّطة؟", "opts": ["مرحلة كبار السن", "مرحلة الطفولة المبكرة والمستويات الأولى", "مرحلة الشباب والمراهقة", "مرحلة الإجازة والأسانيد"], "a": 1}, {"q": "ما الصفة التي تُعدّ «رأس مال» معلم العلوم الشرعية وبدونها يفقد التوجيه أثره التربوي؟", "opts": ["الصوت المرتفع الجهوري", "القدوة الصالحة والرفق في التعامل", "التشدد في العقاب", "السرعة في سرد المعلومات"], "a": 1}]}};
+
+// ── اختبارات نهاية الدورة (اختيار من متعدد) ──
+let TR_EXAM_DONE = {};                 // { course_id: {percent, points} } — نتيجة مسجّلة = مقفول
+let _qzState = null;                    // {cid, qs, idx, answers[]}
+let _qzTimer = null, _qzEndTs = 0;
+const QZ_DURATION = 30*60;              // مدة الاختبار بالثواني (٣٠ دقيقة)
+
+function clearQzTimer(){ if(_qzTimer){ clearInterval(_qzTimer); _qzTimer=null; } }
+function qzStartTimer(){
+  clearQzTimer();
+  _qzEndTs=Date.now()+QZ_DURATION*1000;
+  qzTickTimer();
+  _qzTimer=setInterval(qzTickTimer,1000);
 }
+function qzTickTimer(){
+  const rem=Math.max(0,Math.round((_qzEndTs-Date.now())/1000));
+  const el=document.getElementById('qz-timer');
+  const m=Math.floor(rem/60), sec=rem%60;
+  if(el){
+    el.textContent='⏱️ '+toAr(String(m).padStart(2,'0'))+':'+toAr(String(sec).padStart(2,'0'));
+    if(rem<=300){ el.style.color='var(--red)'; el.style.background='var(--red-pale)'; el.style.borderColor='var(--red)'; }
+    else{ el.style.color='var(--emerald)'; el.style.background='var(--pale)'; el.style.borderColor='var(--border)'; }
+  }
+  if(rem<=0){ clearQzTimer(); if(_qzState){ showToast('⏰ انتهى وقت الاختبار — سيتم التسليم تلقائياً'); qzShowResult(); } }
+}
+
+function trExamHas(cid){ return !!EXAMS[cid]; }
+
+async function openQuiz(cid){
+  const ex=EXAMS[cid]; if(!ex) return;
+  if(TR_EXAM_DONE[cid]){ showToast('🔒 تم أداء هذا الاختبار — لا يمكن إعادته إلا بإذن المدير'); return; }
+  // تأكيد ملكية النتيجة من جديد (منع سباق)
+  try{
+    const {data}=await db.from('teacher_exam_results').select('percent,points').eq('teacher_id',cu.id).eq('exam_id',cid).maybeSingle();
+    if(data){ TR_EXAM_DONE[cid]={percent:data.percent,points:data.points}; renderTrCourses(); showToast('🔒 تم أداء هذا الاختبار مسبقاً'); return; }
+  }catch(e){}
+  _qzState={cid, qs:ex.questions, idx:0, answers:new Array(ex.questions.length).fill(-1)};
+  document.getElementById('qz-title').textContent='🎯 '+ex.title;
+  document.getElementById('qz-result').style.display='none';
+  document.getElementById('qz-quiz').style.display='';
+  openModal('modal-tr-exam');
+  qzStartTimer();
+  renderQzQ();
+}
+function renderQzQ(){
+  const s=_qzState; if(!s) return;
+  const total=s.qs.length, q=s.qs[s.idx];
+  document.getElementById('qz-progress-txt').textContent='سؤال '+toAr(s.idx+1)+' من '+toAr(total);
+  document.getElementById('qz-progress-bar').style.width=Math.round((s.idx+1)/total*100)+'%';
+  // متصفح الأسئلة — التنقل الحر لأي سؤال قبل التسليم
+  document.getElementById('qz-nav').innerHTML=s.qs.map((_,i)=>{
+    const ans=s.answers[i]>=0, cur=i===s.idx;
+    const bg=cur?'var(--jade)':(ans?'var(--mint)':'#fff'), col=(cur||ans)?'#fff':'var(--mid)', bd=cur?'var(--jade)':(ans?'var(--mint)':'var(--border)');
+    return `<button onclick="qzGoto(${i})" title="سؤال ${toAr(i+1)}" style="width:31px;height:31px;border-radius:8px;border:1.5px solid ${bd};background:${bg};color:${col};font-size:.74rem;font-weight:800;cursor:pointer;transition:all .12s;">${toAr(i+1)}</button>`;
+  }).join('');
+  document.getElementById('qz-question').textContent=q.q;
+  const cur=s.answers[s.idx]; const L=['أ','ب','ج','د'];
+  document.getElementById('qz-options').innerHTML=q.opts.map((o,i)=>`
+    <div onclick="qzSelect(${i})" style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border:2px solid ${cur===i?'var(--jade)':'var(--border)'};background:${cur===i?'var(--pale)':'#fff'};border-radius:12px;cursor:pointer;transition:all .12s;" onmouseenter="if(${cur}!==${i})this.style.borderColor='var(--mint)'" onmouseleave="if(${cur}!==${i})this.style.borderColor='var(--border)'">
+      <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${cur===i?'var(--jade)':'var(--pale)'};color:${cur===i?'#fff':'var(--emerald)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.86rem;">${L[i]}</span>
+      <span style="font-size:.9rem;font-weight:600;color:var(--forest);line-height:1.6;padding-top:3px;">${o.replace(/</g,'&lt;')}</span>
+    </div>`).join('');
+  const first=s.idx===0, last=s.idx===total-1;
+  const pv=document.getElementById('qz-prev-btn'), nx=document.getElementById('qz-next-btn');
+  pv.disabled=first; pv.style.opacity=first?'.45':'1'; pv.style.cursor=first?'not-allowed':'pointer';
+  nx.disabled=last;  nx.style.opacity=last?'.45':'1';  nx.style.cursor=last?'not-allowed':'pointer';
+}
+function qzSelect(i){ if(!_qzState) return; _qzState.answers[_qzState.idx]=i; renderQzQ(); }
+function qzGoto(i){ if(!_qzState) return; _qzState.idx=i; renderQzQ(); }
+function qzPrev(){ if(_qzState && _qzState.idx>0){ _qzState.idx--; renderQzQ(); } }
+function qzNext(){ if(_qzState && _qzState.idx<_qzState.qs.length-1){ _qzState.idx++; renderQzQ(); } }
+function qzSubmit(){
+  const s=_qzState; if(!s) return;
+  const un=s.answers.filter(a=>a<0).length;
+  let msg='هل أنت متأكد من تسليم الاختبار وإظهار النتيجة؟\n\n⚠️ بعد التسليم لا يمكن إعادة الاختبار إلا بإذن المدير، ولا الرجوع لمراجعة الأسئلة.';
+  if(un>0) msg='لديك '+toAr(un)+' سؤالاً بدون إجابة (سيُحتسب خطأً).\n\n'+msg;
+  if(!confirm(msg)) return;
+  qzShowResult();
+}
+async function qzShowResult(){
+  const s=_qzState; if(!s) return;
+  clearQzTimer();
+  let correct=0; s.qs.forEach((q,i)=>{ if(s.answers[i]===q.a) correct++; });
+  const total=s.qs.length, percent=Math.round(correct/total*100), points=percent;   // ٢٥/٢٥ = ١٠٠٪ = ١٠٠ نقطة
+  const cid=s.cid;
+  document.getElementById('qz-quiz').style.display='none';
+  const rc = percent>=60;
+  document.getElementById('qz-result').style.display='';
+  document.getElementById('qz-result').innerHTML=`
+    <div style="text-align:center;padding:24px 18px;">
+      <div style="font-size:3rem;margin-bottom:6px;">${rc?'🎉':'📘'}</div>
+      <div style="font-size:1.15rem;font-weight:800;color:var(--forest);margin-bottom:18px;">${rc?'أحسنت! اجتزت الاختبار':'انتهى الاختبار'}</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="background:var(--pale);border:1px solid var(--border);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--emerald);">${toAr(correct)}/${toAr(total)}</div>
+          <div style="font-size:.76rem;color:var(--light);margin-top:2px;">الدرجة</div></div>
+        <div style="background:var(--pale);border:1px solid var(--border);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--jade);">${toAr(percent)}٪</div>
+          <div style="font-size:.76rem;color:var(--light);margin-top:2px;">النسبة المئوية</div></div>
+        <div style="background:var(--gold-pale);border:1px solid var(--gold-l);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--gold);">${toAr(points)}</div>
+          <div style="font-size:.76rem;color:var(--gold);margin-top:2px;">نقطة أُضيفت</div></div>
+      </div>
+      <div style="font-size:.82rem;color:var(--light);max-width:420px;margin:0 auto 20px;line-height:1.7;">🔒 لا يمكن إعادة هذا الاختبار إلا بإذن المدير. جزاك الله خيراً على اجتهادك.</div>
+      <button class="btn btn-primary btn-sm" onclick="closeQuiz()">تم</button>
+    </div>`;
+  // حفظ النتيجة (مرة واحدة) + منح النقاط
+  try{
+    const {error}=await db.from('teacher_exam_results').insert([{teacher_id:cu.id, exam_id:cid, score:correct, total:total, percent:percent, points:points}]);
+    if(error && error.code!=='23505'){ throw error; }
+    if(!error){
+      const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
+      const curp=(u&&u.points)||0;
+      await db.from('users').update({points:curp+points}).eq('id',cu.id);
+    }
+    TR_EXAM_DONE[cid]={percent,points};
+    refreshMyPoints();
+  }catch(e){ showToast('⚠️ تعذّر حفظ النتيجة: '+(e.message||e.code||'')); }
+  _qzState=null;
+}
+function closeQuiz(){ clearQzTimer(); closeModal('modal-tr-exam'); _qzState=null; renderTrCourses(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElementById('modal-tr-exam') && document.getElementById('modal-tr-exam').classList.contains('open')){ if(_qzState && !confirm('إغلاق الاختبار سيُلغي إجاباتك الحالية. متأكد؟')) return; closeQuiz(); } });
+
+
+let TR_WATCHED = new Set();
+let TR_TITLES = {};
+let _trCurLevel = null, _trPlaying = null, _trPlayer = null, _trPollTimer = null;
+const _trAwarding = new Set();
+const TR_TITLE_CACHE_KEY = 'tr_titles_v1';
+
+function trEsc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function trCourseStats(c){ let d=0; c.videos.forEach(v=>{ if(TR_WATCHED.has(v)) d++; }); return {done:d,total:c.videos.length}; }
+function trLevelStats(lv){ let d=0,t=0; lv.courses.forEach(c=>{ const s=trCourseStats(c); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
+function trOverallStats(){ let d=0,t=0; TRAINING_LEVELS.forEach(lv=>{ const s=trLevelStats(lv); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
+function trAllVideoIds(){ const a=[]; TRAINING_LEVELS.forEach(lv=>lv.courses.forEach(c=>c.videos.forEach(v=>a.push(v)))); return a; }
+
+function trBar(done,total){
+  const pct = total ? Math.round(done/total*100) : 0;
+  return `<div style="display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;height:9px;background:var(--pale);border-radius:99px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--jade),var(--mint));border-radius:99px;transition:width .4s;"></div>
+    </div>
+    <span style="font-size:.75rem;font-weight:800;color:var(--emerald);min-width:98px;text-align:left;">${toAr(done)}/${toAr(total)} • ${toAr(pct)}٪</span>
+  </div>`;
+}
+
+// ── العناوين الحقيقية (oEmbed) مع تخزين محلي ──
+function trLoadTitleCache(){ try{ const s=localStorage.getItem(TR_TITLE_CACHE_KEY); if(s) TR_TITLES=JSON.parse(s)||{}; }catch(e){ TR_TITLES={}; } }
+function trSaveTitleCache(){ try{ localStorage.setItem(TR_TITLE_CACHE_KEY, JSON.stringify(TR_TITLES)); }catch(e){} }
+async function fetchTrTitles(){
+  let any=false;
+  await Promise.allSettled(trAllVideoIds().map(async id=>{
+    if(TR_TITLES[id]) return;
+    try{
+      const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+id+'&format=json');
+      if(r.ok){ const j=await r.json(); if(j.title){ TR_TITLES[id]=j.title; any=true;
+        const el=document.getElementById('tr-t-'+id); if(el) el.textContent=j.title;
+        if(_trPlaying && _trPlaying.videoId===id){ const pt=document.getElementById('tr-vid-title'); if(pt) pt.textContent='▶️ '+j.title; }
+      } }
+    }catch(e){}
+  }));
+  if(any) trSaveTitleCache();
+}
+
+// ── YouTube IFrame API (لرصد إتمام المشاهدة) ──
+let _ytReady = (typeof YT!=='undefined' && YT && YT.Player), _ytPending=null;
+function trEnsureYT(cb){
+  if(_ytReady){ cb&&cb(); return; }
+  if(cb) _ytPending=cb;
+  if(!document.getElementById('yt-iframe-api')){
+    const s=document.createElement('script'); s.id='yt-iframe-api'; s.src='https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  }
+}
+window.onYouTubeIframeAPIReady=function(){ _ytReady=true; if(_ytPending){ const c=_ytPending; _ytPending=null; c(); } };
+
+// ── التحميل الرئيسي ──
+async function loadTraining(){
+  trLoadTitleCache();
+  try{
+    const {data}=await db.from('teacher_training_progress').select('video_id').eq('teacher_id',cu.id);
+    TR_WATCHED=new Set((data||[]).map(r=>r.video_id));
+  }catch(e){ TR_WATCHED=new Set(); }
+  try{
+    const {data}=await db.from('teacher_exam_results').select('exam_id,percent,points').eq('teacher_id',cu.id);
+    TR_EXAM_DONE={}; (data||[]).forEach(r=>{ TR_EXAM_DONE[r.exam_id]={percent:r.percent,points:r.points}; });
+  }catch(e){ TR_EXAM_DONE={}; }
+  renderTrQuick();
+  trBackToLevels();
+  trEnsureYT();
+  fetchTrTitles();
+}
+function renderTrQuick(){ const {done,total}=trOverallStats(); const qt=document.getElementById('qs-train'); if(qt) qt.textContent=total?(toAr(done)+'/'+toAr(total)):toAr(0); }
+
+// ── منظر المستويات ──
+function trBackToLevels(){
+  const cv=document.getElementById('tr-courses-view'), lvv=document.getElementById('tr-levels-view');
+  if(cv) cv.style.display='none'; if(lvv) lvv.style.display='';
+  _trCurLevel=null; renderTrLevels();
+}
+function renderTrLevels(){
+  renderTrOverall();
+  const g=document.getElementById('tr-levels-grid'); if(g) g.innerHTML=TRAINING_LEVELS.map(trLevelCard).join('');
+}
+function renderTrOverall(){
+  const {done,total}=trOverallStats(); const pct=total?Math.round(done/total*100):0;
+  const el=document.getElementById('tr-overall'); if(!el) return;
+  el.innerHTML=`<div style="background:linear-gradient(135deg,var(--forest),var(--emerald));border-radius:var(--r);padding:16px 20px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+      <div style="font-size:.95rem;font-weight:800;">🎯 إجمالي تقدّمك في التأهيل</div>
+      <div style="font-size:.8rem;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:99px;font-weight:800;">🏆 من الفيديوهات: ${toAr(done*POINTS_PER_VIDEO)} نقطة</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;height:10px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--gold-l);border-radius:99px;transition:width .4s;"></div></div>
+      <span style="font-size:.8rem;font-weight:800;min-width:100px;text-align:left;">${toAr(done)}/${toAr(total)} فيديو • ${toAr(pct)}٪</span>
+    </div>
+  </div>`;
+}
+function trLevelCard(lv){
+  const {done,total}=trLevelStats(lv); const nC=lv.courses.length; const locked=nC===0;
+  const complete=total>0 && done===total;
+  const badge = locked
+    ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">قريباً</span>'
+    : (complete ? '<span class="badge bg-green">✅ مكتمل</span>' : '<span class="badge bg-gold">قيد التقدّم</span>');
+  const chips = nC
+    ? lv.courses.map(c=>`<span style="display:block;background:var(--pale);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.79rem;font-weight:700;color:var(--forest);">${c.name}</span>`).join('')
+    : '<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;">الدورات قريباً بإذن الله 🌿</div>';
+  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="font-family:Amiri,serif;font-size:1.28rem;font-weight:800;color:var(--gold-l);">${lv.name}</div>${badge}
+    </div>
+    <div style="padding:15px 18px;display:flex;flex-direction:column;gap:11px;flex:1;">
+      <div style="display:flex;flex-direction:column;gap:7px;">${chips}</div>
+      ${total?trBar(done,total):''}
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--mid);border-top:1px solid var(--border);padding-top:10px;margin-top:auto;">
+        <span>📚 ${toAr(nC)} دورة</span><span>🎬 ${toAr(total)} فيديو</span><span>🏆 ${toAr(total*POINTS_PER_VIDEO)} نقطة</span>
+      </div>
+      <button class="btn ${locked?'btn-outline':'btn-primary'} btn-sm" ${locked?'disabled style="opacity:.55;cursor:not-allowed;"':''} onclick="openLevel('${lv.id}')">${locked?'قريباً':'ادخل المستوى ←'}</button>
+    </div>
+  </div>`;
+}
+
+// ── منظر الدورات (شكل كورسات) ──
+function openLevel(id){
+  const lv=TRAINING_LEVELS.find(l=>l.id===id); if(!lv||!lv.courses.length) return;
+  _trCurLevel=id;
+  document.getElementById('tr-levels-view').style.display='none';
+  document.getElementById('tr-courses-view').style.display='';
+  document.getElementById('tr-level-title').textContent=lv.name;
+  renderTrCourses();
+}
+function renderTrCourses(){
+  const lv=TRAINING_LEVELS.find(l=>l.id===_trCurLevel); if(!lv) return;
+  const {done,total}=trLevelStats(lv);
+  document.getElementById('tr-level-progress').innerHTML=
+    `<div style="background:var(--pale);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;">
+       <div style="font-size:.85rem;font-weight:800;color:var(--forest);margin-bottom:10px;">📊 تقدّمك في ${lv.name}</div>${trBar(done,total)}
+     </div>`;
+  document.getElementById('tr-courses-list').innerHTML=lv.courses.map(c=>trCourseCard(c,lv)).join('');
+}
+function trCourseCard(c,lv){
+  const {done,total}=trCourseStats(c); const complete=total>0 && done===total;
+  const cBadge = complete ? '<span class="badge bg-green">✅ مكتملة</span>' : '<span class="badge bg-gold">'+toAr(done)+'/'+toAr(total)+'</span>';
+  const rows=c.videos.map((v,i)=>{
+    const w=TR_WATCHED.has(v); const title=TR_TITLES[v]?trEsc(TR_TITLES[v]):('فيديو تدريبي '+toAr(i+1));
+    return `<div onclick="playTrVideo('${v}','${c.id}','${lv.id}')" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;background:${w?'var(--pale)':'#fff'};transition:background .15s;" onmouseenter="this.style.background='var(--gold-pale)'" onmouseleave="this.style.background='${w?'var(--pale)':'#fff'}'">
+      <div style="position:relative;flex-shrink:0;">
+        <img src="https://img.youtube.com/vi/${v}/mqdefault.jpg" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v}/default.jpg'" style="width:78px;height:47px;object-fit:cover;border-radius:6px;display:block;">
+        <div style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.72);color:#fff;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:99px;">${toAr(i+1)}</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div id="tr-t-${v}" style="font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.5;">${title}</div>
+        <div style="font-size:.7rem;color:var(--light);margin-top:2px;">🏆 ٥٠ نقطة عند الإتمام</div>
+      </div>
+      ${w?'<span class="badge bg-green" style="flex-shrink:0;">✅ تمّت</span>':'<span style="flex-shrink:0;color:var(--jade);font-size:1.35rem;line-height:1;">▶</span>'}
+    </div>`;
+  }).join('');
+  let exam;
+  if(!complete){
+    exam=`<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🔒 اختبار نهاية الدورة — أكمِل مشاهدة كل الفيديوهات لفتحه (${toAr(done)}/${toAr(total)})</div>`;
+  } else if(trExamHas(c.id)){
+    const r=TR_EXAM_DONE[c.id];
+    exam = r
+      ? `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px solid var(--mint);border-radius:10px;padding:11px;color:var(--emerald);font-size:.82rem;font-weight:800;text-align:center;">✅ تم أداء الاختبار — نتيجتك ${toAr(r.percent)}٪ (${toAr(r.points)} نقطة) • لا يمكن إعادته إلا بإذن المدير</div>`
+      : `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${c.id}')">🎯 ابدأ اختبار نهاية الدورة (٢٥ سؤالاً)</button>`;
+  } else {
+    exam=`<button class="btn btn-gold btn-sm" style="width:100%;" onclick="showToast('🎯 اختبار نهاية الدورة قيد الإعداد — سيتاح قريباً بإذن الله')">🎯 اختبار نهاية الدورة — مُتاح (قريباً بإذن الله)</button>`;
+  }
+  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);">
+    <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:1.02rem;font-weight:800;color:#fff;">📘 ${c.name}</div>${cBadge}
+    </div>
+    <div style="padding:14px 18px;">
+      <div style="margin-bottom:14px;">${trBar(done,total)}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>
+      <div style="margin-top:16px;border-top:1px dashed var(--border);padding-top:14px;">${exam}</div>
+    </div>
+  </div>`;
+}
+
+// ── تشغيل الفيديو + رصد الإتمام ──
+function playTrVideo(videoId,courseId,levelId){
+  _trPlaying={videoId,courseId,levelId};
+  document.getElementById('tr-vid-title').textContent='▶️ '+(TR_TITLES[videoId]||'الفيديو');
+  const already=TR_WATCHED.has(videoId);
+  const st=document.getElementById('tr-vid-status'), mb=document.getElementById('tr-mark-btn');
+  if(already){ st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تمت مشاهدة هذا الفيديو — احتُسبت نقاطه من قبل</span>'; mb.style.display='none'; }
+  else{ st.textContent='شاهد الفيديو حتى النهاية لتُسجَّل ٥٠ نقطة تلقائياً.'; mb.style.display=''; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
+  openModal('modal-tr-video');
+  trEnsureYT(()=>{
+    if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
+    const host=document.getElementById('tr-yt-player'); host.innerHTML='<div id="tr-yt-mount" style="width:100%;height:100%;"></div>';
+    _trPlayer=new YT.Player('tr-yt-mount',{
+      videoId:videoId,
+      playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,origin:location.origin},
+      events:{
+        onReady:e=>{ try{e.target.playVideo();}catch(_){} startTrPoll(); },
+        onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED && _trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
+      }
+    });
+  });
+}
+function startTrPoll(){
+  if(_trPollTimer) clearInterval(_trPollTimer);
+  _trPollTimer=setInterval(()=>{
+    if(!_trPlayer||!_trPlaying) return;
+    try{
+      const d=_trPlayer.getDuration?_trPlayer.getDuration():0, t=_trPlayer.getCurrentTime?_trPlayer.getCurrentTime():0;
+      if(d>0 && t/d>=0.92) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
+    }catch(e){}
+  },2000);
+}
+function trConfirmWatched(){ if(_trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
+function closeTrVideo(){
+  if(_trPollTimer){ clearInterval(_trPollTimer); _trPollTimer=null; }
+  if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
+  const host=document.getElementById('tr-yt-player'); if(host) host.innerHTML='';
+  closeModal('modal-tr-video'); _trPlaying=null;
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElementById('modal-tr-video').classList.contains('open')) closeTrVideo(); });
+
+async function markTrWatched(videoId,courseId,levelId){
+  if(!videoId || TR_WATCHED.has(videoId) || _trAwarding.has(videoId)) return;
+  _trAwarding.add(videoId);
+  try{
+    const {error}=await db.from('teacher_training_progress').insert([{teacher_id:cu.id, video_id:videoId, course_id:courseId||null, level_id:levelId||null, points_awarded:POINTS_PER_VIDEO}]);
+    if(error && error.code==='23505'){ TR_WATCHED.add(videoId); }          // مسجّل مسبقاً — لا تمنح نقاط مكرّرة
+    else if(error){ throw error; }
+    else{                                                                    // صف جديد → امنح ٥٠ نقطة
+      TR_WATCHED.add(videoId);
+      const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
+      const cur=(u&&u.points)||0;
+      await db.from('users').update({points:cur+POINTS_PER_VIDEO}).eq('id',cu.id);
+      showToast('🎉 جزاكم الله خيرًا — أُضيفت ٥٠ نقطة لرصيدك');
+    }
+    refreshMyPoints();
+    const st=document.getElementById('tr-vid-status'), mb=document.getElementById('tr-mark-btn');
+    if(_trPlaying && _trPlaying.videoId===videoId){ if(st) st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تم — احتُسب هذا الفيديو</span>'; if(mb) mb.style.display='none'; }
+    renderTrQuick();
+    if(document.getElementById('tr-courses-view').style.display!=='none') renderTrCourses(); else renderTrLevels();
+  }catch(e){ showToast('⚠️ تعذّر تسجيل النقاط: '+(e.message||e.code||'')); }
+  finally{ _trAwarding.delete(videoId); }
+}
+
+// ── رصيد النقاط في السايدبار ──
+async function refreshMyPoints(){
+  try{
+    const {data}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
+    const p=(data&&data.points)||0; const el=document.getElementById('sb-points-val'); if(el) el.textContent=toAr(p);
+  }catch(e){}
+}
+
 
 // ══ MESSAGES (نظام كامل منقول من لوحة المدير) ══
 const MSG_STATIC_USERS = []; // فُرّغت — المستخدمون يُجلبون من Supabase
