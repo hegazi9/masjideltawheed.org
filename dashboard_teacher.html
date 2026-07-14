@@ -1933,9 +1933,10 @@ async function loadTeacherCurriculum(){
   if(onlyKebar){ sec.style.display='none'; return; }
   sec.style.display='block';
   const cal=document.getElementById('tcp-cal');
+  const cpSection = branches.some(b=> b==='الملكات'||b==='الأميرات') ? 'banat' : 'boys';
   try{
     const {data,error}=await db.from('curriculum_plan')
-      .select('*').eq('course','الدورة الصيفية 2026 م').order('sort_order',{ascending:true});
+      .select('*').eq('course','الدورة الصيفية 2026 م').eq('section',cpSection).order('sort_order',{ascending:true});
     if(error) throw error;
     TCP_ROWS=data||[];
   }catch(e){ TCP_ROWS=[]; }
