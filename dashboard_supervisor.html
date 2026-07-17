@@ -21,7 +21,6 @@
      │  «id="page-branch-abtal"»
      │  «id="page-branch-rowad"»
      │  «id="page-branch-banat"»
-     │  «id="page-branch-kebar"»
      │  «id="page-teachers"»
      │  «id="page-supervisors"»
      │  «id="page-parents"»
@@ -528,6 +527,34 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 .prog-bar{height:100%;border-radius:99px;background:linear-gradient(to left,var(--gold-l),var(--jade));}
 
 /* ══════════════════════════════════════
+   FINANCE
+══════════════════════════════════════ */
+.fin-sres{
+  position:absolute;top:100%;right:0;left:0;z-index:60;
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  box-shadow:var(--shadow-lg);max-height:230px;overflow-y:auto;margin-top:4px;display:none;
+}
+.fin-sres.open{display:block;}
+.fin-sres-item{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);}
+.fin-sres-item:last-child{border-bottom:none;}
+.fin-sres-item:hover{background:var(--pale);}
+.fin-sres-name{font-size:.85rem;font-weight:700;color:var(--forest);}
+.fin-sres-meta{font-size:.7rem;color:var(--light);margin-top:2px;}
+.fin-sres-empty{padding:12px 13px;font-size:.78rem;color:var(--light);text-align:center;}
+.fin-spick{
+  margin-top:8px;padding:9px 13px;border-radius:var(--r-sm);
+  background:var(--pale);border:1.5px solid var(--jade);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.fin-spick-x{cursor:pointer;color:var(--red);font-weight:900;font-size:1rem;}
+.fin-cell-amt{font-weight:800;color:var(--forest);}
+.fin-cell-none{color:#d1d5db;}
+.fin-unc td, .fin-unc td .fin-cell-amt{color:var(--light) !important;}
+.fin-unc .badge{filter:grayscale(1);opacity:.6;}
+td.fin-unc-c, td.fin-unc-c .fin-cell-amt{color:var(--light) !important;}
+td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
+
+/* ══════════════════════════════════════
    MODAL
 ══════════════════════════════════════ */
 .overlay{
@@ -949,6 +976,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
     <div class="sb-item" onclick="nav(this,'reports')">
       <span class="sb-icon">📄</span> التقارير
+      <span id="sb-lessons-badge" class="badge bg-red" style="display:none;margin-right:auto;font-size:.68rem;align-items:center;" title="تحضيرات بانتظار المراجعة"></span>
     </div>
     <div class="sb-item" onclick="nav(this,'stats')">
       <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12" y="7" width="3" height="10" rx="1"/><rect x="17" y="13" width="3" height="4" rx="1"/></svg></span> الإحصاءات
@@ -962,8 +990,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="sb-item" onclick="nav(this,'library')" style="display:none;">
       <span class="sb-icon">📚</span> المكتبة
     </div>
-    <div class="sb-item" onclick="nav(this,'finance')" style="display:none;">
-      <span class="sb-icon">💰</span> الشؤون المالية
+    <div class="sb-item" onclick="nav(this,'finance')" id="sb-finance">
+      <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></span> الشؤون المالية
     </div>
   </nav>
 
@@ -1232,29 +1260,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       </div>
     </div>
 
-    <!-- تحفيظ الكبار -->
-    <div class="card branch-card" data-branch-key="kebar" onclick="openBranch('تحفيظ الكبار')" style="cursor:pointer;border:2px solid transparent;transition:all .25s;" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-      <div style="background:linear-gradient(135deg,var(--gold),#a0720a);border-radius:var(--r-sm) var(--r-sm) 0 0;padding:20px 20px 16px;color:#fff;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-        <div style="font-size:2rem;margin-bottom:6px;">📖</div>
-        <div style="font-size:1.2rem;font-weight:800;font-family:'Amiri',serif;">تحفيظ الكبار</div>
-        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">كل الأعمار • ذكور</div>
-      </div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">الطلاب</span>
-          <span style="font-weight:800;font-size:1.1rem;color:var(--gold);" id="count-kebar-students">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">المعلمين</span>
-          <span style="font-weight:800;font-size:1.1rem;color:var(--gold);" id="count-kebar-teachers">—</span>
-        </div>
-        <div style="margin-top:4px;">
-          <button class="btn btn-primary" style="width:100%;font-size:.82rem;background:linear-gradient(135deg,var(--gold),#a0720a);border:none;" onclick="event.stopPropagation();openBranch('تحفيظ الكبار')">📂 عرض التفاصيل</button>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /branches-grid -->
 
 </div><!-- /page-students -->
@@ -1290,17 +1295,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div style="background:linear-gradient(135deg,#9b59b6,#6c3483);color:#fff;padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:700;">👑 البنات — إناث</div>
   </div>
   <div id="banat-circles-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;"></div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     PAGE: BRANCH DETAIL - تحفيظ الكبار
-══════════════════════════════════════════════════════ -->
-<div id="page-branch-kebar" class="page">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-    <button class="btn btn-outline btn-sm" onclick="history.back()" style="font-size:.8rem;">← رجوع</button>
-    <div style="background:linear-gradient(135deg,var(--gold),#a0720a);color:#fff;padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:700;">📖 تحفيظ الكبار</div>
-  </div>
-  <div id="kebar-circles-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:16px;"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════
@@ -1389,27 +1383,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
           </div>
           <div id="tc-banat-names"></div>
           <button class="btn btn-primary" style="width:100%;margin-top:12px;font-size:.82rem;background:linear-gradient(135deg,#9b59b6,#6c3483);border:none;" onclick="event.stopPropagation();openAddTeacherForBranch('الملكات')">➕ إضافة معلمة</button>
-        </div>
-      </div>
-
-      <!-- تحفيظ الكبار -->
-      <div class="card" data-branch-key="kebar" style="cursor:pointer;border:2px solid transparent;transition:all .25s;overflow:hidden;"
-           onclick="openTeacherBranch('تحفيظ الكبار')"
-           onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-4px)'"
-           onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-        <div style="background:linear-gradient(135deg,var(--gold),#a0720a);padding:20px 22px 16px;color:#fff;position:relative;overflow:hidden;">
-          <div style="position:absolute;left:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-          <div style="font-size:2rem;margin-bottom:6px;">📖</div>
-          <div style="font-size:1.1rem;font-weight:800;font-family:'Amiri',serif;">تحفيظ الكبار</div>
-          <div style="font-size:.72rem;opacity:.85;margin-top:3px;">كل الأعمار • ذكور</div>
-        </div>
-        <div style="padding:16px 20px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--gold-pale);border-radius:var(--r-sm);margin-bottom:12px;">
-            <span style="font-size:.83rem;color:var(--mid);font-weight:600;">المعلمون</span>
-            <span style="font-weight:900;font-size:1.4rem;color:var(--gold);" id="tc-kebar-count">—</span>
-          </div>
-          <div id="tc-kebar-names"></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:12px;font-size:.82rem;background:linear-gradient(135deg,var(--gold),#a0720a);border:none;" onclick="event.stopPropagation();openAddTeacherForBranch('تحفيظ الكبار')">➕ إضافة معلم</button>
         </div>
       </div>
 
@@ -1556,26 +1529,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         </div>
       </div>
 
-      <!-- تحفيظ الكبار -->
-      <div data-branch-key="kebar" onclick="svShowSupervisors('kebar')" style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'" onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
-        <div style="background:linear-gradient(135deg,var(--gold),var(--gold-l));padding:20px 22px;display:flex;align-items:center;gap:14px;">
-          <div style="width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">📖</div>
-          <div>
-            <div style="font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;color:#fff;">تحفيظ الكبار</div>
-            <div style="font-size:.74rem;color:rgba(255,255,255,.8);margin-top:3px;">ذكور · كل الأعمار · الجمعة</div>
-          </div>
-          <div style="margin-right:auto;font-size:1.2rem;color:rgba(255,255,255,.5);">←</div>
-        </div>
-        <div style="padding:16px 22px;display:flex;align-items:center;gap:22px;">
-          <div style="text-align:center;">
-            <div style="font-size:2rem;font-weight:900;color:var(--gold);line-height:1;" data-sv-count>—</div>
-            <div style="font-size:.72rem;color:var(--light);margin-top:3px;">مشرفون</div>
-          </div>
-          <div style="width:1px;height:36px;background:var(--border);"></div>
-          <div style="font-size:.83rem;color:var(--mid);" data-sv-names>—</div>
-        </div>
-      </div>
-
     </div>
   </div><!-- /branches view -->
 
@@ -1651,7 +1604,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <option value="">اختر الشعبة</option>
             <option value="الأبطال">الأبطال</option><option value="الرواد">الرواد</option>
             <option value="الملكات">الملكات</option><option value="الأميرات">الأميرات</option>
-            <option value="تحفيظ الكبار">تحفيظ الكبار</option>
           </select>
         </div>
         <div class="fg"><label>نوع الهوية</label>
@@ -1772,7 +1724,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
               <input type="checkbox" value="الأميرات" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🌸 الأميرات
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="تحفيظ الكبار" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 📖 تحفيظ الكبار
             </label>
           </div>
         </div>
@@ -1866,7 +1817,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
               <input type="checkbox" value="الأميرات" class="edit-sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🌸 الأميرات
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="تحفيظ الكبار" class="edit-sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 📖 تحفيظ الكبار
             </label>
           </div>
         </div>
@@ -2834,8 +2784,10 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <div style="display:flex;align-items:center;gap:16px;">
         <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(107,63,160,.25);">📝</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تحضير الدروس</div>
-          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مراجعة تحضيرات المعلمين والموافقة عليها</div>
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);display:flex;align-items:center;gap:8px;">تحضير الدروس
+            <span id="rep-lessons-badge" class="badge bg-red" style="display:none;font-size:.7rem;align-items:center;"></span>
+          </div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مراجعة تحضيرات المعلمين والموافقة عليها (+٥٠ نقطة)</div>
         </div>
         <div style="font-size:1.3rem;color:var(--purple);">‹</div>
       </div>
@@ -3066,37 +3018,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       </div>
     </div>
 
-    <!-- م.محمد كمال — مدير تحفيظ الكبار -->
-    <div data-adminid="f912a145-95a0-4e14-806d-7d5428f084dd" data-adminname="م.محمد كمال"
-      style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default;"
-      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
-      onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow)'"
-      oncontextmenu="showAdminMenu(event,this);return false;"
-      ontouchstart="adminLongPressStart(event,this)"
-      ontouchend="adminLongPressEnd()"
-      ontouchmove="adminLongPressEnd()">
-      <div style="background:linear-gradient(135deg,#5c3800,var(--gold));padding:20px 22px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4.5" fill="white" opacity="0.9"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:1.05rem;font-weight:800;color:#fff;font-family:'Amiri',serif;">م.محمد كمال</div>
-          <div style="font-size:.75rem;color:rgba(255,255,255,.85);margin-top:3px;">مدير تحفيظ الكبار</div>
-        </div>
-        <div style="width:10px;height:10px;border-radius:50%;background:#52c77c;box-shadow:0 0 8px #52c77c;flex-shrink:0;"></div>
-      </div>
-      <div style="padding:16px 20px;">
-        <div style="font-size:.72rem;color:var(--light);font-weight:600;margin-bottom:8px;">شعبة تحفيظ الكبار فقط</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-          <div style="background:var(--gold-pale);border-radius:var(--r-sm);padding:10px 8px;text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:var(--gold);line-height:1;" id="adm4-branches">—</div><div style="font-size:.68rem;color:var(--light);margin-top:3px;">الشعب</div></div>
-          <div style="background:var(--gold-pale);border-radius:var(--r-sm);padding:10px 8px;text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:var(--gold);line-height:1;" id="adm4-supervisors">—</div><div style="font-size:.68rem;color:var(--light);margin-top:3px;">المشرفون</div></div>
-          <div style="background:var(--gold-pale);border-radius:var(--r-sm);padding:10px 8px;text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:var(--gold);line-height:1;" id="adm4-teachers">—</div><div style="font-size:.68rem;color:var(--light);margin-top:3px;">المعلمون</div></div>
-          <div style="background:var(--gold-pale);border-radius:var(--r-sm);padding:10px 8px;text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:var(--gold);line-height:1;" id="adm4-students">—</div><div style="font-size:.68rem;color:var(--light);margin-top:3px;">الطلاب</div></div>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /admins-cards-grid -->
 </div><!-- /page-admins -->
 
@@ -3212,7 +3133,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <option value="الرواد">الرواد</option>
             <option value="الملكات">الملكات</option>
             <option value="الأميرات">الأميرات</option>
-            <option value="تحفيظ الكبار">تحفيظ الكبار</option>
           </select>
         </div>
         <div>
@@ -3306,7 +3226,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <option value="الرواد">الرواد (ذكور ٧–١٠)</option>
             <option value="الملكات">الملكات (إناث ١١–١٤)</option>
             <option value="الأميرات">الأميرات (إناث ٧–١٠)</option>
-            <option value="تحفيظ الكبار">تحفيظ الكبار (مكثف)</option>
           </select>
         </div>
         <div class="fg"><label>يعرض على واجهة الموقع؟</label>
@@ -3379,7 +3298,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <option value="الرواد">الرواد</option>
             <option value="الملكات">الملكات</option>
             <option value="الأميرات">الأميرات</option>
-            <option value="تحفيظ الكبار">تحفيظ الكبار</option>
           </select>
         </div>
         <div class="fg"><label>يعرض على واجهة الموقع؟</label>
@@ -3702,12 +3620,507 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 </div>
 
 <!-- ══ PAGE: FINANCE ══ -->
+<!-- ══ PAGE: FINANCE ══ -->
 <div id="page-finance" class="page">
-  <div class="section-title">💰 الشؤون المالية</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">💰</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
+  <div class="section-title"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg> الشؤون المالية</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:22px;">اختر القسم المطلوب — كل البيانات حيّة من قاعدة البيانات.</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+    <div onclick="nav(null,'fin-rev')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">الواردات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">الاشتراكات والتبرعات والكفالات</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-exp')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--red);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">المصروفات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مصروفات المدرسة والرواتب</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--red);">‹</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: الواردات ══ -->
+<div id="page-fin-rev" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>الواردات</span>
+  </div>
+  <div class="section-title"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> الواردات</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:22px;">اختر بند الواردات المطلوب.</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+    <div onclick="nav(null,'fin-subs')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">اشتراكات الطلاب</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">اشتراك الدورة الصيفية ٢٠٢٦م — ٣ شهور</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-don')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">التبرعات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">تبرعات المحسنين لصالح المدرسة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-spon')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--blue),#2588c4);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">الكفالات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">كفالة طالب لمدة شهر أو أكثر</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--blue);">‹</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: المصروفات ══ -->
+<div id="page-fin-exp" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>المصروفات</span>
+  </div>
+  <div class="section-title"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> المصروفات</div>
+  <div style="font-size:.82rem;color:var(--light);margin-bottom:22px;">اختر بند المصروفات المطلوب.</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+    <div onclick="nav(null,'fin-sal')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">مرتبات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">المرتبات الشهرية والحوافز</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-food')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">طعام</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">فطار وغداء وعشاء وضيافة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-maint')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--blue),#2588c4);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">صيانة</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">صيانة المقر والأجهزة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--blue);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-mot')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تحفيز وترفيه</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">جوائز وأنشطة ورحلات</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-purch')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">مشتريات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مشتريات وأدوات ومستلزمات</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-mkt')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">تسويق</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">إعلانات ودعاية للمدرسة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-debt')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--red);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">ديون</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مستحقات لم تُسدَّد بعد</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--red);">‹</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: التبرعات ══ -->
+<div id="page-fin-don" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-rev')">الواردات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>التبرعات</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> التبرعات</div>
+    <button class="btn btn-primary" onclick="openDonModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة تبرع</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> سجل التبرعات</div>
+      <span class="badge bg-green" id="fin-don-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المبلغ</th><th>بواسطة</th><th>المستلم</th>
+          <th>وسيلة الدفع</th><th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-don-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: الكفالات ══ -->
+<div id="page-fin-spon" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-rev')">الواردات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>الكفالات</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> الكفالات</div>
+    <button class="btn btn-primary" onclick="openSponModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة كفالة</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> سجل الكفالات</div>
+      <span class="badge bg-blue" id="fin-spon-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المبلغ</th><th>الكفيل</th><th>الطالب المكفول</th>
+          <th>مدة الكفالة</th><th>المستلم</th><th>وسيلة الدفع</th><th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-spon-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: اشتراكات الطلاب ══ -->
+<div id="page-fin-subs" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-rev')">الواردات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>اشتراكات الطلاب</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg> اشتراك الدورة الصيفية ٢٠٢٦م</div>
+    <button class="btn btn-primary" onclick="openSubsModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة اشتراك</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg> اشتراك الدورة الصيفية ٢٠٢٦م</div>
+      <span class="badge bg-green" id="fin-subs-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl" style="font-size:.78rem;">
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:center;vertical-align:middle;">م</th>
+            <th rowspan="2" style="vertical-align:middle;">اسم الطالب</th>
+            <th colspan="4" style="text-align:center;border-right:2px solid var(--border);border-left:2px solid var(--border);">الشهر الأول</th>
+            <th colspan="4" style="text-align:center;border-left:2px solid var(--border);">الشهر الثاني</th>
+            <th colspan="4" style="text-align:center;border-left:2px solid var(--border);">الشهر الثالث</th>
+            <th rowspan="2" style="vertical-align:middle;">ملاحظات</th>
+          </tr>
+          <tr>
+            <th style="text-align:center;border-right:2px solid var(--border);">المبلغ</th><th style="text-align:center;">وسيلة الدفع</th><th style="text-align:center;">المستلم</th><th style="text-align:center;border-left:2px solid var(--border);">تاريخ التسليم</th>
+            <th style="text-align:center;">المبلغ</th><th style="text-align:center;">وسيلة الدفع</th><th style="text-align:center;">المستلم</th><th style="text-align:center;border-left:2px solid var(--border);">تاريخ التسليم</th>
+            <th style="text-align:center;">المبلغ</th><th style="text-align:center;">وسيلة الدفع</th><th style="text-align:center;">المستلم</th><th style="text-align:center;border-left:2px solid var(--border);">تاريخ التسليم</th>
+          </tr>
+        </thead>
+        <tbody id="fin-subs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: مرتبات ══ -->
+<div id="page-fin-sal" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>مرتبات</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> المرتبات</div>
+    <button class="btn btn-primary" onclick="openSalModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة مرتب</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> سجل المرتبات</div>
+      <span class="badge bg-green" id="fin-sal-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>اسم المستلم</th><th>المبلغ</th><th>نوع المرتب</th>
+          <th>المدير</th><th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-sal-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: طعام ══ -->
+<div id="page-fin-food" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>طعام</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> طعام</div>
+    <button class="btn btn-primary" onclick="openExpModal('food')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة طعام</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> سجل طعام</div>
+      <span class="badge bg-gold" id="fin-food-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع الطعام</th>
+          <th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-food-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: صيانة ══ -->
+<div id="page-fin-maint" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>صيانة</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> صيانة</div>
+    <button class="btn btn-primary" onclick="openExpModal('maintenance')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة صيانة</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> سجل صيانة</div>
+      <span class="badge bg-blue" id="fin-maint-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع الصيانة</th>
+          <th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-maint-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: تحفيز وترفيه ══ -->
+<div id="page-fin-mot" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>تحفيز وترفيه</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> تحفيز وترفيه</div>
+    <button class="btn btn-primary" onclick="openExpModal('motivation')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة تحفيز</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> سجل تحفيز وترفيه</div>
+      <span class="badge bg-purple" id="fin-mot-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع التحفيز</th>
+          <th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-mot-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: مشتريات ══ -->
+<div id="page-fin-purch" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>مشتريات</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg> مشتريات</div>
+    <button class="btn btn-primary" onclick="openExpModal('purchases')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة مشتريات</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg> سجل مشتريات</div>
+      <span class="badge bg-green" id="fin-purch-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>البند</th>
+          <th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-purch-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: تسويق ══ -->
+<div id="page-fin-mkt" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>تسويق</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> تسويق</div>
+    <button class="btn btn-primary" onclick="openExpModal('marketing')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة تسويق</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> سجل تسويق</div>
+      <span class="badge bg-gold" id="fin-mkt-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع التسويق</th>
+          <th>التاريخ</th><th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-mkt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: ديون ══ -->
+<div id="page-fin-debt" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>ديون</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون</div>
+    <button class="btn btn-primary" onclick="openDebtModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة دين</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> سجل الديون</div>
+      <span class="badge bg-red" id="fin-debt-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl" style="font-size:.78rem;">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>صاحب الدين</th><th>المبلغ</th><th>البند</th>
+          <th>وسيلة الدفع</th><th>المستلم</th><th>تاريخ الدين</th>
+          <th style="text-align:center;border-right:2px solid var(--border);">تم الرد</th>
+          <th style="text-align:center;">تاريخ الرد</th><th style="text-align:center;">وسيلة الدفع</th>
+          <th style="text-align:center;border-left:2px solid var(--border);">المشرف</th>
+          <th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-debt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- ══ PAGE: WEBSITE ══ -->
@@ -3854,7 +4267,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="fg"><label>الشعبة</label>
           <select id="edit-s-branch" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
             <option>الأبطال</option><option>الرواد</option>
-            <option>الملكات</option><option>الأميرات</option><option>تحفيظ الكبار</option>
           </select>
         </div>
         <div class="fg"><label>الحفظ (أجزاء)</label><input type="number" id="edit-s-mem" min="0" max="30" step="0.5"></div>
@@ -3926,7 +4338,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <input type="checkbox" value="الأميرات" onchange="updateBranchLabel(this)"> الأميرات
           </label>
           <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid var(--border);border-radius:99px;cursor:pointer;font-size:.82rem;transition:all .2s;" class="branch-label">
-            <input type="checkbox" value="تحفيظ الكبار" onchange="updateBranchLabel(this)"> تحفيظ الكبار
           </label>
         </div>
       </div>
@@ -4084,7 +4495,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="fg"><label>الشعبة</label>
           <select id="edit-t-branch">
             <option>الأبطال</option><option>الرواد</option>
-            <option>الملكات</option><option>الأميرات</option><option>تحفيظ الكبار</option>
           </select>
         </div>
         <div class="fg"><label>الحالة</label>
@@ -4203,7 +4613,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
             <input type="checkbox" value="الأميرات" onchange="updateCEBranchLabel(this)"> الأميرات
           </label>
           <label style="display:flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid var(--border);border-radius:99px;cursor:pointer;font-size:.82rem;transition:all .2s;">
-            <input type="checkbox" value="تحفيظ الكبار" onchange="updateCEBranchLabel(this)"> تحفيظ الكبار
           </label>
         </div>
       </div>
@@ -4529,7 +4938,7 @@ async function svLoadTeachersFromDB() {
     const { data:us } = await db.from('users').select('id,full_name');
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
-    const toKey = { 'الأبطال':'الأبطال','الرواد':'الرواد','الملكات':'البنات','الأميرات':'البنات','البنات':'البنات','تحفيظ الكبار':'تحفيظ الكبار' };
+    const toKey = { 'الأبطال':'الأبطال','الرواد':'الرواد','الملكات':'البنات','الأميرات':'البنات','البنات':'البنات' };
     const map = {};
     ts.forEach(t => {
       const bn = brName[t.branch_id] || '';
@@ -4545,7 +4954,7 @@ async function svLoadTeachersFromDB() {
 }
 function loadBranchCounts() {
   const svBranchTeachers = window.__BD_HYDRATED ? null : (window.SUPERVISOR_BRANCH_TEACHERS || null);
-  const keyMap = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات', kebar:'تحفيظ الكبار' };
+  const keyMap = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات' };
 
   Object.entries(keyMap).forEach(([key, branchName]) => {
     let circles = BRANCH_DATA[branchName] || [];
@@ -4575,7 +4984,7 @@ function loadBranchCounts() {
 // ══════════════════════════════════════
 const BRANCH_DATA = {
   // فارغ عمداً — يُعمَّر بالكامل من قاعدة البيانات عبر hydrateBranchDataFromDB()
-  'الأبطال': [], 'الرواد': [], 'البنات': [], 'تحفيظ الكبار': [], 'الملكات': [], 'الأميرات': [],
+  'الأبطال': [], 'الرواد': [], 'البنات': [], 'الملكات': [], 'الأميرات': [],
 };
 
 // ── Student data helpers (localStorage) ──
@@ -4745,8 +5154,8 @@ function refreshCircleCard(safeId) {
 }
 
 function openBranch(branchName) {
-  const pageMap = { 'الأبطال':'branch-abtal', 'الرواد':'branch-rowad', 'البنات':'branch-banat', 'تحفيظ الكبار':'branch-kebar' };
-  const gridMap = { 'الأبطال':'abtal-circles-grid', 'الرواد':'rowad-circles-grid', 'البنات':'banat-circles-grid', 'تحفيظ الكبار':'kebar-circles-grid' };
+  const pageMap = { 'الأبطال':'branch-abtal', 'الرواد':'branch-rowad', 'البنات':'branch-banat' };
+  const gridMap = { 'الأبطال':'abtal-circles-grid', 'الرواد':'rowad-circles-grid', 'البنات':'banat-circles-grid' };
   const pageId = pageMap[branchName];
   if (!pageId) { showToast('🚧 قيد الإنشاء'); return; }
 
@@ -4760,7 +5169,6 @@ function openBranch(branchName) {
       grid.style.gridTemplateColumns = '1fr';
       {
         const isFemale = branchName === 'البنات';
-        const isKebar  = branchName === 'تحفيظ الكبار';
         // فلتر معلمي المشرف لهذه الشعبة تحديداً
         let circles = BRANCH_DATA[branchName] || [];
         if (window.SUPERVISOR_BRANCH_TEACHERS) {
@@ -5048,7 +5456,7 @@ function pbDoDelete() {
   const branch = _pbCtxBranch;
   if (branch) {
     // احذف الطالب من BRANCH_DATA مؤقتاً (session فقط)
-    ['الأبطال','الرواد','البنات','تحفيظ الكبار'].forEach(key => {
+    ['الأبطال','الرواد','البنات'].forEach(key => {
       if (BRANCH_DATA[key]) {
         BRANCH_DATA[key].forEach(circle => {
           circle.students = circle.students.filter(s => s !== _pbCtxStudent);
@@ -5149,7 +5557,6 @@ function renderTeacherBranchCards() {
     'abtal': { branchKey: 'الأبطال',       countId: 'tc-abtal-count', namesId: 'tc-abtal-names', color: 'var(--jade)'  },
     'rowad': { branchKey: 'الرواد',         countId: 'tc-rowad-count', namesId: 'tc-rowad-names', color: '#2196a3'      },
     'banat': { branchKey: 'البنات',         countId: 'tc-banat-count', namesId: 'tc-banat-names', color: '#9b59b6'      },
-    'kebar': { branchKey: 'تحفيظ الكبار',  countId: 'tc-kebar-count', namesId: 'tc-kebar-names', color: 'var(--gold)'  },
   };
   const svBT = window.SUPERVISOR_BRANCH_TEACHERS || null;
 
@@ -5182,7 +5589,7 @@ function renderTeacherBranchCards() {
     }
   });
   // stat-teachers: إجمالي معلمي هذا المشرف فقط
-  const total = ['الأبطال','الرواد','البنات','تحفيظ الكبار'].reduce((s, b) => s + filterItems(b).length, 0);
+  const total = ['الأبطال','الرواد','البنات'].reduce((s, b) => s + filterItems(b).length, 0);
   const el = document.getElementById('stat-teachers');
   if (el) el.textContent = total;
 }
@@ -5192,7 +5599,6 @@ const BRANCH_META = {
   'الأبطال':       { emoji:'⚔️', sub:'١١–١٤ سنة • ذكور',           color:'var(--jade)',  gradFrom:'var(--jade)', gradTo:'var(--forest)', keys:['الأبطال'],           addLabel:'➕ إضافة معلم'  },
   'الرواد':        { emoji:'🚀', sub:'٧–١٠ سنة • ذكور',            color:'#2196a3',      gradFrom:'#2196a3',     gradTo:'#15616d',        keys:['الرواد'],            addLabel:'➕ إضافة معلم'  },
   'البنات':        { emoji:'👑', sub:'الملكات + الأميرات • إناث',   color:'#9b59b6',      gradFrom:'#9b59b6',     gradTo:'#6c3483',        keys:['الملكات','الأميرات'], addLabel:'➕ إضافة معلمة' },
-  'تحفيظ الكبار': { emoji:'📖', sub:'كل الأعمار • ذكور',           color:'var(--gold)',  gradFrom:'var(--gold)', gradTo:'#a0720a',        keys:['تحفيظ الكبار'],     addLabel:'➕ إضافة معلم'  },
 };
 
 function openTeacherBranch(branchName) {
@@ -6371,7 +6777,7 @@ function openAddParent() {
   // ── جيب كل الأسماء من BRANCH_DATA ──
   const allStudents = [];
   const seen = new Set();
-  const branchOrder = ['الأبطال','الرواد','البنات','تحفيظ الكبار'];
+  const branchOrder = ['الأبطال','الرواد','البنات'];
   const subMap = { 'الملكات': 'الملكات', 'الأميرات': 'الأميرات' };
 
   branchOrder.forEach(bKey => {
@@ -6424,7 +6830,6 @@ function renderChildrenTags(branch) {
       'الرواد':   { bg:'#e8f4fb', border:'#2196a3',       color:'#15616d',        activeBg:'#2196a3',       activeColor:'#fff' },
       'الملكات':  { bg:'#f3e8fa', border:'#9b59b6',       color:'#6c3483',        activeBg:'#9b59b6',       activeColor:'#fff' },
       'الأميرات': { bg:'#fde8f4', border:'#e84393',       color:'#b5006d',        activeBg:'#e84393',       activeColor:'#fff' },
-      'تحفيظ الكبار': { bg:'#fdf3dc', border:'var(--gold)', color:'var(--gold)', activeBg:'var(--gold)', activeColor:'#fff' },
     };
     const c = branchColors[b] || branchColors['الأبطال'];
 
@@ -6864,11 +7269,16 @@ const PAGE_TITLES = {
   'rep-students':'👨‍🎓 تقارير الطلاب','rep-teachers':'👨‍🏫 تقارير المعلمين','rep-circles':'🕌 تقارير الحلقات',
   'rep-lessons':'📝 مراجعة تحضير الدروس',
   exams:'✍️ الامتحانات',golden:'🏅 السجل الذهبي',cards:'🪪 بطاقات الطلاب',
-  reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'💰 الشؤون المالية',
+  reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg> الشؤون المالية',
+  'fin-rev':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> الواردات','fin-exp':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> المصروفات',
+  'fin-don':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> التبرعات','fin-spon':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> الكفالات','fin-subs':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg> اشتراكات الطلاب',
+  'fin-sal':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> المرتبات','fin-food':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> طعام','fin-maint':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> صيانة',
+  'fin-mot':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> تحفيز وترفيه','fin-purch':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg> مشتريات','fin-mkt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> تسويق',
+  'fin-debt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
   settings:'⚙️ الإعدادات',admins:'🛡️ المديرون',media:'🎬 المرئيات',
   'branch-abtal':'⚔️ شعبة الأبطال','branch-rowad':'🚀 شعبة الرواد',
-  'branch-banat':'👑 شعبة البنات','branch-kebar':'📖 تحفيظ الكبار',
+  'branch-banat':'👑 شعبة البنات',
   'parents-branch':'👨‍👦 أولياء الأمور — الشعبة',
 };
 
@@ -7339,7 +7749,7 @@ function renderNotifications(){ _notifRender(); _notifUpdateBell(); }
 // ADMIN_BRANCH_FILTER: null = كل الشعب، array = الشعب المسموحة فقط
 // ═══════════════════════════════════════════════════════
 function applyBranchFilter() {
-  const allowed = window.ADMIN_BRANCH_FILTER; // null أو ['kebar'] أو ['abtal','rowad','banat']
+  const allowed = window.ADMIN_BRANCH_FILTER; // null أو ['abtal','rowad','banat']
   if (!allowed) return; // كل الصلاحيات → لا تخفي حاجة
 
   // كل الكروت اللي عليها data-branch-key
@@ -7350,15 +7760,8 @@ function applyBranchFilter() {
     }
   });
 
-  // لو المدير pref = kebar بس → خلي الـ dashboard welcome يقول كده
   const wbSub = document.getElementById('wb-subtitle');
-  if (wbSub) {
-    if (allowed.length === 1 && allowed[0] === 'kebar') {
-      wbSub.textContent = 'مسؤول شعبة تحفيظ الكبار';
-    } else if (allowed.includes('abtal') && !allowed.includes('kebar')) {
-      wbSub.textContent = 'مسؤول شعب الأطفال';
-    }
-  }
+  if (wbSub && allowed.includes('abtal')) wbSub.textContent = 'مسؤول شعب الأطفال';
 }
 
 
@@ -7473,7 +7876,6 @@ async function hydrateBranchDataFromDB(){
     'الرواد':['#2196a3','#15616d'],
     'الملكات':['#9b59b6','#6c3483'],
     'الأميرات':['#e84393','#c0398a'],
-    'تحفيظ الكبار':['#b8860b','#a0720a','#c8920a']
   };
   try{
     const { data:brs } = await db.from('branches').select('id,name');
@@ -7504,7 +7906,7 @@ async function hydrateBranchDataFromDB(){
     });
 
     // فرّغ BRANCH_DATA وأعد بناءه (mutate — لأنه const)
-    ['الأبطال','الرواد','البنات','تحفيظ الكبار'].forEach(k => { BRANCH_DATA[k] = []; });
+    ['الأبطال','الرواد','البنات'].forEach(k => { BRANCH_DATA[k] = []; });
     const colorIdx = {}, svbt = {};
 
     (circles||[]).forEach(c => {
@@ -7594,8 +7996,6 @@ async function init(){
     'أيمن كمال'      : { display: 'د.أيمن حجازي',      title: 'المدير التنفيذي للمدرسة' },
     'م.محمد الحسيني' : { display: 'الشيخ محمد الحسيني', title: 'مدير تحفيظ الأطفال' },
     'محمد الحسيني'   : { display: 'الشيخ محمد الحسيني', title: 'مدير تحفيظ الأطفال' },
-    'م.محمد كمال'    : { display: 'الشيخ محمد كمال',    title: 'مدير تحفيظ الكبار' },
-    'محمد كمال'      : { display: 'الشيخ محمد كمال',    title: 'مدير تحفيظ الكبار' },
   };
   const fn = (currentUser.full_name || '').trim();
   const adminInfo = ADMIN_MAP[fn] || { display: fn, title: 'مدير المدرسة' };
@@ -7610,13 +8010,10 @@ async function init(){
   if (roleEl) roleEl.textContent = currentUser.job_title || adminInfo.title;
 
   // ═══ نظام فلترة الشعب بحسب المدير ═══
-  // محمد كمال → تحفيظ الكبار فقط
   // محمد الحسيني → الأطفال فقط (الأبطال + الرواد + البنات)
-  // أيمن كمال + علاء عارف → كل الشعب
+  // أيمن حجازي + علاء عارف → كل الشعب
   const _adminFull = fn.toLowerCase();
-  if (_adminFull.includes('محمد كمال') || currentUser.full_name?.includes('محمد كمال')) {
-    window.ADMIN_BRANCH_FILTER = ['kebar']; // يرى تحفيظ الكبار فقط
-  } else if (_adminFull.includes('محمد الحسيني') || currentUser.full_name?.includes('محمد الحسيني') || currentUser.full_name?.includes('الحسيني')) {
+  if (_adminFull.includes('محمد الحسيني') || currentUser.full_name?.includes('محمد الحسيني') || currentUser.full_name?.includes('الحسيني')) {
     window.ADMIN_BRANCH_FILTER = ['abtal','rowad','banat']; // يرى الأطفال فقط
   } else {
     window.ADMIN_BRANCH_FILTER = null; // كل الشعب
@@ -7658,24 +8055,18 @@ async function init(){
       const allTeachers = [...new Set(Object.values(window.SUPERVISOR_BRANCH_TEACHERS).flat())];
       window.SUPERVISOR_TEACHER_LIST = allTeachers;
 
-      const branchKeyMap = {'الأبطال':'abtal','الرواد':'rowad','البنات':'banat','تحفيظ الكبار':'kebar'};
+      const branchKeyMap = {'الأبطال':'abtal','الرواد':'rowad','البنات':'banat'};
       // نجمع كل الشعب من كل الـ entries
       const svBranches = [...new Set(svEntries.flatMap(e => e.branches || [e.branch]))];
       window.ADMIN_BRANCH_FILTER = svBranches.map(b => branchKeyMap[b]).filter(Boolean);
       if (!window.ADMIN_BRANCH_FILTER.length) window.ADMIN_BRANCH_FILTER = null;
       applyBranchFilter();
 
-      // إخفاء «الخطط والمقررات» لمشرف تحفيظ الكبار فقط (الدورة الصيفية مش بتخصهم)
-      if (window.ADMIN_BRANCH_FILTER && window.ADMIN_BRANCH_FILTER.length === 1 && window.ADMIN_BRANCH_FILTER[0] === 'kebar') {
-        const schItem = document.querySelector('.sb-item[onclick*="\'schedule\'"]');
-        if (schItem) schItem.style.display = 'none';
-      }
-
       // شارة الشعبة في السايدبار
       const badge = document.getElementById('sb-supervisor-badge');
       if (badge) badge.style.display = 'block';
       const label  = document.getElementById('sb-sv-branch-label');
-      const emojis = {'الأبطال':'⚔️','الرواد':'🚀','البنات':'👑','تحفيظ الكبار':'📖'};
+      const emojis = {'الأبطال':'⚔️','الرواد':'🚀','البنات':'👑'};
       const svBranchNames = svBranches.join(' + ');
       if (label) label.textContent = svBranches.map(b => (emojis[b]||'👁️') + ' ' + b).join(' · ');
 
@@ -7724,6 +8115,7 @@ async function init(){
   loadDashboardCounts();
   loadSupervisorDashboard();
   try { waStartAutoSync(); } catch(e){ console.log('waStartAutoSync:', e); }   // مزامنة التنبيهات الأسبوعية مع لوحة القيادة
+  try { lpRefreshPendingBadge(); setInterval(lpRefreshPendingBadge, 120000); } catch(e){}   // عدّاد تحضيرات المعلمين المنتظرة
   loadBranchCounts();        // ← أعداد الشعب بعد تحديد SUPERVISOR_TEACHER_LIST
   initParentBranchCounts();  // ← أعداد أولياء الأمور بعد تحديد SUPERVISOR_TEACHER_LIST
   loadUnreadMsgCount();
@@ -7912,7 +8304,6 @@ async function loadAnnPeople(){
           seen.add(sName);
           const roleLabel = branch === 'البنات'
             ? (circle.sub === 'الأميرات' ? 'أميرات' : 'ملكات')
-            : branch === 'تحفيظ الكبار' ? 'تحفيظ الكبار'
             : branch === 'الأبطال' ? 'أبطال' : 'رواد';
           annAllPeople.push({ id: 'stu_'+sName.replace(/\s/g,'_'), name: sName, role: roleLabel, icon: '📖' });
         }
@@ -8799,9 +9190,19 @@ function nav(el, pageId, fromPopstate){
   if (typeof patchThemeOnNav === 'function') patchThemeOnNav();
   const title = PAGE_TITLES[pageId] || '';
   const tb = document.getElementById('tb-title');
-  if(tb) tb.textContent = title;
+  if(tb){ if(title.indexOf('<svg') === 0) tb.innerHTML = title; else tb.textContent = title; }
   if(!fromPopstate) history.pushState({page: pageId}, '', '#' + pageId);
   // side effects
+  if (pageId === 'fin-don')   loadFinDonations();
+  if (pageId === 'fin-spon')  loadFinSponsorships();
+  if (pageId === 'fin-subs')  loadFinSubs();
+  if (pageId === 'fin-sal')   loadFinSalaries();
+  if (pageId === 'fin-food')  loadFinExp('food');
+  if (pageId === 'fin-maint') loadFinExp('maintenance');
+  if (pageId === 'fin-mot')   loadFinExp('motivation');
+  if (pageId === 'fin-purch') loadFinExp('purchases');
+  if (pageId === 'fin-mkt')   loadFinExp('marketing');
+  if (pageId === 'fin-debt')  loadFinDebts();
   if (pageId === 'dashboard') loadSupervisorDashboard();
   if (pageId === 'weekly') renderWeekly();
   if (pageId === 'walerts') renderWAlerts();
@@ -8818,6 +9219,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
   if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
   if (pageId === 'rep-lessons') loadLessonReviews();
+  if (pageId === 'reports') lpRefreshPendingBadge();
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'stats-students') statsStudentsInit();
   if (pageId === 'stats-circles') statsCirclesInit();
@@ -8837,8 +9239,7 @@ function nav(el, pageId, fromPopstate){
 function loadAdminsStats() {
   // ── حساب الأرقام من BRANCH_DATA و SUPERVISORS ──
   const kidsKeys    = ['الأبطال','الرواد','البنات'];
-  const kebarKey    = 'تحفيظ الكبار';
-  const allKeys     = [...kidsKeys, kebarKey];
+  const allKeys     = [...kidsKeys];
 
   function countTeachers(keys) {
     const set = new Set();
@@ -8857,7 +9258,7 @@ function loadAdminsStats() {
   function countBranches(keys) { return keys.length; }
 
   // كل الشعب
-  const allSv   = countSupervisors([...kidsKeys, kebarKey, 'البنات']);
+  const allSv   = countSupervisors([...kidsKeys, 'البنات']);
   const allTch  = countTeachers(allKeys);
   const allSt   = countStudents(allKeys);
 
@@ -8865,11 +9266,6 @@ function loadAdminsStats() {
   const kidsSv  = countSupervisors([...kidsKeys]);
   const kidsTch = countTeachers(kidsKeys);
   const kidsSt  = countStudents(kidsKeys);
-
-  // شعبة تحفيظ الكبار فقط
-  const kebarSv  = countSupervisors([kebarKey]);
-  const kebarTch = countTeachers([kebarKey]);
-  const kebarSt  = countStudents([kebarKey]);
 
   // adm1 = الشيخ علاء عارف — مدير عام — كل المدرسة
   _setAdm('adm1', countBranches(allKeys), allSv, allTch, allSt);
@@ -8880,8 +9276,6 @@ function loadAdminsStats() {
   // adm3 = م.محمد الحسيني — مدير تحفيظ الأطفال — 4 شعب
   _setAdm('adm3', countBranches(kidsKeys), kidsSv, kidsTch, kidsSt);
 
-  // adm4 = م.محمد كمال — مدير تحفيظ الكبار — شعبة الكبار فقط
-  _setAdm('adm4', 1, kebarSv, kebarTch, kebarSt);
 }
 
 function _setAdm(prefix, branches, sv, tch, st) {
@@ -8898,30 +9292,16 @@ function _setAdm(prefix, branches, sv, tch, st) {
 let SUPERVISORS = [], SUPERVISORS_FILTERED = [], SV_SELECTED = new Set();
 let svPage = 1, svRowsPerPage = 10, svSortField = '', svSortDir = 1;
 
+// ★ قاعدة #١: البيانات حقيقية دايماً — القائمة الثابتة اتشالت، المصدر القاعدة فقط
+//   (وده بيخلّي أي تغيير في الأدوار — زي عبدالله هاني — ينعكس فوراً من غير كود)
 async function loadSupervisors() {
-  // قراءة البيانات من localStorage أولاً (محدّثة من لوحة المدير)
-  const stored = (() => { try { const s = localStorage.getItem('tawhed_supervisors'); return s ? JSON.parse(s) : null; } catch(e) { return null; } })();
-  SUPERVISORS = stored && stored.length ? stored : [
-    { id:'sv1', name:'عصام', lname:'هاني', branch:'الأبطال',
-      teacherList: ['أحمد حسن','أنس محمد زكي','عبدالرحمن شريف','عبدالله هاني','مازن إسلام','محمد سيف','معاذ إسلام'] },
-    { id:'sv2', name:'خالد', lname:'ناصر', branch:'الأبطال',
-      teacherList: ['أحمد ربيع','حمزة حسني','عبدالرحمن مصطفى','عمر أبو المكارم','مصطفى محمد','ياسين أسامة'] },
-    { id:'sv3', name:'عصام', lname:'هاني', branch:'الرواد',
-      teacherList: ['أحمد السيد','عبدالرحمن محمد إبراهيم','محمد تامر','محمود هاني'] },
-    { id:'sv4', name:'خالد', lname:'ناصر', branch:'الرواد',
-      teacherList: ['أحمد حسن','مالك أحمد سمير','محمد سيف'] },
-    { id:'sv5', name:'أسماء', lname:'محمد', branch:'البنات',
-      teacherList: ['جهاد محمد إبراهيم','عائشة خالد','سارة حمادة','لوجين أحمد قاسم','سارة مصطفى'] },
-    { id:'sv6', name:'مريم', lname:'تامر', branch:'البنات',
-      teacherList: ['سلمى محمد إبراهيم','ضحى فهمي','مريم مصطفى','سلمى حمادة','نور أحمد'] },
-    { id:'sv7', name:'أحمد', lname:'سليمان', branch:'تحفيظ الكبار',
-      teacherList: ['محمد عبدالحليم','سيد محمد','طارق مبروك','محمد شريف','أحمد ربيع','محمد إيهاب'] },
-    { id:'sv8', name:'عبدالله', lname:'هاني', branch:'تحفيظ الكبار',
-      teacherList: ['فهد محمد على','مصطفى أسامة','عبد الرحمن مسعد','محمد ناصر','عبد الرحمن مصطفى (الأحد)','عبد الرحمن مصطفى (الجمعة)'] },
-  ];
+  SUPERVISORS = await buildSupervisorsLive();
+  if (!SUPERVISORS.length) { updateSupervisorStats(); return; }
 
-  // Compute teachers/students counts dynamically from BRANCH_DATA
+  // احسب عدد المعلمين والطلاب من البيانات الحيّة
   SUPERVISORS.forEach(sv => {
+    sv.id = sv.id || (sv.name + '|' + sv.branch);
+    sv.teacherList = sv.teacherList || [];
     sv.teachers = sv.teacherList.length;
     const branchItems = BRANCH_DATA[sv.branch] || [];
     sv.students = sv.teacherList.reduce((sum, tName) => {
@@ -8940,7 +9320,7 @@ function updateSupervisorStats() {
   if (el) el.textContent = uniqueNames.length || (typeof SUPERVISORS!=='undefined' ? SUPERVISORS.length : 0);
 
   // كروت الشُّعب: عدد وأسماء المشرفين لكل شعبة (live)
-  const keyToBranch = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات', kebar:'تحفيظ الكبار' };
+  const keyToBranch = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات' };
   document.querySelectorAll('[data-branch-key]').forEach(card => {
     const bn = keyToBranch[card.getAttribute('data-branch-key')];
     if (!bn) return;
@@ -8961,7 +9341,6 @@ const SV_BRANCH_CFG = {
   abtal: { label:'الأبطال',       color1:'var(--emerald)', color2:'var(--jade)',  accent:'var(--emerald)', textAccent:'var(--emerald)', paleBg:'var(--pale)' },
   rowad: { label:'الرواد',        color1:'#1d6fa4',        color2:'#2a8fc8',      accent:'#1d6fa4',        textAccent:'#1d6fa4',        paleBg:'#e8f2fb' },
   banat: { label:'البنات',        color1:'#8e44ad',        color2:'#a569c9',      accent:'#8e44ad',        textAccent:'#8e44ad',        paleBg:'#f0ebfa' },
-  kebar: { label:'تحفيظ الكبار', color1:'var(--gold)',    color2:'var(--gold-l)', accent:'var(--gold)',    textAccent:'var(--gold)',    paleBg:'var(--gold-pale)' },
 };
 
 let svCurrentBranchKey = '';
@@ -9984,7 +10363,6 @@ const SV_DB_BRANCH_CFG = {
   'الأبطال':      {emoji:'⚔️', accent:'#1a7a4a', bg:'#e8f5ee', key:'abtal'},
   'الرواد':       {emoji:'🚀', accent:'#15616d', bg:'#e0f2f4', key:'rowad'},
   'البنات':       {emoji:'👑', accent:'#9b59b6', bg:'#f0ebfa', key:'banat'},
-  'تحفيظ الكبار': {emoji:'📖', accent:'#c8920a', bg:'#fdf3dc', key:'kebar'},
 };
 
 // ══════════════════════════════════════════════════════
@@ -10799,11 +11177,11 @@ function svGetMyBranches(){
   if(window.SUPERVISOR_BRANCH_TEACHERS && Object.keys(window.SUPERVISOR_BRANCH_TEACHERS).length){
     branches = Object.keys(window.SUPERVISOR_BRANCH_TEACHERS);
   } else if(window.ADMIN_BRANCH_FILTER && window.ADMIN_BRANCH_FILTER.length){
-    const km = {'abtal':'الأبطال','rowad':'الرواد','banat':'البنات','kebar':'تحفيظ الكبار'};
+    const km = {'abtal':'الأبطال','rowad':'الرواد','banat':'البنات'};
     branches = window.ADMIN_BRANCH_FILTER.map(k=>km[k]).filter(Boolean);
   }
   if(!branches.length) branches = ['الأبطال','الرواد'];
-  const order = ['الأبطال','الرواد','البنات','تحفيظ الكبار'];
+  const order = ['الأبطال','الرواد','البنات'];
   return [...new Set(branches)].sort((a,b)=>{
     const ia=order.indexOf(a), ib=order.indexOf(b);
     return (ia<0?99:ia)-(ib<0?99:ib);
@@ -10814,7 +11192,6 @@ function svGetMyBranches(){
 function wkBranchDays(branchName){
   const sc = SV_SCHEDULE[branchName];
   if(sc && sc.days) return sc.days;
-  if(branchName==='تحفيظ الكبار') return [5];
   return [0,1,3,4,5];
 }
 
@@ -11426,34 +11803,140 @@ function waAnalyzeBranch(branchName, weekIdx){
   return { alerts, warnings };
 }
 
-// ══ تخزين الإجراءات ══
-function waLoadActions(){
-  try { return JSON.parse(localStorage.getItem('wa_actions')||'{}'); } catch(e){ return {}; }
-}
-function waSaveActions(obj){
-  try { localStorage.setItem('wa_actions', JSON.stringify(obj)); } catch(e){}
-}
-function waGetAction(id){ return waLoadActions()[id] || ''; }
+// ══ تخزين الإجراءات — Supabase (مشترك بين كل الأجهزة وكل المشرفين والمديرين) ══
+window.WA_ACTS = window.WA_ACTS || {};   // { alert_id: {action_text, taken_by_name, updated_at} }
+window._waActsLoaded = false;
 
-// ── ترتيب: العناصر اللي ليها إجراء تنزل أسفل ──
+async function waEnsureSession(){
+  try{
+    const {data:{session}} = await db.auth.getSession();
+    if(!session) return false;
+    if(((session.expires_at||0)*1000 - Date.now()) < 120000){
+      const {data,error} = await db.auth.refreshSession();
+      return !error && !!(data&&data.session);
+    }
+    return true;
+  }catch(e){ return false; }
+}
+function waErr(e){
+  const m = String((e&&(e.message||e.error))||e||'');
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'الشبكة مقطوعة';
+  if(/401|jwt|expired|Unauthorized/i.test(m))             return 'الجلسة انتهت — اعمل خروج ودخول تاني';
+  if(/42P01|does not exist|relation/i.test(m))            return 'جدول weekly_alert_actions مش موجود — شغّل ملف SQL';
+  if(/403|policy|row-level|violates/i.test(m))            return 'الصلاحية مرفوضة (RLS)';
+  return m || 'خطأ غير معروف';
+}
+
+// تحميل كل الإجراءات من القاعدة مرة واحدة (ثم تحديث عند كل حفظ)
+async function waFetchActions(force){
+  if(window._waActsLoaded && !force) return window.WA_ACTS;
+  try{
+    const {data,error} = await db.from('weekly_alert_actions').select('alert_id,action_text,taken_by_name,updated_at');
+    if(error) throw error;
+    const m = {};
+    (data||[]).forEach(r=>{ m[r.alert_id] = { action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; });
+    window.WA_ACTS = m;
+    window._waActsLoaded = true;
+    await waMigrateLocal();     // ترحيل الإجراءات القديمة من الجهاز مرة واحدة
+  }catch(e){
+    console.warn('waFetchActions:', e);
+    if(typeof showToast==='function') showToast('⚠️ تعذّر تحميل الإجراءات: '+waErr(e));
+  }
+  return window.WA_ACTS;
+}
+
+// ترحيل الإجراءات القديمة المخزّنة محلياً على الجهاز → القاعدة (مرة واحدة فقط)
+async function waMigrateLocal(){
+  let old = {};
+  try{ old = JSON.parse(localStorage.getItem('wa_actions')||'{}'); }catch(e){ return; }
+  const ids = Object.keys(old).filter(id=>old[id] && !window.WA_ACTS[id]);
+  if(!ids.length){ try{ localStorage.removeItem('wa_actions'); }catch(e){} return; }
+  let done = 0;
+  for(const id of ids){
+    const ok = await waPutAction(id, old[id], null, null, true);
+    if(ok) done++;
+  }
+  try{ localStorage.removeItem('wa_actions'); }catch(e){}
+  if(done && typeof showToast==='function') showToast('☁️ تم رفع '+wkAr(done)+' إجراء كان محفوظ على الجهاز ده');
+}
+
+// كتابة/تعديل/حذف إجراء — select ثم update/insert (بدل upsert)
+async function waPutAction(id, text, weekIdx, branch, quiet){
+  if(!(await waEnsureSession())){ if(!quiet) showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); return false; }
+  let me={}; try{ me = JSON.parse(localStorage.getItem('currentUser')||'{}')||{}; }catch(e){}
+  try{
+    if(!text){
+      const {error} = await db.from('weekly_alert_actions').delete().eq('alert_id', id);
+      if(error) throw error;
+      delete window.WA_ACTS[id];
+      return true;
+    }
+    const meta = (window.WA_DETAILS||{})[id] || {};
+    const body = { action_text:text, taken_by:me.id||null, taken_by_name:me.full_name||'', updated_at:new Date().toISOString() };
+    const {data:ex} = await db.from('weekly_alert_actions').select('alert_id').eq('alert_id', id).maybeSingle();
+    if(ex){
+      const {data,error} = await db.from('weekly_alert_actions').update(body).eq('alert_id', id).select('alert_id');
+      if(error) throw error;
+      if(!data || !data.length) throw new Error('التعديل مرفوض من RLS (صفر صفوف)');
+    } else {
+      const row = Object.assign({ alert_id:id, week_idx:(weekIdx==null?WA_CURRENT:weekIdx), branch:branch||null, alert_text:meta.title||null }, body);
+      const {data,error} = await db.from('weekly_alert_actions').insert(row).select('alert_id');
+      if(error) throw error;
+      if(!data || !data.length){
+        const {data:chk} = await db.from('weekly_alert_actions').select('alert_id').eq('alert_id', id).maybeSingle();
+        if(!chk) throw new Error('الإضافة مرفوضة من RLS');
+      }
+    }
+    window.WA_ACTS[id] = { action_text:text, taken_by_name:me.full_name||'', updated_at:body.updated_at };
+    return true;
+  }catch(e){
+    if(!quiet) showToast('❌ تعذّر حفظ الإجراء: '+waErr(e));
+    return false;
+  }
+}
+
+// واجهات متوافقة مع باقي الكود (متزامنة — تقرأ من الكاش)
+function waLoadActions(){
+  const m = {};
+  Object.keys(window.WA_ACTS||{}).forEach(k=>{ m[k] = window.WA_ACTS[k].action_text; });
+  return m;
+}
+function waGetAction(id){ return (window.WA_ACTS[id]||{}).action_text || ''; }
+function waActionBy(id){ const a=window.WA_ACTS[id]; return a ? (a.taken_by_name||'') : ''; }
+function waActionWhen(id){
+  const a=window.WA_ACTS[id]; if(!a||!a.updated_at) return '';
+  try{ return new Date(a.updated_at).toLocaleDateString('ar-EG',{day:'numeric',month:'long'}); }catch(e){ return ''; }
+}
+function waHasAction(id){ return !!window.WA_ACTS[id]; }
+
+// ── فصل: اللي مالوش إجراء يفضل ظاهر • اللي ليه إجراء يروح لقسم «تم اتخاذ إجراء» ──
+function waSplitByAction(list){
+  const open=[], closed=[];
+  list.forEach(a=>{ (waHasAction(a.id) ? closed : open).push(a); });
+  return { open, closed };
+}
 function waSortByAction(list){
-  const acts = waLoadActions();
-  return list.slice().sort((a,b)=>{
-    const da = acts[a.id]?1:0, db = acts[b.id]?1:0;
-    return da - db;   // اللي مالهوش إجراء (0) فوق، اللي ليه (1) تحت
-  });
+  const {open, closed} = waSplitByAction(list);
+  return open.concat(closed);
 }
 
 // ── فتح مودال الإجراء ──
 let WA_ACTION_CTX = null;
-function waOpenAction(id, kind, text){
-  WA_ACTION_CTX = { id, kind };
+function waOpenAction(id, kind, text, branch){
+  WA_ACTION_CTX = { id, kind, branch:branch||null };
   const existing = waGetAction(id);
   document.getElementById('wa-action-alert-text').textContent = text;
   document.getElementById('wa-action-input').value = existing;
   document.getElementById('wa-action-title').textContent = existing ? '✏️ تعديل الإجراء المتخذ' : '✅ تسجيل الإجراء المتخذ';
+  // مين اتخذ الإجراء وإمتى — يمنع تكرار الإجراءات بين المشرفين
+  const by = waActionBy(id), when = waActionWhen(id);
+  const el = document.getElementById('wa-action-by');
+  if(el){
+    if(existing && by){ el.style.display='block'; el.innerHTML = '👤 سُجِّل بواسطة: <b>'+by+'</b>'+(when?(' • '+when):''); }
+    else el.style.display='none';
+  }
   openModal('modal-wa-action');
-  setTimeout(()=>{ const el=document.getElementById('wa-action-input'); if(el) el.focus(); }, 120);
+  setTimeout(()=>{ const e2=document.getElementById('wa-action-input'); if(e2) e2.focus(); }, 120);
 }
 
 // ── عرض البيان التفصيلي للتنبيه (التواريخ) ──
@@ -11487,15 +11970,17 @@ function waShowDetail(id){
 }
 
 // ── حفظ الإجراء ──
-function waSaveAction(){
+async function waSaveAction(){
   if(!WA_ACTION_CTX) return;
+  const btn = document.getElementById('wa-action-save');
   const val = document.getElementById('wa-action-input').value.trim();
-  const acts = waLoadActions();
-  if(val) acts[WA_ACTION_CTX.id] = val;
-  else delete acts[WA_ACTION_CTX.id];
-  waSaveActions(acts);
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ جارٍ الحفظ…'; }
+  const ok = await waPutAction(WA_ACTION_CTX.id, val, WA_CURRENT, WA_ACTION_CTX.branch);
+  if(btn){ btn.disabled = false; btn.textContent = '💾 حفظ الإجراء'; }
+  if(!ok) return;                       // الرسالة اتعرضت جوّه waPutAction — المودال يفضل مفتوح
   closeModal('modal-wa-action');
-  showToast(val ? '✅ تم حفظ الإجراء' : '🗑️ تم حذف الإجراء');
+  showToast(val ? '✅ تم حفظ الإجراء — ظاهر لكل المشرفين والمديرين' : '🗑️ تم حذف الإجراء');
+  await waFetchActions(true);
   renderWAlerts();
   waSyncDashboard();   // حدّث لوحة القيادة فوراً
 }
@@ -11510,42 +11995,28 @@ function waCurrentWeekIndex(){
 // تحقن تنبيهات الأسبوع الجاري بنفس صورتها، وتحافظ على التنبيهات اليدوية،
 // وتعكس الإجراءات المتخذة (أخضر) وترتّبها أسفل القائمة.
 function waSyncDashboard(){
-  const wk   = waCurrentWeekIndex();
-  waLoadAnalysis(wk).then(()=>{
-  const acts = waLoadActions();
-  window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
+  const wk = waCurrentWeekIndex();
+  Promise.all([ waLoadAnalysis(wk), waFetchActions(true) ]).then(()=>{
+    window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
 
-  svGetMyBranches().forEach(b=>{
-    const r = waAnalyzeBranch(b, wk);
-    const auto = [...r.warnings, ...r.alerts];   // الإنذارات أولاً
+    svGetMyBranches().forEach(b=>{
+      const r = waAnalyzeBranch(b, wk);
+      const auto = [...r.warnings, ...r.alerts];   // الإنذارات أولاً
 
-    // احتفظ بالتنبيهات اليدوية فقط (اللي مش جاية من النظام الأسبوعي)
-    const existing = (window.DB_BRANCH_ALERTS[b] || []).filter(a => !a.auto);
+      // احتفظ بالتنبيهات اليدوية فقط (اللي مش جاية من النظام الأسبوعي)
+      const existing = (window.DB_BRANCH_ALERTS[b] || []).filter(a => !a.auto);
 
-    // ابنِ التنبيهات التلقائية بصورة لوحة القيادة
-    const autoItems = auto.map(a=>{
-      const done = !!acts[a.id];
-      return {
-        id: a.id,
-        type: done ? 'green' : a.type,
-        icon: done ? '✅' : a.icon,
-        text: a.text,
-        action: acts[a.id] || '',
-        done: done,
+      // ★ تعديل ١: اللي اتخذ فيه إجراء يختفي خالص من لوحة القيادة — عشان ما يتكررش
+      const autoItems = auto.filter(a => !waHasAction(a.id)).map(a=>({
+        id: a.id, type: a.type, icon: a.icon, text: a.text,
+        action: '', done: false,
         time: 'الأسبوع ' + (WK_AR_NUM[wk] || wkAr(wk+1)),
-        auto: true
-      };
+        branch: b, auto: true
+      }));
+
+      window.DB_BRANCH_ALERTS[b] = [...autoItems, ...existing];
+      svRenderBranchAlerts(b);
     });
-
-    // غير المتخذ فيها إجراء فوق، المتخذ أسفل
-    autoItems.sort((x,y)=> (x.done?1:0) - (y.done?1:0));
-
-    // التلقائية فوق ثم اليدوية، أو حسب رغبتك — هنا: تلقائية ثم يدوية
-    window.DB_BRANCH_ALERTS[b] = [...autoItems, ...existing];
-
-    // أعد الرسم لو البند ظاهر
-    svRenderBranchAlerts(b);
-  });
   });
 }
 
@@ -11564,8 +12035,9 @@ async function renderWAlerts(){
     WA_CURRENT = waCurrentWeekIndex();
     window._waInit = true;
   }
-  // حمّل بيانات التحليل الحقيقية (بالـ ID على نطاق الشهر) قبل الرصد
+  // حمّل بيانات التحليل + الإجراءات من القاعدة (مشتركة بين كل الأجهزة) قبل الرصد
   await waLoadAnalysis(WA_CURRENT);
+  await waFetchActions(true);
 
   const dates = wkWeekDates(WA_CURRENT);
   document.getElementById('wa-week-title').textContent  = 'الأسبوع '+WK_AR_NUM[WA_CURRENT];
@@ -11576,14 +12048,19 @@ async function renderWAlerts(){
 
   const branches = svGetMyBranches();
   WA_DATA = {};
-  let totAlerts=0, totWarn=0;
-  branches.forEach(b=>{ const r = waAnalyzeBranch(b); WA_DATA[b]=r; totAlerts+=r.alerts.length; totWarn+=r.warnings.length; });
+  let totAlerts=0, totWarn=0, totOpen=0, totDone=0;
+  branches.forEach(b=>{
+    const r = waAnalyzeBranch(b); WA_DATA[b]=r;
+    totAlerts += r.alerts.length; totWarn += r.warnings.length;
+    [...r.alerts, ...r.warnings].forEach(a=>{ waHasAction(a.id) ? totDone++ : totOpen++; });
+  });
 
   // إحصائيات
   document.getElementById('wa-stats').innerHTML = `
-    <div class="stat-card gold"><span class="stat-icon">🔔</span><div class="stat-val">${wkAr(totAlerts)}</div><div class="stat-lbl">إجمالي التنبيهات</div><div class="stat-sub">هذا الأسبوع</div></div>
+    <div class="stat-card gold"><span class="stat-icon">🔔</span><div class="stat-val">${wkAr(totOpen)}</div><div class="stat-lbl">تنبيهات مفتوحة</div><div class="stat-sub">لم يُتخذ فيها إجراء</div></div>
     <div class="stat-card" style="border-top-color:var(--red);"><span class="stat-icon">⛔</span><div class="stat-val" style="color:var(--red);">${wkAr(totWarn)}</div><div class="stat-lbl">إنذارات</div><div class="stat-sub">تستوجب إجراء</div></div>
-    <div class="stat-card green"><span class="stat-icon">🏫</span><div class="stat-val">${wkAr(branches.length)}</div><div class="stat-lbl">الشعب</div><div class="stat-sub">تحت المتابعة</div></div>`;
+    <div class="stat-card green"><span class="stat-icon">✅</span><div class="stat-val">${wkAr(totDone)}</div><div class="stat-lbl">تم اتخاذ إجراء</div><div class="stat-sub">مسجّل للجميع</div></div>
+    <div class="stat-card" style="border-top-color:var(--blue);"><span class="stat-icon">🏫</span><div class="stat-val" style="color:var(--blue);">${wkAr(branches.length)}</div><div class="stat-lbl">الشعب</div><div class="stat-sub">تحت المتابعة</div></div>`;
 
   // بطاقات الشعب
   const colorMap = {
@@ -11593,29 +12070,35 @@ async function renderWAlerts(){
     blue: {bg:'var(--blue-pale)', color:'var(--blue)',  border:'var(--blue)'},
   };
   const wrap = document.getElementById('wa-branches');
-  const acts = waLoadActions();
 
   // زر الإجراء (SVG)
-  const actionBtn = (id, kind, text)=>{
+  const actionBtn = (id, kind, text, br)=>{
     const safe = String(text).replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    const has  = !!acts[id];
-    return `<button class="btn ${has?'btn-outline':'btn-primary'} btn-xs" onclick="waOpenAction('${id}','${kind}','${safe}')" style="flex-shrink:0;display:flex;align-items:center;gap:4px;align-self:center;">
+    const sbr  = String(br||'').replace(/'/g,"\\'");
+    const has  = waHasAction(id);
+    return `<button class="btn ${has?'btn-outline':'btn-primary'} btn-xs" onclick="waOpenAction('${id}','${kind}','${safe}','${sbr}')" style="flex-shrink:0;display:flex;align-items:center;gap:4px;align-self:center;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       ${has?'تعديل':'الإجراء'}
     </button>`;
   };
-  // سطر الإجراء المحفوظ
-  const actionLine = (id)=> acts[id]
-    ? `<div style="margin-top:7px;padding:7px 11px;background:var(--pale);border-radius:var(--r-sm);font-size:.76rem;color:var(--jade);line-height:1.6;"><span style="font-weight:700;">الإجراء المتخذ:</span> ${acts[id]}</div>`
-    : '';
+  // سطر الإجراء المحفوظ + مين اتخذه (يمنع تكرار الإجراءات بين المشرفين)
+  const actionLine = (id)=>{
+    if(!waHasAction(id)) return '';
+    const by = waActionBy(id), when = waActionWhen(id);
+    const sig = (by||when) ? `<div style="font-size:.68rem;color:var(--light);margin-top:4px;">👤 ${by||'—'}${when?(' • '+when):''}</div>` : '';
+    return `<div style="margin-top:7px;padding:7px 11px;background:var(--pale);border-radius:var(--r-sm);font-size:.76rem;color:var(--jade);line-height:1.6;"><span style="font-weight:700;">الإجراء المتخذ:</span> ${waGetAction(id)}${sig}</div>`;
+  };
 
   wrap.innerHTML = branches.map(b=>{
     const cfg = SV_DB_BRANCH_CFG[b] || SV_DB_BRANCH_CFG['الأبطال'];
     const r = WA_DATA[b] || {alerts:[],warnings:[]};
     const sB = b.replace(/'/g,"\\'");
 
-    const warnHtml = waSortByAction(r.warnings).map(a=>{
-      const done = !!acts[a.id];
+    // ★ تعديل ١: المفتوح فوق • المتخذ فيه إجراء يتنقل لقسم مطوي منفصل (ما يتكررش وسط الجديد)
+    const wSplit = waSplitByAction(r.warnings), aSplit = waSplitByAction(r.alerts);
+
+    const warnItem = (a)=>{
+      const done = waHasAction(a.id);
       const bg   = done ? 'var(--pale)'  : 'var(--red-pale)';
       const bd   = done ? 'var(--jade)'  : 'var(--red)';
       const col  = done ? 'var(--jade)'  : 'var(--red)';
@@ -11623,15 +12106,14 @@ async function renderWAlerts(){
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1.1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
           <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
-          ${actionBtn(a.id,'warning',a.text)}
+          ${actionBtn(a.id,'warning',a.text,b)}
         </div>
         ${actionLine(a.id)}
       </div>`;
-    }).join('');
-
-    const alertHtml = waSortByAction(r.alerts).map(a=>{
+    };
+    const alertItem = (a)=>{
       const c = colorMap[a.type] || colorMap.gold;
-      const done = !!acts[a.id];
+      const done = waHasAction(a.id);
       const bg  = done ? 'var(--pale)' : c.bg;
       const bd  = done ? 'var(--jade)' : c.border;
       const col = done ? 'var(--jade)' : c.color;
@@ -11639,19 +12121,31 @@ async function renderWAlerts(){
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
           <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
-          ${actionBtn(a.id,'alert',a.text)}
+          ${actionBtn(a.id,'alert',a.text,b)}
         </div>
         ${actionLine(a.id)}
       </div>`;
-    }).join('');
+    };
 
+    const openHtml   = wSplit.open.map(warnItem).join('') + aSplit.open.map(alertItem).join('');
+    const closedList = [...wSplit.closed, ...aSplit.closed];
+    const closedHtml = closedList.length ? `
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;font-size:.82rem;font-weight:800;color:var(--jade);padding:9px 12px;background:var(--pale);border-radius:var(--r-sm);list-style:none;user-select:none;">
+          ✅ تم اتخاذ إجراء (${wkAr(closedList.length)}) — اضغط للعرض
+        </summary>
+        <div style="margin-top:9px;">${wSplit.closed.map(warnItem).join('')}${aSplit.closed.map(alertItem).join('')}</div>
+      </details>` : '';
+
+    const openCount = wSplit.open.length + aSplit.open.length;
     const empty = (!r.warnings.length && !r.alerts.length);
     return `<div class="card" style="margin-bottom:0;border-top:3px solid ${cfg.accent};">
       <div class="card-head" style="background:${cfg.bg};display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div class="card-title" style="display:flex;align-items:center;gap:8px;font-size:1.02rem;">
           شعبة ${b}
-          ${r.warnings.length?`<span class="badge bg-red">${wkAr(r.warnings.length)} إنذار</span>`:''}
-          <span class="badge bg-gray">${wkAr(r.alerts.length)} تنبيه</span>
+          ${wSplit.open.length?`<span class="badge bg-red">${wkAr(wSplit.open.length)} إنذار</span>`:''}
+          <span class="badge bg-gray">${wkAr(openCount)} مفتوح</span>
+          ${closedList.length?`<span class="badge bg-green">${wkAr(closedList.length)} ✅</span>`:''}
         </div>
         <button class="btn btn-gold btn-xs" onclick="waShareBranch('${sB}')" style="display:flex;align-items:center;gap:5px;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
@@ -11660,7 +12154,7 @@ async function renderWAlerts(){
       </div>
       <div style="padding:14px;">
         ${empty ? '<div class="empty" style="padding:18px;"><span class="empty-icon">✅</span>لا توجد تنبيهات هذا الأسبوع — كل شيء على ما يرام</div>'
-          : (warnHtml + alertHtml)}
+          : ((openHtml || '<div class="empty" style="padding:16px;"><span class="empty-icon">👏</span>كل التنبيهات اتخذ فيها إجراء</div>') + closedHtml)}
       </div>
     </div>`;
   }).join('');
@@ -11680,9 +12174,12 @@ function waPdfBranchPage(branchName, supName){
   const sortedWarn  = waSortByAction(r.warnings);
   const sortedAlert = waSortByAction(r.alerts);
 
-  // سطر الإجراء أسفل النص
-  const actLine = (id)=> acts[id]
-    ? `<div style="margin-top:6px;padding:6px 10px;background:#e8f5ee;border-radius:7px;font-size:12px;color:#1a7a4a;line-height:1.6;"><b>الإجراء المتخذ:</b> ${acts[id]}</div>` : '';
+  // سطر الإجراء أسفل النص + اسم من اتخذه
+  const actLine = (id)=>{
+    if(!waHasAction(id)) return '';
+    const by = waActionBy(id), when = waActionWhen(id);
+    return `<div style="margin-top:6px;padding:6px 10px;background:#e8f5ee;border-radius:7px;font-size:12px;color:#1a7a4a;line-height:1.6;"><b>الإجراء المتخذ:</b> ${waGetAction(id)}${(by||when)?`<div style="font-size:11px;color:#8ea598;margin-top:3px;">👤 ${by||'—'}${when?(' • '+when):''}</div>`:''}</div>`;
+  };
 
   const warnRows = sortedWarn.map((a,i)=>{
     const done = !!acts[a.id];
@@ -11822,7 +12319,7 @@ function svRenderBranchAlerts(branchName){
           <div style="font-size:.66rem;color:var(--light);margin-top:2px;">${a.time||''}</div>
           ${actionRow}
         </div>
-        <button onclick="waOpenAction('${a.id}','dash','${safeTxt}')" title="${a.action?'تعديل الإجراء':'تسجيل إجراء'}"
+        <button onclick="waOpenAction('${a.id}','dash','${safeTxt}','${safeBranch}')" title="${a.action?'تعديل الإجراء':'تسجيل إجراء'}"
           style="width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;background:${a.done?'var(--pale)':'var(--gold-pale)'};color:${a.done?'var(--jade)':'var(--gold)'};"
           onmouseover="this.style.filter='brightness(.95)'" onmouseout="this.style.filter=''">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -12169,8 +12666,8 @@ function ctxTransferStudent() {
   // populate branches
   const grid = document.getElementById('transfer-branches-grid');
   grid.innerHTML = Object.keys(BRANCH_DATA).map(br => {
-    const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6','تحفيظ الكبار':'var(--gold)'};
-    const icons = {'الأبطال':'⚔️','الرواد':'🚀','البنات':'👑','تحفيظ الكبار':'📖'};
+    const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6'};
+    const icons = {'الأبطال':'⚔️','الرواد':'🚀','البنات':'👑'};
     return `<div onclick="selectTransferBranch('${br}')" style="background:${colors[br]||'var(--jade)'};color:#fff;border-radius:10px;padding:14px 16px;cursor:pointer;text-align:center;font-weight:700;font-size:.9rem;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">${icons[br]||'📚'} ${br}</div>`;
   }).join('');
   document.getElementById('transfer-teachers-section').style.display = 'none';
@@ -12187,7 +12684,7 @@ function selectTransferBranch(branchName) {
   window._transferBranch = branchName;
   const sec = document.getElementById('transfer-teachers-section');
   const grid = document.getElementById('transfer-teachers-grid');
-  const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6','تحفيظ الكبار':'var(--gold)'};
+  const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6'};
   const color = colors[branchName] || 'var(--jade)';
   grid.innerHTML = (BRANCH_DATA[branchName] || []).map(c => `
     <div onclick="selectTransferTeacher('${c.teacher.replace(/'/g,"\'")}',this)" style="border:2px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s;" onmouseover="this.style.borderColor='${color}'" onmouseout="if(!this.classList.contains('selected'))this.style.borderColor='var(--border)'">
@@ -12202,7 +12699,7 @@ function selectTransferTeacher(teacher, el) {
     d.classList.remove('selected'); d.style.borderColor = 'var(--border)'; d.style.background = '';
   });
   el.classList.add('selected');
-  const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6','تحفيظ الكبار':'var(--gold)'};
+  const colors = {'الأبطال':'var(--jade)','الرواد':'#2196a3','البنات':'#9b59b6'};
   el.style.borderColor = colors[window._transferBranch] || 'var(--jade)';
   el.style.background = 'var(--pale)';
   window._transferTargetTeacher = teacher;
@@ -13220,7 +13717,6 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') hideStudentMenu
               <input type="checkbox" value="الأميرات" class="adm-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🌸 الأميرات
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="تحفيظ الكبار" class="adm-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 📖 تحفيظ الكبار
             </label>
           </div>
         </div>
@@ -14268,11 +14764,12 @@ function transliterateAr(str) {
         <textarea id="wa-action-input" placeholder="مثال: تم التواصل مع ولي الأمر وحثّه على المتابعة، ومنح الطالب فرصة تعويض..." rows="4"
           style="font-family:Tajawal;font-size:.88rem;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;resize:vertical;direction:rtl;width:100%;box-sizing:border-box;"
           onkeydown="if(event.ctrlKey&&event.key==='Enter')waSaveAction()"></textarea>
+      <div id="wa-action-by" style="display:none;margin-top:10px;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);font-size:.78rem;color:var(--jade);"></div>
         <div style="font-size:.72rem;color:var(--light);margin-top:3px;">Ctrl+Enter للحفظ السريع — اترك الحقل فارغاً لإلغاء الإجراء</div>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-primary" onclick="waSaveAction()">💾 حفظ الإجراء</button>
+      <button class="btn btn-primary" id="wa-action-save" onclick="waSaveAction()">💾 حفظ الإجراء</button>
       <button class="btn btn-outline" onclick="closeModal('modal-wa-action')">إلغاء</button>
     </div>
   </div>
@@ -14394,8 +14891,7 @@ function transliterateAr(str) {
 // أيام الشعب (للأيام المتوقّعة في تقرير المعلم)
 const AWK_BRANCHES = [
   { name:'الأبطال', days:[0,1,3,4,5] }, { name:'الرواد', days:[0,1,3,4,5] },
-  { name:'الملكات', days:[6,2] }, { name:'الأميرات', days:[6,2] },
-  { name:'تحفيظ الكبار', days:[5] }
+  { name:'الملكات', days:[6,2] }, { name:'الأميرات', days:[6,2] }
 ];
 
 function rptAr(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
@@ -14636,41 +15132,98 @@ async function loadLessonReviews(){
     (others.length?('<div class="card" style="margin-top:16px;"><div class="card-head"><div class="card-title">📋 مراجَعة سابقاً</div></div>'+tbl(others,'—')+'</div>'):'');
 }
 function lpSheetHtml(r){
-  const d=r.data||{};
-  const esc=(v)=>(v||'—').replace(/</g,'&lt;');
-  const rws=(d.rows||[]).map(x=>'<tr><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.during)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;text-align:center;">'+esc(x.time)+'</td><td style="border:1px solid var(--border);padding:6px 8px;font-size:.8rem;">'+esc(x.assess)+'</td></tr>').join('')||'<tr><td colspan="3" style="text-align:center;color:var(--light);padding:10px;">—</td></tr>';
-  const block=(t,v)=>'<div style="margin-bottom:8px;"><div style="font-weight:700;color:var(--jade);font-size:.8rem;">'+t+'</div><div style="white-space:pre-wrap;font-size:.82rem;color:var(--ink);">'+esc(v)+'</div></div>';
-  return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><b style="font-family:Amiri,serif;color:var(--forest);">تحضير الدرس: '+esc(r.title)+'</b><span style="font-size:.78rem;color:var(--light);">'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+'</span></div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div>'+block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure)+'</div>'+
-    '<div><div style="font-weight:700;color:var(--forest);font-size:.82rem;margin-bottom:6px;">المساحة الإبداعية (أثناء الشرح / الزمن / التقويم)</div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:var(--pale);"><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">أثناء الشرح</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;width:56px;">الزمن</th><th style="border:1px solid var(--border);padding:5px;font-size:.78rem;">التقويم</th></tr></thead><tbody>'+rws+'</tbody></table></div></div>';
+  const d = r.data || {};
+  const esc = v => String(v==null||v===''?'—':v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const STAGES = [['intro','المقدمة'],['preface','التمهيد'],['present','عرض الدرس'],['closure','الغلق']];
+  const st = d.stages || {};
+  const cell = v => '<td style="border:1px solid var(--border);padding:6px 8px;font-size:.76rem;vertical-align:top;white-space:pre-wrap;line-height:1.6;">'+esc(v)+'</td>';
+
+  // توافق مع التحضيرات القديمة (قبل تحديث النموذج)
+  if(!d.stages && (d.objectives || d.intro || d.rows)){
+    const block=(t,v)=>'<div style="margin-bottom:8px;"><div style="font-weight:700;color:var(--jade);font-size:.8rem;">'+t+'</div><div style="white-space:pre-wrap;font-size:.82rem;color:var(--ink);">'+esc(v)+'</div></div>';
+    return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><b style="font-family:Amiri,serif;color:var(--forest);">تحضير الدرس: '+esc(r.title)+'</b><span style="font-size:.78rem;color:var(--light);">'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+' <span class="badge bg-gray" style="font-size:.66rem;">نموذج قديم</span></span></div>'
+      + block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure);
+  }
+
+  const rows = STAGES.map(([k,lbl])=>{
+    const x = st[k] || {};
+    return '<tr>'+cell(x.obj)+cell(x.media)
+      + '<td style="border:1px solid var(--border);padding:0;vertical-align:top;">'
+      + '<div style="background:#f6faf7;font-weight:800;color:var(--jade);padding:4px 8px;font-size:.76rem;border-bottom:1px solid var(--border);">'+lbl+':</div>'
+      + '<div style="padding:6px 8px;font-size:.76rem;white-space:pre-wrap;line-height:1.6;">'+esc(x.flow)+'</div></td>'
+      + cell(x.method)
+      + '<td style="border:1px solid var(--border);padding:6px 4px;font-size:.76rem;text-align:center;vertical-align:top;">'+esc(x.time)+'</td>'
+      + cell(x.assess) + '</tr>';
+  }).join('');
+
+  return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;">'
+    + '<b style="font-family:Amiri,serif;color:var(--forest);font-size:1.02rem;">تحضير الدرس: '+esc(r.title)+'</b>'
+    + '<span style="font-size:.78rem;color:var(--light);">المقرر: '+esc(d.course)+' • '+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+'</span></div>'
+    + '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">'
+    + '<thead><tr style="background:#cfe2f3;">'
+    + '<th style="width:16%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الأهداف السلوكية</th>'
+    + '<th style="width:12%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الوسائل التعليمية</th>'
+    + '<th style="border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">سير الدرس</th>'
+    + '<th style="width:13%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الطريقة / الأسلوب</th>'
+    + '<th style="width:7%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الزمن</th>'
+    + '<th style="width:14%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">التقويم</th>'
+    + '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
+
 function openPrepReview(id){
-  const r=window._LP_ROWS[id]; if(!r) return; window._LP_CUR=id;
-  document.getElementById('prep-sheet').innerHTML=lpSheetHtml(r);
-  document.getElementById('prep-note').value=r.supervisor_note||'';
-  const approved=r.status==='approved';
-  document.getElementById('prep-approved-tag').style.display=approved?'block':'none';
-  document.getElementById('prep-actions').style.display=approved?'none':'flex';
+  const r = window._LP_ROWS[id]; if(!r) return; window._LP_CUR = id;
+  document.getElementById('prep-sheet').innerHTML = lpSheetHtml(r);
+  document.getElementById('prep-note').value = r.supervisor_note || '';
+  const approved = r.status==='approved';
+  document.getElementById('prep-approved-tag').style.display = approved ? 'block' : 'none';
+  document.getElementById('prep-actions').style.display = approved ? 'none' : 'flex';
   openModal('modal-prep-review');
 }
+
+// ★ الموافقة: RPC تضيف ٥٠ نقطة لرصيد المعلم مرة واحدة + تبعتله إشعار
 async function approvePrep(){
-  const id=window._LP_CUR; if(!id) return;
+  const id = window._LP_CUR; if(!id) return;
+  const btns = document.getElementById('prep-actions');
+  if(btns) btns.style.pointerEvents='none';
   try{
-    const {data,error}=await db.rpc('approve_lesson_prep',{p_id:id});
+    if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {data,error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:true, p_note:null });
     if(error) throw error;
-    if(data&&data.ok){ showToast(data.awarded?'✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم':'✅ تمت الموافقة (النقاط ممنوحة سابقاً)'); closeModal('modal-prep-review'); loadLessonReviews(); }
-    else showToast('⚠️ '+((data&&data.msg)==='forbidden'?'لا تملك صلاحية على هذا المعلم':'تعذّرت الموافقة'));
-  }catch(e){ showToast('❌ تعذّرت الموافقة: '+(e.message||e.code||'')); }
+    showToast((data && data.points>0) ? '✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم' : '✅ تمت الموافقة (النقاط ممنوحة سابقاً)');
+    closeModal('modal-prep-review');
+    await loadLessonReviews();
+  }catch(e){ showToast('❌ تعذّرت الموافقة: '+waErr(e)); }
+  finally{ if(btns) btns.style.pointerEvents=''; }
 }
+
+// ★ الإرجاع للتعديل: RPC تحفظ الملاحظة + تبعت إشعار للمعلم
 async function returnPrep(){
-  const id=window._LP_CUR; if(!id) return;
-  const note=document.getElementById('prep-note').value.trim();
+  const id = window._LP_CUR; if(!id) return;
+  const note = document.getElementById('prep-note').value.trim();
   if(!note){ showToast('⚠️ اكتب الملاحظة قبل الإرجاع'); return; }
+  const btns = document.getElementById('prep-actions');
+  if(btns) btns.style.pointerEvents='none';
   try{
-    const {error}=await db.from('lesson_preps').update({status:'returned',supervisor_note:note,reviewed_at:new Date().toISOString()}).eq('id',id);
+    if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:false, p_note:note });
     if(error) throw error;
-    showToast('📌 تم إرجاع التحضير للمعلم بالملاحظات'); closeModal('modal-prep-review'); loadLessonReviews();
-  }catch(e){ showToast('❌ تعذّر الإرجاع: '+(e.message||e.code||'')); }
+    showToast('📌 تم إرجاع التحضير للمعلم بالملاحظات — وصله إشعار');
+    closeModal('modal-prep-review');
+    await loadLessonReviews();
+  }catch(e){ showToast('❌ تعذّر الإرجاع: '+waErr(e)); }
+  finally{ if(btns) btns.style.pointerEvents=''; }
+}
+
+// عدّاد التحضيرات المنتظرة — يظهر في صندوق «تحضير الدروس» بمركز التقارير وفي القائمة الجانبية
+async function lpRefreshPendingBadge(){
+  try{
+    const {count} = await db.from('lesson_preps').select('id',{count:'exact',head:true}).eq('status','submitted');
+    const n = count||0;
+    ['rep-lessons-badge','sb-lessons-badge'].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      if(n>0){ el.style.display='inline-flex'; el.textContent=rptAr(n); } else el.style.display='none';
+    });
+  }catch(e){}
 }
 
 // ══════════════════════════════════════════════════════
@@ -15083,7 +15636,7 @@ async function statsStudentsInit(){
   if(t && !t.value) t.value = iso(to);
   const R = window.RPT, byBranch = {};
   R.circles.forEach(c=>{ if(!c.branch_name) return; (byBranch[c.branch_name]=byBranch[c.branch_name]||[]).push(c); });
-  const order = ['الأبطال','الرواد','الملكات','الأميرات','تحفيظ الكبار'];
+  const order = ['الأبطال','الرواد','الملكات','الأميرات'];
   let html = '<option value="all">كل الحلقات</option>';
   Object.keys(byBranch).sort((a,b)=> order.indexOf(a)-order.indexOf(b)).forEach(bn=>{
     html += `<optgroup label="${bn}"><option value="br:${bn}">كل حلقات ${bn}</option>`;
@@ -15193,7 +15746,7 @@ function statsRenderMetric(){
 function ssBranchGroup(v){ return (!v||v==='all')?null:new Set([v]); }
 function ssBranchOptions(){
   const R=window.RPT||{circles:[]};
-  const order=['الأبطال','الرواد','الملكات','الأميرات','تحفيظ الكبار'];
+  const order=['الأبطال','الرواد','الملكات','الأميرات'];
   const names=[...new Set((R.circles||[]).map(c=>c.branch_name).filter(Boolean))].sort((a,b)=>order.indexOf(a)-order.indexOf(b));
   return '<option value="all" selected>كل شُعبي</option>'+names.map(n=>'<option value="'+n+'">'+n+'</option>').join('');
 }
@@ -15491,6 +16044,1029 @@ function tcRenderMetric(){
   const cv=document.getElementById('tc-canvas'); if(!cv) return;
   ssDrawBar(cv, rows.map(r=>r.name), rows.map(r=> r[TC_METRIC]==null?0:r[TC_METRIC]), m.color, m.unit, '_tcChart');
 }
+
+</script>
+
+<!-- ══════════ MODALS: الشؤون المالية ══════════ -->
+
+<!-- إضافة تبرع -->
+<div class="overlay" id="modal-fin-don">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة تبرع</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-don')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="don-amount" min="0" step="1" placeholder="مثال: 500" autocomplete="off"></div>
+        <div class="fg"><label>بواسطة (اسم دافع المبلغ) *</label>
+          <input type="text" id="don-donor" placeholder="اسم المتبرع" autocomplete="off"></div>
+        <div class="fg"><label>وسيلة الدفع *</label>
+          <select id="don-pay" onchange="finPayChange('don')">
+            <option value="cash">نقدي</option>
+            <option value="vodafone_cash">فودافون كاش</option>
+            <option value="instapay">انستاباي</option>
+          </select></div>
+        <div class="fg "><label id="don-receiver-lbl">المستلم (تلقائي)</label>
+          <input type="text" id="don-receiver" autocomplete="off"></div>
+        <div class="fg " id="don-recsel-wrap" style="display:none;">
+          <label>اسم صاحب المحفظة (العميل) *</label>
+          <select id="don-recsel" onchange="finRecSelChange('don')"></select>
+          <input type="text" id="don-recnew" placeholder="اكتب اسم العميل الجديد" autocomplete="off" style="display:none;margin-top:7px;">
+        </div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="don-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>التاريخ</label>
+          <input type="text" id="don-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveDonation(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-don')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إضافة كفالة -->
+<div class="overlay" id="modal-fin-spon">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة كفالة</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-spon')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="spon-amount" min="0" step="1" placeholder="مثال: 300" autocomplete="off"></div>
+        <div class="fg"><label>الكفيل (اسم دافع المبلغ) *</label>
+          <input type="text" id="spon-sponsor" placeholder="اسم الكفيل" autocomplete="off"></div>
+        <div class="fg full" style="position:relative;"><label>الطالب المكفول *</label>
+          <input type="text" id="spon-sq" placeholder="ابحث باسم الطالب…" autocomplete="off" oninput="finStuSearch('spon')">
+          <div id="spon-sres" class="fin-sres"></div>
+          <div id="spon-spick" class="fin-spick" style="display:none;"></div>
+        </div>
+        <div class="fg"><label>مدة الكفالة *</label>
+          <select id="spon-months">
+            <option value="1">شهر</option><option value="2">شهرين</option><option value="3">ثلاثة أشهر</option>
+          </select></div>
+        <div class="fg"><label>وسيلة الدفع *</label>
+          <select id="spon-pay" onchange="finPayChange('spon')">
+            <option value="cash">نقدي</option>
+            <option value="vodafone_cash">فودافون كاش</option>
+            <option value="instapay">انستاباي</option>
+          </select></div>
+        <div class="fg full"><label id="spon-receiver-lbl">المستلم (تلقائي)</label>
+          <input type="text" id="spon-receiver" autocomplete="off"></div>
+        <div class="fg full" id="spon-recsel-wrap" style="display:none;">
+          <label>اسم صاحب المحفظة (العميل) *</label>
+          <select id="spon-recsel" onchange="finRecSelChange('spon')"></select>
+          <input type="text" id="spon-recnew" placeholder="اكتب اسم العميل الجديد" autocomplete="off" style="display:none;margin-top:7px;">
+        </div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="spon-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>التاريخ</label>
+          <input type="text" id="spon-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveSponsorship(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-spon')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إضافة اشتراك طالب -->
+<div class="overlay" id="modal-fin-subs">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة اشتراك — الدورة الصيفية ٢٠٢٦م</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-subs')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="position:relative;"><label>اسم الطالب *</label>
+        <input type="text" id="subs-sq" placeholder="ابحث باسم الطالب…" autocomplete="off" oninput="finStuSearch('subs')">
+        <div id="subs-sres" class="fin-sres"></div>
+        <div id="subs-spick" class="fin-spick" style="display:none;"></div>
+      </div>
+      <div id="subs-rest" style="display:none;">
+        <div class="form-grid-2">
+          <div class="fg"><label>الشهر *</label>
+            <select id="subs-month">
+              <option value="1">الشهر الأول</option><option value="2">الشهر الثاني</option><option value="3">الشهر الثالث</option>
+            </select>
+            <div id="subs-paid-hint" style="font-size:.72rem;color:var(--gold);font-weight:700;"></div>
+          </div>
+          <div class="fg"><label>المبلغ (ج.م) *</label>
+            <input type="number" id="subs-amount" min="0" step="1" placeholder="مثال: 200" autocomplete="off"></div>
+          <div class="fg"><label>وسيلة الدفع *</label>
+            <select id="subs-pay" onchange="finPayChange('subs')">
+            <option value="cash">نقدي</option>
+            <option value="vodafone_cash">فودافون كاش</option>
+            <option value="instapay">انستاباي</option>
+          </select></div>
+          <div class="fg "><label id="subs-receiver-lbl">المستلم (تلقائي)</label>
+          <input type="text" id="subs-receiver" autocomplete="off"></div>
+        <div class="fg " id="subs-recsel-wrap" style="display:none;">
+          <label>اسم صاحب المحفظة (العميل) *</label>
+          <select id="subs-recsel" onchange="finRecSelChange('subs')"></select>
+          <input type="text" id="subs-recnew" placeholder="اكتب اسم العميل الجديد" autocomplete="off" style="display:none;margin-top:7px;">
+        </div>
+          <div class="fg full"><label>ملاحظات</label>
+            <textarea id="subs-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+          <div class="fg full"><label>التاريخ</label>
+            <input type="text" id="subs-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveSubscription(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-subs')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إضافة مرتب -->
+<div class="overlay" id="modal-fin-sal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة مرتب</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-sal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg" style="position:relative;"><label>اسم المستلم *</label>
+        <input type="text" id="sal-sq" placeholder="ابحث باسم المعلم أو المشرف أو الموظف…" autocomplete="off" oninput="finStaffSearch('sal')">
+        <div id="sal-sres" class="fin-sres"></div>
+        <div id="sal-spick" class="fin-spick" style="display:none;"></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="sal-amount" min="0" step="1" placeholder="مثال: 1500" autocomplete="off"></div>
+        <div class="fg"><label>نوع المرتب *</label>
+          <select id="sal-kind">
+            <option value="monthly">مرتب شهري</option>
+            <option value="bonus">حوافز</option>
+          </select></div>
+        <div class="fg full"><label>المدير (تلقائي — المسجِّل)</label>
+          <input type="text" id="sal-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="sal-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>التاريخ</label>
+          <input type="text" id="sal-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveSalary(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-sal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إضافة مصروف عام -->
+<div class="overlay" id="modal-fin-exp">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-head">
+      <div class="modal-title" id="exp-m-title">إضافة</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-exp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="exp-amount" min="0" step="1" placeholder="مثال: 250" autocomplete="off"></div>
+        <div class="fg"><label id="exp-kind-lbl">النوع *</label>
+          <select id="exp-kind-sel" style="display:none;"></select>
+          <input type="text" id="exp-kind-txt" autocomplete="off" style="display:none;"></div>
+        <div class="fg full"><label>المشرف (تلقائي — المسجِّل)</label>
+          <input type="text" id="exp-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="exp-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>التاريخ</label>
+          <input type="text" id="exp-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveExpense(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-exp')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- إضافة دين -->
+<div class="overlay" id="modal-fin-debt">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة دين</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-debt')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="dbt-amount" min="0" step="1" placeholder="مثال: 800" autocomplete="off"></div>
+        <div class="fg"><label>اسم صاحب الدين *</label>
+          <input type="text" id="dbt-creditor" placeholder="اسم صاحب الدين" autocomplete="off"></div>
+        <div class="fg"><label>البند *</label>
+          <select id="dbt-cat">
+            <option value="salaries">مرتبات</option><option value="food">طعام</option>
+            <option value="maintenance">صيانة</option><option value="motivation">تحفيز وترفيه</option>
+            <option value="purchases">مشتريات</option><option value="marketing">تسويق</option>
+          </select></div>
+        <div class="fg"><label>وسيلة الدفع *</label>
+          <select id="dbt-pay">
+            <option value="cash">نقدي</option><option value="vodafone_cash">فودافون كاش</option>
+            <option value="instapay">انستاباي</option>
+          </select></div>
+        <div class="fg full"><label>المستلم (تلقائي — المسجِّل)</label>
+          <input type="text" id="dbt-receiver" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="dbt-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>تاريخ الدين</label>
+          <input type="text" id="dbt-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveDebt(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-debt')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- رد الدين -->
+<div class="overlay" id="modal-fin-debt-pay">
+  <div class="modal" style="max-width:470px;">
+    <div class="modal-head">
+      <div class="modal-title">إضافة رد — دين</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-debt-pay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert-strip alert-warn" id="dbtp-info"></div>
+      <div class="fg"><label>وسيلة الدفع *</label>
+        <select id="dbtp-pay">
+          <option value="cash">نقدي</option><option value="vodafone_cash">فودافون كاش</option>
+          <option value="instapay">انستاباي</option>
+        </select></div>
+      <div class="fg"><label>المشرف (تلقائي — المسجِّل)</label>
+        <input type="text" id="dbtp-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+      <div class="fg"><label>تاريخ الرد</label>
+        <input type="text" id="dbtp-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      <div class="alert-strip alert-ok" style="font-size:.76rem;">عند التأكيد يُنقل البند تلقائياً من صندوق الديون إلى صندوق المصروفات المطابق.</div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="confirmDebtPay(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> تأكيد</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-debt-pay')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   الشؤون المالية — لوحة المشرف
+   الواردات: اشتراكات الطلاب / التبرعات / الكفالات
+   المصروفات: كل البنود ما عدا دعم العملاء
+   الفصل بالجنس: الذكور ← الأبطال + الرواد • الإناث ← الملكات + الأميرات
+   كل البيانات حيّة من Supabase — لا بيانات ثابتة
+══════════════════════════════════════════════════════ */
+
+const FIN_PAY_AR      = { cash:'نقدي', vodafone_cash:'فودافون كاش', instapay:'انستاباي' };
+const FIN_PAY_BADGE   = { cash:'bg-green', vodafone_cash:'bg-red', instapay:'bg-blue' };
+const FIN_MONTH_AR    = { 1:'الشهر الأول', 2:'الشهر الثاني', 3:'الشهر الثالث' };
+const FIN_DUR_AR      = { 1:'شهر', 2:'شهرين', 3:'ثلاثة أشهر' };
+const FIN_EXP_CAT_AR  = { salaries:'مرتبات', food:'طعام', maintenance:'صيانة', motivation:'تحفيز وترفيه', purchases:'مشتريات', marketing:'تسويق' };
+const FIN_SAL_KIND_AR = { monthly:'مرتب شهري', bonus:'حوافز' };
+const FIN_ROLE_AR     = { teacher:'معلم', supervisor:'مشرف', admin:'مدير', employee:'موظف' };
+
+const FIN_ICON_P = {
+  plus:  '<path d="M12 5v14"/><path d="M5 12h14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  utensils: '<path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/>',
+  gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+  cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+};
+function finIcon(name, size, color){
+  size = size || 18; color = color || 'currentColor';
+  const d = FIN_ICON_P[name]; if(!d) return '';
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;">'+d+'</svg>';
+}
+
+function finAr(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function finMoney(v){ return finAr(Number(v||0).toLocaleString('en-US')) + ' ج.م'; }
+function finEsc(x){ return String(x==null?'':x).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function finTodayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function finDateAr(d){ if(!d) return '—'; const p=String(d).slice(0,10).split('-'); if(p.length!==3) return finAr(d); return finAr(p[2]+'/'+p[1]+'/'+p[0]); }
+function finMe(){ const cu = JSON.parse(localStorage.getItem('currentUser')||'{}'); return { id: cu.id||null, name: (cu.full_name||'').trim() || '—' }; }
+function finNorm(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ًٌٍَُِّْ]/g,'').replace(/\s+/g,' ').trim(); }
+function finUnc(r){ return !!r && r.pay_method !== 'cash' && !r.collected; }
+function finUncBadge(r){ return finUnc(r) ? ' <span class="badge bg-gray" style="font-size:.6rem;">غير محصَّل</span>' : ''; }
+
+/* ══ نطاق شُعب المشرف حسب الجنس ══ */
+function finMyBranches(){
+  return (MY_GENDER === 'إناث') ? ['الملكات','الأميرات'] : ['الأبطال','الرواد'];
+}
+function finInMySection(branch){
+  const b = finNorm(branch);
+  return finMyBranches().some(x => finNorm(x) === b);
+}
+
+function finBusy(btn, on, txt){
+  if(!btn) return;
+  if(on){ btn._t = btn.innerHTML; btn.disabled = true; btn.innerHTML = '⏳ جاري الحفظ…'; }
+  else  { btn.disabled = false; btn.innerHTML = txt || btn._t || 'حفظ'; }
+}
+
+/* ══════════ العملاء (لأسماء أصحاب المحافظ) ══════════ */
+async function getFinClients(force){
+  if(window._finClients && !force) return window._finClients;
+  try{
+    const { data, error } = await db.from('fin_clients').select('id,name').order('name');
+    if(error) throw error;
+    window._finClients = (data||[]).map(c => ({ id:c.id, name:(c.name||'').trim() })).filter(c => c.name);
+  }catch(e){ console.warn('fin_clients:', e); window._finClients = window._finClients || []; }
+  return window._finClients;
+}
+async function finEnsureClient(name){
+  const nm = (name||'').trim(); if(!nm) return null;
+  const list = await getFinClients();
+  const hit = list.find(c => finNorm(c.name) === finNorm(nm));
+  if(hit) return hit;
+  try{
+    const me = finMe();
+    const { error } = await db.from('fin_clients').insert([{ name:nm, created_by:me.id }]);
+    if(error && String(error.code) !== '23505') throw error;
+  }catch(e){ console.warn('ensureClient:', e); }
+  const l2 = await getFinClients(true);
+  return l2.find(c => finNorm(c.name) === finNorm(nm)) || null;
+}
+async function finFillClients(p){
+  const sel = document.getElementById(p+'-recsel'); if(!sel) return;
+  sel.innerHTML = '<option value="">-- جاري التحميل… --</option>';
+  const list = await getFinClients(true);
+  sel.innerHTML = '<option value="">-- اختر العميل --</option>'
+    + list.map(c => '<option value="'+finEsc(c.name)+'">'+finEsc(c.name)+'</option>').join('')
+    + '<option value="__new__">+ عميل جديد</option>';
+  finRecSelChange(p);
+}
+function finRecSelChange(p){
+  const sel = document.getElementById(p+'-recsel'), nw = document.getElementById(p+'-recnew');
+  if(!sel || !nw) return;
+  if(sel.value === '__new__') nw.style.display = '';
+  else { nw.style.display = 'none'; nw.value = ''; }
+}
+function finReceiverValue(p){
+  const m = document.getElementById(p+'-pay').value;
+  if(m === 'cash') return (document.getElementById(p+'-receiver').value||'').trim();
+  const sel = document.getElementById(p+'-recsel'); if(!sel) return '';
+  let v = sel.value;
+  if(v === '__new__') v = (document.getElementById(p+'-recnew').value||'').trim();
+  return (v||'').trim();
+}
+
+/* ══ وسيلة الدفع → المستلم ══ */
+function finPayChange(p){
+  const m    = document.getElementById(p+'-pay').value;
+  const rec  = document.getElementById(p+'-receiver');
+  const lbl  = document.getElementById(p+'-receiver-lbl');
+  const wrap = document.getElementById(p+'-recsel-wrap');
+  if(!rec) return;
+  if(m === 'cash'){
+    rec.style.display = ''; rec.value = finMe().name; rec.readOnly = true;
+    rec.style.background = '#f3f4f6'; rec.style.fontWeight = '700';
+    if(lbl){ lbl.style.display = ''; lbl.textContent = 'المستلم (تلقائي — المسجِّل)'; }
+    if(wrap) wrap.style.display = 'none';
+  }else{
+    rec.style.display = 'none'; rec.value = '';
+    if(lbl) lbl.style.display = 'none';
+    if(wrap){ wrap.style.display = ''; finFillClients(p); }
+  }
+}
+
+/* ══ بحث الطالب — داخل شُعب المشرف فقط ══ */
+const FIN_SEL = {};
+
+async function finStuSearch(p){
+  const q   = document.getElementById(p+'-sq').value.trim();
+  const box = document.getElementById(p+'-sres'); if(!box) return;
+  if(q.length < 2){ box.classList.remove('open'); box.innerHTML=''; return; }
+  box.innerHTML = '<div class="fin-sres-empty">جاري البحث…</div>'; box.classList.add('open');
+  let hits = [];
+  try{
+    const { data } = await db.rpc('search_students', { q });
+    hits = (data||[])
+      .filter(x => finInMySection(x.branch))
+      .map(x => ({ id:x.id, name:x.full_name, branch:x.branch||'—', circle:x.teacher||'بدون حلقة' }))
+      .slice(0,25);
+  }catch(e){ console.warn('search_students:', e); hits = []; }
+  if(!hits.length){
+    box.innerHTML = '<div class="fin-sres-empty">لا توجد نتائج داخل ' + finEsc(finMyBranches().join(' / ')) + '</div>';
+    return;
+  }
+  box.innerHTML = hits.map((s,i) =>
+    '<div class="fin-sres-item" onclick="finPick(\''+p+'\','+i+')">'
+    + '<div class="fin-sres-name">'+finEsc(s.name)+'</div>'
+    + '<div class="fin-sres-meta">'+finEsc(s.branch)+' • '+finEsc(s.circle)+'</div></div>'
+  ).join('');
+  box._hits = hits;
+}
+
+function finPick(p, i){
+  const box = document.getElementById(p+'-sres');
+  const s = (box._hits||[])[i]; if(!s) return;
+  FIN_SEL[p] = { id:s.id, name:s.name, branch:s.branch, circle:s.circle };
+  finRenderPick(p);
+  box.classList.remove('open');
+  document.getElementById(p+'-sq').value = '';
+  if(p === 'subs') subsAfterPick();
+}
+
+function finRenderPick(p){
+  const w = document.getElementById(p+'-spick'); if(!w) return;
+  const s = FIN_SEL[p];
+  if(!s){ w.style.display='none'; w.innerHTML=''; return; }
+  w.innerHTML = '<div><div style="font-size:.86rem;font-weight:800;color:var(--forest);">'+finEsc(s.name)+'</div>'
+    + '<div style="font-size:.72rem;color:var(--mid);margin-top:2px;">'+finEsc(s.branch||'—')+' • '+finEsc(s.circle||'—')+'</div></div>'
+    + '<span class="fin-spick-x" onclick="finClearPick(\''+p+'\')">✕</span>';
+  w.style.display = 'flex';
+}
+
+function finClearPick(p){
+  FIN_SEL[p] = null; finRenderPick(p);
+  if(p === 'subs'){ const r=document.getElementById('subs-rest'); if(r) r.style.display='none'; }
+}
+
+function finValidate(p, needStudent){
+  const amt = parseFloat(document.getElementById(p+'-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return null; }
+  const pay = document.getElementById(p+'-pay').value;
+  const rec = finReceiverValue(p);
+  if(!rec){ showToast(pay==='cash' ? '⚠️ اسم المستلم غير معروف' : '⚠️ اختر أو اكتب اسم صاحب المحفظة (العميل)'); return null; }
+  if(needStudent && !FIN_SEL[p]){ showToast('⚠️ اختر الطالب أولاً'); return null; }
+  return { amt, pay, rec, notes:(document.getElementById(p+'-notes').value||'').trim() || null };
+}
+
+/* ══════════ التبرعات ══════════ */
+function openDonModal(){
+  document.getElementById('don-amount').value = '';
+  document.getElementById('don-donor').value  = '';
+  document.getElementById('don-notes').value  = '';
+  document.getElementById('don-pay').value    = 'cash';
+  document.getElementById('don-date').value   = finDateAr(finTodayISO());
+  finPayChange('don');
+  openModal('modal-fin-don');
+}
+
+async function saveDonation(btn){
+  const v = finValidate('don', false); if(!v) return;
+  const donor = (document.getElementById('don-donor').value||'').trim();
+  if(!donor){ showToast('⚠️ اكتب اسم دافع المبلغ'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    if(v.pay !== 'cash') await finEnsureClient(v.rec);
+    const { error, status } = await db.from('fin_donations').insert([{
+      amount: v.amt, donor_name: donor, pay_method: v.pay, receiver: v.rec,
+      collected: v.pay === 'cash', notes: v.notes, date: finTodayISO(), created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم تسجيل التبرع');
+    closeModal('modal-fin-don');
+    loadFinDonations();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+async function loadFinDonations(){
+  const tb = document.getElementById('fin-don-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_donations').select('*')
+      .order('date',{ascending:false}).order('created_at',{ascending:false});
+    if(error) throw error;
+    const rows = data || [];
+    const tot = document.getElementById('fin-don-total');
+    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:34px;">لا توجد تبرعات مسجّلة بعد</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) =>
+      '<tr'+(finUnc(r)?' class="fin-unc"':'')+'><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+      + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+      + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.donor_name)+'</td>'
+      + '<td>'+finEsc(r.receiver)+'</td>'
+      + '<td><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'+finUncBadge(r)+'</td>'
+      + '<td>'+finDateAr(r.date)+'</td>'
+      + '<td style="font-size:.76rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>'
+    ).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+/* ══════════ الكفالات ══════════ */
+function openSponModal(){
+  document.getElementById('spon-amount').value  = '';
+  document.getElementById('spon-sponsor').value = '';
+  document.getElementById('spon-notes').value   = '';
+  document.getElementById('spon-sq').value      = '';
+  document.getElementById('spon-months').value  = '1';
+  document.getElementById('spon-pay').value     = 'cash';
+  document.getElementById('spon-date').value    = finDateAr(finTodayISO());
+  document.getElementById('spon-sres').classList.remove('open');
+  finClearPick('spon'); finPayChange('spon');
+  openModal('modal-fin-spon');
+}
+
+async function saveSponsorship(btn){
+  const v = finValidate('spon', true); if(!v) return;
+  const sponsor = (document.getElementById('spon-sponsor').value||'').trim();
+  if(!sponsor){ showToast('⚠️ اكتب اسم الكفيل'); return; }
+  const s = FIN_SEL['spon'];
+  if(!finInMySection(s.branch)){ showToast('⚠️ الطالب خارج نطاق شُعبك'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    if(v.pay !== 'cash') await finEnsureClient(v.rec);
+    const { error, status } = await db.from('fin_sponsorships').insert([{
+      amount: v.amt, sponsor_name: sponsor, collected: v.pay === 'cash',
+      student_id: s.id, student_name: s.name, student_branch: s.branch, student_circle: s.circle,
+      months: parseInt(document.getElementById('spon-months').value,10),
+      pay_method: v.pay, receiver: v.rec, notes: v.notes,
+      date: finTodayISO(), created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم تسجيل الكفالة');
+    closeModal('modal-fin-spon');
+    loadFinSponsorships();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+async function loadFinSponsorships(){
+  const tb = document.getElementById('fin-spon-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_sponsorships').select('*')
+      .order('date',{ascending:false}).order('created_at',{ascending:false});
+    if(error) throw error;
+    const rows = (data||[]).filter(r => finInMySection(r.student_branch));
+    const tot = document.getElementById('fin-spon-total');
+    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--light);padding:34px;">لا توجد كفالات مسجّلة بعد</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) =>
+      '<tr'+(finUnc(r)?' class="fin-unc"':'')+'><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+      + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+      + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.sponsor_name)+'</td>'
+      + '<td><div style="font-weight:700;color:var(--forest);">'+finEsc(r.student_name||'—')+'</div>'
+      +   '<div style="font-size:.7rem;color:var(--light);">'+finEsc(r.student_branch||'—')+' • '+finEsc(r.student_circle||'—')+'</div></td>'
+      + '<td><span class="badge bg-purple">'+(FIN_DUR_AR[r.months]||'—')+'</span></td>'
+      + '<td>'+finEsc(r.receiver)+'</td>'
+      + '<td><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'+finUncBadge(r)+'</td>'
+      + '<td>'+finDateAr(r.date)+'</td>'
+      + '<td style="font-size:.76rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>'
+    ).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+/* ══════════ اشتراكات الطلاب ══════════ */
+function openSubsModal(){
+  document.getElementById('subs-sq').value     = '';
+  document.getElementById('subs-amount').value = '';
+  document.getElementById('subs-notes').value  = '';
+  document.getElementById('subs-month').value  = '1';
+  document.getElementById('subs-pay').value    = 'cash';
+  document.getElementById('subs-date').value   = finDateAr(finTodayISO());
+  document.getElementById('subs-sres').classList.remove('open');
+  document.getElementById('subs-rest').style.display = 'none';
+  document.getElementById('subs-paid-hint').textContent = '';
+  finClearPick('subs'); finPayChange('subs');
+  openModal('modal-fin-subs');
+}
+
+async function subsAfterPick(){
+  document.getElementById('subs-rest').style.display = 'block';
+  const sel = document.getElementById('subs-month');
+  [...sel.options].forEach(o => { o.disabled = false; o.textContent = FIN_MONTH_AR[+o.value]; });
+  document.getElementById('subs-paid-hint').textContent = '';
+  const s = FIN_SEL['subs']; if(!s || !s.id) return;
+  try{
+    const { data } = await db.from('fin_subscriptions').select('month_no').eq('student_id', s.id);
+    const paid = new Set((data||[]).map(r=>r.month_no));
+    [...sel.options].forEach(o => { if(paid.has(+o.value)){ o.disabled = true; o.textContent = FIN_MONTH_AR[+o.value] + ' — ✓ مدفوع'; } });
+    const first = [...sel.options].find(o => !o.disabled);
+    if(first) sel.value = first.value;
+    else document.getElementById('subs-paid-hint').textContent = 'كل الشهور مدفوعة لهذا الطالب';
+  }catch(e){ /* بدون تظليل */ }
+}
+
+async function saveSubscription(btn){
+  const v = finValidate('subs', true); if(!v) return;
+  const s  = FIN_SEL['subs'];
+  if(!finInMySection(s.branch)){ showToast('⚠️ الطالب خارج نطاق شُعبك'); return; }
+  const mo = parseInt(document.getElementById('subs-month').value,10);
+  const opt = [...document.getElementById('subs-month').options].find(o => +o.value === mo);
+  if(opt && opt.disabled){ showToast('⚠️ هذا الشهر مدفوع بالفعل'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    if(v.pay !== 'cash') await finEnsureClient(v.rec);
+    const { error, status } = await db.from('fin_subscriptions').insert([{
+      collected: v.pay === 'cash',
+      student_id: s.id, student_name: s.name, student_branch: s.branch, student_circle: s.circle,
+      month_no: mo, amount: v.amt, pay_method: v.pay, receiver: v.rec,
+      notes: v.notes, paid_date: finTodayISO(), created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم تسجيل الاشتراك');
+    closeModal('modal-fin-subs');
+    loadFinSubs();
+  }catch(e){
+    showToast(String(e.code)==='23505' ? '⚠️ هذا الشهر مسجّل بالفعل لهذا الطالب' : '❌ تعذّر الحفظ: '+(e.message||e.code||''));
+  }
+  finBusy(btn, false);
+}
+
+function _finSubCell(r){
+  if(!r) return '<td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;border-left:2px solid var(--border);">—</td>';
+  const u = finUnc(r) ? ' fin-unc-c' : '';
+  return '<td style="text-align:center;" class="fin-cell-amt'+u+'">'+finMoney(r.amount)+'</td>'
+    + '<td style="text-align:center;" class="'+u.trim()+'"><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'+finUncBadge(r)+'</td>'
+    + '<td style="text-align:center;font-size:.74rem;" class="'+u.trim()+'">'+finEsc(r.receiver||'—')+'</td>'
+    + '<td style="text-align:center;border-left:2px solid var(--border);" class="'+u.trim()+'">'+finDateAr(r.paid_date)+'</td>';
+}
+
+async function loadFinSubs(){
+  const tb = document.getElementById('fin-subs-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_subscriptions').select('*').order('created_at',{ascending:true});
+    if(error) throw error;
+    const rows = (data||[]).filter(r => finInMySection(r.student_branch));
+    const tot = document.getElementById('fin-subs-total');
+    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--light);padding:34px;">لا توجد اشتراكات مسجّلة بعد</td></tr>';
+      return;
+    }
+    const map = {}, order = [];
+    rows.forEach(r => {
+      const k = r.student_id || ('n:'+r.student_name);
+      if(!map[k]){ map[k] = { name:r.student_name, branch:r.student_branch, circle:r.student_circle, m:{}, notes:[] }; order.push(k); }
+      map[k].m[r.month_no] = r;
+      if(r.notes) map[k].notes.push(r.notes);
+    });
+    tb.innerHTML = order.map((k,i) => {
+      const g = map[k];
+      return '<tr><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+        + '<td><div style="font-weight:700;color:var(--forest);">'+finEsc(g.name||'—')+'</div>'
+        +   '<div style="font-size:.68rem;color:var(--light);">'+finEsc(g.branch||'—')+' • '+finEsc(g.circle||'—')+'</div></td>'
+        + _finSubCell(g.m[1]) + _finSubCell(g.m[2]) + _finSubCell(g.m[3])
+        + '<td style="font-size:.72rem;color:var(--light);">'+finEsc(g.notes.join(' — ')||'—')+'</td></tr>';
+    }).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+/* ══════════ المرتبات ══════════ */
+async function getFinStaff(){
+  if(window._finStaff) return window._finStaff;
+  const out = [];
+  try{
+    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin']);
+    (data||[]).forEach(u => { const nm=(u.full_name||'').trim(); if(!nm) return;
+      if(!sameSection({ id:u.id, full_name:u.full_name, role:u.role })) return;
+      out.push({ id:u.id, name:nm, role:FIN_ROLE_AR[u.role]||u.role, job:u.job_title||'' }); });
+  }catch(e){ console.warn('finStaff users:', e); }
+  try{
+    const { data } = await db.from('employees').select('id,name,lname,job');
+    (data||[]).forEach(e => { const nm=((e.name||'')+' '+(e.lname||'')).trim(); if(nm) out.push({ id:null, name:nm, role:'موظف', job:e.job||'' }); });
+  }catch(e){ console.warn('finStaff employees:', e); }
+  const seen = new Set(), list = [];
+  out.forEach(x => { const k = finNorm(x.name); if(!k || seen.has(k)) return; seen.add(k); list.push(x); });
+  list.sort((a,b) => a.name.localeCompare(b.name,'ar'));
+  window._finStaff = list;
+  return list;
+}
+
+function finStaffSearch(p){
+  const q   = document.getElementById(p+'-sq').value.trim();
+  const box = document.getElementById(p+'-sres'); if(!box) return;
+  if(!q){ box.classList.remove('open'); box.innerHTML=''; return; }
+  const nq = finNorm(q);
+  const hits = (window._finStaff||[]).filter(s => finNorm(s.name).includes(nq)).slice(0,25);
+  if(!hits.length){ box.innerHTML = '<div class="fin-sres-empty">لا توجد نتائج</div>'; box.classList.add('open'); return; }
+  box.innerHTML = hits.map((s,i) =>
+    '<div class="fin-sres-item" onclick="finStaffPick(\''+p+'\','+i+')">'
+    + '<div class="fin-sres-name">'+finEsc(s.name)+'</div>'
+    + '<div class="fin-sres-meta">'+finEsc(s.role)+(s.job ? ' • '+finEsc(s.job) : '')+'</div></div>'
+  ).join('');
+  box._hits = hits;
+  box.classList.add('open');
+}
+
+function finStaffPick(p, i){
+  const box = document.getElementById(p+'-sres');
+  const s = (box._hits||[])[i]; if(!s) return;
+  FIN_SEL[p] = { id:s.id, name:s.name, branch:s.role, circle:s.job||'—' };
+  finRenderPick(p);
+  box.classList.remove('open');
+  document.getElementById(p+'-sq').value = '';
+}
+
+async function openSalModal(){
+  await getFinStaff();
+  document.getElementById('sal-sq').value     = '';
+  document.getElementById('sal-amount').value = '';
+  document.getElementById('sal-notes').value  = '';
+  document.getElementById('sal-kind').value   = 'monthly';
+  document.getElementById('sal-by').value     = finMe().name;
+  document.getElementById('sal-date').value   = finDateAr(finTodayISO());
+  document.getElementById('sal-sres').classList.remove('open');
+  finClearPick('sal');
+  openModal('modal-fin-sal');
+}
+
+async function saveSalary(btn){
+  const amt = parseFloat(document.getElementById('sal-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
+  const s = FIN_SEL['sal'];
+  if(!s){ showToast('⚠️ اختر اسم المستلم'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    const { error, status } = await db.from('fin_expenses').insert([{
+      category:'salaries', amount:amt,
+      recipient: s.name, recipient_id: s.id, recipient_role: s.branch,
+      kind: document.getElementById('sal-kind').value,
+      by_name: me.name, by_id: me.id,
+      notes: (document.getElementById('sal-notes').value||'').trim() || null,
+      date: finTodayISO(), source:'direct', created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم تسجيل المرتب');
+    closeModal('modal-fin-sal');
+    loadFinSalaries();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+function finSalKindAr(k){ return FIN_SAL_KIND_AR[k] || k || '—'; }
+
+async function loadFinSalaries(){
+  const tb = document.getElementById('fin-sal-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_expenses').select('*').eq('category','salaries')
+      .order('date',{ascending:false}).order('created_at',{ascending:false});
+    if(error) throw error;
+    const rows = data || [];
+    const tot = document.getElementById('fin-sal-total');
+    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:34px;">لا توجد مرتبات مسجّلة بعد</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) =>
+      '<tr><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+      + '<td><div style="font-weight:700;color:var(--forest);">'+finEsc(r.recipient||'—')+'</div>'
+      +   (r.recipient_role ? '<div style="font-size:.7rem;color:var(--light);">'+finEsc(r.recipient_role)+'</div>' : '') + '</td>'
+      + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+      + '<td><span class="badge '+(r.kind==='bonus'?'bg-gold':(r.kind==='monthly'?'bg-green':'bg-red'))+'">'+finEsc(finSalKindAr(r.kind))+'</span></td>'
+      + '<td>'+finEsc(r.by_name||'—')+'</td>'
+      + '<td>'+finDateAr(r.date)+'</td>'
+      + '<td style="font-size:.76rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>'
+    ).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+/* ══════════ مصروفات عامة ══════════ */
+const FIN_EXP_CFG = {
+  food:        { page:'fin-food',  ico:'utensils',  title:'إضافة طعام',    lbl:'نوع الطعام *',  mode:'select', opts:['فطار','غداء','عشاء','ضيافة'] },
+  maintenance: { page:'fin-maint', ico:'wrench',    title:'إضافة صيانة',   lbl:'نوع الصيانة *', mode:'text',   ph:'اكتب نوع الصيانة' },
+  motivation:  { page:'fin-mot',   ico:'gift',      title:'إضافة تحفيز',   lbl:'نوع التحفيز *', mode:'text',   ph:'اكتب نوع التحفيز' },
+  purchases:   { page:'fin-purch', ico:'cart',      title:'إضافة مشتريات', lbl:'البند *',       mode:'text',   ph:'اكتب البند' },
+  marketing:   { page:'fin-mkt',   ico:'megaphone', title:'إضافة تسويق',   lbl:'نوع التسويق *', mode:'text',   ph:'اكتب نوع التسويق' },
+};
+let EXP_CAT = null;
+
+function openExpModal(cat){
+  const c = FIN_EXP_CFG[cat]; if(!c) return;
+  EXP_CAT = cat;
+  document.getElementById('exp-m-title').innerHTML = finIcon(c.ico, 18, 'currentColor') + ' ' + c.title;
+  document.getElementById('exp-kind-lbl').textContent = c.lbl;
+  const sel = document.getElementById('exp-kind-sel'), txt = document.getElementById('exp-kind-txt');
+  if(c.mode === 'select'){
+    sel.innerHTML = c.opts.map(o => '<option value="'+finEsc(o)+'">'+finEsc(o)+'</option>').join('');
+    sel.style.display = ''; txt.style.display = 'none'; sel.value = c.opts[0];
+  }else{
+    txt.placeholder = c.ph || ''; txt.value = '';
+    txt.style.display = ''; sel.style.display = 'none';
+  }
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-notes').value  = '';
+  document.getElementById('exp-by').value     = finMe().name;
+  document.getElementById('exp-date').value   = finDateAr(finTodayISO());
+  openModal('modal-fin-exp');
+}
+
+async function saveExpense(btn){
+  const c = FIN_EXP_CFG[EXP_CAT]; if(!c) return;
+  const amt = parseFloat(document.getElementById('exp-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
+  const kind = (c.mode === 'select'
+    ? document.getElementById('exp-kind-sel').value
+    : (document.getElementById('exp-kind-txt').value||'').trim());
+  if(!kind){ showToast('⚠️ ' + c.lbl.replace(' *','') + ' مطلوب'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    const { error, status } = await db.from('fin_expenses').insert([{
+      category: EXP_CAT, amount: amt, kind: kind,
+      by_name: me.name, by_id: me.id,
+      notes: (document.getElementById('exp-notes').value||'').trim() || null,
+      date: finTodayISO(), source:'direct', created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم التسجيل');
+    closeModal('modal-fin-exp');
+    loadFinExp(EXP_CAT);
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+async function loadFinExp(cat){
+  const c = FIN_EXP_CFG[cat]; if(!c) return;
+  const tb = document.getElementById(c.page+'-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_expenses').select('*').eq('category',cat)
+      .order('date',{ascending:false}).order('created_at',{ascending:false});
+    if(error) throw error;
+    const rows = data || [];
+    const tot = document.getElementById(c.page+'-total');
+    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--light);padding:34px;">لا توجد سجلات بعد</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) =>
+      '<tr><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+      + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.by_name||'—')+'</td>'
+      + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+      + '<td>'+finEsc(r.kind||'—')+(r.source==='debt' ? ' <span class="badge bg-red" style="font-size:.62rem;">من الديون</span>' : '')+'</td>'
+      + '<td>'+finDateAr(r.date)+'</td>'
+      + '<td style="font-size:.76rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>'
+    ).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+/* ══════════ الديون ══════════ */
+function openDebtModal(){
+  document.getElementById('dbt-amount').value   = '';
+  document.getElementById('dbt-creditor').value = '';
+  document.getElementById('dbt-notes').value    = '';
+  document.getElementById('dbt-cat').value      = 'salaries';
+  document.getElementById('dbt-pay').value      = 'cash';
+  document.getElementById('dbt-receiver').value = finMe().name;
+  document.getElementById('dbt-date').value     = finDateAr(finTodayISO());
+  openModal('modal-fin-debt');
+}
+
+async function saveDebt(btn){
+  const amt = parseFloat(document.getElementById('dbt-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
+  const cr = (document.getElementById('dbt-creditor').value||'').trim();
+  if(!cr){ showToast('⚠️ اكتب اسم صاحب الدين'); return; }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    await finEnsureClient(cr);
+    const { error, status } = await db.from('fin_debts').insert([{
+      amount: amt, creditor_name: cr,
+      category: document.getElementById('dbt-cat').value,
+      pay_method: document.getElementById('dbt-pay').value,
+      receiver: me.name,
+      notes: (document.getElementById('dbt-notes').value||'').trim() || null,
+      date: finTodayISO(), repaid: false, created_by: me.id
+    }]);
+    if(error) throw error;
+    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
+    showToast('✅ تم تسجيل الدين');
+    closeModal('modal-fin-debt');
+    loadFinDebts();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+async function loadFinDebts(){
+  const tb = document.getElementById('fin-debt-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await db.from('fin_debts').select('*')
+      .order('repaid',{ascending:true}).order('date',{ascending:false}).order('created_at',{ascending:false});
+    if(error) throw error;
+    const rows = data || [];
+    window._finDebts = rows;
+    const open_ = rows.filter(r => !r.repaid).reduce((a,r)=>a+Number(r.amount||0),0);
+    const tot = document.getElementById('fin-debt-total');
+    if(tot) tot.textContent = 'غير مسدَّد: ' + finMoney(open_);
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--light);padding:34px;">لا توجد ديون مسجّلة بعد</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) => {
+      const done = !!r.repaid;
+      const doneCell = done
+        ? '<span class="badge bg-green">'+finIcon('check',12)+' تم الرد</span>'
+        : '<button class="btn btn-gold btn-xs" onclick="openDebtPay(\''+r.id+'\')">'+finIcon('plus',12)+' إضافة رد</button>';
+      return '<tr'+(done?' style="opacity:.72;"':'')+'>'
+        + '<td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+        + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.creditor_name||'—')+'</td>'
+        + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+        + '<td><span class="badge bg-purple">'+finEsc(FIN_EXP_CAT_AR[r.category]||'—')+'</span></td>'
+        + '<td><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span></td>'
+        + '<td>'+finEsc(r.receiver||'—')+'</td>'
+        + '<td>'+finDateAr(r.date)+'</td>'
+        + '<td style="text-align:center;border-right:2px solid var(--border);">'+doneCell+'</td>'
+        + '<td style="text-align:center;">'+(done ? finDateAr(r.repaid_date) : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="text-align:center;">'+(done && r.repaid_pay_method ? '<span class="badge '+(FIN_PAY_BADGE[r.repaid_pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.repaid_pay_method]||'—')+'</span>' : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="text-align:center;border-left:2px solid var(--border);">'+(done ? finEsc(r.repaid_by_name||'—') : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="font-size:.74rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>';
+    }).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+let DEBT_PAY_ID = null;
+
+function openDebtPay(id){
+  const d = (window._finDebts||[]).find(x => x.id === id); if(!d) return;
+  DEBT_PAY_ID = id;
+  document.getElementById('dbtp-info').innerHTML =
+    '<div><strong>'+finEsc(d.creditor_name)+'</strong> — '+finMoney(d.amount)
+    + ' — بند: <strong>'+finEsc(FIN_EXP_CAT_AR[d.category]||'—')+'</strong></div>';
+  document.getElementById('dbtp-pay').value  = 'cash';
+  document.getElementById('dbtp-by').value   = finMe().name;
+  document.getElementById('dbtp-date').value = finDateAr(finTodayISO());
+  openModal('modal-fin-debt-pay');
+}
+
+async function confirmDebtPay(btn){
+  const d = (window._finDebts||[]).find(x => x.id === DEBT_PAY_ID);
+  if(!d){ showToast('⚠️ لم يتم تحديد الدين'); return; }
+  if(d.repaid){ showToast('⚠️ هذا الدين مسدَّد بالفعل'); return; }
+  finBusy(btn, true);
+  const me = finMe(), today = finTodayISO();
+  const payM = document.getElementById('dbtp-pay').value;
+  try{
+    const { error: uErr } = await db.from('fin_debts').update({
+      repaid: true, repaid_date: today, repaid_pay_method: payM, repaid_by_name: me.name, repaid_by_id: me.id
+    }).eq('id', d.id).eq('repaid', false);
+    if(uErr) throw uErr;
+    const { data: chk } = await db.from('fin_debts').select('repaid').eq('id', d.id).single();
+    if(!chk || chk.repaid !== true){ showToast('⚠️ لم يُحدَّث الدين (صلاحيات RLS)'); finBusy(btn,false); return; }
+    const { error: iErr } = await db.from('fin_expenses').insert([{
+      category: d.category, amount: d.amount,
+      recipient: d.creditor_name, recipient_role: null,
+      kind: 'سداد دين — ' + d.creditor_name,
+      by_name: me.name, by_id: me.id,
+      notes: d.notes, date: today, source: 'debt', debt_id: d.id, created_by: me.id
+    }]);
+    if(iErr){
+      await db.from('fin_debts').update({ repaid:false, repaid_date:null, repaid_pay_method:null, repaid_by_name:null, repaid_by_id:null }).eq('id', d.id);
+      throw iErr;
+    }
+    showToast('✅ تم الرد ونُقل البند إلى ' + (FIN_EXP_CAT_AR[d.category]||'المصروفات'));
+    closeModal('modal-fin-debt-pay');
+    loadFinDebts();
+  }catch(e){ showToast('❌ تعذّر التأكيد: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+/* إغلاق نتائج البحث عند الضغط بره */
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.fin-sres.open').forEach(box => {
+    const p = box.id.replace('-sres','');
+    const inp = document.getElementById(p+'-sq');
+    if(box.contains(e.target) || (inp && inp.contains(e.target))) return;
+    box.classList.remove('open');
+  });
+});
 
 </script>
 

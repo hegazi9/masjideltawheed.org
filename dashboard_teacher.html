@@ -945,6 +945,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card-head" style="flex-wrap:wrap;gap:8px;">
       <div class="card-title">✅ المهام اليومية — <span id="tsk-title" style="color:var(--jade);">—</span></div>
       <span id="tsk-circle" style="font-size:.8rem;color:var(--light);"></span>
+      <span id="tsk-save-state" style="font-size:.78rem;font-weight:700;margin-right:auto;"></span>
     </div>
     <div class="card-body">
       <div id="tsk-list" style="display:flex;flex-direction:column;gap:9px;"></div>
@@ -981,7 +982,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-primary btn-sm" onclick="saveLessonPrep()">💾 حفظ المسودة</button>
       <button class="btn btn-gold btn-sm" onclick="exportLessonPdf()">📄 تصدير PDF</button>
-      <button class="btn btn-outline btn-sm" onclick="submitLessonPrep()">📤 إرسال للمشرف للمراجعة</button>
+      <button class="btn btn-outline btn-sm" id="lp-submit-btn" onclick="submitLessonPrep()" style="border-color:var(--blue);color:var(--blue);">📤 إرسال نموذج التحضير للمشرف</button>
+      <span id="lp-save-state" style="font-size:.78rem;font-weight:700;"></span>
       <button class="btn btn-ghost btn-sm" style="margin-right:auto;color:var(--purple);border:1.5px solid var(--purple);" onclick="navPage('strategies')">🎬 استراتيجيات التعلم النشط</button>
     </div>
   </div>
@@ -997,57 +999,39 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div style="font-family:Amiri,serif;font-weight:800;font-size:1.15rem;color:var(--forest);">تحضير الدرس</div>
         <div style="font-family:Amiri,serif;font-size:.9rem;color:var(--jade);">مدرسة التوحيد القرآنية — إصلاح حياة</div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
-        <span style="font-weight:800;color:var(--forest);font-size:.9rem;">عنوان الدرس:</span>
-        <input id="lp-title" type="text" placeholder="يُؤخذ تلقائياً من خطة اليوم…" style="flex:1;min-width:220px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.9rem;font-weight:700;color:var(--emerald);outline:none;">
-        <span id="lp-meta" style="font-size:.78rem;color:var(--light);"></span>
-      </div>
+      <!-- صف الترويسة: المقرر | عنوان الدرس | التاريخ -->
+      <table id="lp-head-tbl" style="width:100%;border-collapse:collapse;font-family:Tajawal;border:1.5px solid var(--forest);margin-bottom:0;">
+        <tr>
+          <td style="width:26%;padding:7px 10px;border-left:1.5px solid var(--forest);background:var(--pale);vertical-align:middle;">
+            <div style="font-size:.72rem;font-weight:800;color:var(--forest);margin-bottom:3px;">المقرر</div>
+            <input id="lp-course" type="text" placeholder="المقرر…" style="width:100%;border:none;background:transparent;font-family:Tajawal;font-size:.82rem;font-weight:700;color:var(--emerald);outline:none;padding:0;">
+          </td>
+          <td style="padding:7px 10px;border-left:1.5px solid var(--forest);background:var(--pale);vertical-align:middle;">
+            <div style="font-size:.72rem;font-weight:800;color:var(--forest);margin-bottom:3px;">عنوان الدرس</div>
+            <input id="lp-title" type="text" placeholder="يُؤخذ تلقائياً من خطة اليوم…" style="width:100%;border:none;background:transparent;font-family:Tajawal;font-size:.88rem;font-weight:800;color:var(--emerald);outline:none;padding:0;">
+          </td>
+          <td style="width:20%;padding:7px 10px;background:var(--pale);vertical-align:middle;">
+            <div style="font-size:.72rem;font-weight:800;color:var(--forest);margin-bottom:3px;">التاريخ</div>
+            <div id="lp-date-txt" style="font-size:.82rem;font-weight:700;color:var(--emerald);"></div>
+            <div id="lp-meta" style="font-size:.68rem;color:var(--light);margin-top:2px;"></div>
+          </td>
+        </tr>
+      </table>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--forest);border-radius:8px;overflow:hidden;">
-        <!-- يمين: الأهداف + سير الدرس -->
-        <div style="border-left:1.5px solid var(--forest);">
-          <div style="background:var(--pale);color:var(--forest);font-weight:800;text-align:center;padding:8px;border-bottom:1.5px solid var(--forest);font-size:.88rem;">سير الدرس</div>
-          <div style="display:grid;grid-template-columns:1fr 1.3fr;">
-            <div style="border-left:1px solid var(--border);">
-              <div style="background:var(--gold-pale);color:var(--forest);font-weight:700;text-align:center;padding:7px;border-bottom:1px solid var(--border);font-size:.82rem;">الأهداف الدرسية</div>
-              <textarea id="lp-objectives" placeholder="اكتب الأهداف…" style="width:100%;min-height:360px;border:none;padding:10px;font-family:Tajawal;font-size:.82rem;line-height:1.7;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-            </div>
-            <div>
-              <div style="border-bottom:1px solid var(--border);">
-                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">المقدمة:</div>
-                <textarea id="lp-intro" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-              </div>
-              <div style="border-bottom:1px solid var(--border);">
-                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">التمهيد:</div>
-                <textarea id="lp-preface" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-              </div>
-              <div style="border-bottom:1px solid var(--border);">
-                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">عرض الدرس:</div>
-                <textarea id="lp-present" style="width:100%;min-height:110px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-              </div>
-              <div>
-                <div style="background:#f6faf7;font-weight:700;color:var(--jade);padding:6px 10px;font-size:.8rem;">الغلق:</div>
-                <textarea id="lp-closure" style="width:100%;min-height:78px;border:none;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- يسار: أثناء الشرح / الزمن / التقويم -->
-        <div>
-          <div style="background:var(--pale);color:var(--forest);font-weight:800;text-align:center;padding:8px;border-bottom:1.5px solid var(--forest);font-size:.88rem;">المساحة الإبداعية في تحضير الدرس</div>
-          <table style="width:100%;border-collapse:collapse;font-family:Tajawal;">
-            <thead><tr style="background:var(--gold-pale);color:var(--forest);font-size:.82rem;">
-              <th style="padding:7px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);">أثناء الشرح</th>
-              <th style="padding:7px;width:64px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);">الزمن</th>
-              <th style="padding:7px;width:120px;border-bottom:1px solid var(--border);">التقويم</th>
-            </tr></thead>
-            <tbody id="lp-rows"></tbody>
-          </table>
-          <div style="padding:8px;text-align:center;" class="lp-noprint">
-            <button class="btn btn-ghost btn-xs" onclick="lpAddRow()">➕ إضافة صف</button>
-          </div>
-        </div>
-      </div>
+      <!-- الجدول الرئيسي: الأهداف السلوكية | الوسائل التعليمية | سير الدرس | الطريقة/الأسلوب | الزمن | التقويم -->
+      <table id="lp-main-tbl" style="width:100%;border-collapse:collapse;font-family:Tajawal;border:1.5px solid var(--forest);border-top:none;table-layout:fixed;">
+        <thead>
+          <tr style="background:#cfe2f3;">
+            <th style="width:16%;padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">الأهداف السلوكية</th>
+            <th style="width:12%;padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">الوسائل التعليمية</th>
+            <th style="padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">سير الدرس</th>
+            <th style="width:13%;padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">الطريقة / الأسلوب</th>
+            <th style="width:8%;padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">الزمن</th>
+            <th style="width:14%;padding:8px 4px;border:1px solid var(--forest);font-size:.8rem;color:var(--forest);font-weight:800;">التقويم</th>
+          </tr>
+        </thead>
+        <tbody id="lp-rows"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -1487,12 +1471,12 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="fg"><label>عدد الأخطاء (الإجمالي)</label>
           <input type="number" min="0" id="ev-errors" placeholder="اكتب عدد الأخطاء" oninput="evGrade()">
         </div>
-        <div class="fg"><label>عدد الأوجه المُسمَّعة <span style="color:var(--jade);font-weight:700;font-size:.7rem;">(يُحسب تلقائياً)</span></label>
+        <div class="fg" id="ev-faces-box"><label>عدد الأوجه المُسمَّعة <span style="color:var(--jade);font-weight:700;font-size:.7rem;">(يُحسب تلقائياً)</span></label>
           <input type="number" min="1" value="1" id="ev-faces" placeholder="١" oninput="evGrade()">
           <div id="ev-faces-hint" style="font-size:.68rem;color:var(--light);margin-top:3px;">من المصحف المدني — يمكنك تعديله يدوياً</div>
         </div>
       </div>
-      <div style="font-size:.72rem;color:var(--light);margin:-4px 0 8px;">٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠) — يُحسب على <b>متوسط الأخطاء في الوجه الواحد</b></div>
+      <div id="ev-scale-hint" style="font-size:.72rem;color:var(--light);margin:-4px 0 8px;">٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠)</div>
       <div style="padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);margin-bottom:14px;text-align:center;font-size:1rem;" id="ev-grade"><span style="color:var(--light);">— أدخل عدد الأخطاء</span></div>
 
       <div class="fg"><label>ملاحظات المعلم على أداء الطالب</label><textarea id="ev-notes" rows="2" placeholder="اكتب ملاحظتك..."></textarea></div>
@@ -1676,14 +1660,12 @@ const SCHED_MAP = {
   'الرواد':[{day:'الأحد'},{day:'الاثنين'},{day:'الأربعاء'},{day:'الخميس'},{day:'الجمعة'}],
   'الملكات':[{day:'السبت'},{day:'الثلاثاء'}],
   'الأميرات':[{day:'السبت'},{day:'الثلاثاء'}],
-  'تحفيظ الكبار':[{day:'الجمعة'}],
 };
 function genderOf(branch){ return (branch==='الملكات'||branch==='الأميرات')?'إناث':'ذكور'; }
-// مجموعة الشعبة لبحث الطالب الزائر: شباب (أبطال+رواد) / بنات (ملكات+أميرات) / كبار
+// مجموعة الشعبة لبحث الطالب الزائر: شباب (أبطال+رواد) / بنات (ملكات+أميرات)
 function branchGroup(b){
   if(b==='الأبطال'||b==='الرواد') return 'shabab';
   if(b==='الملكات'||b==='الأميرات') return 'banat';
-  if(b==='تحفيظ الكبار'||b==='تحفيظ كبار') return 'kibar';
   return 'other';
 }
 
@@ -1723,13 +1705,12 @@ function reflectReportDay(){
   const lbl=document.getElementById('report-day-lbl'); if(lbl) lbl.textContent='يوم '+dayName;
   const warn=document.getElementById('report-day-warn'); if(warn) warn.textContent='';
 }
-// خطة الحفظ/المراجعة تظهر فقط: الخميس (الأبطال/الرواد) • الأربعاء (الملكات/الأميرات) • الجمعة (تحفيظ الكبار)
+// خطة الحفظ/المراجعة تظهر فقط: الخميس (الأبطال/الرواد) • الثلاثاء (الملكات/الأميرات)
 function planAllowed(){
   const c=activeCircle(); if(!c) return false;
   const day=DAYS_AR[new Date(D()+'T00:00:00').getDay()]; const b=c.branch;
   if(b==='الأبطال'||b==='الرواد') return day==='الخميس';
   if(b==='الملكات'||b==='الأميرات') return day==='الثلاثاء';
-  if(b==='تحفيظ الكبار') return day==='الجمعة';
   return false;
 }
 
@@ -1830,6 +1811,9 @@ async function boot(){
   document.getElementById('tb-date').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
   if(typeof loadUserTheme==='function') loadUserTheme();
 
+  // تعديل ٦: أعِد رفع أي تسجيلات فشل رفعها قبل كده
+  setTimeout(()=>{ try{ recQueueFlush(); }catch(e){} }, 2500);
+
   // الشعب (branches)
   try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BRANCH_MAP[b.id]=b.name); }catch(e){}
 
@@ -1927,16 +1911,11 @@ function tcpFmtDate(d){
 async function loadTeacherCurriculum(){
   const sec=document.getElementById('tcp-section');
   if(!sec) return;
-  // إخفاء كامل لمعلمي تحفيظ الكبار فقط
-  const branches=[...new Set(MY_CIRCLES.map(c=>c.branch))];
-  const onlyKebar = branches.length>0 && branches.every(b=>b==='تحفيظ الكبار');
-  if(onlyKebar){ sec.style.display='none'; return; }
   sec.style.display='block';
   const cal=document.getElementById('tcp-cal');
-  const cpSection = branches.some(b=> b==='الملكات'||b==='الأميرات') ? 'banat' : 'boys';
   try{
     const {data,error}=await db.from('curriculum_plan')
-      .select('*').eq('course','الدورة الصيفية 2026 م').eq('section',cpSection).order('sort_order',{ascending:true});
+      .select('*').eq('course','الدورة الصيفية 2026 م').order('sort_order',{ascending:true});
     if(error) throw error;
     TCP_ROWS=data||[];
   }catch(e){ TCP_ROWS=[]; }
@@ -2022,35 +2001,82 @@ function updateTaskProgress(){
   document.getElementById('tsk-done-msg').style.display=(done===all)?'block':'none';
 }
 async function toggleTask(i,checked){
+  const prev=TASK_STATE.done[i];
   TASK_STATE.done[i]=checked;
-  const lbl=document.getElementById('tsk-lbl-'+i);
-  if(lbl){ lbl.style.background=checked?'var(--pale)':'var(--bg)'; lbl.style.borderColor=checked?'var(--mint)':'var(--border)'; }
+  const paint=v=>{ const lbl=document.getElementById('tsk-lbl-'+i);
+    if(lbl){ lbl.style.background=v?'var(--pale)':'var(--bg)'; lbl.style.borderColor=v?'var(--mint)':'var(--border)'; } };
+  paint(checked);
   updateTaskProgress();
+  tskSaveState('saving');
   const allDone=TASK_STATE.done.every(Boolean);
-  await saveTasks(allDone);
+  const ok=await saveTasks(allDone);           // حفظ تلقائي مع كل بند
+  tskSaveState(ok?'saved':'error');
+  if(!ok){
+    // ★ الحفظ فشل → رجّع الشيك بوكس لحالته عشان الواجهة ما تكدبش على المعلم
+    TASK_STATE.done[i]=prev; paint(prev); updateTaskProgress();
+    const cb=document.querySelector('#tsk-lbl-'+i+' input[type=checkbox]'); if(cb) cb.checked=prev;
+    return;
+  }
   if(allDone && !TASK_STATE.awarded){ await awardTaskPoints(); }
 }
+
+// مؤشّر حالة الحفظ
+function tskSaveState(st){
+  const el=document.getElementById('tsk-save-state'); if(!el) return;
+  const map={ saving:['⏳ جارٍ الحفظ…','var(--mid)'], saved:['✅ محفوظ','var(--jade)'], error:['⚠️ لم يُحفظ — أعد المحاولة','var(--red)'] };
+  const [t,c]=map[st]||['',''];
+  el.textContent=t; el.style.color=c;
+  if(st==='saved') setTimeout(()=>{ if(el.textContent==='✅ محفوظ') el.textContent=''; },2500);
+}
+
+// ── تعديل ٢: حفظ حقيقي — select ثم update/insert (upsert بيفشل من غير UNIQUE constraint) ──
 async function saveTasks(completed){
-  const c=activeCircle(); if(!c) return;
-  const s=cu; if(!s.id) return;
-  const payload={ teacher_id:cu.id, circle_id:c.id, date:D(), done_items:TASK_STATE.done, completed:!!completed, points_awarded:TASK_STATE.awarded||0 };
-  try{ await db.from('teacher_daily_tasks').upsert([payload],{onConflict:'teacher_id,circle_id,date'}); }catch(e){}
+  const c=activeCircle(); if(!c){ return false; }
+  if(!cu || !cu.id){ return false; }
+  if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); return false; }
+  // ملاحظة: points_awarded مش بتتبعت من هنا — ملك الـ RPC بس (يمنع سحب النقاط أكتر من مرة)
+  const body={ done_items:TASK_STATE.done, completed:!!completed, updated_at:new Date().toISOString() };
+  try{
+    // ابحث عن الصف الموجود
+    if(!TASK_STATE._row){
+      const {data,error}=await db.from('teacher_daily_tasks').select('id').eq('teacher_id',cu.id).eq('circle_id',c.id).eq('date',D()).maybeSingle();
+      if(error && error.code!=='PGRST116') throw error;
+      if(data) TASK_STATE._row=data.id;
+    }
+    if(TASK_STATE._row){
+      const {data,error}=await db.from('teacher_daily_tasks').update(body).eq('id',TASK_STATE._row).select('id');
+      if(error) throw error;
+      if(!data || !data.length){ TASK_STATE._row=null; throw new Error('التحديث مرفوض من RLS (صفر صفوف)'); }
+    } else {
+      const row=Object.assign({ teacher_id:cu.id, circle_id:c.id, date:D() }, body);
+      const {data,error}=await db.from('teacher_daily_tasks').insert(row).select('id');
+      if(error) throw error;
+      if(data && data.length) TASK_STATE._row=data[0].id;
+      else {
+        // RLS ممكن ترجّع insert ناجح بصفر صفوف — نتأكد بقراءة منفصلة
+        const {data:chk}=await db.from('teacher_daily_tasks').select('id').eq('teacher_id',cu.id).eq('circle_id',c.id).eq('date',D()).maybeSingle();
+        if(!chk) throw new Error('الإضافة مرفوضة من RLS');
+        TASK_STATE._row=chk.id;
+      }
+    }
+    return true;
+  }catch(e){
+    showToast('❌ تعذّر حفظ المهام: '+recFriendlyErr(e));
+    return false;
+  }
 }
 async function awardTaskPoints(){
-  // منح ٢٠ نقطة لرصيد المعلم مرة واحدة لكل حلقة/يوم
+  // منح ٢٠ نقطة لرصيد المعلم مرة واحدة لكل حلقة/يوم — عبر RPC آمنة (تمنع التكرار)
   try{
-    const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
-    const cur=(u&&u.points)||0;
-    const {error}=await db.from('users').update({points:cur+20}).eq('id',cu.id);
+    const c=activeCircle(); if(!c) return;
+    const {data,error}=await db.rpc('award_daily_tasks_points',{ p_circle_id:c.id, p_date:D() });
     if(error) throw error;
-    TASK_STATE.awarded=20;
-    await saveTasks(true);
+    if(data===0){ TASK_STATE.awarded=20; return; }   // كانت متصرفة قبل كده
+    TASK_STATE.awarded=20; TASK_STATE.completed=true;
     if(typeof refreshMyPoints==='function') refreshMyPoints();
     showToast('🎉 جزاكم الله خيرًا — أُضيفت ٢٠ نقطة لرصيدك');
   }catch(e){
-    // حتى لو فشل تحديث الرصيد، سجّل الإتمام
-    TASK_STATE.awarded=20; await saveTasks(true);
-    showToast('✅ تم إنهاء المهام — (تعذّر تحديث الرصيد: '+(e.message||e.code||'')+')');
+    showToast('⚠️ المهام محفوظة — تعذّر إضافة النقاط: '+recFriendlyErr(e));
   }
 }
 
@@ -2062,28 +2088,59 @@ function initLessonPrep(){
   const dt=document.getElementById('lp-date'); if(dt&&!dt.value) dt.value=D();
   loadLessonPrep();
 }
+function lpAddRow(){ /* الصفوف ثابتة في النموذج المعتمد */ }
 function lpSubject(){ return document.getElementById('lp-subject').value; }
-function lpRowHtml(r){
-  r=r||{during:'',time:'',assess:''};
-  return `<tr>
-    <td style="border-bottom:1px solid var(--border);border-left:1px solid var(--border);padding:0;vertical-align:top;">
-      <textarea class="lp-r-during" style="width:100%;min-height:66px;border:none;padding:7px 9px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">${(r.during||'').replace(/</g,'&lt;')}</textarea></td>
-    <td style="border-bottom:1px solid var(--border);border-left:1px solid var(--border);padding:0;vertical-align:top;">
-      <input class="lp-r-time" value="${(r.time||'').replace(/"/g,'&quot;')}" placeholder="د" style="width:100%;border:none;padding:7px 6px;font-family:Tajawal;font-size:.78rem;text-align:center;outline:none;box-sizing:border-box;"></td>
-    <td style="border-bottom:1px solid var(--border);padding:0;vertical-align:top;">
-      <textarea class="lp-r-assess" style="width:100%;min-height:66px;border:none;padding:7px 9px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;">${(r.assess||'').replace(/</g,'&lt;')}</textarea></td>
+
+// ── صفوف النموذج الثابتة (نفس نموذج المدرسة): المقدمة / التمهيد / عرض الدرس / الغلق ──
+const LP_STAGES=[
+  {key:'intro',   label:'المقدمة',   min:70},
+  {key:'preface', label:'التمهيد',   min:70},
+  {key:'present', label:'عرض الدرس', min:210},
+  {key:'closure', label:'الغلق',     min:70},
+];
+const _lpEsc = v => String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+function lpRowHtml(st, d){
+  d = d || {};
+  const cell = (cls,val,h,ph) => `<td style="border:1px solid var(--border);padding:0;vertical-align:top;">
+      <textarea class="${cls}" placeholder="${ph||''}" style="width:100%;min-height:${h}px;border:none;padding:7px 8px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;background:transparent;">${_lpEsc(val)}</textarea></td>`;
+  return `<tr data-stage="${st.key}">
+    ${cell('lp-c-obj',   d.obj,    st.min, 'الأهداف السلوكية…')}
+    ${cell('lp-c-media', d.media,  st.min, 'الوسائل…')}
+    <td style="border:1px solid var(--border);padding:0;vertical-align:top;">
+      <div style="background:#f6faf7;font-weight:800;color:var(--jade);padding:5px 9px;font-size:.78rem;border-bottom:1px solid var(--border);">${st.label}:</div>
+      <textarea class="lp-c-flow" placeholder="اكتب سير الدرس…" style="width:100%;min-height:${st.min-24}px;border:none;padding:7px 9px;font-family:Tajawal;font-size:.78rem;line-height:1.6;outline:none;resize:vertical;box-sizing:border-box;background:transparent;">${_lpEsc(d.flow)}</textarea>
+    </td>
+    ${cell('lp-c-method', d.method, st.min, 'الطريقة…')}
+    <td style="border:1px solid var(--border);padding:0;vertical-align:top;">
+      <input class="lp-c-time" value="${_lpEsc(d.time)}" placeholder="د" style="width:100%;border:none;padding:7px 4px;font-family:Tajawal;font-size:.78rem;text-align:center;outline:none;box-sizing:border-box;background:transparent;"></td>
+    ${cell('lp-c-assess', d.assess, st.min, 'التقويم…')}
   </tr>`;
 }
-function lpAddRow(r){ document.getElementById('lp-rows').insertAdjacentHTML('beforeend', lpRowHtml(r)); }
+
 function lpSetStatusBadge(st){
   const b=document.getElementById('lp-status-badge');
-  const map={ draft:['مسودة','bg-gray'], submitted:['قيد المراجعة','bg-blue'], approved:['معتمَد ✅','bg-green'], returned:['مُعاد بملاحظات','bg-red'] };
-  const [txt,cls]=map[st]||map.draft; b.textContent=txt; b.className='badge '+cls+'';
+  const map={ draft:['مسودة','bg-gray'], submitted:['📤 مُرسل — قيد مراجعة المشرف','bg-blue'], approved:['معتمَد ✅','bg-green'], returned:['↩️ مُعاد للتعديل','bg-red'] };
+  const [txt,cls]=map[st]||map.draft; b.textContent=txt; b.className='badge '+cls;
+  const btn=document.getElementById('lp-submit-btn');
+  if(btn){
+    if(st==='submitted'){ btn.textContent='⏳ في انتظار المشرف'; btn.disabled=true; btn.style.opacity='.55'; }
+    else if(st==='approved'){ btn.textContent='✅ معتمَد'; btn.disabled=true; btn.style.opacity='.55'; }
+    else { btn.textContent=(st==='returned'?'📤 إعادة الإرسال للمشرف':'📤 إرسال نموذج التحضير للمشرف'); btn.disabled=false; btn.style.opacity=''; }
+  }
 }
+function lpSaveState(st,extra){
+  const el=document.getElementById('lp-save-state'); if(!el) return;
+  const map={ saving:['⏳ جارٍ الحفظ…','var(--mid)'], saved:['✅ محفوظ','var(--jade)'], error:['⚠️ '+(extra||'لم يُحفظ'),'var(--red)'] };
+  const [t,c]=map[st]||['',''];
+  el.textContent=t; el.style.color=c;
+  if(st==='saved') setTimeout(()=>{ if(el.textContent==='✅ محفوظ') el.textContent=''; },2500);
+}
+
 async function loadLessonPrep(){
   const date=document.getElementById('lp-date').value||D();
   const subject=lpSubject();
-  // خطة اليوم (عنوان الدرس تلقائياً)
+  // خطة اليوم (عنوان الدرس والمقرر تلقائياً)
   let plan=null;
   try{ const {data}=await db.from('curriculum_plan').select('*').eq('date',date).maybeSingle(); plan=data||null; }catch(e){}
   const autoTitle=(plan && plan[LP_PLAN_FIELD[subject]] && String(plan[LP_PLAN_FIELD[subject]]).trim()) || '';
@@ -2093,64 +2150,114 @@ async function loadLessonPrep(){
   LP_STATE={ id:row?row.id:null, status:row?(row.status||'draft'):'draft', points_awarded:row?(row.points_awarded||0):0 };
   const d=(row&&row.data)||{};
   document.getElementById('lp-title').value = (row&&row.title) || autoTitle;
-  document.getElementById('lp-meta').textContent = 'المادة: '+(subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+new Date(date+'T00:00:00').toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('lp-objectives').value=d.objectives||'';
-  document.getElementById('lp-intro').value=d.intro||'';
-  document.getElementById('lp-preface').value=d.preface||'';
-  document.getElementById('lp-present').value=d.present||'';
-  document.getElementById('lp-closure').value=d.closure||'';
+  document.getElementById('lp-course').value = d.course || (subject==='tajweed'?'التجويد':'المنهج المصاحب');
+  const dd=new Date(date+'T00:00:00');
+  document.getElementById('lp-date-txt').textContent = dd.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const c=activeCircle();
+  document.getElementById('lp-meta').textContent = c ? (c.name+' — '+c.branch) : '';
+  // الصفوف
   const rowsBox=document.getElementById('lp-rows'); rowsBox.innerHTML='';
-  const rows=(d.rows&&d.rows.length)?d.rows:[null,null,null,null];
-  rows.forEach(r=>lpAddRow(r));
+  const saved=(d.stages)||{};
+  LP_STAGES.forEach(st=>rowsBox.insertAdjacentHTML('beforeend', lpRowHtml(st, saved[st.key])));
   lpSetStatusBadge(LP_STATE.status);
   // ملاحظة المشرف / الاعتماد
   const note=document.getElementById('lp-sup-note'), appr=document.getElementById('lp-approved');
-  if(LP_STATE.status==='returned' && row.supervisor_note){ note.style.display='block'; note.innerHTML='📌 ملاحظة المشرف: '+row.supervisor_note; } else note.style.display='none';
+  if(LP_STATE.status==='returned' && row && row.supervisor_note){ note.style.display='block'; note.innerHTML='📌 ملاحظة المشرف: '+_lpEsc(row.supervisor_note); }
+  else note.style.display='none';
   appr.style.display=(LP_STATE.status==='approved')?'block':'none';
+  // قفل التحرير لو مُرسل أو معتمَد
+  const locked=(LP_STATE.status==='submitted'||LP_STATE.status==='approved');
+  document.querySelectorAll('#lp-sheet textarea, #lp-sheet input').forEach(el=>{ el.readOnly=locked; el.style.background=locked?'#fafbfa':'transparent'; });
 }
+
 function lpCollect(){
-  const rows=[...document.querySelectorAll('#lp-rows tr')].map(tr=>({
-    during:tr.querySelector('.lp-r-during').value.trim(),
-    time:tr.querySelector('.lp-r-time').value.trim(),
-    assess:tr.querySelector('.lp-r-assess').value.trim(),
-  })).filter(r=>r.during||r.time||r.assess);
-  return {
-    objectives:document.getElementById('lp-objectives').value.trim(),
-    intro:document.getElementById('lp-intro').value.trim(),
-    preface:document.getElementById('lp-preface').value.trim(),
-    present:document.getElementById('lp-present').value.trim(),
-    closure:document.getElementById('lp-closure').value.trim(),
-    rows,
-  };
+  const stages={};
+  [...document.querySelectorAll('#lp-rows tr')].forEach(tr=>{
+    const k=tr.getAttribute('data-stage');
+    const g=c=>{ const e=tr.querySelector(c); return e?e.value.trim():''; };
+    stages[k]={ obj:g('.lp-c-obj'), media:g('.lp-c-media'), flow:g('.lp-c-flow'), method:g('.lp-c-method'), time:g('.lp-c-time'), assess:g('.lp-c-assess') };
+  });
+  return { course:document.getElementById('lp-course').value.trim(), stages };
 }
+
+// حفظ: select ثم update/insert (بدل upsert اللي محتاج UNIQUE constraint)
 async function lpUpsert(extra){
   const date=document.getElementById('lp-date').value||D();
   const subject=lpSubject();
-  const payload=Object.assign({
-    teacher_id:cu.id, date, subject,
+  if(!(await ensureFreshSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+  const body=Object.assign({
     circle_id:(activeCircle()||{}).id||null,
     title:document.getElementById('lp-title').value.trim(),
     data:lpCollect(), updated_at:new Date().toISOString(),
   }, extra||{});
-  const {data,error}=await db.from('lesson_preps').upsert([payload],{onConflict:'teacher_id,date,subject'}).select('id,status,points_awarded').maybeSingle();
+  delete body.points_awarded;   // النقاط ملك الـ RPC بس
+  if(!LP_STATE.id){
+    const {data}=await db.from('lesson_preps').select('id').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle();
+    if(data) LP_STATE.id=data.id;
+  }
+  if(LP_STATE.id){
+    const {data,error}=await db.from('lesson_preps').update(body).eq('id',LP_STATE.id).select('id,status,points_awarded');
+    if(error) throw error;
+    if(!data || !data.length) throw new Error('التعديل مرفوض من RLS (صفر صفوف)');
+    LP_STATE.status=data[0].status; LP_STATE.points_awarded=data[0].points_awarded;
+    return data[0];
+  }
+  const row=Object.assign({ teacher_id:cu.id, date, subject }, body);
+  const {data,error}=await db.from('lesson_preps').insert(row).select('id,status,points_awarded');
   if(error) throw error;
-  if(data){ LP_STATE.id=data.id; LP_STATE.status=data.status; LP_STATE.points_awarded=data.points_awarded; }
-  return data;
+  if(data && data.length){ LP_STATE.id=data[0].id; LP_STATE.status=data[0].status; LP_STATE.points_awarded=data[0].points_awarded; return data[0]; }
+  const {data:chk}=await db.from('lesson_preps').select('id,status,points_awarded').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle();
+  if(!chk) throw new Error('الإضافة مرفوضة من RLS');
+  LP_STATE.id=chk.id; LP_STATE.status=chk.status; LP_STATE.points_awarded=chk.points_awarded;
+  return chk;
 }
+
 async function saveLessonPrep(){
-  try{ await lpUpsert({status: (LP_STATE.status==='approved'?'approved':'draft')}); lpSetStatusBadge(LP_STATE.status); showToast('✅ تم حفظ المسودة'); }
-  catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  if(LP_STATE.status==='submitted'){ showToast('⏳ التحضير مُرسل للمشرف — استنى المراجعة'); return; }
+  lpSaveState('saving');
+  try{
+    await lpUpsert({status:(LP_STATE.status==='approved'?'approved':'draft')});
+    lpSetStatusBadge(LP_STATE.status); lpSaveState('saved'); showToast('✅ تم حفظ المسودة');
+  }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الحفظ: '+recFriendlyErr(e)); }
 }
+
+// ── تعديل ٣: إرسال نموذج التحضير للمشرف (يظهر في إشعاراته + صندوق التقارير) ──
 async function submitLessonPrep(){
   const t=document.getElementById('lp-title').value.trim();
   if(!t){ showToast('⚠️ اكتب عنوان الدرس أولاً'); return; }
+  const dd=lpCollect();
+  const filled=Object.values(dd.stages).some(x=>x.flow||x.obj||x.assess);
+  if(!filled){ showToast('⚠️ املأ سير الدرس قبل الإرسال'); return; }
+  if(!confirm('إرسال نموذج التحضير للمشرف للمراجعة؟\nمش هتقدر تعدّله لحد ما المشرف يرد.')) return;
+  lpSaveState('saving');
   try{
     await lpUpsert({ status:'submitted', supervisor_note:null, submitted_at:new Date().toISOString() });
+    await lpNotifySupervisor(t);
+    LP_STATE.status='submitted';
     lpSetStatusBadge('submitted');
     document.getElementById('lp-sup-note').style.display='none';
-    showToast('📤 تم إرسال التحضير للمشرف للمراجعة');
-  }catch(e){ showToast('❌ تعذّر الإرسال: '+(e.message||e.code||'')); }
+    document.querySelectorAll('#lp-sheet textarea, #lp-sheet input').forEach(el=>{ el.readOnly=true; el.style.background='#fafbfa'; });
+    lpSaveState('saved');
+    showToast('📤 تم إرسال التحضير للمشرف — هيوصله إشعار');
+  }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الإرسال: '+recFriendlyErr(e)); }
 }
+
+// إشعار المشرف المتابع للحلقة
+async function lpNotifySupervisor(title){
+  try{
+    const c=activeCircle(); if(!c) return;
+    const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
+    const sup=cir&&cir.supervisor_id; if(!sup) return;
+    const date=document.getElementById('lp-date').value||D();
+    await db.from('messages').insert({
+      sender_id:cu.id, receiver_id:sup,
+      subject:'📝 نموذج تحضير جديد للمراجعة',
+      body:'المعلم/ '+(cu.full_name||'')+' أرسل تحضير درس «'+title+'» ('+(lpSubject()==='tajweed'?'التجويد':'المنهج المصاحب')+') بتاريخ '+date+' — من حلقة '+c.name+' ('+c.branch+').\nراجعه من: التقارير ← تحضير الدروس.',
+      is_read:false
+    });
+  }catch(e){ /* الإشعار مش شرط ينجح — التحضير اتسجّل */ }
+}
+
 async function exportLessonPdf(){
   const src=document.getElementById('lp-sheet');
   const JsPDF=(window.jspdf&&window.jspdf.jsPDF)?window.jspdf.jsPDF:null;
@@ -2160,7 +2267,7 @@ async function exportLessonPdf(){
   const clone=src.cloneNode(true);
   clone.querySelectorAll('.lp-noprint').forEach(e=>e.remove());
   clone.querySelectorAll('textarea').forEach(t=>{ const d=document.createElement('div'); d.textContent=t.value; d.style.cssText='white-space:pre-wrap;padding:8px 10px;font-family:Tajawal;font-size:.8rem;line-height:1.6;min-height:'+ (t.style.minHeight||'40px'); t.parentNode.replaceChild(d,t); });
-  clone.querySelectorAll('input').forEach(inp=>{ const d=document.createElement('div'); d.textContent=inp.value||inp.placeholder||''; d.style.cssText='padding:6px 8px;font-family:Tajawal;font-size:.85rem;font-weight:700;color:var(--emerald);text-align:'+(inp.style.textAlign||'right'); inp.parentNode.replaceChild(d,inp); });
+  clone.querySelectorAll('input').forEach(inp=>{ const d=document.createElement('div'); d.textContent=inp.value||''; d.style.cssText='padding:6px 8px;font-family:Tajawal;font-size:.82rem;font-weight:700;color:var(--emerald);text-align:'+(inp.style.textAlign||'right'); inp.parentNode.replaceChild(d,inp); });
   const holder=document.createElement('div');
   holder.style.cssText='position:fixed;left:-9999px;top:0;width:800px;background:#fff;';
   holder.appendChild(clone); document.body.appendChild(holder);
@@ -2185,9 +2292,12 @@ const AL_VIDEO_IDS = [
   'guV728zRIDo','w7FYbVcmbtM','sTxjRorroZo','GniYDnAe0Ak','H1pKoy57_6M',
   'gWIwnPBy6Xw','L2ebs4dGx4c','E4WCLiMxKjs','mpQUlHT9l8s','LJCdUnhjITw',
   'ywGaBuzf4Ac','rdfHix4rZSs','zZURrxUIAZs','li8VXlk6VoM','NN42c6cYSvg',
-  '8x-1MTAYG80','MCccRJlxcxs','QhSaVeOzfnc','6Nx6wcYhfWQ','-tQcP1mfVlo','TDzBbp52mEs'
+  '8x-1MTAYG80','MCccRJlxcxs','QhSaVeOzfnc','6Nx6wcYhfWQ','-tQcP1mfVlo','TDzBbp52mEs',
+  // ── إضافة جديدة ──
+  'BTfvZTcud-E','p_KIRpM7Tt8','PFirMNKUnUM','P6l8VCLO_nE','eoR7vNQLZtc',
+  'ANDNik5jrvc','zY_WK9jXlAI','J8BIa_NENew','ww_VN4PtGIg'
 ];
-const AL_CACHE_KEY='al_strat_titles_v1';
+const AL_CACHE_KEY='al_strat_titles_v2';
 let AL_VIDEOS = AL_VIDEO_IDS.map(id=>({id,title:''}));
 let _curStrat=null;
 
@@ -2733,6 +2843,13 @@ function openEval(sid,type){
   document.getElementById('ev-errors').value=st.errors??'';
   document.getElementById('ev-faces').value=st.faces??1;
   document.getElementById('ev-notes').value=st.notes??'';
+  // ── تعديل ١٠: المراجعة بالحساب القديم (إجمالي الأخطاء) — نخفي خانة الأوجه ──
+  const _fbox=document.getElementById('ev-faces-box'), _shint=document.getElementById('ev-scale-hint');
+  const _errLbl=document.querySelector('label[for="ev-errors"]');
+  if(_fbox) _fbox.style.display = isNew ? '' : 'none';
+  if(_shint) _shint.innerHTML = '٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠) — '
+    + (isNew ? 'يُحسب على <b>متوسط الأخطاء في الوجه الواحد</b>' : 'يُحسب على <b>إجمالي الأخطاء</b>');
+  if(!isNew) document.getElementById('ev-faces').value=1;
   evAutoFaces();
   evGrade();
   const pw=document.getElementById('ev-plan-wrap'); if(pw) pw.style.display=planAllowed()?'':'none';
@@ -2742,18 +2859,22 @@ function openEval(sid,type){
   if(st.audio_url){ const a=document.getElementById('ev-audio'); a.src=st.audio_url; a.style.display='block'; }
   openModal('modal-eval');
 }
+// ── المراجعة: حساب قديم على إجمالي الأخطاء (بدون أوجه) | الحفظ: متوسط الأخطاء في الوجه ──
+function evIsReview(){ return !!(REC_CTX && REC_CTX.type==='review'); }
+function evFacesVal(){ return evIsReview() ? 1 : Math.max(1,parseInt(document.getElementById('ev-faces').value)||1); }
 function evGrade(){
   const v=parseInt(document.getElementById('ev-errors').value);
-  const f=Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
+  const f=evFacesVal();
   const box=document.getElementById('ev-grade');
   if(isNaN(v)){ box.innerHTML='<span style="color:var(--light);">— أدخل عدد الأخطاء</span>'; return; }
-  const avg=v/f; const g=errorsToGrade(avg);
-  box.innerHTML=gradeBadge(g)+(f>1?` <span style="font-size:.74rem;color:var(--mid);">— متوسط ${toAr(Math.round(avg*10)/10)} خطأ/وجه على ${toAr(f)} أوجه</span>`:'');
+  const g=errorsToGrade(v/f);
+  box.innerHTML=gradeBadge(g)+((!evIsReview()&&f>1)?` <span style="font-size:.74rem;color:var(--mid);">— متوسط ${toAr(Math.round((v/f)*10)/10)} خطأ/وجه على ${toAr(f)} أوجه</span>`:'');
   // اقترح حالة الخطة تلقائياً
   setPlan(g!=='retry');
 }
 // حساب عدد الأوجه تلقائياً من المصحف المدني حسب مدى التسميع
 function evAutoFaces(){
+  if(evIsReview()){ evGrade(); return; }   // المراجعة بالحساب القديم — لا أوجه
   if(typeof madaniFaces!=='function') return;
   const sF=+document.getElementById('ev-sfrom').value+1;   // رقم السورة = الفهرس+1
   const aF=parseInt(document.getElementById('ev-afrom').value)||1;
@@ -2803,12 +2924,90 @@ function ensureRecStopped(){
   });
 }
 
+// ══════════════ تعديل ٦: رفع التسجيل الصوتي بشكل موثوق ══════════════
+// الأسباب الشائعة لرسالة «السيرفر لا يعمل»: انتهاء جلسة Auth (401) أو انقطاع مؤقت.
+// الحل: تأكيد الجلسة قبل الرفع + إعادة محاولة تلقائية + رسالة عربية واضحة + طابور محلي لإعادة الرفع.
+const REC_QUEUE_KEY='rec_upload_queue_v1';
+
+async function ensureFreshSession(){
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    if(!session) return false;
+    const expIn=(session.expires_at||0)*1000 - Date.now();
+    if(expIn < 120000){ const {data,error}=await db.auth.refreshSession(); if(error) return false; return !!(data&&data.session); }
+    return true;
+  }catch(e){ return false; }
+}
+
+function recFriendlyErr(e){
+  const m=String((e&&(e.message||e.error||e.statusText))||e||'');
+  if(/Failed to fetch|NetworkError|network|ERR_INTERNET|Load failed/i.test(m)) return 'الشبكة مقطوعة — التسجيل محفوظ محلياً وهيترفع تلقائياً لما النت يرجع';
+  if(/401|jwt|JWT|token|Unauthorized|expired/i.test(m)) return 'الجلسة انتهت — اعمل خروج ودخول تاني';
+  if(/403|not authorized|violates|policy|row-level/i.test(m)) return 'الصلاحية مرفوضة على مخزن التسجيلات (RLS)';
+  if(/413|too large|Payload/i.test(m)) return 'حجم التسجيل كبير جداً';
+  if(/404|Bucket not found/i.test(m)) return 'مخزن التسجيلات (recitations) غير موجود';
+  return m || 'خطأ غير معروف';
+}
+
+// طابور محلي — يخزّن التسجيلات اللي فشل رفعها ويعيد المحاولة تلقائياً
+async function recQueuePush(sid,type,blob,path){
+  try{
+    const b64=await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
+    const q=JSON.parse(localStorage.getItem(REC_QUEUE_KEY)||'[]');
+    q.push({sid,type,path,date:D(),b64,ts:Date.now()});
+    while(q.length>12) q.shift();          // سقف للحجم
+    localStorage.setItem(REC_QUEUE_KEY,JSON.stringify(q));
+  }catch(e){}
+}
+function b64ToBlob(b64){
+  const bin=atob(b64); const a=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i);
+  return new Blob([a],{type:'audio/webm'});
+}
+async function recQueueFlush(){
+  let q=[]; try{ q=JSON.parse(localStorage.getItem(REC_QUEUE_KEY)||'[]'); }catch(e){ return; }
+  if(!q.length) return;
+  if(!(await ensureFreshSession())) return;
+  const rest=[];
+  for(const it of q){
+    try{
+      const up=await db.storage.from('recitations').upload(it.path,b64ToBlob(it.b64),{contentType:'audio/webm',upsert:true});
+      if(up.error){ rest.push(it); continue; }
+      const {data}=db.storage.from('recitations').getPublicUrl(it.path);
+      await db.from('recitation_records').insert({student_id:it.sid,date:it.date,type:it.type,audio_url:data.publicUrl,file_path:it.path,recorded_by:cu.id});
+      try{ await db.from('memorization').update({audio_url:data.publicUrl}).eq('student_id',it.sid).eq('date',it.date).eq('type',it.type); }catch(e){}
+    }catch(e){ rest.push(it); }
+  }
+  localStorage.setItem(REC_QUEUE_KEY,JSON.stringify(rest));
+  const done=q.length-rest.length;
+  if(done>0 && typeof showToast==='function') showToast('🎧 تم رفع '+toAr(done)+' تسجيل كان متأخّر');
+}
+
+async function uploadRecitation(sid,type,blob){
+  const path='rec_'+sid+'_'+type+'_'+Date.now()+'.webm';
+  const ok=await ensureFreshSession();
+  if(!ok){ await recQueuePush(sid,type,blob,path); return {url:null,path:null,msg:' • ⚠️ الصوت لم يُرفع: الجلسة انتهت — اعمل خروج ودخول تاني'}; }
+  let lastErr=null;
+  for(let i=0;i<3;i++){
+    try{
+      const up=await db.storage.from('recitations').upload(path,blob,{contentType:'audio/webm',upsert:true});
+      if(!up.error){ const {data}=db.storage.from('recitations').getPublicUrl(path); return {url:data.publicUrl,path,msg:' • 🎧 صوت محفوظ'}; }
+      lastErr=up.error;
+      if(/401|jwt|expired/i.test(String(up.error.message||''))) await db.auth.refreshSession();
+    }catch(e){ lastErr=e; }
+    await new Promise(r=>setTimeout(r,700*(i+1)));   // 0.7s ثم 1.4s
+  }
+  await recQueuePush(sid,type,blob,path);
+  return {url:null,path:null,msg:' • ⚠️ الصوت لم يُرفع: '+recFriendlyErr(lastErr)};
+}
+window.addEventListener('online',()=>{ recQueueFlush(); });
+
 // ── حفظ التسميع ──
 async function saveEval(){
   const {sid,type}=REC_CTX; const s=findStu(sid); if(!s) return;
   const errors=parseInt(document.getElementById('ev-errors').value);
   if(isNaN(errors)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
-  const faces=Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
+  const faces=(type==='review')?1:Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
   const grade=errorsToGrade(errors/faces), pts=GRADE_PTS[grade];
   const rec={
     surah_from:+document.getElementById('ev-sfrom').value, ayah_from:+document.getElementById('ev-afrom').value||null,
@@ -2823,12 +3022,8 @@ async function saveEval(){
   const hasBlob=_audioBlob && _audioBlob.size>0;
   if(hasBlob && (s._static||s._guest)){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
   else if(hasBlob){
-    try{
-      audioPath='rec_'+sid+'_'+type+'_'+Date.now()+'.webm';
-      const up=await db.storage.from('recitations').upload(audioPath,_audioBlob,{contentType:'audio/webm',upsert:true});
-      if(up.error){ audioMsg=' • ⚠️ الصوت لم يُرفع: '+(up.error.message||up.error.error||''); }
-      else { const {data}=db.storage.from('recitations').getPublicUrl(audioPath); audioUrl=data.publicUrl; audioMsg=' • 🎧 صوت محفوظ'; }
-    }catch(e){ audioMsg=' • ⚠️ خطأ Storage: '+(e.message||''); }
+    const r=await uploadRecitation(sid,type,_audioBlob);
+    audioUrl=r.url||audioUrl; audioPath=r.path; audioMsg=r.msg;
   } else if(_audioBlob){ audioMsg=' • ⚠️ التسجيل فارغ'; }
   rec.audio_url=audioUrl;
   // حفظ في قاعدة البيانات
@@ -2838,7 +3033,7 @@ async function saveEval(){
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
     try{ await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}); }
     catch(e){ try{ const {error}=await db.from('memorization').insert([{student_id:sid,date:D(),type,grade,errors,points:pts,notes:rec.notes,recorded_by:cu.id}]); if(error) throw error; }catch(e2){ showToast('❌ خطأ في الحفظ'); return; } }
-    if(audioUrl){ try{ const {error}=await db.from('recitation_records').insert({student_id:sid,date:D(),type,audio_url:audioUrl,file_path:audioPath,recorded_by:cu.id}); if(error) audioMsg=' • ⚠️ الصوت اترفع بس مش متسجّل بالجدول: '+(error.message||''); }catch(e){ audioMsg=' • ⚠️ recitation_records: '+(e.message||''); } }
+    if(audioUrl && audioPath){ try{ const {error}=await db.from('recitation_records').insert({student_id:sid,date:D(),type,audio_url:audioUrl,file_path:audioPath,recorded_by:cu.id}); if(error) audioMsg=' • ⚠️ الصوت اترفع بس مش متسجّل بالجدول: '+recFriendlyErr(error); }catch(e){ audioMsg=' • ⚠️ recitation_records: '+recFriendlyErr(e); } }
     s.points+=delta; try{ await db.from('students').update({total_points:s.points}).eq('id',sid); }catch(e){}
   } else { s.points+=delta; }
   // تحديث الحالة المحلية والجدول
@@ -3174,8 +3369,7 @@ const TRAINING_LEVELS = [
   { id:'l5', name:'المستوى الخامس', courses:[] },
 ];
 
-const EXAMS = {"c2": {"title": "الاختبار الشامل لدورة مهارات التدريس", "questions": [{"q": "ما هو الأصل والنموذج الأكمل الذي يجب على معلم حلقات العلوم الشرعية اتباعه؟", "opts": ["المناهج التعليمية الغربية الحديثة", "هدي النبي صلى الله عليه وسلم في التعليم", "التجارب الشخصية للمعلمين السابقين", "النظم الإدارية للمراكز التعليمية"], "a": 1}, {"q": "من هو الصحابي الذي قال عن النبي صلى الله عليه وسلم: «ما رأيت معلماً قبله ولا بعده أحسن تعليماً منه»؟", "opts": ["معاوية بن الحكم السلمي", "عبد الله بن مسعود", "عبد الله بن عباس", "أنس بن مالك"], "a": 0}, {"q": "كيف تعامل النبي صلى الله عليه وسلم مع معاوية بن الحكم عندما تكلم في الصلاة جهلاً؟", "opts": ["زجره ونهاه بشدة أمام الصحابة", "وجهه برفق وعلمه مقصود الصلاة دون تعنيف", "أمره بإعادة الصلاة فوراً", "أعرض عنه ولم يكلمه"], "a": 1}, {"q": "في قصة الأعرابي الذي بال في المسجد، ما التوجيه النبوي الفوري للصحابة؟", "opts": ["أن يزجروه ويخرجوه", "«لا تُزرِموه» أي لا تقطعوا عليه بوله", "أن يعاقبوه بالضرب", "أن يتركوه ويغيّروا مكان الصلاة"], "a": 1}, {"q": "ما دلالة دعاء الأعرابي: «اللهم ارحمني ومحمداً ولا ترحم معنا أحداً»؟", "opts": ["تأثره الشديد برحمة النبي صلى الله عليه وسلم وحسن خلقه مقارنة بشدة الآخرين", "عدم رغبته في دخول الصحابة الجنة", "علمه بفقه الدعاء وشروطه", "رغبته في الانفراد بالتعليم النبوي"], "a": 0}, {"q": "ما الوصف التربوي الذي أطلقه النبي صلى الله عليه وسلم على تضييق الأعرابي للرحمة؟", "opts": ["أخطأت التعبير", "حجّرت واسعاً", "اعتديت في الدعاء", "قصرت في الفهم"], "a": 1}, {"q": "ما أهمية الحلقات القرآنية والشرعية لأبناء المجتمع المتشتت؟", "opts": ["ملء وقت الفراغ فقط", "تمثيل المحضن التربوي الأصيل لبناء الجيل وتقويم السلوك", "تقديم الدعم المادي والإغاثي لهم", "تعليمهم مهارات القتال والدفاع عن النفس"], "a": 1}, {"q": "ما الذي يهدد بقاء الطلاب في الحلقات التقليدية إذا استمر المعلم في استخدام الأساليب الجافة؟", "opts": ["زيادة الحفظ السريع", "هروب وتسرّب الطلاب من الحلقات", "تحسّن الانضباط الإداري", "قوة الترابط بين المعلم والطالب"], "a": 1}, {"q": "ما هي الميزة الأساسية التي تجعل الألعاب الإلكترونية مثل البلاي ستيشن تجذب الأطفال لساعات طويلة؟", "opts": ["السهولة وعدم بذل الجهد", "قوة عنصر الجذب والتشويق والتفاعل", "الفائدة العلمية المباشرة", "تكلفتها المادية البسيطة"], "a": 1}, {"q": "إذا كانت المادة العلمية والتجويدية واحدة في كل الحلقات، فما السبب في إقبال الطلاب على معلم ونفورهم من آخر؟", "opts": ["مكان المسجد وتجهيزاته", "الأساليب والمهارات التدريسية وطريقة تعامل المعلم", "المكافآت المالية الموزعة", "وقت انعقاد الحلقة"], "a": 1}, {"q": "بماذا تميّز الصحابي عبد الله بن مسعود رضي الله عنه في المنظومة التعليمية النبوية؟", "opts": ["إمامة الجيوش العسكرية", "إمامة القراءة والإقراء بالأسلوب الغضّ المتصل", "كثرة كتابة العهود السياسية", "المهارات الاقتصادية والمالية"], "a": 1}, {"q": "ما الهدف العام المحدد لهذه الدورة التربوية كما ورد في الدورة؟", "opts": ["حفظ جزء عمّ كاملاً للمعلمين", "التعرف على الهدي النبوي في التعليم واكتساب المهارات التدريسية بكفاءة", "شرح أحكام التجويد المتقدمة", "كيفية إعداد دبلومات شرعية معتمدة"], "a": 1}, {"q": "ما التعريف الإجرائي لـ «مهارات التدريس» كما لخّصها المحاضر؟", "opts": ["حفظ المتون الشرعية بسرعة", "أنشطة تربوية ووسائل إجرائية يستعملها المعلم لتحقيق أهداف الحلقة بكفاءة", "معاقبة الطلاب المقصّرين بأساليب مبتكرة", "كتابة التقارير الإدارية اليومية للمشرفين"], "a": 1}, {"q": "ما هو التعريف المستنبط للحلقة القرآنية بناءً على الحديث النبوي؟", "opts": ["اجتماع رسمي لتوزيع الجوائز", "اجتماع معلم القرآن مع المتعلمين في بيئة تربوية صالحة لتعلم القرآن وتدارسه", "مسابقة سنوية بين المساجد", "لقاء عائلي غير منتظم"], "a": 1}, {"q": "أي الأماكن يُعتبر المحضن الأفضل والأعلى رتبة لانعقاد الحلقات القرآنية؟", "opts": ["المدارس الخاصة", "بيت من بيوت الله - المسجد", "الملاعب الرياضية", "البيوت السكنية بالتناوب"], "a": 1}, {"q": "من هو الصحابي الذي كان يكتب الوحي بين يدي النبي صلى الله عليه وسلم ويعرضه عليه؟", "opts": ["أبو هريرة", "زيد بن ثابت", "عمر بن الخطاب", "معاذ بن جبل"], "a": 1}, {"q": "ما الدليل في مسند أحمد على أن النبي صلى الله عليه وسلم كان يباشر التعليم بنفسه دائماً؟", "opts": ["كان يُقرئهم القرآن ما لم يكن جُنُباً", "كان يرسل الرسل لتعليم الناس", "كان يكتفي بالوعظ العام يوم الجمعة", "كان يوجّه الصحابة للكتابة فقط"], "a": 0}, {"q": "لمن امتدت جهود النبي صلى الله عليه وسلم الإقرائية والتعليمية بالإضافة إلى الإنس؟", "opts": ["لملوك الأعاجم فقط", "للجن؛ فقد ذهب مع داعي الجن وقرأ عليهم", "لجميع الأمم السابقة", "للمكاتبات السرية فقط"], "a": 1}, {"q": "كيف وصف أنس رضي الله عنه نشاط الصحابة بعد صلاة الفجر في المسجد النبوي؟", "opts": ["كانوا ينامون في المسجد", "كانوا يتحلّقون حِلَقاً يقرؤون القرآن ويتعلمون الفرائض والسنن", "كانوا يغادرون فوراً للتجارة", "كانوا ينتظرون توزيع الغنائم"], "a": 1}, {"q": "ما هي الفضائل الأربع المترتبة على حلقة تدارس القرآن في المسجد كما في الحديث؟", "opts": ["الغنى والجاه والقوة والنصر", "نزول السكينة، وغشيان الرحمة، وحفُّ الملائكة، وذكر الله لهم فيمن عنده", "طول العمر والبركة في الولد والتوفيق وتيسير الرزق", "مغفرة الكبائر ورفعة الدرجات وبطلان السحر وطرد الشياطين"], "a": 1}, {"q": "ما معنى أن النبي صلى الله عليه وسلم كان يتخوّل الصحابة بالموعظة والتعليم؟", "opts": ["يكرر عليهم الكلام طوال اليوم دون انقطاع", "يتخيّر الأوقات المناسبة لئلا يملّوا", "يتركهم شهوراً طويلة دون تعليم", "يعلمهم في السفر فقط دون الحضر"], "a": 1}, {"q": "ما الأثر التربوي لربط الحجارة على بطن النبي صلى الله عليه وسلم وهو يُقرئ أهل الصُّفّة؟", "opts": ["إظهار التعب للصحابة", "علوّ الهمّة والتضحية بالوقت والنفس لتعليم كتاب الله رغم شدة الجوع", "تشجيع الصحابة على الصيام", "كراهة الشبع أثناء التعليم"], "a": 1}, {"q": "ما هو الفرق الدقيق بين «الطريقة» و«الأسلوب» في التدريس؟", "opts": ["الطريقة عامة وشاملة، بينما الأسلوب هو اللمسة الشخصية للمعلم في التنفيذ", "الأسلوب أعمّ من الطريقة دائماً", "الطريقة تخص الطلاب، والأسلوب يخص الإدارة", "لا يوجد أي فرق بينهما وهما مترادفان تماماً"], "a": 0}, {"q": "أي المراحل العمرية تحتاج إلى أسلوب تعامل يعتمد على التشويق والألعاب والقصص المبسّطة؟", "opts": ["مرحلة كبار السن", "مرحلة الطفولة المبكرة والمستويات الأولى", "مرحلة الشباب والمراهقة", "مرحلة الإجازة والأسانيد"], "a": 1}, {"q": "ما الصفة التي تُعدّ «رأس مال» معلم العلوم الشرعية وبدونها يفقد التوجيه أثره التربوي؟", "opts": ["الصوت المرتفع الجهوري", "القدوة الصالحة والرفق في التعامل", "التشدد في العقاب", "السرعة في سرد المعلومات"], "a": 1}]}};
-
+const EXAMS = {"c1": {"title": "الاختبار الشامل لدورة مهارات حفظ القرآن الكريم", "questions": [{"q": "ما هو التحذير الأساسي الذي انطلق منه المحاضر في بداية الدورة لحماية حلم حفظ القرآن؟", "opts": ["تضييع الوقت في الترفيه واللعب.", "الاستماع إلى «سارق الأحلام» الذي يثبط الهمة.", "البدء بحفظ السور الطويلة قبل قصار السور.", "عدم ضبط أحكام التجويد منذ البداية."], "a": 1}, {"q": "من هو «سارق الأحلام» كما وصفه المحاضر في الدورة؟", "opts": ["الشخص الذي يسرق المصاحف من الحلقات والمساجد.", "الشيطان الذي ينسي العبد الآيات بعد حفظها.", "المثبط الذي يقلل من قيمة الحفظ أو يوهمك بصعوبته وعقوبته.", "النسيان الطبيعي الذي يطرأ على الذاكرة البشرية."], "a": 2}, {"q": "ما هي الشبهة التي يطرحها سارق الأحلام للتشكيك في فائدة الحفظ؟", "opts": ["أن الحفظ مجرد إضافة «نسخة صوتية جديدة» والنسخ المطبوعة متوفرة بكثرة.", "أن حفظ القرآن يسبب تشتت الذهن عن العلوم الدنيوية.", "أن المصاحف الإلكترونية تغني تماماً عن الصدر والذاكرة.", "أن الحفظ لا يكون مقبولاً إلا لمن يتقن القراءات العشر."], "a": 0}, {"q": "ما القاعدة التي أكد عليها المحاضر بقوله: «حفظ القرآن يخصك وحدك لا تنفذن حلمك من خلال الآخرين»؟", "opts": ["أنه يجب على الحافظ عدم تعليم غيره حتى يتقن تماماً.", "أن الاكتفاء بدعم الحلقات ماديًا أو تعليم الصغار لا يحقق لك رتبة الحفظ بنفسك.", "أن حفظ القرآن لا يصح إلا بشكل فردي دون شيخ.", "أن على الحافظ كتمان حفظه عن عائلته وأصدقائه تماماً."], "a": 1}, {"q": "ما البيت الشعري للإمام الشاطبي الذي استشهد به المحاضر للدلالة على أن القرآن يلقى صاحبه متهللاً في القبر؟", "opts": ["وفي يسرها التيسير رمتُ بناظمٍ ... وأدرك في أثنائها من تجمّلا.", "وحيث الفتى يرتاع في ظلماته ... من القبر يلقاه سناً متهللاً.", "جزى الله بالخيرات عنا أئمة ... لنا نقلوا القرآن عذباً وسلسلا.", "تبارك رحماناً رحيماً وعالماً ... سبحان من أحيا القلوب بفضله."], "a": 1}, {"q": "ما المقصود بـ«ضريبة النجاح» في حفظ القرآن الكريم كما شرحها المحاضر؟", "opts": ["دفع الرسوم المالية للمشرفين والمعلمين في الحلقات.", "التخلي عن الدراسة الجامعية من أجل التفرغ للحفظ.", "تقديم نفيس الأوقات وأفضلها للقرآن وليس فضلتها.", "تحمل مشقة السفر البعيد لملاقاة المشايخ المتقنين."], "a": 2}, {"q": "ما النتيجة المترتبة على إعطاء القرآن «فضلة الأوقات» (الأوقات الهامشية أو المتبقية)؟", "opts": ["الحصول على حفظ متين وراسخ في وقت قياسي.", "الحصول على «فضلة النتائج» وتذبذب الحفظ وعدم استقراره.", "عدم القدرة على تذكر أرقام الآيات والسور نهائياً.", "الإصابة بالملل الشديد والنفور من التلاوة."], "a": 1}, {"q": "ما الومضة الأولى من الومضات الخمس عشرة التي طرحها المحاضر؟", "opts": ["الحفظ في الصغر كالنقش على الحجر.", "التكرار باللسان.", "الإخلاص سر الفتح.", "تسمع الآذان."], "a": 2}, {"q": "من هم الثلاثة الذين تسعر بهم النار يوم القيامة كتحذير لضياع الإخلاص؟", "opts": ["الكاذب، السارق، وقاطع الرحم.", "مانع الزكاة، تارك الصلاة، وآكل الربا.", "رجل تعلم العلم ليقال عالم، وقرأ القرآن ليقال قارئ، ومجاهد ليقال شهيد، ومتصدق رياءً.", "الحافظ الذي نسي القرآن، المتكاسل عن الصلاة، والعاق لوالديه."], "a": 2}, {"q": "ما هي علامات المرائي الثلاث التي نُسبت إلى علي بن أبي طالب رضي الله عنه؟", "opts": ["الكذب في الحديث، خلف الوعد، وخيانة الأمانة.", "يكسل إذا كان وحده، وينشط بين الناس، ويزيد في العمل إذا أُثني عليه.", "الجهر بالمعصية، السخرية من الآخرين، وحب الرئاسة.", "سرعة الغضب، كثرة النوم، وإهمال الصلوات الخمس."], "a": 1}, {"q": "ماذا قال بشر بن الحارث في الحث على الإخلاص وإخفاء الأعمال الصالحة؟", "opts": ["«لا تتعلم العلم لتماري به السفهاء وتجاري به العلماء».", "«لا تعمل لتُذكر، بل اكتم الحسنة كما تكتم السيئة».", "«إنما الأعمال بالنيات وإنما لكل امرئ ما نوى».", "«من طلب العلم لغير الله تعالى أبى العلم أن يكون لغير الله»."], "a": 1}, {"q": "أي من النيات التالية لم يذكرها المحاضر كنية صالحة ينبغي استصحابها عند حفظ القرآن؟", "opts": ["نيل شفاعة القرآن يوم القيامة.", "النجاة من النار (لو جمع القرآن في إهاب ما أحرقه الله).", "الفوز بالمسابقات الدولية ونيل الجوائز المالية الكبرى.", "طمأنينة القلب والهدى والرحمة."], "a": 2}, {"q": "متى تبدأ «الذاكرة الحفظية» في ذرياتنا وأبنائنا بالعمل والنشاط وفق ما ذكر في الدورة؟", "opts": ["من لحظة الولادة مباشرة.", "عند سن السابعة (سن التمييز).", "من لحظة الحمل في بطن الأم.", "عندما يبدأ الطفل في نطق الكلمات الكاملة."], "a": 2}, {"q": "ما هو التفسير العلمي والتربوي لكثرة ساعات نوم الطفل الرضيع؟", "opts": ["لأنه يقوم بمجهود بدني شاق يحتاج للراحة.", "لأن عينه تقوم بعمل مسح ضوئي وحفظ كل جديد، فيحتاج النوم لترتيب الذاكرة.", "بسبب ضعف مناعته الجسدية في شهوره الأولى.", "لأن الدماغ يفرز هرمونات النمو أثناء النوم فقط."], "a": 1}, {"q": "ماذا يحدث للذاكرة الحفظية والذاكرة الاستيعابية كلما تقدم الإنسان في السن؟", "opts": ["ترتفع الذاكرة الحفظية وتنخفض الذاكرة الاستيعابية.", "تنخفض الذاكرة الحفظية وترتفع الذاكرة الاستيعابية.", "تنخفضان معاً بشكل حاد في نفس الوقت.", "تظلان ثابتتين دون أي تغيير طوال العمر."], "a": 1}, {"q": "ما الحديث الشريف الذي رواه البخاري في التاريخ الكبير ويحث على الحفظ في الصغر؟", "opts": ["«خيركم من تعلم القرآن وعلمه».", "«من تعلم القرآن وهو فتي السن خلطه الله بلحمه ودمه».", "«يقال لصاحب القرآن اقرأ وارتق ورتل».", "«الماهر بالقرآن مع السفرة الكرام البررة»."], "a": 1}, {"q": "ما التشبيه الذي شبه به المحاضر الذاكرة الإنسانية ليدلل على أنها تقوى بالتدريب وتضعف بالإهمال؟", "opts": ["بالصفحة البيضاء التي يكتب عليها بالقلم.", "بالعضلات الجسدية التي تنمو بالرياضة والدربة.", "بالمحرك الآلي الذي يحتاج إلى وقود دائم.", "بالنبتة الصغيرة التي تحتاج للسقاية والرعاية."], "a": 1}, {"q": "ما مقدار السعة التخزينية لدماغ الإنسان من المعلومات كما ذكر المحاضر؟", "opts": ["ما يعادل معلومات يحويها ١٠٠ ألف كتاب.", "ما يعادل معلومات يحويها مليون كتاب فقط.", "ما يعادل معلومات يحويها ٩٠ مليون كتاب.", "سعة غير محدودة تفوق مئات المليارات من الكتب المطبوعة."], "a": 2}, {"q": "لماذا يسهل على الأطفال الصغار حفظ القرآن الكريم مقارنة بالكبار؟", "opts": ["لأن لسانهم أفصح من لسان الكبار.", "لأنهم يمتلكون قدرة أكبر على فهم تفسير الآيات وعلم البيان.", "لأنهم يتعاملون مع الأمور المجردة بسهولة، وذاكرتهم الحفظية في أعلى مستوياتها.", "لأنهم يقضون أوقاتاً أطول في المسجد مع المعلمين."], "a": 2}, {"q": "وفقاً للتجربة التي عُرضت في المحاضرة، ما هو القرار الحاسم الذي غيّر حياة الأخ الذي كان يشكو ضيق الوقت؟", "opts": ["اعتزال الناس تماماً وترك العمل للحفظ.", "ألا ينتظر إنهاء أعماله ليجد وقتاً للقرآن، بل يبدأ يومه بالقرآن ليجد البركة.", "الاكتفاء بالاستماع للقرآن أثناء القيادة والذهاب للعمل.", "تأجيل الحفظ حتى مرحلة التقاعد السني."], "a": 1}, {"q": "لماذا يعشق الدماغ النغمة الجميلة والصوت الحسن في التلاوة كما ذُكر في المحاضرة الثانية؟", "opts": ["لأن الصوت الحسن يساعد في تسريع النطق بالكلمات الصعبة.", "لأن أحكام التجويد لا تظهر إلا بالنغم فقط.", "لأن الدماغ يعشق النغم كما يعشق الألوان، مما يسهل ترسيخ الحفظ وتجنب الخلط.", "لأن الترنم بالقرآن يمنع العينين من الإجهاد البصري."], "a": 2}, {"q": "ما الفائدة العملية من قوله تعالى: ﴿لا تحرك به لسانك لتعجل به﴾ في موضوع الحفظ؟", "opts": ["تحريم تحريك اللسان بالقرآن خارج أوقات الصلاة.", "بيان أن تحريك اللسان والتكرار أداة لتثبيت المحفوظ، والنهي مؤقت بقراءة المعلم لتفادي التشتت.", "توجيه الحافظ للحفظ بالنظر والقلب فقط دون النطق باللسان.", "الإشارة إلى أن حفظ الصدور غير مهم مقارنة بحفظ السطور."], "a": 1}, {"q": "لكي تنتقل المعلومة من الذاكرة قصيرة الأمد إلى الذاكرة طويلة الأمد، كم يجب تكرار المحفوظ على الأقل؟", "opts": ["تكراره مرة واحدة بتركيز شديد.", "تكراره خمس مرات فقط.", "تكراره بضعف عدد مرات الحفظ الأساسي على الأقل.", "تكراره ٥٠٠ مرة كما يفعل الشناقطة في كل الأوقات."], "a": 2}, {"q": "ما المقولة الشهيرة لابن خلدون التي استشهد بها المحاضر للدلالة على قوة السمع في التلقي؟", "opts": ["«اللسان هو ترجمان القلوب ومستودع العلوم».", "«السمع أبو الملكات اللسانية».", "«العلم صيد والكتابة قيده ورسمه».", "«كثرة التكرار تفتح مغاليق الأذهان والقلوب»."], "a": 1}, {"q": "ما هي النصيحة العملية التي قدمها المحاضر في ومضة «تسمع الآذان» لتطبيقها قبل النوم؟", "opts": ["كتابة الصفحة المراد حفظها غداً باليد ثلاث مرات.", "قراءة التفسير الإجمالي للسورة كاملة بصوت مرتفع.", "الاستماع إلى الصفحة المراد حفظها بتركيز وانتباه شديد والضوء مغلق.", "النوم مبكراً فور صلاة العشاء مباشرة دون تلاوة."], "a": 2}, {"q": "ما المقصود بومضة «فكر بالأذهان» وكيف يتم تطبيقها عملياً؟", "opts": ["قراءة صفحة وتوقع الكلمات القادمة فيها ذهنياً.", "التكرار الصامت في النفس بلا صوت مسموع مع تخيل وتصور شكل الصفحة ومواقع الآيات.", "كتابة الآيات بخط اليد من الذاكرة مع تصحيح الأخطاء آلياً.", "مناقشة معاني الآيات مع الأصدقاء لترسيخ الفهم والتدبر."], "a": 1}, {"q": "ما الحكمة التربوية لالتزام الحافظ بطبعة مصحف واحدة طوال مسيرته الحفظية؟", "opts": ["لأن اختلاف الطبعات يحتوي على فروق في الكلمات والآيات.", "لتجنب حدوث خلل وتشتت بصري في الذاكرة الصورية لأماكن الآيات وبداية الصفحات ونهايتها.", "للحفاظ على المصحف الشخصي من الضياع والتلف السريع.", "لأن حفظ القرآن يحتاج إلى بركة المصحف الذي بدأت به فقط."], "a": 1}, {"q": "ما هي خصائص طبعة المصحف المثالية للحفظ كما بينتها ومضة «أي طبعة أختار»؟", "opts": ["طبعة ذات ورق أبيض ناصع مع تلوين جميع الكلمات باللون الأزرق.", "طبعة ذات ورق «شاموه» أو «زبدة» مريح للعين، وكتابة سوداء مع تلوين لفظ الجلالة بالأحمر.", "طبعة جيب صغيرة جداً ليسهل حملها في كل الأوقات والظروف.", "طبعة ملونة بألوان الطيف السبعة لتحديد الأجزاء والسور."], "a": 1}, {"q": "ما هي الوضعية البصرية المثالية لإمساك المصحف عند الرغبة في الحفظ لترسيخ المحفوظ؟", "opts": ["وضعه في الحجر والنظر إليه للأسفل لزيادة التركيز الخشوعي.", "إمساكه أمام العينين مائلاً إلى الأعلى واليسار قليلاً لإثارة الذاكرة البصرية الإيجابية.", "إغلاق المصحف تماماً والاعتماد التام على السمع فقط.", "وضعه على مستوى منخفض جداً والنظر إليه جانباً."], "a": 1}, {"q": "ماذا نعني بمصطلح «إحكام الربط» وكيف نطبقه عملياً في الحفظ اليومي؟", "opts": ["ربط أجزاء القرآن بالخيوط القوية لحمايتها من التفكك البنيوي.", "قراءة الصفحة كاملة دفعة واحدة من غير توقف عند رؤوس الآيات نهائياً.", "حفظ آية وكلمة من الآية التالية مكررة ٥ مرات على الأقل لوصل نهاية الآية أو الصفحة ببداية ما بعدها دون تردد.", "كتابة تفسير الآيات على حواشي المصحف لتثبيت المعاني."], "a": 2}]}, "c2": {"title": "الاختبار الشامل لدورة مهارات التدريس", "questions": [{"q": "ما هو الأصل والنموذج الأكمل الذي يجب على معلم حلقات العلوم الشرعية اتباعه؟", "opts": ["المناهج التعليمية الغربية الحديثة", "هدي النبي صلى الله عليه وسلم في التعليم", "التجارب الشخصية للمعلمين السابقين", "النظم الإدارية للمراكز التعليمية"], "a": 1}, {"q": "من هو الصحابي الذي قال عن النبي صلى الله عليه وسلم: «ما رأيت معلماً قبله ولا بعده أحسن تعليماً منه»؟", "opts": ["معاوية بن الحكم السلمي", "عبد الله بن مسعود", "عبد الله بن عباس", "أنس بن مالك"], "a": 0}, {"q": "كيف تعامل النبي صلى الله عليه وسلم مع معاوية بن الحكم عندما تكلم في الصلاة جهلاً؟", "opts": ["زجره ونهاه بشدة أمام الصحابة", "وجهه برفق وعلمه مقصود الصلاة دون تعنيف", "أمره بإعادة الصلاة فوراً", "أعرض عنه ولم يكلمه"], "a": 1}, {"q": "في قصة الأعرابي الذي بال في المسجد، ما التوجيه النبوي الفوري للصحابة؟", "opts": ["أن يزجروه ويخرجوه", "«لا تُزرِموه» أي لا تقطعوا عليه بوله", "أن يعاقبوه بالضرب", "أن يتركوه ويغيّروا مكان الصلاة"], "a": 1}, {"q": "ما دلالة دعاء الأعرابي: «اللهم ارحمني ومحمداً ولا ترحم معنا أحداً»؟", "opts": ["تأثره الشديد برحمة النبي صلى الله عليه وسلم وحسن خلقه مقارنة بشدة الآخرين", "عدم رغبته في دخول الصحابة الجنة", "علمه بفقه الدعاء وشروطه", "رغبته في الانفراد بالتعليم النبوي"], "a": 0}, {"q": "ما الوصف التربوي الذي أطلقه النبي صلى الله عليه وسلم على تضييق الأعرابي للرحمة؟", "opts": ["أخطأت التعبير", "حجّرت واسعاً", "اعتديت في الدعاء", "قصرت في الفهم"], "a": 1}, {"q": "ما أهمية الحلقات القرآنية والشرعية لأبناء المجتمع المتشتت؟", "opts": ["ملء وقت الفراغ فقط", "تمثيل المحضن التربوي الأصيل لبناء الجيل وتقويم السلوك", "تقديم الدعم المادي والإغاثي لهم", "تعليمهم مهارات القتال والدفاع عن النفس"], "a": 1}, {"q": "ما الذي يهدد بقاء الطلاب في الحلقات التقليدية إذا استمر المعلم في استخدام الأساليب الجافة؟", "opts": ["زيادة الحفظ السريع", "هروب وتسرّب الطلاب من الحلقات", "تحسّن الانضباط الإداري", "قوة الترابط بين المعلم والطالب"], "a": 1}, {"q": "ما هي الميزة الأساسية التي تجعل الألعاب الإلكترونية مثل البلاي ستيشن تجذب الأطفال لساعات طويلة؟", "opts": ["السهولة وعدم بذل الجهد", "قوة عنصر الجذب والتشويق والتفاعل", "الفائدة العلمية المباشرة", "تكلفتها المادية البسيطة"], "a": 1}, {"q": "إذا كانت المادة العلمية والتجويدية واحدة في كل الحلقات، فما السبب في إقبال الطلاب على معلم ونفورهم من آخر؟", "opts": ["مكان المسجد وتجهيزاته", "الأساليب والمهارات التدريسية وطريقة تعامل المعلم", "المكافآت المالية الموزعة", "وقت انعقاد الحلقة"], "a": 1}, {"q": "بماذا تميّز الصحابي عبد الله بن مسعود رضي الله عنه في المنظومة التعليمية النبوية؟", "opts": ["إمامة الجيوش العسكرية", "إمامة القراءة والإقراء بالأسلوب الغضّ المتصل", "كثرة كتابة العهود السياسية", "المهارات الاقتصادية والمالية"], "a": 1}, {"q": "ما الهدف العام المحدد لهذه الدورة التربوية كما ورد في الدورة؟", "opts": ["حفظ جزء عمّ كاملاً للمعلمين", "التعرف على الهدي النبوي في التعليم واكتساب المهارات التدريسية بكفاءة", "شرح أحكام التجويد المتقدمة", "كيفية إعداد دبلومات شرعية معتمدة"], "a": 1}, {"q": "ما التعريف الإجرائي لـ «مهارات التدريس» كما لخّصها المحاضر؟", "opts": ["حفظ المتون الشرعية بسرعة", "أنشطة تربوية ووسائل إجرائية يستعملها المعلم لتحقيق أهداف الحلقة بكفاءة", "معاقبة الطلاب المقصّرين بأساليب مبتكرة", "كتابة التقارير الإدارية اليومية للمشرفين"], "a": 1}, {"q": "ما هو التعريف المستنبط للحلقة القرآنية بناءً على الحديث النبوي؟", "opts": ["اجتماع رسمي لتوزيع الجوائز", "اجتماع معلم القرآن مع المتعلمين في بيئة تربوية صالحة لتعلم القرآن وتدارسه", "مسابقة سنوية بين المساجد", "لقاء عائلي غير منتظم"], "a": 1}, {"q": "أي الأماكن يُعتبر المحضن الأفضل والأعلى رتبة لانعقاد الحلقات القرآنية؟", "opts": ["المدارس الخاصة", "بيت من بيوت الله - المسجد", "الملاعب الرياضية", "البيوت السكنية بالتناوب"], "a": 1}, {"q": "من هو الصحابي الذي كان يكتب الوحي بين يدي النبي صلى الله عليه وسلم ويعرضه عليه؟", "opts": ["أبو هريرة", "زيد بن ثابت", "عمر بن الخطاب", "معاذ بن جبل"], "a": 1}, {"q": "ما الدليل في مسند أحمد على أن النبي صلى الله عليه وسلم كان يباشر التعليم بنفسه دائماً؟", "opts": ["كان يُقرئهم القرآن ما لم يكن جُنُباً", "كان يرسل الرسل لتعليم الناس", "كان يكتفي بالوعظ العام يوم الجمعة", "كان يوجّه الصحابة للكتابة فقط"], "a": 0}, {"q": "لمن امتدت جهود النبي صلى الله عليه وسلم الإقرائية والتعليمية بالإضافة إلى الإنس؟", "opts": ["لملوك الأعاجم فقط", "للجن؛ فقد ذهب مع داعي الجن وقرأ عليهم", "لجميع الأمم السابقة", "للمكاتبات السرية فقط"], "a": 1}, {"q": "كيف وصف أنس رضي الله عنه نشاط الصحابة بعد صلاة الفجر في المسجد النبوي؟", "opts": ["كانوا ينامون في المسجد", "كانوا يتحلّقون حِلَقاً يقرؤون القرآن ويتعلمون الفرائض والسنن", "كانوا يغادرون فوراً للتجارة", "كانوا ينتظرون توزيع الغنائم"], "a": 1}, {"q": "ما هي الفضائل الأربع المترتبة على حلقة تدارس القرآن في المسجد كما في الحديث؟", "opts": ["الغنى والجاه والقوة والنصر", "نزول السكينة، وغشيان الرحمة، وحفُّ الملائكة، وذكر الله لهم فيمن عنده", "طول العمر والبركة في الولد والتوفيق وتيسير الرزق", "مغفرة الكبائر ورفعة الدرجات وبطلان السحر وطرد الشياطين"], "a": 1}, {"q": "ما معنى أن النبي صلى الله عليه وسلم كان يتخوّل الصحابة بالموعظة والتعليم؟", "opts": ["يكرر عليهم الكلام طوال اليوم دون انقطاع", "يتخيّر الأوقات المناسبة لئلا يملّوا", "يتركهم شهوراً طويلة دون تعليم", "يعلمهم في السفر فقط دون الحضر"], "a": 1}, {"q": "ما الأثر التربوي لربط الحجارة على بطن النبي صلى الله عليه وسلم وهو يُقرئ أهل الصُّفّة؟", "opts": ["إظهار التعب للصحابة", "علوّ الهمّة والتضحية بالوقت والنفس لتعليم كتاب الله رغم شدة الجوع", "تشجيع الصحابة على الصيام", "كراهة الشبع أثناء التعليم"], "a": 1}, {"q": "ما هو الفرق الدقيق بين «الطريقة» و«الأسلوب» في التدريس؟", "opts": ["الطريقة عامة وشاملة، بينما الأسلوب هو اللمسة الشخصية للمعلم في التنفيذ", "الأسلوب أعمّ من الطريقة دائماً", "الطريقة تخص الطلاب، والأسلوب يخص الإدارة", "لا يوجد أي فرق بينهما وهما مترادفان تماماً"], "a": 0}, {"q": "أي المراحل العمرية تحتاج إلى أسلوب تعامل يعتمد على التشويق والألعاب والقصص المبسّطة؟", "opts": ["مرحلة كبار السن", "مرحلة الطفولة المبكرة والمستويات الأولى", "مرحلة الشباب والمراهقة", "مرحلة الإجازة والأسانيد"], "a": 1}, {"q": "ما الصفة التي تُعدّ «رأس مال» معلم العلوم الشرعية وبدونها يفقد التوجيه أثره التربوي؟", "opts": ["الصوت المرتفع الجهوري", "القدوة الصالحة والرفق في التعامل", "التشدد في العقاب", "السرعة في سرد المعلومات"], "a": 1}]}, "c4": {"title": "الاختبار الشامل لدورة مهارات إيصال المعلومة", "questions": [{"q": "متى يبدأ الطفل بدراسة نفسية وشخصية من حوله للتعرف على كيفية التعامل معهم؟", "opts": ["منذ ولادته", "في سن التمييز", "بعمر سنتين", "عند دخول المدرسة"], "a": 0}, {"q": "ماذا يختبر الطفل عندما يبكي في أشهره الأولى وفقاً للدورة؟", "opts": ["قوة صوته", "ردة فعل الأم لتلبية حاجاته", "قدرته على الكلام", "مدى جوعه فقط"], "a": 1}, {"q": "ما هي أهم حاجة يسعى الطفل — أو المتلقي — لتحقيقها عند التعامل مع المدرس؟", "opts": ["الاستفادة القصوى من المعلومات", "اللعب والمرح", "الشعور بالأمان", "إثبات الشخصية بتحدي المعلم"], "a": 2}, {"q": "ماذا يفعل الطالب عندما يدرس شخصية المعلم ويبحث عن نقاط ضعفه؟", "opts": ["يسعى للتعلم منه بصمت", "يحاول مساعدته لتجاوزها", "يتقرب منه ليصبح المفضل لديه", "يحاول استثارته وإزعاجه لإثبات شخصيته وتحقيق إنجازه"], "a": 3}, {"q": "ما هو الأثر الذي تتركه الحصة الأولى للمدرس على الطلاب؟", "opts": ["لا أثر لها وتُنسى بسرعة", "تستمر معهم بقية السنة وتحدد طبيعة التعامل", "تؤثر فقط في نفس الأسبوع", "يعتمد الأثر فقط على صعوبة المادة"], "a": 1}, {"q": "ما هو الخطأ التربوي الذي وقع فيه مدرس الصف الرابع رغم استخدامه للغة العربية الفصحى وحزمه؟", "opts": ["كان يضرب الطلاب ويعاقبهم بشدة", "لم يكن متمكناً من المادة العلمية", "كان مستواه وأسلوبه يناسب طلاب الجامعة وليس أطفالاً في الصف الرابع", "كان يتحدث بلغة عامية غير مفهومة"], "a": 2}, {"q": "من هو «المرسل» في العملية التعليمية بناءً على عناصر الاتصال المذكورة؟", "opts": ["الكتاب المدرسي فقط", "المعلم — أو من يوصل المعلومة — سواء كان ضيفاً أو طالباً", "الطالب الذي يستمع للدرس", "مدير المدرسة"], "a": 1}, {"q": "ماذا يحدث إذا كان المنهج ممتازاً ولكن «المرسل» سلبي ولا يملك مهارات إيصال المعلومة؟", "opts": ["تنجح العملية التعليمية بفضل المنهج", "يقوم المرسل بتشويه المنهج ولن تصل الرسالة بشكل صحيح", "يعتمد الطالب على نفسه ويستفيد تماماً", "لا يتأثر الطالب بشخصية المعلم"], "a": 1}, {"q": "ما هي النتيجة إذا كان المنهج ضعيفاً ولكن المعلم كفء وصاحب رسالة؟", "opts": ["يفشل المعلم في إيصال المعلومة", "يترك المدرسة لعدم توفر الإمكانيات", "يبدع ويستفيد من المنهج ليوصل رسالته متجاوزاً سوء المنهج", "يطالب بإلغاء المادة"], "a": 2}, {"q": "لماذا يجب مراعاة نوعية المعلومة ومناسبتها لـ«المستقبِل» (الطالب/المتلقي)؟", "opts": ["لتوفير الوقت وإنهاء المنهج بسرعة", "لأن جميع المعلومات مفيدة في أي وقت", "لأن بعض المعلومات قد تضر المتلقي وتُفهم خطأً إذا قيلت في غير وقتها المناسب", "لكي لا يمل المعلم من الشرح"], "a": 2}, {"q": "ما هو الفرق بين التعليم والتدريب كما ذُكر في الدورة؟", "opts": ["التعليم تحويل لمهارة والتدريب نظري", "لا فرق بينهما فهما مترادفان", "التعليم للكبار والتدريب للصغار", "التعليم إعطاء معلومة نظرية والتدريب هو تحويلها إلى مهارة وواقع حياة"], "a": 3}, {"q": "كيف كان الصحابة رضوان الله عليهم يتعلمون القرآن الكريم؟", "opts": ["يحفظونه كاملاً ثم يبدؤون بفهمه", "لا يتجاوزون خمس آيات حتى يحفظوها ويفهموها ويطبقوها عملياً", "يقرؤونه دون التركيز على المعاني", "يدرسون الأحكام الفقهية دون تطبيق"], "a": 1}, {"q": "ما هي الطريقة الأفضل للتعامل مع الفروع المختلفة للمنهج الشرعي (سيرة، حديث، قيم، سلوك)؟", "opts": ["تدريس السيرة فقط", "فصل كل مادة بدرس مستقل تماماً", "ربطها معاً لغرس القيم والأخلاق بشكل متكامل", "إلغاء الدروس السلوكية والاكتفاء بالحفظ"], "a": 2}, {"q": "كم عدد الوسائل الإبداعية لإيصال المعلومة التي استخرجها المحاضر من كتاب السيرة النبوية خلال ساعات قليلة؟", "opts": ["١٠ وسائل", "١٥ وسيلة", "٣٥ وسيلة", "٥٠ وسيلة"], "a": 2}, {"q": "ما هي الوسيلة التي تم استخدامها في «مشهد الوضوء» أثناء الدورة؟", "opts": ["التلقين النظري من الكتاب", "التعليم بالخطأ والتطبيق العملي (النمذجة)", "الاستماع لشريط صوتي", "كتابة الخطوات على السبورة فقط"], "a": 1}, {"q": "كيف علّم النبي صلى الله عليه وسلم الصحابة كيفية الصلاة بشكل فعّال؟", "opts": ["بالشرح النظري الطويل دون حركة", "ببعث رسائل مكتوبة لهم", "بالتطبيق العملي وصعود المنبر وقال: «صلوا كما رأيتموني أصلي»", "بطلب قراءة الآيات المتعلقة بالصلاة فقط"], "a": 2}, {"q": "ما فائدة استخدام «القصة المجزّأة» — التي لا يكملها المعلم فوراً — في العملية التعليمية؟", "opts": ["توفير وقت الحصة", "تشتيت انتباه الطلاب", "إثارة التشويق وفتح العقل اللاواعي لمعرفة الباقي أثناء إعطاء الدرس", "التغطية على نسيان المعلم للمعلومات"], "a": 2}, {"q": "كيف اقترح المحاضر شرح مفهوم «التوكل» بطريقة عملية وشاملة؟", "opts": ["بتعريف التوكل لغة واصطلاحاً بطريقة جافة", "بسرد قصة الهجرة النبوية واستخراج اتخاذ الأسباب وتعلق القلب بالله منها", "بذكر آيات التوكل وإعرابها فقط", "بكتابة كلمة التوكل على السبورة وتكرارها"], "a": 1}, {"q": "ما هو الأثر التربوي عندما جعل المعلم طالبة في الصف الرابع تشرح درس «الإيمان بالملائكة» أمام زميلاتها؟", "opts": ["إضاعة وقت الحصة بلا فائدة", "تقليل احترام الطلاب للمعلم", "إكسابها الثقة بالنفس، والجرأة، ومهارة البحث، وتثبيت المعلومة لديها", "شعور الطالبة بالخوف والكره للمادة"], "a": 2}, {"q": "ما هي «أفضل طريقة» لإيصال المعلومة كما أكد المحاضر؟", "opts": ["طريقة واحدة ثابتة تناسب الجميع", "استخدام التكنولوجيا والبروجيكتور فقط", "الإلقاء المستمر دون توقف", "التجديد والتنويع واستخدام الأسلوب الذي يتناسب مع الموقف والفئة المستهدفة"], "a": 3}, {"q": "لماذا تُعتبر قصة «العصفور» جافة ومملة للأطفال إذا رويت كإلقاء عادي؟", "opts": ["لأن الأطفال لا يحبون العصافير", "لأنها طويلة جداً", "لعدم استخدام المعلم لغة الجسد والأصوات والتمثيل فيها", "لأنها قصة خيالية وليست واقعية"], "a": 2}, {"q": "هل تناسب القصة الخيالية — كقصة العصفور — طلاب الجامعة بنفس أسلوب تمثيلها للأطفال؟", "opts": ["نعم، تناسبهم تماماً", "لا، سيعتبرونها استخفافاً بعقولهم ويجب تغيير الأسلوب بما يتناسب مع نضجهم", "نعم، إذا قيلت باللغة الفصحى", "لا، يُمنع استخدام القصص تماماً للمرحلة الجامعية"], "a": 1}, {"q": "ما هو الأسلوب الذي يجعل تفسير القرآن ممتعاً ومؤثراً بدلاً من الشرح الجاف المعتاد؟", "opts": ["القراءة الصامتة الفردية", "سرد معاني الكلمات بشكل متتالٍ وسريع", "النقاش، والحوار، وطرح الأسئلة، واستخدام لغة الجسد", "الاعتماد على الحفظ والتسميع فقط"], "a": 2}, {"q": "هل استخدم النبي صلى الله عليه وسلم أسلوب «السؤال والجواب» أثناء خطبة الجمعة؟", "opts": ["لا، لم يفعله أبداً", "نعم، كان يسأل ويُجيب لإضفاء روح وحياة على الخطبة", "استخدمه في الغزوات فقط", "نهى عن استخدامه في المساجد"], "a": 1}, {"q": "ماذا فعل أحد الخطباء في خطبة العيد لدمج الأطفال وجذب انتباههم بشكل إيجابي؟", "opts": ["طردهم من المسجد لعدم إزعاج الكبار", "تجاهلهم تماماً ووجّه خطبته للرجال فقط", "جعل طفلاً يصعد المنبر ليقرأ آية عن بر الوالدين ويشرحها", "خصص لهم غرفة مغلقة للعب"], "a": 2}, {"q": "من أبرز العلماء الذين تميزوا باستخدام أسلوب «السؤال والجواب» و«المسائل» في التعليم الشرعي؟", "opts": ["علماء العصر الحديث فقط", "الإمام ابن تيمية والإمام أحمد", "الفلاسفة اليونان حصراً", "لم يستخدم العلماء المسلمون هذا الأسلوب قديماً"], "a": 1}, {"q": "ما الفائدة التربوية من استخدام «الألعاب» — مثل لعبة فك الأيدي — في العملية التعليمية؟", "opts": ["تضييع الوقت والترفيه فقط", "إشغال الطلاب عند غياب المعلم", "إيصال مهارة أو قيمة معينة — كالعمل الجماعي أو تقبل الصعوبات الجديدة — بطريقة ممتعة", "لا توجد أي فائدة علمية من اللعب"], "a": 2}, {"q": "كيف اقترح المحاضر شرح حديث «المؤمن الذي يقرأ القرآن كالأترجّة» ليترسخ في أذهان الطلاب؟", "opts": ["حفظ الحديث غيباً فقط", "رسم الثمار على السبورة العادية", "إحضار فاكهة مشابهة — كاليمون والحنظلة والريحانة — لتجربتها وشمّها عملياً", "تجاهل الشرح والاكتفاء بالقراءة"], "a": 2}, {"q": "ما هو الهدف من إشراك الطلاب المتدربين في تمرين «الأيدي المتشابكة وعكسها» في نهاية الدورة؟", "opts": ["إثبات أنهم غير قادرين على التركيز", "تقوية عضلاتهم للنشاط البدني", "إيصال فكرة عملية بأن أي أسلوب تعليمي جديد ومبتكر سيكون صعباً في البداية ثم يصبح ممتعاً بالتعوّد", "الاستراحة من المحاضرة فقط"], "a": 2}, {"q": "هل من الصواب تقديم تفاصيل فقهية دقيقة — كمفسدات الصيام المتعلقة بالعلاقة الزوجية — في درس عام يحضره أطفال صغار؟", "opts": ["نعم، لنشر العلم للجميع بدون استثناء", "نعم، ليتعلموا أحكام الدين مبكراً", "لا، لأنها لا تناسب مستوى أعمارهم وقد تُفهم أو تُستخدم بشكل خاطئ", "لا يهم من يحضر، فالعلم يُطرح في أي مكان"], "a": 2}]}};
 // ── اختبارات نهاية الدورة (اختيار من متعدد) ──
 let TR_EXAM_DONE = {};                 // { course_id: {percent, points} } — نتيجة مسجّلة = مقفول
 let _qzState = null;                    // {cid, qs, idx, answers[]}
@@ -3393,33 +3587,58 @@ function renderTrOverall(){
     </div>
   </div>`;
 }
-function trLevelCard(lv){
-  const {done,total}=trLevelStats(lv); const nC=lv.courses.length; const locked=nC===0;
-  const complete=total>0 && done===total;
-  const badge = locked
-    ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">قريباً</span>'
-    : (complete ? '<span class="badge bg-green">✅ مكتمل</span>' : '<span class="badge bg-gold">قيد التقدّم</span>');
-  const chips = nC
-    ? lv.courses.map(c=>`<span style="display:block;background:var(--pale);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.79rem;font-weight:700;color:var(--forest);">${c.name}</span>`).join('')
-    : '<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;">الدورات قريباً بإذن الله 🌿</div>';
-  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;">
-    <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
-      <div style="font-family:Amiri,serif;font-size:1.28rem;font-weight:800;color:var(--gold-l);">${lv.name}</div>${badge}
+// اكتمال المستوى = كل فيديوهاته اتشافت + كل اختبارات دوراته المتاحة اتأدّت
+function trLevelComplete(lv){
+  if(!lv || !lv.courses.length) return false;
+  const {done,total}=trLevelStats(lv);
+  if(!total || done<total) return false;
+  return lv.courses.every(c=> !trExamHas(c.id) || !!TR_EXAM_DONE[c.id]);
+}
+// المستوى مقفول لو اللي قبله لسه مخلصش — يرجّع المستوى السابق أو null
+function trLevelLockedBy(idx){
+  if(idx<=0) return null;
+  const prev=TRAINING_LEVELS[idx-1];
+  return trLevelComplete(prev) ? null : prev;
+}
+
+function trLevelCard(lv,idx){
+  const {done,total}=trLevelStats(lv); const nC=lv.courses.length;
+  const prereq=trLevelLockedBy(idx);        // مقفول بسبب المستوى السابق
+  const soon=!prereq && nC===0;             // مفتوح بس لسه مفيهوش دورات
+  const locked=!!prereq || soon;
+  const complete=trLevelComplete(lv);
+  const badge = prereq
+    ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">🔒 مقفول</span>'
+    : soon
+      ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">قريباً</span>'
+      : (complete ? '<span class="badge bg-green">✅ مكتمل</span>' : '<span class="badge bg-gold">قيد التقدّم</span>');
+  const chips = prereq
+    ? `<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;line-height:1.7;">🔒 يُفتح بعد إتمام <strong style="color:var(--emerald);">${prereq.name}</strong><br><span style="font-size:.75rem;">(مشاهدة كل الفيديوهات + اجتياز اختبارات الدورات)</span></div>`
+    : nC
+      ? lv.courses.map(c=>`<span style="display:block;background:var(--pale);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.79rem;font-weight:700;color:var(--forest);">${c.name}</span>`).join('')
+      : '<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;">الدورات قريباً بإذن الله 🌿</div>';
+  const btnTxt = prereq ? '🔒 مقفول' : (soon ? 'قريباً' : 'ادخل المستوى ←');
+  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;${prereq?'opacity:.72;':''}">
+    <div style="background:linear-gradient(135deg,${prereq?'#5a6b61,#7d8f84':'var(--forest),var(--emerald)'});padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="font-family:Amiri,serif;font-size:1.28rem;font-weight:800;color:${prereq?'rgba(255,255,255,.85)':'var(--gold-l)'};">${lv.name}</div>${badge}
     </div>
     <div style="padding:15px 18px;display:flex;flex-direction:column;gap:11px;flex:1;">
       <div style="display:flex;flex-direction:column;gap:7px;">${chips}</div>
-      ${total?trBar(done,total):''}
+      ${(!prereq&&total)?trBar(done,total):''}
       <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--mid);border-top:1px solid var(--border);padding-top:10px;margin-top:auto;">
         <span>📚 ${toAr(nC)} دورة</span><span>🎬 ${toAr(total)} فيديو</span><span>🏆 ${toAr(total*POINTS_PER_VIDEO)} نقطة</span>
       </div>
-      <button class="btn ${locked?'btn-outline':'btn-primary'} btn-sm" ${locked?'disabled style="opacity:.55;cursor:not-allowed;"':''} onclick="openLevel('${lv.id}')">${locked?'قريباً':'ادخل المستوى ←'}</button>
+      <button class="btn ${locked?'btn-outline':'btn-primary'} btn-sm" ${locked?'disabled style="opacity:.55;cursor:not-allowed;"':''} onclick="openLevel('${lv.id}')">${btnTxt}</button>
     </div>
   </div>`;
 }
 
 // ── منظر الدورات (شكل كورسات) ──
 function openLevel(id){
-  const lv=TRAINING_LEVELS.find(l=>l.id===id); if(!lv||!lv.courses.length) return;
+  const idx=TRAINING_LEVELS.findIndex(l=>l.id===id); if(idx<0) return;
+  const lv=TRAINING_LEVELS[idx]; if(!lv.courses.length) return;
+  const prereq=trLevelLockedBy(idx);
+  if(prereq){ showToast('🔒 لازم تُتم '+prereq.name+' الأول'); return; }
   _trCurLevel=id;
   document.getElementById('tr-levels-view').style.display='none';
   document.getElementById('tr-courses-view').style.display='';
@@ -3459,7 +3678,7 @@ function trCourseCard(c,lv){
     const r=TR_EXAM_DONE[c.id];
     exam = r
       ? `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px solid var(--mint);border-radius:10px;padding:11px;color:var(--emerald);font-size:.82rem;font-weight:800;text-align:center;">✅ تم أداء الاختبار — نتيجتك ${toAr(r.percent)}٪ (${toAr(r.points)} نقطة) • لا يمكن إعادته إلا بإذن المدير</div>`
-      : `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${c.id}')">🎯 ابدأ اختبار نهاية الدورة (٢٥ سؤالاً)</button>`;
+      : `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${c.id}')">🎯 ابدأ اختبار نهاية الدورة (${toAr(EXAMS[c.id].questions.length)} سؤالاً)</button>`;
   } else {
     exam=`<button class="btn btn-gold btn-sm" style="width:100%;" onclick="showToast('🎯 اختبار نهاية الدورة قيد الإعداد — سيتاح قريباً بإذن الله')">🎯 اختبار نهاية الدورة — مُتاح (قريباً بإذن الله)</button>`;
   }
