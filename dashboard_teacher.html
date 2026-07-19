@@ -785,6 +785,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="sb-item" onclick="nav(this,'tasks')"><span class="sb-icon">✅</span> المهام اليومية</div>
     <div class="sb-item" onclick="nav(this,'lessonprep')"><span class="sb-icon">📝</span> تحضير الدروس</div>
     <div class="sb-item" onclick="nav(this,'strategies')"><span class="sb-icon">🎬</span> استراتيجيات التعلم النشط</div>
+    <div class="sb-item" onclick="nav(this,'media')"><span class="sb-icon">🎥</span> المرئيات</div>
+    <div class="sb-item" onclick="nav(this,'library')"><span class="sb-icon">📚</span> المكتبة</div>
     <div class="sb-item" onclick="nav(this,'messages')" style="position:relative;">
       <span class="sb-icon">✉️</span> الرسائل
       <span id="sb-msg-badge" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:.62rem;font-weight:800;border-radius:99px;padding:1px 7px;min-width:18px;text-align:center;line-height:1.6;"></span>
@@ -814,7 +816,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <div class="main">
 <div class="topbar">
   <div class="tb-left">
-    <div class="tb-menu-btn" onclick="toggleSidebar()" title="القائمة" style="display:none;font-size:1.4rem;cursor:pointer;">☰</div>
+    <div class="tb-menu-btn" onclick="toggleSidebar()" title="القائمة" style="display:none;font-size:1.4rem;cursor:pointer;">≡</div>
     <div>
       <div class="tb-title" id="tb-title">🏠 لوحة القيادة</div>
       <div class="tb-breadcrumb" id="tb-breadcrumb">مدرسة التوحيد القرآنية — لوحة المعلم</div>
@@ -1037,6 +1039,27 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 </div>
 
 <!-- ══════════════ استراتيجيات التعلم النشط (معرض فيديوهات) ══════════════ -->
+<!-- ══ PAGE: LIBRARY (معرض الكتب — قراءة) ══ -->
+<div id="page-library" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
+      <div class="card-title">📚 المكتبة</div>
+      <input id="lib-search" oninput="renderLibraryPage()" placeholder="🔎 ابحث عن كتاب…"
+        style="flex:1;min-width:180px;max-width:320px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:.85rem;">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
+      <div class="card-title" id="lib-count">📖 الكتب</div>
+      <div id="lib-tabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <div class="card-body">
+      <div id="lib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px;"></div>
+    </div>
+  </div>
+</div>
+
 <div id="page-strategies" class="page">
   <div class="card">
     <div class="card-head" style="flex-wrap:wrap;gap:8px;">
@@ -1065,10 +1088,39 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ نافذة تشغيل الفيديو (منبثقة) ══ -->
 <div class="overlay" id="modal-strat-video" onclick="if(event.target===this)closeStratVideo()">
   <div class="modal" style="max-width:920px;width:94%;">
-    <div class="modal-head"><div class="modal-title" id="strat-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeStratVideo()">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="strat-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeStratVideo()">×</button></div>
     <div class="modal-body" style="padding:0;">
       <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
         <iframe id="strat-vid-frame" src="" title="فيديو" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen
+          style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ المرئيات (معرض — رؤية فقط) ══ -->
+<div id="page-media" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+      <div class="card-title">🎬 المرئيات</div>
+      <span style="font-size:.78rem;color:var(--light);">اضغط على أي مقطع لتشغيله</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title" id="media-count">📼 المقاطع</div></div>
+    <div class="card-body">
+      <div id="media-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ نافذة تشغيل المرئي ══ -->
+<div class="overlay" id="modal-media-video" onclick="if(event.target===this)closeMediaVideo()">
+  <div class="modal" style="max-width:920px;width:94%;">
+    <div class="modal-head"><div class="modal-title" id="media-vid-title" style="font-size:.92rem;">▶️ المقطع</div><button class="modal-close" onclick="closeMediaVideo()">×</button></div>
+    <div class="modal-body" style="padding:0;">
+      <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
+        <iframe id="media-vid-frame" src="" title="مقطع مرئي" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay;encrypted-media;fullscreen" allowfullscreen
           style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
       </div>
     </div>
@@ -1165,14 +1217,14 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ نافذة تشغيل فيديو التأهيل ══ -->
 <div class="overlay" id="modal-tr-video" onclick="if(event.target===this)closeTrVideo()">
   <div class="modal" style="max-width:940px;width:95%;">
-    <div class="modal-head"><div class="modal-title" id="tr-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeTrVideo()">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="tr-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeTrVideo()">×</button></div>
     <div class="modal-body" style="padding:0;">
       <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
         <div id="tr-yt-player" style="position:absolute;inset:0;width:100%;height:100%;"></div>
       </div>
       <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);">
-        <div id="tr-vid-status" style="font-size:.82rem;font-weight:700;color:var(--mid);flex:1;min-width:180px;">شاهد الفيديو حتى النهاية لتُسجَّل ٥٠ نقطة تلقائياً.</div>
-        <button id="tr-mark-btn" class="btn btn-primary btn-sm" onclick="trConfirmWatched()">✅ أنهيت المشاهدة</button>
+        <div id="tr-vid-status" style="font-size:.82rem;font-weight:700;color:var(--mid);flex:1;min-width:180px;">شاهد الفيديو كاملاً — لا يمكن تجاوز الأجزاء التي لم تشاهدها.</div>
+        <button id="tr-mark-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="trConfirmWatched()">✅ أنهيت المشاهدة</button>
       </div>
     </div>
   </div>
@@ -1181,7 +1233,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ نافذة اختبار نهاية الدورة ══ -->
 <div class="overlay" id="modal-tr-exam">
   <div class="modal" style="max-width:720px;width:95%;">
-    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" onclick="closeQuiz()">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" onclick="closeQuiz()">×</button></div>
     <div class="modal-body">
       <div id="qz-quiz">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
@@ -1395,7 +1447,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: ملاحظة سلوكية على الطالب ══ -->
 <div class="overlay" id="modal-note">
   <div class="modal" style="max-width:480px;">
-    <div class="modal-head"><div class="modal-title">📝 ملاحظة على الطالب: <span id="note-student"></span></div><button class="modal-close" onclick="closeModal('modal-note')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">📝 ملاحظة على الطالب: <span id="note-student"></span></div><button class="modal-close" onclick="closeModal('modal-note')">×</button></div>
     <div class="modal-body">
       <div class="fg"><label>الملاحظة (السلوك / الانضباط / أخرى)</label>
         <textarea id="note-text" placeholder="مثال: أظهر تحسناً في الانضباط اليوم..." style="min-height:96px;"></textarea></div>
@@ -1411,7 +1463,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: تأكيد رفع تقرير الحلقة ══ -->
 <div class="overlay" id="modal-upload">
   <div class="modal" style="max-width:460px;">
-    <div class="modal-head"><div class="modal-title">📤 رفع تقرير الحلقة</div><button class="modal-close" onclick="closeModal('modal-upload')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">📤 رفع تقرير الحلقة</div><button class="modal-close" onclick="closeModal('modal-upload')">×</button></div>
     <div class="modal-body">
       <div style="font-size:.95rem;font-weight:700;color:var(--forest);margin-bottom:12px;">هل أنت متأكد من رفع الحلقة بجميع بياناتها؟</div>
       <div id="ur-info" style="background:var(--pale);border-radius:var(--r-sm);padding:12px 14px;font-size:.84rem;color:var(--mid);line-height:1.9;"></div>
@@ -1427,7 +1479,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: إضافة طالب خارج الحلقة ══ -->
 <div class="overlay" id="modal-guest">
   <div class="modal" style="max-width:480px;">
-    <div class="modal-head"><div class="modal-title">➕ إضافة طالب خارج الحلقة</div><button class="modal-close" onclick="closeModal('modal-guest')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">➕ إضافة طالب خارج الحلقة</div><button class="modal-close" onclick="closeModal('modal-guest')">×</button></div>
     <div class="modal-body">
       <div class="fg"><label>ابحث عن أي طالب في المدرسة</label>
         <input type="text" id="guest-search" placeholder="اكتب اسم الطالب..." autocomplete="off" oninput="renderGuestResults(this.value)"></div>
@@ -1447,7 +1499,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: تسميع الحفظ/المراجعة ══ -->
 <div class="overlay" id="modal-eval">
   <div class="modal" style="max-width:540px;">
-    <div class="modal-head"><div class="modal-title" id="ev-title">🎙️ تسميع</div><button class="modal-close" onclick="closeModal('modal-eval')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="ev-title">🎙️ تسميع</div><button class="modal-close" onclick="closeModal('modal-eval')">×</button></div>
     <div class="modal-body">
       <div class="form-grid-2">
         <div class="fg"><label>من سورة</label><select id="ev-sfrom" onchange="ayahMax('ev-sfrom','ev-afrom');evAutoFaces()"></select></div>
@@ -1498,7 +1550,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: درجة اختبار (قرآن/منهج/تجويد/نشاط/حفظ/مراجعة) ══ -->
 <div class="overlay" id="modal-exam">
   <div class="modal" style="max-width:480px;">
-    <div class="modal-head"><div class="modal-title" id="ex-title">📝 الدرجة</div><button class="modal-close" onclick="closeModal('modal-exam')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="ex-title">📝 الدرجة</div><button class="modal-close" onclick="closeModal('modal-exam')">×</button></div>
     <div class="modal-body">
       <div id="ex-rec-wrap" style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;">
         <div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:8px;">🎙️ التسجيل الصوتي</div>
@@ -1528,7 +1580,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: ملف الطالب ══ -->
 <div class="overlay" id="modal-file">
   <div class="modal" style="max-width:560px;">
-    <div class="modal-head"><div class="modal-title" id="file-title">📁 ملف الطالب</div><button class="modal-close" onclick="closeModal('modal-file')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="file-title">📁 ملف الطالب</div><button class="modal-close" onclick="closeModal('modal-file')">×</button></div>
     <div class="modal-body" id="file-body"></div>
     <div class="modal-foot">
       <button class="btn btn-gold" onclick="openParentNote()">📩 ملاحظة لولي الأمر</button>
@@ -1543,7 +1595,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="modal-head" style="background:linear-gradient(135deg,var(--emerald),var(--forest));color:#fff;">
       <div><div class="modal-title" style="color:#fff;">📁 ملف الطالب</div>
         <div id="stf-header-name" style="font-size:.82rem;opacity:.85;margin-top:2px;"></div></div>
-      <button class="modal-close" style="color:#fff;" onclick="closeStfile()">✕</button>
+      <button class="modal-close" style="color:#fff;" onclick="closeStfile()">×</button>
     </div>
     <div style="display:flex;gap:4px;padding:10px 16px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
       <button class="stf-tab-btn" onclick="switchStfTab(1)" style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-family:Tajawal;font-size:.8rem;font-weight:700;transition:all .2s;background:var(--jade);color:#fff;">📖 السجل القرآني</button>
@@ -1565,7 +1617,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: مشغل التسجيل الصوتي ══ -->
 <div class="overlay" id="modal-recplay">
   <div class="modal" style="max-width:380px;">
-    <div class="modal-head"><div class="modal-title">🎧 التسجيل الصوتي</div><button class="modal-close" onclick="closeRec()">✕</button></div>
+    <div class="modal-head"><div class="modal-title">🎧 التسجيل الصوتي</div><button class="modal-close" onclick="closeRec()">×</button></div>
     <div class="modal-body" style="text-align:center;padding:24px 18px;">
       <div style="font-size:2.4rem;margin-bottom:12px;">🎙️</div>
       <audio id="recplay-audio" controls style="width:100%;"></audio>
@@ -1579,7 +1631,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: تأكيد حفظ ملف الطالب ══ -->
 <div class="overlay" id="modal-stfile-confirm">
   <div class="modal" style="max-width:380px;">
-    <div class="modal-head"><div class="modal-title">💾 تأكيد الحفظ</div><button class="modal-close" onclick="closeModal('modal-stfile-confirm')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">💾 تأكيد الحفظ</div><button class="modal-close" onclick="closeModal('modal-stfile-confirm')">×</button></div>
     <div class="modal-body" style="text-align:center;font-size:.95rem;font-weight:600;color:var(--forest);padding:22px 18px;">هل أنت متأكد من حفظ هذه التغييرات؟</div>
     <div class="modal-foot" style="justify-content:center;">
       <button class="btn btn-primary" onclick="doStfSave()">نعم</button>
@@ -1591,7 +1643,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ MODAL: ملاحظة لولي الأمر ══ -->
 <div class="overlay" id="modal-pnote">
   <div class="modal" style="max-width:440px;">
-    <div class="modal-head"><div class="modal-title">📩 ملاحظة لولي الأمر</div><button class="modal-close" onclick="closeModal('modal-pnote')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">📩 ملاحظة لولي الأمر</div><button class="modal-close" onclick="closeModal('modal-pnote')">×</button></div>
     <div class="modal-body">
       <div class="fg"><label>نص الملاحظة</label><textarea id="pnote-text" rows="4" placeholder="مثال: الطالب متميز هذا الأسبوع في الحفظ..."></textarea></div>
     </div>
@@ -1604,7 +1656,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <div class="modal" style="max-width:580px;max-height:90vh;">
     <div class="modal-head">
       <div class="modal-title">✍️ رسالة جديدة</div>
-      <button class="modal-close" onclick="closeModal('modal-compose')">✕</button>
+      <button class="modal-close" onclick="closeModal('modal-compose')">×</button>
     </div>
     <div class="modal-body" style="overflow-y:auto;">
       <div class="fg">
@@ -1721,6 +1773,7 @@ const PAGE_TITLES = {
   files:'📁 ملفات الطلاب', reports:'📄 تقاريري', training:'🎓 تأهيل المعلمين',
   messages:'✉️ الرسائل', announcements:'📢 الإعلانات', settings:'⚙️ الإعدادات',
   tasks:'✅ المهام اليومية', lessonprep:'📝 تحضير الدروس', strategies:'🎬 استراتيجيات التعلم النشط',
+  library:'📚 المكتبة', media:'🎬 المرئيات',
 };
 
 // ── helpers ──
@@ -1754,6 +1807,155 @@ function findStu(id){
 
 // ══ NAVIGATION ══
 function navPage(pageId){ const el=document.querySelector(`.sb-item[onclick*="'${pageId}'"]`); nav(el,pageId); }
+// ══════════════ معرض المكتبة (قراءة فقط) ══════════════
+let LIBRARY_BOOKS = [];
+let LIB_CAT = 'all';
+const LIB_CATS = [
+  {key:'all',    label:'الكل',              icon:'📚'},
+  {key:'grade',  label:'الصفوف الدراسية',   icon:'🎓'},
+  {key:'kunooz', label:'الكنوز الأثرية',    icon:'💎'},
+  {key:'ahkam',  label:'الأحكام والكتيبات', icon:'📗'},
+  {key:'other',  label:'أخرى',              icon:'📄'}
+];
+function _libAr(n){ return String(n==null?'':n).replace(/[0-9]/g,function(d){ return '٠١٢٣٤٥٦٧٨٩'[+d]; }); }
+function _libNorm(t){ return String(t||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,'').toLowerCase(); }
+
+async function loadLibraryBooks(){
+  const grid = document.getElementById('lib-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--light);">⏳ جارٍ التحميل…</div>';
+  try{
+    await db.auth.getSession();
+    const { data, error } = await db.from('library_books')
+      .select('id,title,drive_id,category,sort_order,is_active')
+      .eq('is_active', true)
+      .order('sort_order', {ascending:true});
+    if (error) throw error;
+    LIBRARY_BOOKS = data || [];
+  }catch(e){
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--red);">تعذّر تحميل الكتب — تأكد من الاتصال</div>';
+    if (typeof showToast==='function') showToast('❌ تعذّر تحميل المكتبة');
+    return;
+  }
+  renderLibTabs();
+  renderLibraryPage();
+}
+
+function renderLibTabs(){
+  const wrap = document.getElementById('lib-tabs');
+  if (!wrap) return;
+  wrap.innerHTML = LIB_CATS.map(function(c){
+    var n = c.key==='all' ? LIBRARY_BOOKS.length : LIBRARY_BOOKS.filter(function(b){ return b.category===c.key; }).length;
+    var on = LIB_CAT===c.key;
+    return '<button onclick="libSetCat(\'' + c.key + '\')" style="cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:700;padding:7px 14px;border-radius:99px;border:1.5px solid '
+      + (on?'var(--jade)':'var(--border)') + ';background:' + (on?'var(--jade)':'#fff') + ';color:' + (on?'#fff':'var(--mid)') + ';transition:.15s;">'
+      + c.icon + ' ' + c.label + ' (' + _libAr(n) + ')</button>';
+  }).join('');
+}
+function libSetCat(k){ LIB_CAT = k; renderLibTabs(); renderLibraryPage(); }
+
+function renderLibraryPage(){
+  const grid = document.getElementById('lib-grid');
+  if (!grid) return;
+  const qEl = document.getElementById('lib-search');
+  const q = qEl ? _libNorm(qEl.value) : '';
+  var list = LIBRARY_BOOKS.slice();
+  if (LIB_CAT !== 'all') list = list.filter(function(b){ return b.category === LIB_CAT; });
+  if (q) list = list.filter(function(b){ return _libNorm(b.title).indexOf(q) !== -1; });
+  const cnt = document.getElementById('lib-count');
+  if (cnt) cnt.textContent = '📖 الكتب (' + _libAr(list.length) + ')';
+  if (!list.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--light);">لا توجد كتب مطابقة</div>';
+    return;
+  }
+  grid.innerHTML = list.map(function(b){
+    var title = (b.title||'').replace(/</g,'&lt;');
+    var did = b.drive_id;
+    return '<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;cursor:pointer;"'
+      + ' onmouseenter="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--shadow-lg)\'" onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'var(--shadow)\'"'
+      + ' onclick="openBook(\'' + did + '\')" title="' + title + '">'
+      +   '<div style="position:relative;padding-top:140%;background:linear-gradient(135deg,var(--pale),#dbeee2);">'
+      +     '<img src="https://drive.google.com/thumbnail?id=' + did + '&sz=w400" alt="" loading="lazy"'
+      +       ' onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.lib-fallback\').style.display=\'flex\'"'
+      +       ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'
+      +     '<div class="lib-fallback" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;">'
+      +       '<div style="font-size:2.6rem;">📕</div>'
+      +       '<div style="font-size:.72rem;font-weight:700;padding:0 10px;text-align:center;color:var(--mid);">' + title + '</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div style="padding:11px 12px;font-size:.82rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:58px;display:flex;align-items:center;">' + title + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function openBook(did){
+  window.open('https://drive.google.com/file/d/' + did + '/view', '_blank');
+}
+
+// ══════════════ معرض المرئيات (Google Drive) — رؤية فقط ══════════════
+let MEDIA_VIDEOS = [];
+let _curMedia = null;
+function mediaAr(n){ return String(n==null?'':n).replace(/[0-9]/g,function(d){ return '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[+d]; }); }
+
+async function renderMediaPage(){
+  const grid = document.getElementById('media-grid');
+  const cnt = document.getElementById('media-count');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:44px 14px;color:var(--light);"><div style="font-size:2rem;">\u23f3</div><div style="margin-top:8px;font-size:.86rem;">\u062c\u0627\u0631\u064a \u0627\u0644\u062a\u062d\u0645\u064a\u0644\u2026</div></div>';
+  try {
+    await db.auth.getSession();
+    const { data, error } = await db.from('media_videos')
+      .select('*').eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    MEDIA_VIDEOS = data || [];
+  } catch(e){
+    console.error('media load:', e);
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--red);">\u26a0\ufe0f \u062a\u0639\u0630\u0651\u0631 \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u0645\u0631\u0626\u064a\u0627\u062a \u2014 \u0631\u0627\u062c\u0639 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0648\u062c\u0631\u0651\u0628 \u062a\u0627\u0646\u064a</div>';
+    if (cnt) cnt.textContent = '\ud83d\udcfc \u0627\u0644\u0645\u0642\u0627\u0637\u0639';
+    return;
+  }
+  const list = MEDIA_VIDEOS;
+  if (cnt) cnt.textContent = '\ud83d\udcfc \u0627\u0644\u0645\u0642\u0627\u0637\u0639 (' + mediaAr(list.length) + ')';
+  if (!grid) return;
+  if (!list.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--light);"><div style="font-size:2.4rem;margin-bottom:8px;">\ud83c\udfac</div><div style="font-size:.9rem;">\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0642\u0627\u0637\u0639 \u0628\u0639\u062f</div></div>';
+    return;
+  }
+  grid.innerHTML = list.map(function(v,i){
+    var title = (v.title && v.title.trim()) ? v.title.replace(/</g,'&lt;') : ('\u0645\u0642\u0637\u0639 \u0645\u0631\u0626\u064a ' + mediaAr(i+1));
+    var titleAttr = (v.title || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;');
+    return '<div style="cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;"'
+      + ' onmouseenter="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--shadow-lg)\'" onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'var(--shadow)\'"'
+      + ' onclick="playMedia(\'' + v.drive_id + '\',\'' + titleAttr + '\')">'
+      +   '<div style="position:relative;padding-top:56.25%;background:linear-gradient(135deg,#1a2a20,#0f2318);">'
+      +     '<img src="https://drive.google.com/thumbnail?id=' + v.drive_id + '&sz=w640" alt="" loading="lazy"'
+      +       ' onerror="this.style.display=\'none\'"'
+      +       ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'
+      +     '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.08);">'
+      +       '<div style="width:56px;height:56px;border-radius:50%;background:rgba(200,0,0,.92);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;padding-right:3px;box-shadow:0 2px 10px rgba(0,0,0,.35);">\u25b6</div>'
+      +     '</div>'
+      +     '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;">' + mediaAr(i+1) + '</div>'
+      +   '</div>'
+      +   '<div style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">' + title + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function playMedia(driveId, title){
+  _curMedia = driveId;
+  var f = document.getElementById('media-vid-frame');
+  if (f) f.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+  var pt = document.getElementById('media-vid-title');
+  if (pt) pt.textContent = '\u25b6\ufe0f ' + (title && title.trim() ? title : '\u0645\u0642\u0637\u0639 \u0645\u0631\u0626\u064a');
+  openModal('modal-media-video');
+}
+function closeMediaVideo(){
+  var f = document.getElementById('media-vid-frame');
+  if (f) f.src = '';
+  closeModal('modal-media-video');
+  _curMedia = null;
+}
+
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -1767,6 +1969,7 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='tasks') renderTasks();
   if(pageId==='lessonprep') initLessonPrep();
   if(pageId==='strategies') renderStrategiesPage();
+  if(pageId==='media') renderMediaPage();
   if(pageId==='circles') renderCircles();
   if(pageId==='students') renderStudents();
   if(pageId==='attendance') renderAttendance();
@@ -1774,6 +1977,7 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='points') renderPoints();
   if(pageId==='files') renderFiles();
   if(pageId==='training') loadTraining();
+  if(pageId==='library') loadLibraryBooks();
   if(pageId==='messages') initMessages();
   if(pageId==='announcements') loadAnnouncements();
   if(pageId==='settings') renderProfile();
@@ -2427,7 +2631,7 @@ function renderStudents(){
       <td style="text-align:center;${showPlan?'':'display:none;'}" id="memplan-${s.id}">—</td>
       <td style="text-align:center;${showPlan?'':'display:none;'}" id="revplan-${s.id}">—</td>
       <td style="text-align:center;"><button class="btn btn-ghost btn-xs" onclick="openStudentFile('${s.id}')">📁 الملف</button></td>
-      <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">✕ إزالة</button>`:''}</td>
+      <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">× إزالة</button>`:''}</td>
     </tr>`;
   }).join('');
   loadTodayRecitation(list);
@@ -2511,7 +2715,7 @@ function renderExamTable(c,list,exam){
       ${gcells}
       <td style="text-align:center;" id="exfin-${s.id}">${examFinalCell(s.id)}</td>
       <td style="text-align:center;"><button class="btn btn-ghost btn-xs" onclick="openStudentFile('${s.id}')">📁 الملف</button></td>
-      <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">✕ إزالة</button>`:''}</td>
+      <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">× إزالة</button>`:''}</td>
     </tr>`;
   }).join('');
   wrap.innerHTML=`
@@ -3355,31 +3559,18 @@ async function sendParentNote(){
 // كل فيديو تُنهي مشاهدته = ٥٠ نقطة تُضاف لرصيد المعلم (users.points) وتُسجَّل في teacher_training_progress.
 // لنقل دورة لمستوى آخر: انقل كائن الدورة {id,name,videos} من مصفوفة courses لمستوى إلى آخر فقط.
 const POINTS_PER_VIDEO = 50;
-const TRAINING_LEVELS = [
-  { id:'l0', name:'المستوى التمهيدي', courses:[
-    { id:'c1', name:'دورة مهارات حفظ القرآن الكريم', videos:['pcU2hnsYUr8','TxdZqPemWKY'] },
-    { id:'c2', name:'دورة مهارات التدريس لمعلم القرآن الكريم', videos:['vr2pGJEn7QQ','vvVvFjR5nuE','N_TD_YKYKxM'] },
-    { id:'c3', name:'مهارات المربي الفعّال', videos:['vZccnTUL9FE','fX_bqJWalNQ','X2Yqjgparb8','RZKRBwc8mH0','WK15OxQ2Ob4','r-y-EjwvG4c','qEbN7IGv6Rg','j0ZlDr4gLWE','VAMywr0XfOg','Gc2Gees4f6Y'] },
-    { id:'c4', name:'مهارات إيصال المعلومة', videos:['6E-1BkQrbB0','NW9sVnxd8k8'] },
-  ]},
-  { id:'l1', name:'المستوى الأول', courses:[] },
-  { id:'l2', name:'المستوى الثاني', courses:[] },
-  { id:'l3', name:'المستوى الثالث', courses:[] },
-  { id:'l4', name:'المستوى الرابع', courses:[] },
-  { id:'l5', name:'المستوى الخامس', courses:[] },
-];
+let TRAINING_LEVELS = [];        // تُحمّل من get_training_tree()
+let EXAMS_META = {};             // بيانات الاختبارات (بدون أسئلة/إجابات)
 
-const EXAMS = {"c1": {"title": "الاختبار الشامل لدورة مهارات حفظ القرآن الكريم", "questions": [{"q": "ما هو التحذير الأساسي الذي انطلق منه المحاضر في بداية الدورة لحماية حلم حفظ القرآن؟", "opts": ["تضييع الوقت في الترفيه واللعب.", "الاستماع إلى «سارق الأحلام» الذي يثبط الهمة.", "البدء بحفظ السور الطويلة قبل قصار السور.", "عدم ضبط أحكام التجويد منذ البداية."], "a": 1}, {"q": "من هو «سارق الأحلام» كما وصفه المحاضر في الدورة؟", "opts": ["الشخص الذي يسرق المصاحف من الحلقات والمساجد.", "الشيطان الذي ينسي العبد الآيات بعد حفظها.", "المثبط الذي يقلل من قيمة الحفظ أو يوهمك بصعوبته وعقوبته.", "النسيان الطبيعي الذي يطرأ على الذاكرة البشرية."], "a": 2}, {"q": "ما هي الشبهة التي يطرحها سارق الأحلام للتشكيك في فائدة الحفظ؟", "opts": ["أن الحفظ مجرد إضافة «نسخة صوتية جديدة» والنسخ المطبوعة متوفرة بكثرة.", "أن حفظ القرآن يسبب تشتت الذهن عن العلوم الدنيوية.", "أن المصاحف الإلكترونية تغني تماماً عن الصدر والذاكرة.", "أن الحفظ لا يكون مقبولاً إلا لمن يتقن القراءات العشر."], "a": 0}, {"q": "ما القاعدة التي أكد عليها المحاضر بقوله: «حفظ القرآن يخصك وحدك لا تنفذن حلمك من خلال الآخرين»؟", "opts": ["أنه يجب على الحافظ عدم تعليم غيره حتى يتقن تماماً.", "أن الاكتفاء بدعم الحلقات ماديًا أو تعليم الصغار لا يحقق لك رتبة الحفظ بنفسك.", "أن حفظ القرآن لا يصح إلا بشكل فردي دون شيخ.", "أن على الحافظ كتمان حفظه عن عائلته وأصدقائه تماماً."], "a": 1}, {"q": "ما البيت الشعري للإمام الشاطبي الذي استشهد به المحاضر للدلالة على أن القرآن يلقى صاحبه متهللاً في القبر؟", "opts": ["وفي يسرها التيسير رمتُ بناظمٍ ... وأدرك في أثنائها من تجمّلا.", "وحيث الفتى يرتاع في ظلماته ... من القبر يلقاه سناً متهللاً.", "جزى الله بالخيرات عنا أئمة ... لنا نقلوا القرآن عذباً وسلسلا.", "تبارك رحماناً رحيماً وعالماً ... سبحان من أحيا القلوب بفضله."], "a": 1}, {"q": "ما المقصود بـ«ضريبة النجاح» في حفظ القرآن الكريم كما شرحها المحاضر؟", "opts": ["دفع الرسوم المالية للمشرفين والمعلمين في الحلقات.", "التخلي عن الدراسة الجامعية من أجل التفرغ للحفظ.", "تقديم نفيس الأوقات وأفضلها للقرآن وليس فضلتها.", "تحمل مشقة السفر البعيد لملاقاة المشايخ المتقنين."], "a": 2}, {"q": "ما النتيجة المترتبة على إعطاء القرآن «فضلة الأوقات» (الأوقات الهامشية أو المتبقية)؟", "opts": ["الحصول على حفظ متين وراسخ في وقت قياسي.", "الحصول على «فضلة النتائج» وتذبذب الحفظ وعدم استقراره.", "عدم القدرة على تذكر أرقام الآيات والسور نهائياً.", "الإصابة بالملل الشديد والنفور من التلاوة."], "a": 1}, {"q": "ما الومضة الأولى من الومضات الخمس عشرة التي طرحها المحاضر؟", "opts": ["الحفظ في الصغر كالنقش على الحجر.", "التكرار باللسان.", "الإخلاص سر الفتح.", "تسمع الآذان."], "a": 2}, {"q": "من هم الثلاثة الذين تسعر بهم النار يوم القيامة كتحذير لضياع الإخلاص؟", "opts": ["الكاذب، السارق، وقاطع الرحم.", "مانع الزكاة، تارك الصلاة، وآكل الربا.", "رجل تعلم العلم ليقال عالم، وقرأ القرآن ليقال قارئ، ومجاهد ليقال شهيد، ومتصدق رياءً.", "الحافظ الذي نسي القرآن، المتكاسل عن الصلاة، والعاق لوالديه."], "a": 2}, {"q": "ما هي علامات المرائي الثلاث التي نُسبت إلى علي بن أبي طالب رضي الله عنه؟", "opts": ["الكذب في الحديث، خلف الوعد، وخيانة الأمانة.", "يكسل إذا كان وحده، وينشط بين الناس، ويزيد في العمل إذا أُثني عليه.", "الجهر بالمعصية، السخرية من الآخرين، وحب الرئاسة.", "سرعة الغضب، كثرة النوم، وإهمال الصلوات الخمس."], "a": 1}, {"q": "ماذا قال بشر بن الحارث في الحث على الإخلاص وإخفاء الأعمال الصالحة؟", "opts": ["«لا تتعلم العلم لتماري به السفهاء وتجاري به العلماء».", "«لا تعمل لتُذكر، بل اكتم الحسنة كما تكتم السيئة».", "«إنما الأعمال بالنيات وإنما لكل امرئ ما نوى».", "«من طلب العلم لغير الله تعالى أبى العلم أن يكون لغير الله»."], "a": 1}, {"q": "أي من النيات التالية لم يذكرها المحاضر كنية صالحة ينبغي استصحابها عند حفظ القرآن؟", "opts": ["نيل شفاعة القرآن يوم القيامة.", "النجاة من النار (لو جمع القرآن في إهاب ما أحرقه الله).", "الفوز بالمسابقات الدولية ونيل الجوائز المالية الكبرى.", "طمأنينة القلب والهدى والرحمة."], "a": 2}, {"q": "متى تبدأ «الذاكرة الحفظية» في ذرياتنا وأبنائنا بالعمل والنشاط وفق ما ذكر في الدورة؟", "opts": ["من لحظة الولادة مباشرة.", "عند سن السابعة (سن التمييز).", "من لحظة الحمل في بطن الأم.", "عندما يبدأ الطفل في نطق الكلمات الكاملة."], "a": 2}, {"q": "ما هو التفسير العلمي والتربوي لكثرة ساعات نوم الطفل الرضيع؟", "opts": ["لأنه يقوم بمجهود بدني شاق يحتاج للراحة.", "لأن عينه تقوم بعمل مسح ضوئي وحفظ كل جديد، فيحتاج النوم لترتيب الذاكرة.", "بسبب ضعف مناعته الجسدية في شهوره الأولى.", "لأن الدماغ يفرز هرمونات النمو أثناء النوم فقط."], "a": 1}, {"q": "ماذا يحدث للذاكرة الحفظية والذاكرة الاستيعابية كلما تقدم الإنسان في السن؟", "opts": ["ترتفع الذاكرة الحفظية وتنخفض الذاكرة الاستيعابية.", "تنخفض الذاكرة الحفظية وترتفع الذاكرة الاستيعابية.", "تنخفضان معاً بشكل حاد في نفس الوقت.", "تظلان ثابتتين دون أي تغيير طوال العمر."], "a": 1}, {"q": "ما الحديث الشريف الذي رواه البخاري في التاريخ الكبير ويحث على الحفظ في الصغر؟", "opts": ["«خيركم من تعلم القرآن وعلمه».", "«من تعلم القرآن وهو فتي السن خلطه الله بلحمه ودمه».", "«يقال لصاحب القرآن اقرأ وارتق ورتل».", "«الماهر بالقرآن مع السفرة الكرام البررة»."], "a": 1}, {"q": "ما التشبيه الذي شبه به المحاضر الذاكرة الإنسانية ليدلل على أنها تقوى بالتدريب وتضعف بالإهمال؟", "opts": ["بالصفحة البيضاء التي يكتب عليها بالقلم.", "بالعضلات الجسدية التي تنمو بالرياضة والدربة.", "بالمحرك الآلي الذي يحتاج إلى وقود دائم.", "بالنبتة الصغيرة التي تحتاج للسقاية والرعاية."], "a": 1}, {"q": "ما مقدار السعة التخزينية لدماغ الإنسان من المعلومات كما ذكر المحاضر؟", "opts": ["ما يعادل معلومات يحويها ١٠٠ ألف كتاب.", "ما يعادل معلومات يحويها مليون كتاب فقط.", "ما يعادل معلومات يحويها ٩٠ مليون كتاب.", "سعة غير محدودة تفوق مئات المليارات من الكتب المطبوعة."], "a": 2}, {"q": "لماذا يسهل على الأطفال الصغار حفظ القرآن الكريم مقارنة بالكبار؟", "opts": ["لأن لسانهم أفصح من لسان الكبار.", "لأنهم يمتلكون قدرة أكبر على فهم تفسير الآيات وعلم البيان.", "لأنهم يتعاملون مع الأمور المجردة بسهولة، وذاكرتهم الحفظية في أعلى مستوياتها.", "لأنهم يقضون أوقاتاً أطول في المسجد مع المعلمين."], "a": 2}, {"q": "وفقاً للتجربة التي عُرضت في المحاضرة، ما هو القرار الحاسم الذي غيّر حياة الأخ الذي كان يشكو ضيق الوقت؟", "opts": ["اعتزال الناس تماماً وترك العمل للحفظ.", "ألا ينتظر إنهاء أعماله ليجد وقتاً للقرآن، بل يبدأ يومه بالقرآن ليجد البركة.", "الاكتفاء بالاستماع للقرآن أثناء القيادة والذهاب للعمل.", "تأجيل الحفظ حتى مرحلة التقاعد السني."], "a": 1}, {"q": "لماذا يعشق الدماغ النغمة الجميلة والصوت الحسن في التلاوة كما ذُكر في المحاضرة الثانية؟", "opts": ["لأن الصوت الحسن يساعد في تسريع النطق بالكلمات الصعبة.", "لأن أحكام التجويد لا تظهر إلا بالنغم فقط.", "لأن الدماغ يعشق النغم كما يعشق الألوان، مما يسهل ترسيخ الحفظ وتجنب الخلط.", "لأن الترنم بالقرآن يمنع العينين من الإجهاد البصري."], "a": 2}, {"q": "ما الفائدة العملية من قوله تعالى: ﴿لا تحرك به لسانك لتعجل به﴾ في موضوع الحفظ؟", "opts": ["تحريم تحريك اللسان بالقرآن خارج أوقات الصلاة.", "بيان أن تحريك اللسان والتكرار أداة لتثبيت المحفوظ، والنهي مؤقت بقراءة المعلم لتفادي التشتت.", "توجيه الحافظ للحفظ بالنظر والقلب فقط دون النطق باللسان.", "الإشارة إلى أن حفظ الصدور غير مهم مقارنة بحفظ السطور."], "a": 1}, {"q": "لكي تنتقل المعلومة من الذاكرة قصيرة الأمد إلى الذاكرة طويلة الأمد، كم يجب تكرار المحفوظ على الأقل؟", "opts": ["تكراره مرة واحدة بتركيز شديد.", "تكراره خمس مرات فقط.", "تكراره بضعف عدد مرات الحفظ الأساسي على الأقل.", "تكراره ٥٠٠ مرة كما يفعل الشناقطة في كل الأوقات."], "a": 2}, {"q": "ما المقولة الشهيرة لابن خلدون التي استشهد بها المحاضر للدلالة على قوة السمع في التلقي؟", "opts": ["«اللسان هو ترجمان القلوب ومستودع العلوم».", "«السمع أبو الملكات اللسانية».", "«العلم صيد والكتابة قيده ورسمه».", "«كثرة التكرار تفتح مغاليق الأذهان والقلوب»."], "a": 1}, {"q": "ما هي النصيحة العملية التي قدمها المحاضر في ومضة «تسمع الآذان» لتطبيقها قبل النوم؟", "opts": ["كتابة الصفحة المراد حفظها غداً باليد ثلاث مرات.", "قراءة التفسير الإجمالي للسورة كاملة بصوت مرتفع.", "الاستماع إلى الصفحة المراد حفظها بتركيز وانتباه شديد والضوء مغلق.", "النوم مبكراً فور صلاة العشاء مباشرة دون تلاوة."], "a": 2}, {"q": "ما المقصود بومضة «فكر بالأذهان» وكيف يتم تطبيقها عملياً؟", "opts": ["قراءة صفحة وتوقع الكلمات القادمة فيها ذهنياً.", "التكرار الصامت في النفس بلا صوت مسموع مع تخيل وتصور شكل الصفحة ومواقع الآيات.", "كتابة الآيات بخط اليد من الذاكرة مع تصحيح الأخطاء آلياً.", "مناقشة معاني الآيات مع الأصدقاء لترسيخ الفهم والتدبر."], "a": 1}, {"q": "ما الحكمة التربوية لالتزام الحافظ بطبعة مصحف واحدة طوال مسيرته الحفظية؟", "opts": ["لأن اختلاف الطبعات يحتوي على فروق في الكلمات والآيات.", "لتجنب حدوث خلل وتشتت بصري في الذاكرة الصورية لأماكن الآيات وبداية الصفحات ونهايتها.", "للحفاظ على المصحف الشخصي من الضياع والتلف السريع.", "لأن حفظ القرآن يحتاج إلى بركة المصحف الذي بدأت به فقط."], "a": 1}, {"q": "ما هي خصائص طبعة المصحف المثالية للحفظ كما بينتها ومضة «أي طبعة أختار»؟", "opts": ["طبعة ذات ورق أبيض ناصع مع تلوين جميع الكلمات باللون الأزرق.", "طبعة ذات ورق «شاموه» أو «زبدة» مريح للعين، وكتابة سوداء مع تلوين لفظ الجلالة بالأحمر.", "طبعة جيب صغيرة جداً ليسهل حملها في كل الأوقات والظروف.", "طبعة ملونة بألوان الطيف السبعة لتحديد الأجزاء والسور."], "a": 1}, {"q": "ما هي الوضعية البصرية المثالية لإمساك المصحف عند الرغبة في الحفظ لترسيخ المحفوظ؟", "opts": ["وضعه في الحجر والنظر إليه للأسفل لزيادة التركيز الخشوعي.", "إمساكه أمام العينين مائلاً إلى الأعلى واليسار قليلاً لإثارة الذاكرة البصرية الإيجابية.", "إغلاق المصحف تماماً والاعتماد التام على السمع فقط.", "وضعه على مستوى منخفض جداً والنظر إليه جانباً."], "a": 1}, {"q": "ماذا نعني بمصطلح «إحكام الربط» وكيف نطبقه عملياً في الحفظ اليومي؟", "opts": ["ربط أجزاء القرآن بالخيوط القوية لحمايتها من التفكك البنيوي.", "قراءة الصفحة كاملة دفعة واحدة من غير توقف عند رؤوس الآيات نهائياً.", "حفظ آية وكلمة من الآية التالية مكررة ٥ مرات على الأقل لوصل نهاية الآية أو الصفحة ببداية ما بعدها دون تردد.", "كتابة تفسير الآيات على حواشي المصحف لتثبيت المعاني."], "a": 2}]}, "c2": {"title": "الاختبار الشامل لدورة مهارات التدريس", "questions": [{"q": "ما هو الأصل والنموذج الأكمل الذي يجب على معلم حلقات العلوم الشرعية اتباعه؟", "opts": ["المناهج التعليمية الغربية الحديثة", "هدي النبي صلى الله عليه وسلم في التعليم", "التجارب الشخصية للمعلمين السابقين", "النظم الإدارية للمراكز التعليمية"], "a": 1}, {"q": "من هو الصحابي الذي قال عن النبي صلى الله عليه وسلم: «ما رأيت معلماً قبله ولا بعده أحسن تعليماً منه»؟", "opts": ["معاوية بن الحكم السلمي", "عبد الله بن مسعود", "عبد الله بن عباس", "أنس بن مالك"], "a": 0}, {"q": "كيف تعامل النبي صلى الله عليه وسلم مع معاوية بن الحكم عندما تكلم في الصلاة جهلاً؟", "opts": ["زجره ونهاه بشدة أمام الصحابة", "وجهه برفق وعلمه مقصود الصلاة دون تعنيف", "أمره بإعادة الصلاة فوراً", "أعرض عنه ولم يكلمه"], "a": 1}, {"q": "في قصة الأعرابي الذي بال في المسجد، ما التوجيه النبوي الفوري للصحابة؟", "opts": ["أن يزجروه ويخرجوه", "«لا تُزرِموه» أي لا تقطعوا عليه بوله", "أن يعاقبوه بالضرب", "أن يتركوه ويغيّروا مكان الصلاة"], "a": 1}, {"q": "ما دلالة دعاء الأعرابي: «اللهم ارحمني ومحمداً ولا ترحم معنا أحداً»؟", "opts": ["تأثره الشديد برحمة النبي صلى الله عليه وسلم وحسن خلقه مقارنة بشدة الآخرين", "عدم رغبته في دخول الصحابة الجنة", "علمه بفقه الدعاء وشروطه", "رغبته في الانفراد بالتعليم النبوي"], "a": 0}, {"q": "ما الوصف التربوي الذي أطلقه النبي صلى الله عليه وسلم على تضييق الأعرابي للرحمة؟", "opts": ["أخطأت التعبير", "حجّرت واسعاً", "اعتديت في الدعاء", "قصرت في الفهم"], "a": 1}, {"q": "ما أهمية الحلقات القرآنية والشرعية لأبناء المجتمع المتشتت؟", "opts": ["ملء وقت الفراغ فقط", "تمثيل المحضن التربوي الأصيل لبناء الجيل وتقويم السلوك", "تقديم الدعم المادي والإغاثي لهم", "تعليمهم مهارات القتال والدفاع عن النفس"], "a": 1}, {"q": "ما الذي يهدد بقاء الطلاب في الحلقات التقليدية إذا استمر المعلم في استخدام الأساليب الجافة؟", "opts": ["زيادة الحفظ السريع", "هروب وتسرّب الطلاب من الحلقات", "تحسّن الانضباط الإداري", "قوة الترابط بين المعلم والطالب"], "a": 1}, {"q": "ما هي الميزة الأساسية التي تجعل الألعاب الإلكترونية مثل البلاي ستيشن تجذب الأطفال لساعات طويلة؟", "opts": ["السهولة وعدم بذل الجهد", "قوة عنصر الجذب والتشويق والتفاعل", "الفائدة العلمية المباشرة", "تكلفتها المادية البسيطة"], "a": 1}, {"q": "إذا كانت المادة العلمية والتجويدية واحدة في كل الحلقات، فما السبب في إقبال الطلاب على معلم ونفورهم من آخر؟", "opts": ["مكان المسجد وتجهيزاته", "الأساليب والمهارات التدريسية وطريقة تعامل المعلم", "المكافآت المالية الموزعة", "وقت انعقاد الحلقة"], "a": 1}, {"q": "بماذا تميّز الصحابي عبد الله بن مسعود رضي الله عنه في المنظومة التعليمية النبوية؟", "opts": ["إمامة الجيوش العسكرية", "إمامة القراءة والإقراء بالأسلوب الغضّ المتصل", "كثرة كتابة العهود السياسية", "المهارات الاقتصادية والمالية"], "a": 1}, {"q": "ما الهدف العام المحدد لهذه الدورة التربوية كما ورد في الدورة؟", "opts": ["حفظ جزء عمّ كاملاً للمعلمين", "التعرف على الهدي النبوي في التعليم واكتساب المهارات التدريسية بكفاءة", "شرح أحكام التجويد المتقدمة", "كيفية إعداد دبلومات شرعية معتمدة"], "a": 1}, {"q": "ما التعريف الإجرائي لـ «مهارات التدريس» كما لخّصها المحاضر؟", "opts": ["حفظ المتون الشرعية بسرعة", "أنشطة تربوية ووسائل إجرائية يستعملها المعلم لتحقيق أهداف الحلقة بكفاءة", "معاقبة الطلاب المقصّرين بأساليب مبتكرة", "كتابة التقارير الإدارية اليومية للمشرفين"], "a": 1}, {"q": "ما هو التعريف المستنبط للحلقة القرآنية بناءً على الحديث النبوي؟", "opts": ["اجتماع رسمي لتوزيع الجوائز", "اجتماع معلم القرآن مع المتعلمين في بيئة تربوية صالحة لتعلم القرآن وتدارسه", "مسابقة سنوية بين المساجد", "لقاء عائلي غير منتظم"], "a": 1}, {"q": "أي الأماكن يُعتبر المحضن الأفضل والأعلى رتبة لانعقاد الحلقات القرآنية؟", "opts": ["المدارس الخاصة", "بيت من بيوت الله - المسجد", "الملاعب الرياضية", "البيوت السكنية بالتناوب"], "a": 1}, {"q": "من هو الصحابي الذي كان يكتب الوحي بين يدي النبي صلى الله عليه وسلم ويعرضه عليه؟", "opts": ["أبو هريرة", "زيد بن ثابت", "عمر بن الخطاب", "معاذ بن جبل"], "a": 1}, {"q": "ما الدليل في مسند أحمد على أن النبي صلى الله عليه وسلم كان يباشر التعليم بنفسه دائماً؟", "opts": ["كان يُقرئهم القرآن ما لم يكن جُنُباً", "كان يرسل الرسل لتعليم الناس", "كان يكتفي بالوعظ العام يوم الجمعة", "كان يوجّه الصحابة للكتابة فقط"], "a": 0}, {"q": "لمن امتدت جهود النبي صلى الله عليه وسلم الإقرائية والتعليمية بالإضافة إلى الإنس؟", "opts": ["لملوك الأعاجم فقط", "للجن؛ فقد ذهب مع داعي الجن وقرأ عليهم", "لجميع الأمم السابقة", "للمكاتبات السرية فقط"], "a": 1}, {"q": "كيف وصف أنس رضي الله عنه نشاط الصحابة بعد صلاة الفجر في المسجد النبوي؟", "opts": ["كانوا ينامون في المسجد", "كانوا يتحلّقون حِلَقاً يقرؤون القرآن ويتعلمون الفرائض والسنن", "كانوا يغادرون فوراً للتجارة", "كانوا ينتظرون توزيع الغنائم"], "a": 1}, {"q": "ما هي الفضائل الأربع المترتبة على حلقة تدارس القرآن في المسجد كما في الحديث؟", "opts": ["الغنى والجاه والقوة والنصر", "نزول السكينة، وغشيان الرحمة، وحفُّ الملائكة، وذكر الله لهم فيمن عنده", "طول العمر والبركة في الولد والتوفيق وتيسير الرزق", "مغفرة الكبائر ورفعة الدرجات وبطلان السحر وطرد الشياطين"], "a": 1}, {"q": "ما معنى أن النبي صلى الله عليه وسلم كان يتخوّل الصحابة بالموعظة والتعليم؟", "opts": ["يكرر عليهم الكلام طوال اليوم دون انقطاع", "يتخيّر الأوقات المناسبة لئلا يملّوا", "يتركهم شهوراً طويلة دون تعليم", "يعلمهم في السفر فقط دون الحضر"], "a": 1}, {"q": "ما الأثر التربوي لربط الحجارة على بطن النبي صلى الله عليه وسلم وهو يُقرئ أهل الصُّفّة؟", "opts": ["إظهار التعب للصحابة", "علوّ الهمّة والتضحية بالوقت والنفس لتعليم كتاب الله رغم شدة الجوع", "تشجيع الصحابة على الصيام", "كراهة الشبع أثناء التعليم"], "a": 1}, {"q": "ما هو الفرق الدقيق بين «الطريقة» و«الأسلوب» في التدريس؟", "opts": ["الطريقة عامة وشاملة، بينما الأسلوب هو اللمسة الشخصية للمعلم في التنفيذ", "الأسلوب أعمّ من الطريقة دائماً", "الطريقة تخص الطلاب، والأسلوب يخص الإدارة", "لا يوجد أي فرق بينهما وهما مترادفان تماماً"], "a": 0}, {"q": "أي المراحل العمرية تحتاج إلى أسلوب تعامل يعتمد على التشويق والألعاب والقصص المبسّطة؟", "opts": ["مرحلة كبار السن", "مرحلة الطفولة المبكرة والمستويات الأولى", "مرحلة الشباب والمراهقة", "مرحلة الإجازة والأسانيد"], "a": 1}, {"q": "ما الصفة التي تُعدّ «رأس مال» معلم العلوم الشرعية وبدونها يفقد التوجيه أثره التربوي؟", "opts": ["الصوت المرتفع الجهوري", "القدوة الصالحة والرفق في التعامل", "التشدد في العقاب", "السرعة في سرد المعلومات"], "a": 1}]}, "c4": {"title": "الاختبار الشامل لدورة مهارات إيصال المعلومة", "questions": [{"q": "متى يبدأ الطفل بدراسة نفسية وشخصية من حوله للتعرف على كيفية التعامل معهم؟", "opts": ["منذ ولادته", "في سن التمييز", "بعمر سنتين", "عند دخول المدرسة"], "a": 0}, {"q": "ماذا يختبر الطفل عندما يبكي في أشهره الأولى وفقاً للدورة؟", "opts": ["قوة صوته", "ردة فعل الأم لتلبية حاجاته", "قدرته على الكلام", "مدى جوعه فقط"], "a": 1}, {"q": "ما هي أهم حاجة يسعى الطفل — أو المتلقي — لتحقيقها عند التعامل مع المدرس؟", "opts": ["الاستفادة القصوى من المعلومات", "اللعب والمرح", "الشعور بالأمان", "إثبات الشخصية بتحدي المعلم"], "a": 2}, {"q": "ماذا يفعل الطالب عندما يدرس شخصية المعلم ويبحث عن نقاط ضعفه؟", "opts": ["يسعى للتعلم منه بصمت", "يحاول مساعدته لتجاوزها", "يتقرب منه ليصبح المفضل لديه", "يحاول استثارته وإزعاجه لإثبات شخصيته وتحقيق إنجازه"], "a": 3}, {"q": "ما هو الأثر الذي تتركه الحصة الأولى للمدرس على الطلاب؟", "opts": ["لا أثر لها وتُنسى بسرعة", "تستمر معهم بقية السنة وتحدد طبيعة التعامل", "تؤثر فقط في نفس الأسبوع", "يعتمد الأثر فقط على صعوبة المادة"], "a": 1}, {"q": "ما هو الخطأ التربوي الذي وقع فيه مدرس الصف الرابع رغم استخدامه للغة العربية الفصحى وحزمه؟", "opts": ["كان يضرب الطلاب ويعاقبهم بشدة", "لم يكن متمكناً من المادة العلمية", "كان مستواه وأسلوبه يناسب طلاب الجامعة وليس أطفالاً في الصف الرابع", "كان يتحدث بلغة عامية غير مفهومة"], "a": 2}, {"q": "من هو «المرسل» في العملية التعليمية بناءً على عناصر الاتصال المذكورة؟", "opts": ["الكتاب المدرسي فقط", "المعلم — أو من يوصل المعلومة — سواء كان ضيفاً أو طالباً", "الطالب الذي يستمع للدرس", "مدير المدرسة"], "a": 1}, {"q": "ماذا يحدث إذا كان المنهج ممتازاً ولكن «المرسل» سلبي ولا يملك مهارات إيصال المعلومة؟", "opts": ["تنجح العملية التعليمية بفضل المنهج", "يقوم المرسل بتشويه المنهج ولن تصل الرسالة بشكل صحيح", "يعتمد الطالب على نفسه ويستفيد تماماً", "لا يتأثر الطالب بشخصية المعلم"], "a": 1}, {"q": "ما هي النتيجة إذا كان المنهج ضعيفاً ولكن المعلم كفء وصاحب رسالة؟", "opts": ["يفشل المعلم في إيصال المعلومة", "يترك المدرسة لعدم توفر الإمكانيات", "يبدع ويستفيد من المنهج ليوصل رسالته متجاوزاً سوء المنهج", "يطالب بإلغاء المادة"], "a": 2}, {"q": "لماذا يجب مراعاة نوعية المعلومة ومناسبتها لـ«المستقبِل» (الطالب/المتلقي)؟", "opts": ["لتوفير الوقت وإنهاء المنهج بسرعة", "لأن جميع المعلومات مفيدة في أي وقت", "لأن بعض المعلومات قد تضر المتلقي وتُفهم خطأً إذا قيلت في غير وقتها المناسب", "لكي لا يمل المعلم من الشرح"], "a": 2}, {"q": "ما هو الفرق بين التعليم والتدريب كما ذُكر في الدورة؟", "opts": ["التعليم تحويل لمهارة والتدريب نظري", "لا فرق بينهما فهما مترادفان", "التعليم للكبار والتدريب للصغار", "التعليم إعطاء معلومة نظرية والتدريب هو تحويلها إلى مهارة وواقع حياة"], "a": 3}, {"q": "كيف كان الصحابة رضوان الله عليهم يتعلمون القرآن الكريم؟", "opts": ["يحفظونه كاملاً ثم يبدؤون بفهمه", "لا يتجاوزون خمس آيات حتى يحفظوها ويفهموها ويطبقوها عملياً", "يقرؤونه دون التركيز على المعاني", "يدرسون الأحكام الفقهية دون تطبيق"], "a": 1}, {"q": "ما هي الطريقة الأفضل للتعامل مع الفروع المختلفة للمنهج الشرعي (سيرة، حديث، قيم، سلوك)؟", "opts": ["تدريس السيرة فقط", "فصل كل مادة بدرس مستقل تماماً", "ربطها معاً لغرس القيم والأخلاق بشكل متكامل", "إلغاء الدروس السلوكية والاكتفاء بالحفظ"], "a": 2}, {"q": "كم عدد الوسائل الإبداعية لإيصال المعلومة التي استخرجها المحاضر من كتاب السيرة النبوية خلال ساعات قليلة؟", "opts": ["١٠ وسائل", "١٥ وسيلة", "٣٥ وسيلة", "٥٠ وسيلة"], "a": 2}, {"q": "ما هي الوسيلة التي تم استخدامها في «مشهد الوضوء» أثناء الدورة؟", "opts": ["التلقين النظري من الكتاب", "التعليم بالخطأ والتطبيق العملي (النمذجة)", "الاستماع لشريط صوتي", "كتابة الخطوات على السبورة فقط"], "a": 1}, {"q": "كيف علّم النبي صلى الله عليه وسلم الصحابة كيفية الصلاة بشكل فعّال؟", "opts": ["بالشرح النظري الطويل دون حركة", "ببعث رسائل مكتوبة لهم", "بالتطبيق العملي وصعود المنبر وقال: «صلوا كما رأيتموني أصلي»", "بطلب قراءة الآيات المتعلقة بالصلاة فقط"], "a": 2}, {"q": "ما فائدة استخدام «القصة المجزّأة» — التي لا يكملها المعلم فوراً — في العملية التعليمية؟", "opts": ["توفير وقت الحصة", "تشتيت انتباه الطلاب", "إثارة التشويق وفتح العقل اللاواعي لمعرفة الباقي أثناء إعطاء الدرس", "التغطية على نسيان المعلم للمعلومات"], "a": 2}, {"q": "كيف اقترح المحاضر شرح مفهوم «التوكل» بطريقة عملية وشاملة؟", "opts": ["بتعريف التوكل لغة واصطلاحاً بطريقة جافة", "بسرد قصة الهجرة النبوية واستخراج اتخاذ الأسباب وتعلق القلب بالله منها", "بذكر آيات التوكل وإعرابها فقط", "بكتابة كلمة التوكل على السبورة وتكرارها"], "a": 1}, {"q": "ما هو الأثر التربوي عندما جعل المعلم طالبة في الصف الرابع تشرح درس «الإيمان بالملائكة» أمام زميلاتها؟", "opts": ["إضاعة وقت الحصة بلا فائدة", "تقليل احترام الطلاب للمعلم", "إكسابها الثقة بالنفس، والجرأة، ومهارة البحث، وتثبيت المعلومة لديها", "شعور الطالبة بالخوف والكره للمادة"], "a": 2}, {"q": "ما هي «أفضل طريقة» لإيصال المعلومة كما أكد المحاضر؟", "opts": ["طريقة واحدة ثابتة تناسب الجميع", "استخدام التكنولوجيا والبروجيكتور فقط", "الإلقاء المستمر دون توقف", "التجديد والتنويع واستخدام الأسلوب الذي يتناسب مع الموقف والفئة المستهدفة"], "a": 3}, {"q": "لماذا تُعتبر قصة «العصفور» جافة ومملة للأطفال إذا رويت كإلقاء عادي؟", "opts": ["لأن الأطفال لا يحبون العصافير", "لأنها طويلة جداً", "لعدم استخدام المعلم لغة الجسد والأصوات والتمثيل فيها", "لأنها قصة خيالية وليست واقعية"], "a": 2}, {"q": "هل تناسب القصة الخيالية — كقصة العصفور — طلاب الجامعة بنفس أسلوب تمثيلها للأطفال؟", "opts": ["نعم، تناسبهم تماماً", "لا، سيعتبرونها استخفافاً بعقولهم ويجب تغيير الأسلوب بما يتناسب مع نضجهم", "نعم، إذا قيلت باللغة الفصحى", "لا، يُمنع استخدام القصص تماماً للمرحلة الجامعية"], "a": 1}, {"q": "ما هو الأسلوب الذي يجعل تفسير القرآن ممتعاً ومؤثراً بدلاً من الشرح الجاف المعتاد؟", "opts": ["القراءة الصامتة الفردية", "سرد معاني الكلمات بشكل متتالٍ وسريع", "النقاش، والحوار، وطرح الأسئلة، واستخدام لغة الجسد", "الاعتماد على الحفظ والتسميع فقط"], "a": 2}, {"q": "هل استخدم النبي صلى الله عليه وسلم أسلوب «السؤال والجواب» أثناء خطبة الجمعة؟", "opts": ["لا، لم يفعله أبداً", "نعم، كان يسأل ويُجيب لإضفاء روح وحياة على الخطبة", "استخدمه في الغزوات فقط", "نهى عن استخدامه في المساجد"], "a": 1}, {"q": "ماذا فعل أحد الخطباء في خطبة العيد لدمج الأطفال وجذب انتباههم بشكل إيجابي؟", "opts": ["طردهم من المسجد لعدم إزعاج الكبار", "تجاهلهم تماماً ووجّه خطبته للرجال فقط", "جعل طفلاً يصعد المنبر ليقرأ آية عن بر الوالدين ويشرحها", "خصص لهم غرفة مغلقة للعب"], "a": 2}, {"q": "من أبرز العلماء الذين تميزوا باستخدام أسلوب «السؤال والجواب» و«المسائل» في التعليم الشرعي؟", "opts": ["علماء العصر الحديث فقط", "الإمام ابن تيمية والإمام أحمد", "الفلاسفة اليونان حصراً", "لم يستخدم العلماء المسلمون هذا الأسلوب قديماً"], "a": 1}, {"q": "ما الفائدة التربوية من استخدام «الألعاب» — مثل لعبة فك الأيدي — في العملية التعليمية؟", "opts": ["تضييع الوقت والترفيه فقط", "إشغال الطلاب عند غياب المعلم", "إيصال مهارة أو قيمة معينة — كالعمل الجماعي أو تقبل الصعوبات الجديدة — بطريقة ممتعة", "لا توجد أي فائدة علمية من اللعب"], "a": 2}, {"q": "كيف اقترح المحاضر شرح حديث «المؤمن الذي يقرأ القرآن كالأترجّة» ليترسخ في أذهان الطلاب؟", "opts": ["حفظ الحديث غيباً فقط", "رسم الثمار على السبورة العادية", "إحضار فاكهة مشابهة — كاليمون والحنظلة والريحانة — لتجربتها وشمّها عملياً", "تجاهل الشرح والاكتفاء بالقراءة"], "a": 2}, {"q": "ما هو الهدف من إشراك الطلاب المتدربين في تمرين «الأيدي المتشابكة وعكسها» في نهاية الدورة؟", "opts": ["إثبات أنهم غير قادرين على التركيز", "تقوية عضلاتهم للنشاط البدني", "إيصال فكرة عملية بأن أي أسلوب تعليمي جديد ومبتكر سيكون صعباً في البداية ثم يصبح ممتعاً بالتعوّد", "الاستراحة من المحاضرة فقط"], "a": 2}, {"q": "هل من الصواب تقديم تفاصيل فقهية دقيقة — كمفسدات الصيام المتعلقة بالعلاقة الزوجية — في درس عام يحضره أطفال صغار؟", "opts": ["نعم، لنشر العلم للجميع بدون استثناء", "نعم، ليتعلموا أحكام الدين مبكراً", "لا، لأنها لا تناسب مستوى أعمارهم وقد تُفهم أو تُستخدم بشكل خاطئ", "لا يهم من يحضر، فالعلم يُطرح في أي مكان"], "a": 2}]}};
 // ── اختبارات نهاية الدورة (اختيار من متعدد) ──
 let TR_EXAM_DONE = {};                 // { course_id: {percent, points} } — نتيجة مسجّلة = مقفول
 let _qzState = null;                    // {cid, qs, idx, answers[]}
 let _qzTimer = null, _qzEndTs = 0;
-const QZ_DURATION = 30*60;              // مدة الاختبار بالثواني (٣٠ دقيقة)
 
 function clearQzTimer(){ if(_qzTimer){ clearInterval(_qzTimer); _qzTimer=null; } }
-function qzStartTimer(){
+function qzStartTimer(mins){
   clearQzTimer();
-  _qzEndTs=Date.now()+QZ_DURATION*1000;
+  _qzEndTs=Date.now()+(mins||30)*60*1000;
   qzTickTimer();
   _qzTimer=setInterval(qzTickTimer,1000);
 }
@@ -3395,22 +3586,39 @@ function qzTickTimer(){
   if(rem<=0){ clearQzTimer(); if(_qzState){ showToast('⏰ انتهى وقت الاختبار — سيتم التسليم تلقائياً'); qzShowResult(); } }
 }
 
-function trExamHas(cid){ return !!EXAMS[cid]; }
+function trExamHas(cid){ return !!EXAMS_META[cid]; }
+// اختبارات الدورة تأتي من الشجرة (c.exams). أكثر من اختبار = أجزاء.
+// need = مصفوفة الفيديوهات اللازم مشاهدتها لفتح الاختبار.
+function trCourseExams(c){
+  const ex=(c.exams||[]); const vids=c.videos||[];
+  const need=e=>{ const n=(e.need_after&&e.need_after>0)?e.need_after:vids.length; return vids.slice(0,n); };
+  if(ex.length<=1) return ex.map(e=>({id:e.id, name:null, count:e.count, mins:e.mins, need:need(e)}));
+  const P=['الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع','الجزء الخامس','الجزء السادس'];
+  return ex.map((e,i)=>({id:e.id, name:(P[i]||('الجزء '+toAr(i+1))), count:e.count, mins:e.mins, need:need(e)}));
+}
+function trExamMins(eid){ return (EXAMS_META[eid] && EXAMS_META[eid].mins) || 30; }
 
 async function openQuiz(cid){
-  const ex=EXAMS[cid]; if(!ex) return;
+  const meta=EXAMS_META[cid]; if(!meta) return;
   if(TR_EXAM_DONE[cid]){ showToast('🔒 تم أداء هذا الاختبار — لا يمكن إعادته إلا بإذن المدير'); return; }
   // تأكيد ملكية النتيجة من جديد (منع سباق)
   try{
     const {data}=await db.from('teacher_exam_results').select('percent,points').eq('teacher_id',cu.id).eq('exam_id',cid).maybeSingle();
     if(data){ TR_EXAM_DONE[cid]={percent:data.percent,points:data.points}; renderTrCourses(); showToast('🔒 تم أداء هذا الاختبار مسبقاً'); return; }
   }catch(e){}
+  // جلب الأسئلة من القاعدة — بدون الإجابات الصحيحة إطلاقاً
+  let ex;
+  try{
+    const {data,error}=await db.rpc('get_exam_questions',{p_exam_id:cid});
+    if(error) throw error; ex=data;
+  }catch(e){ showToast('⚠️ تعذّر تحميل الاختبار: '+(e.message||e.code||'')); return; }
+  if(!ex || !ex.questions || !ex.questions.length){ showToast('لا توجد أسئلة لهذا الاختبار بعد'); return; }
   _qzState={cid, qs:ex.questions, idx:0, answers:new Array(ex.questions.length).fill(-1)};
-  document.getElementById('qz-title').textContent='🎯 '+ex.title;
+  document.getElementById('qz-title').textContent='🎯 '+(ex.title||meta.title||'الاختبار');
   document.getElementById('qz-result').style.display='none';
   document.getElementById('qz-quiz').style.display='';
   openModal('modal-tr-exam');
-  qzStartTimer();
+  qzStartTimer(ex.mins||trExamMins(cid));
   renderQzQ();
 }
 function renderQzQ(){
@@ -3451,12 +3659,27 @@ function qzSubmit(){
 async function qzShowResult(){
   const s=_qzState; if(!s) return;
   clearQzTimer();
-  let correct=0; s.qs.forEach((q,i)=>{ if(s.answers[i]===q.a) correct++; });
-  const total=s.qs.length, percent=Math.round(correct/total*100), points=percent;   // ٢٥/٢٥ = ١٠٠٪ = ١٠٠ نقطة
-  const cid=s.cid;
+  const cid=s.cid, total=s.qs.length;
+  const answers=s.answers.map(a=>(a==null?-1:a));
+  // حالة انتظار أثناء التصحيح في القاعدة
   document.getElementById('qz-quiz').style.display='none';
-  const rc = percent>=60;
   document.getElementById('qz-result').style.display='';
+  document.getElementById('qz-result').innerHTML='<div style="text-align:center;padding:40px 18px;color:var(--mid);font-weight:700;">⏳ جارٍ التصحيح ورصد النتيجة...</div>';
+  // التصحيح والنقاط تُحسب في القاعدة — العميل يرسل اختياراته فقط
+  let correct=0, percent=0, points=0;
+  try{
+    const {data,error}=await db.rpc('record_exam_result',{p_exam_id:cid, p_answers:answers});
+    if(error) throw error;
+    correct=(data&&typeof data.correct==='number')?data.correct:0;
+    percent=(data&&typeof data.percent==='number')?data.percent:0;
+    points =(data&&typeof data.points==='number')?data.points:0;
+    TR_EXAM_DONE[cid]={percent,points};
+    refreshMyPoints();
+  }catch(e){
+    document.getElementById('qz-result').innerHTML='<div style="text-align:center;padding:32px 18px;"><div style="font-size:2rem;">⚠️</div><div style="color:var(--red);font-weight:800;margin:10px 0;">تعذّر حفظ النتيجة</div><div style="font-size:.82rem;color:var(--light);margin-bottom:16px;">'+trEsc(e.message||e.code||'')+'</div><button class="btn btn-primary btn-sm" onclick="closeQuiz()">تم</button></div>';
+    _qzState=null; return;
+  }
+  const rc = percent>=60;
   document.getElementById('qz-result').innerHTML=`
     <div style="text-align:center;padding:24px 18px;">
       <div style="font-size:3rem;margin-bottom:6px;">${rc?'🎉':'📘'}</div>
@@ -3475,18 +3698,6 @@ async function qzShowResult(){
       <div style="font-size:.82rem;color:var(--light);max-width:420px;margin:0 auto 20px;line-height:1.7;">🔒 لا يمكن إعادة هذا الاختبار إلا بإذن المدير. جزاك الله خيراً على اجتهادك.</div>
       <button class="btn btn-primary btn-sm" onclick="closeQuiz()">تم</button>
     </div>`;
-  // حفظ النتيجة (مرة واحدة) + منح النقاط
-  try{
-    const {error}=await db.from('teacher_exam_results').insert([{teacher_id:cu.id, exam_id:cid, score:correct, total:total, percent:percent, points:points}]);
-    if(error && error.code!=='23505'){ throw error; }
-    if(!error){
-      const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
-      const curp=(u&&u.points)||0;
-      await db.from('users').update({points:curp+points}).eq('id',cu.id);
-    }
-    TR_EXAM_DONE[cid]={percent,points};
-    refreshMyPoints();
-  }catch(e){ showToast('⚠️ تعذّر حفظ النتيجة: '+(e.message||e.code||'')); }
   _qzState=null;
 }
 function closeQuiz(){ clearQzTimer(); closeModal('modal-tr-exam'); _qzState=null; renderTrCourses(); }
@@ -3496,14 +3707,16 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElem
 let TR_WATCHED = new Set();
 let TR_TITLES = {};
 let _trCurLevel = null, _trPlaying = null, _trPlayer = null, _trPollTimer = null;
+let _trMaxTime = 0;              // أقصى نقطة اتشافت فعلاً (ثواني) — لمنع السحب للأمام
+let _trSeekMsgAt = 0;            // آخر مرة ظهرت رسالة التنبيه (منع التكرار)
 const _trAwarding = new Set();
 const TR_TITLE_CACHE_KEY = 'tr_titles_v1';
 
 function trEsc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function trCourseStats(c){ let d=0; c.videos.forEach(v=>{ if(TR_WATCHED.has(v)) d++; }); return {done:d,total:c.videos.length}; }
-function trLevelStats(lv){ let d=0,t=0; lv.courses.forEach(c=>{ const s=trCourseStats(c); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
+function trCourseStats(c){ const v=c.videos||[]; let d=0; v.forEach(x=>{ if(TR_WATCHED.has(x)) d++; }); return {done:d,total:v.length}; }
+function trLevelStats(lv){ let d=0,t=0; (lv.courses||[]).forEach(c=>{ const s=trCourseStats(c); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
 function trOverallStats(){ let d=0,t=0; TRAINING_LEVELS.forEach(lv=>{ const s=trLevelStats(lv); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
-function trAllVideoIds(){ const a=[]; TRAINING_LEVELS.forEach(lv=>lv.courses.forEach(c=>c.videos.forEach(v=>a.push(v)))); return a; }
+function trAllVideoIds(){ const a=[]; TRAINING_LEVELS.forEach(lv=>(lv.courses||[]).forEach(c=>(c.videos||[]).forEach(v=>a.push(v)))); return a; }
 
 function trBar(done,total){
   const pct = total ? Math.round(done/total*100) : 0;
@@ -3548,6 +3761,17 @@ window.onYouTubeIframeAPIReady=function(){ _ytReady=true; if(_ytPending){ const 
 // ── التحميل الرئيسي ──
 async function loadTraining(){
   trLoadTitleCache();
+  // شجرة المحتوى من القاعدة (مستويات/دورات/فيديوهات/اختبارات)
+  try{
+    const {data,error}=await db.rpc('get_training_tree');
+    if(error) throw error;
+    TRAINING_LEVELS = Array.isArray(data)?data:[];
+  }catch(e){ TRAINING_LEVELS=[]; showToast('⚠️ تعذّر تحميل محتوى التأهيل: '+(e.message||e.code||'')); }
+  // بيانات الاختبارات (بدون أسئلة) من الشجرة
+  EXAMS_META={};
+  TRAINING_LEVELS.forEach(lv=>(lv.courses||[]).forEach(c=>(c.exams||[]).forEach(e=>{
+    EXAMS_META[e.id]={title:e.title, mins:e.mins, count:e.count, need_after:e.need_after, pass_pct:e.pass_pct, course_id:c.id};
+  })));
   try{
     const {data}=await db.from('teacher_training_progress').select('video_id').eq('teacher_id',cu.id);
     TR_WATCHED=new Set((data||[]).map(r=>r.video_id));
@@ -3592,7 +3816,7 @@ function trLevelComplete(lv){
   if(!lv || !lv.courses.length) return false;
   const {done,total}=trLevelStats(lv);
   if(!total || done<total) return false;
-  return lv.courses.every(c=> !trExamHas(c.id) || !!TR_EXAM_DONE[c.id]);
+  return lv.courses.every(c=> trCourseExams(c).every(e=> !trExamHas(e.id) || !!TR_EXAM_DONE[e.id]));
 }
 // المستوى مقفول لو اللي قبله لسه مخلصش — يرجّع المستوى السابق أو null
 function trLevelLockedBy(idx){
@@ -3671,17 +3895,19 @@ function trCourseCard(c,lv){
       ${w?'<span class="badge bg-green" style="flex-shrink:0;">✅ تمّت</span>':'<span style="flex-shrink:0;color:var(--jade);font-size:1.35rem;line-height:1;">▶</span>'}
     </div>`;
   }).join('');
-  let exam;
-  if(!complete){
-    exam=`<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🔒 اختبار نهاية الدورة — أكمِل مشاهدة كل الفيديوهات لفتحه (${toAr(done)}/${toAr(total)})</div>`;
-  } else if(trExamHas(c.id)){
-    const r=TR_EXAM_DONE[c.id];
-    exam = r
-      ? `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px solid var(--mint);border-radius:10px;padding:11px;color:var(--emerald);font-size:.82rem;font-weight:800;text-align:center;">✅ تم أداء الاختبار — نتيجتك ${toAr(r.percent)}٪ (${toAr(r.points)} نقطة) • لا يمكن إعادته إلا بإذن المدير</div>`
-      : `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${c.id}')">🎯 ابدأ اختبار نهاية الدورة (${toAr(EXAMS[c.id].questions.length)} سؤالاً)</button>`;
-  } else {
-    exam=`<button class="btn btn-gold btn-sm" style="width:100%;" onclick="showToast('🎯 اختبار نهاية الدورة قيد الإعداد — سيتاح قريباً بإذن الله')">🎯 اختبار نهاية الدورة — مُتاح (قريباً بإذن الله)</button>`;
-  }
+  const exList = trCourseExams(c);
+  const exam = exList.length ? exList.map(e=>{
+    const w=e.need.filter(v=>TR_WATCHED.has(v)).length, n=e.need.length;
+    const unlocked=n>0 && w===n;
+    const lbl=e.name ? 'اختبار '+e.name : 'اختبار نهاية الدورة';
+    const r=TR_EXAM_DONE[e.id];
+    if(r)
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px solid var(--mint);border-radius:10px;padding:11px;color:var(--emerald);font-size:.82rem;font-weight:800;text-align:center;">✅ ${lbl} — نتيجتك ${toAr(r.percent)}٪ (${toAr(r.points)} نقطة) • لا يمكن إعادته إلا بإذن المدير</div>`;
+    if(!unlocked)
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🔒 ${lbl} — أكمِل مشاهدة فيديوهاته لفتحه (${toAr(w)}/${toAr(n)})</div>`;
+    return `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${e.id}')">🎯 ابدأ ${lbl} (${toAr(e.count||0)} سؤالاً • ${toAr(e.mins||30)} دقيقة)</button>`;
+  }).join('<div style="height:8px;"></div>')
+  : `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🎯 اختبار نهاية الدورة — قيد الإعداد، قريباً بإذن الله</div>`;
   return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);">
     <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div style="font-size:1.02rem;font-weight:800;color:#fff;">📘 ${c.name}</div>${cBadge}
@@ -3701,7 +3927,8 @@ function playTrVideo(videoId,courseId,levelId){
   const already=TR_WATCHED.has(videoId);
   const st=document.getElementById('tr-vid-status'), mb=document.getElementById('tr-mark-btn');
   if(already){ st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تمت مشاهدة هذا الفيديو — احتُسبت نقاطه من قبل</span>'; mb.style.display='none'; }
-  else{ st.textContent='شاهد الفيديو حتى النهاية لتُسجَّل ٥٠ نقطة تلقائياً.'; mb.style.display=''; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
+  else{ st.textContent='شاهد الفيديو كاملاً — لا يمكن تجاوز الأجزاء التي لم تشاهدها.'; mb.style.display='none'; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
+  _trMaxTime=0; _trSeekMsgAt=0;
   openModal('modal-tr-video');
   trEnsureYT(()=>{
     if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
@@ -3710,7 +3937,8 @@ function playTrVideo(videoId,courseId,levelId){
       videoId:videoId,
       playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,origin:location.origin},
       events:{
-        onReady:e=>{ try{e.target.playVideo();}catch(_){} startTrPoll(); },
+        onReady:e=>{ try{e.target.playVideo();}catch(_){} try{e.target.setPlaybackRate(1);}catch(_){} startTrPoll(); },
+        onPlaybackRateChange:e=>{ if(e.data!==1){ try{_trPlayer.setPlaybackRate(1);}catch(_){} } },  // قفل السرعة على ١×
         onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED && _trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
       }
     });
@@ -3721,12 +3949,33 @@ function startTrPoll(){
   _trPollTimer=setInterval(()=>{
     if(!_trPlayer||!_trPlaying) return;
     try{
-      const d=_trPlayer.getDuration?_trPlayer.getDuration():0, t=_trPlayer.getCurrentTime?_trPlayer.getCurrentTime():0;
-      if(d>0 && t/d>=0.92) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
+      const d=_trPlayer.getDuration?_trPlayer.getDuration():0;
+      const t=_trPlayer.getCurrentTime?_trPlayer.getCurrentTime():0;
+      if(d<=0) return;
+      // منع السحب للأمام: أي قفزة أبعد من المسموح تُرجَّع لأقصى نقطة اتشافت
+      if(t > _trMaxTime + 2.2){
+        try{ _trPlayer.seekTo(_trMaxTime, true); }catch(_){}
+        const now=Date.now();
+        if(now-_trSeekMsgAt>2500){ _trSeekMsgAt=now; showToast('⚠️ لا يمكن تجاوز ما لم تشاهده — أكمل الفيديو بالترتيب'); }
+      } else if(t > _trMaxTime){
+        _trMaxTime=t;                                   // تقدّم طبيعي
+      }
+      // إظهار زر الإنهاء اليدوي في آخر ٢٠٪ فقط (بعد مشاهدة فعلية)
+      const mb=document.getElementById('tr-mark-btn');
+      if(mb && !TR_WATCHED.has(_trPlaying.videoId) && _trMaxTime/d>=0.80 && mb.style.display==='none') mb.style.display='';
+      // اكتمال تلقائي عند مشاهدة ٩٥٪ فعلياً من الفيديو (مش مجرد وصول للنهاية بالسحب)
+      if(_trMaxTime/d>=0.95) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
     }catch(e){}
-  },2000);
+  },600);
 }
-function trConfirmWatched(){ if(_trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
+function trConfirmWatched(){
+  if(!_trPlaying) return;
+  try{
+    const d=_trPlayer&&_trPlayer.getDuration?_trPlayer.getDuration():0;
+    if(d>0 && _trMaxTime/d < 0.80){ showToast('⚠️ أكمل مشاهدة الفيديو أولاً'); return; }
+  }catch(_){}
+  markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
+}
 function closeTrVideo(){
   if(_trPollTimer){ clearInterval(_trPollTimer); _trPollTimer=null; }
   if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
@@ -3739,16 +3988,11 @@ async function markTrWatched(videoId,courseId,levelId){
   if(!videoId || TR_WATCHED.has(videoId) || _trAwarding.has(videoId)) return;
   _trAwarding.add(videoId);
   try{
-    const {error}=await db.from('teacher_training_progress').insert([{teacher_id:cu.id, video_id:videoId, course_id:courseId||null, level_id:levelId||null, points_awarded:POINTS_PER_VIDEO}]);
-    if(error && error.code==='23505'){ TR_WATCHED.add(videoId); }          // مسجّل مسبقاً — لا تمنح نقاط مكرّرة
-    else if(error){ throw error; }
-    else{                                                                    // صف جديد → امنح ٥٠ نقطة
-      TR_WATCHED.add(videoId);
-      const {data:u}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
-      const cur=(u&&u.points)||0;
-      await db.from('users').update({points:cur+POINTS_PER_VIDEO}).eq('id',cu.id);
-      showToast('🎉 جزاكم الله خيرًا — أُضيفت ٥٠ نقطة لرصيدك');
-    }
+    // النقاط تُحسب في القاعدة عبر RPC آمنة — العميل لا يكتب النقاط
+    const {data,error}=await db.rpc('award_training_video',{p_video_id:videoId, p_course_id:courseId||null, p_level_id:levelId||null});
+    if(error) throw error;
+    TR_WATCHED.add(videoId);                                   // اتسجّل (جديد=50 أو موجود=0)
+    if(data && data>0) showToast('🎉 جزاكم الله خيرًا — أُضيفت ٥٠ نقطة لرصيدك');
     refreshMyPoints();
     const st=document.getElementById('tr-vid-status'), mb=document.getElementById('tr-mark-btn');
     if(_trPlaying && _trPlaying.videoId===videoId){ if(st) st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تم — احتُسب هذا الفيديو</span>'; if(mb) mb.style.display='none'; }
@@ -4312,7 +4556,7 @@ function renderComposeChips() {
     `<div class="compose-chip">
       <div style="width:20px;height:20px;border-radius:50%;background:${color_fn(r)};display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;">${r.name[0]}</div>
       ${r.name}
-      <span class="compose-chip-del" onclick="removeComposeRecipient('${r.id}')">✕</span>
+      <span class="compose-chip-del" onclick="removeComposeRecipient('${r.id}')">×</span>
     </div>`
   ).join('');
 }
