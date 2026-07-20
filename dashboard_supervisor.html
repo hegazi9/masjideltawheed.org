@@ -1187,6 +1187,9 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div class="empty" style="padding:24px;grid-column:1/-1;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
   </div>
 
+  <!-- شريط الإنجاز -->
+  <div id="wa-progress" style="margin-bottom:18px;display:none;"></div>
+
   <!-- بطاقات الشعب -->
   <div id="wa-branches" style="display:flex;flex-direction:column;gap:18px;"></div>
 
@@ -7971,16 +7974,24 @@ async function hydrateBranchDataFromDB(){
     const { data:brs } = await db.from('branches').select('id,name');
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
 
-    // خريطة id→اسم المعلم (لترجمة الحلقات اللي teachers فيها IDs) — كل الأدوار لدعم المزدوج
-    const { data:us } = await db.from('users').select('id,full_name');
-    const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
+    // خريطة id→اسم المعلم (لترجمة الحلقات اللي teachers فيها IDs) + الجنس — كل الأدوار لدعم المزدوج
+    const { data:us } = await db.from('users').select('id,full_name,gender');
+    const uName = {}, uGen = {};
+    (us||[]).forEach(u => { uName[u.id] = u.full_name; if(u.gender) uGen[String(u.id)] = u.gender; });
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
 
-    // معلمات المشرف (فلترة) — لو مدير نسيبها null = الكل. كل الأدوار لدعم المزدوج
-    let myTeachers = null;
-    if (cu.role === 'supervisor' && cu.id){
-      const { data:ts } = await db.from('users').select('full_name').eq('supervisor_id', cu.id);
-      if (ts && ts.length) myTeachers = new Set(ts.map(t => t.full_name));
+    // نطاق المشرف: يرى كل شعب جنسه (المشرف→الأبطال+الرواد | المشرفة→الملكات+الأميرات).
+    // المصدر الأدق حلقاته من my_supervised_circle_ids (نفس مصدر RLS)، والجنس شبكة أمان
+    // حتى لا تختفي شعبة (مثل الرواد) بسبب ربط supervisor_id ناقص بعد إعادة توزيع المشرفين.
+    let myCircleIds = null, supGender = null;
+    if (cu.role === 'supervisor'){
+      try{
+        const { data:ids } = await db.rpc('my_supervised_circle_ids');
+        const arr = (ids||[]).map(r => (typeof r==='string'? r : r.my_supervised_circle_ids)).filter(Boolean);
+        if (arr.length) myCircleIds = new Set(arr.map(String));
+      }catch(_){}
+      const g = uGen[String(cu.id)] || '';
+      if (g) supGender = (g==='أنثى'||g==='إناث') ? 'إناث' : 'ذكور';
     }
 
     const { data:circles } = await db.from('circles').select('id,name,name_ar,teachers,teacher_id,branch_id,schedule');
@@ -8005,7 +8016,12 @@ async function hydrateBranchDataFromDB(){
       if (isUuid(tName)) tName = uName[tName] || tName;
       if (!tName && c.teacher_id) tName = uName[c.teacher_id] || null;
       if (!tName) return;
-      if (myTeachers && !myTeachers.has(tName)) return;        // مش معلمة المشرف
+      // فلترة نطاق المشرف: الحلقة ضمن حلقاته (RPC) أو ضمن شعب جنسه — يضمن ظهور الأبطال والرواد معاً
+      if (cu.role === 'supervisor' && (myCircleIds || supGender)){
+        const inScope  = myCircleIds && myCircleIds.has(String(c.id));
+        const genderOk = supGender && (genderOfBranchName(bn) === supGender);
+        if (!(inScope || genderOk)) return;
+      }
       const key = (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
       if (!BRANCH_DATA[key]) BRANCH_DATA[key] = [];
       const pal = PAL[bn] || ['#1e5c36','#2d7a50'];
@@ -8018,8 +8034,8 @@ async function hydrateBranchDataFromDB(){
       if (cu.role === 'supervisor' && !MY_GENDER && bn) MY_GENDER = genderOfBranchName(bn);
     });
 
-    // لو مشرف: ثبّت قوائم معلميه بالأسماء الحقيقية (للفلاتر اللاحقة)
-    if (myTeachers){
+    // لو مشرف: ثبّت قوائم شعبه ومعلميه (للفلاتر اللاحقة — تشمل كل شعب جنسه)
+    if (cu.role === 'supervisor'){
       window.SUPERVISOR_BRANCH_TEACHERS = svbt;
       window.SUPERVISOR_TEACHER_LIST = [...new Set(Object.values(svbt).flat())];
     }
@@ -11423,7 +11439,7 @@ function svGetMyBranches(){
     const km = {'abtal':'الأبطال','rowad':'الرواد','banat':'البنات'};
     branches = window.ADMIN_BRANCH_FILTER.map(k=>km[k]).filter(Boolean);
   }
-  if(!branches.length) branches = ['الأبطال','الرواد'];
+  if(!branches.length) branches = (MY_GENDER==='إناث') ? ['البنات'] : ['الأبطال','الرواد'];
   const order = ['الأبطال','الرواد','البنات'];
   return [...new Set(branches)].sort((a,b)=>{
     const ia=order.indexOf(a), ib=order.indexOf(b);
@@ -11976,11 +11992,11 @@ function waAnalyzeBranch(branchName, weekIdx){
     const sess = A.sessByTB[teacher+'||'+branchName] || [];
     const tAbsStreak = waMaxStreak(sess.map(s=>s.attendance), a=>a==='غائب');
     if(tAbsStreak>=WA_TH.tAbsStreak)
-      warnings.push({type:'red', icon:'⛔', text:`إنذار: المعلم/ ${teacher} غاب ${wkAr(tAbsStreak)} مرات متتالية خلال الشهر`,
+      warnings.push({type:'red', icon:'⛔', key:'t-abs|'+teacher, text:`إنذار: المعلم/ ${teacher} غاب ${wkAr(tAbsStreak)} مرات متتالية خلال الشهر`,
         _detail:{ intro:'أيام غياب المعلم المسجّلة خلال الشهر:', rows: sess.filter(s=>s.attendance==='غائب').map(s=>({date:s.session_date, note:'غائب'})) }});
     let tLate=0; sess.forEach(s=>{ tLate += toInt(s.late_min); });
     if(tLate>=WA_TH.tLateMonth)
-      alerts.push({type:'gold', icon:'⏱️', text:`المعلم/ ${teacher} — تأخير ${wkAr(tLate)} دقيقة مجمّعة خلال الشهر`,
+      alerts.push({type:'gold', icon:'⏱️', key:'t-late|'+teacher, text:`المعلم/ ${teacher} — تأخير ${wkAr(tLate)} دقيقة مجمّعة خلال الشهر`,
         _detail:{ intro:'أيام تأخير المعلم خلال الشهر:', total:wkAr(tLate)+' دقيقة', rows: sess.map(s=>({d:s.session_date,m:toInt(s.late_min)})).filter(x=>x.m>0).map(x=>({date:x.d, note:wkAr(x.m)+' دقيقة'})) }});
 
     // ── طلاب الحلقة (بالـ id) ──
@@ -11997,40 +12013,40 @@ function waAnalyzeBranch(branchName, weekIdx){
       // 1) غياب متتالي ≥ 3
       const absStreak = waMaxStreak(attL.map(a=>a.status), s=>s==='absent');
       if(absStreak>=WA_TH.absStreak)
-        alerts.push({type:'red', icon:'🚫', text:`الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absStreak)} مرات متتالية`,
+        alerts.push({type:'red', icon:'🚫', key:'s-abs|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absStreak)} مرات متتالية`,
           _detail:{ intro:'الأيام الغائب فيها خلال الشهر:', rows:absRows }});
 
       // 2) غياب متقطع ≥ 6 خلال الشهر
       const absTotal = attL.filter(a=>a.status==='absent').length;
       if(absTotal>=WA_TH.absScatter)
-        warnings.push({type:'red', icon:'📛', text:`إنذار: الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absTotal)} مرات متقطعة خلال الشهر`,
+        warnings.push({type:'red', icon:'📛', key:'s-absm|'+sid, text:`إنذار: الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absTotal)} مرات متقطعة خلال الشهر`,
           _detail:{ intro:'الأيام الغائب فيها بالتواريخ:', rows:absRows }});
 
       // 5) تقدير "جيد" متتالي ≥ 3 (حفظ/مراجعة)
       const memGood = waMaxStreak(memL.map(m=>m.grade), g=>g==='good');
       if(memGood>=WA_TH.gradeStreak)
-        alerts.push({type:'blue', icon:'📖', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في الحفظ ${wkAr(memGood)} مرات متتالية`,
+        alerts.push({type:'blue', icon:'📖', key:'s-memgood|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في الحفظ ${wkAr(memGood)} مرات متتالية`,
           _detail:{ intro:'تواريخ تقدير "جيد" في الحفظ:', rows:gradeRows(memL,'good') }});
       const revGood = waMaxStreak(revL.map(m=>m.grade), g=>g==='good');
       if(revGood>=WA_TH.gradeStreak)
-        alerts.push({type:'blue', icon:'🔁', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في المراجعة ${wkAr(revGood)} مرات متتالية`,
+        alerts.push({type:'blue', icon:'🔁', key:'s-revgood|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في المراجعة ${wkAr(revGood)} مرات متتالية`,
           _detail:{ intro:'تواريخ تقدير "جيد" في المراجعة:', rows:gradeRows(revL,'good') }});
 
       // 6) تقدير "إعادة" متتالي ≥ 3 (حفظ/مراجعة)
       const memRetry = waMaxStreak(memL.map(m=>m.grade), g=>g==='retry');
       if(memRetry>=WA_TH.gradeStreak)
-        alerts.push({type:'gold', icon:'📕', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في الحفظ ${wkAr(memRetry)} مرات متتالية`,
+        alerts.push({type:'gold', icon:'📕', key:'s-memretry|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في الحفظ ${wkAr(memRetry)} مرات متتالية`,
           _detail:{ intro:'تواريخ تقدير "إعادة" في الحفظ:', rows:gradeRows(memL,'retry') }});
       const revRetry = waMaxStreak(revL.map(m=>m.grade), g=>g==='retry');
       if(revRetry>=WA_TH.gradeStreak)
-        alerts.push({type:'gold', icon:'🔂', text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في المراجعة ${wkAr(revRetry)} مرات متتالية`,
+        alerts.push({type:'gold', icon:'🔂', key:'s-revretry|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في المراجعة ${wkAr(revRetry)} مرات متتالية`,
           _detail:{ intro:'تواريخ تقدير "إعادة" في المراجعة:', rows:gradeRows(revL,'retry') }});
 
       // 7) تأخير الطالب ≥ 100 دقيقة خلال الأسبوع المعروض
       let lateWeek=0; const lateRows=[];
       attL.forEach(a=>{ if(weekSet.has(a.date) && a.status==='late'){ lateWeek += (a.late_minutes||0); lateRows.push({date:a.date, note:wkAr(a.late_minutes||0)+' دقيقة'}); } });
       if(lateWeek>=WA_TH.stuLateWeek)
-        alerts.push({type:'gold', icon:'⏰', text:`الطالب ${sName} (حلقة ${teacher}) — تأخير ${wkAr(lateWeek)} دقيقة خلال الأسبوع`,
+        alerts.push({type:'gold', icon:'⏰', key:'s-late|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تأخير ${wkAr(lateWeek)} دقيقة خلال الأسبوع`,
           _detail:{ intro:'أيام التأخير خلال الأسبوع:', total:wkAr(lateWeek)+' دقيقة', rows:lateRows }});
     });
   });
@@ -12038,7 +12054,7 @@ function waAnalyzeBranch(branchName, weekIdx){
   // id ثابت لكل عنصر + تخزين التفاصيل
   window.WA_DETAILS = window.WA_DETAILS || {};
   const stamp = (a)=>{
-    a.id = 'wa_' + weekIdx + '_' + svHash(branchName + '|' + a.text);
+    a.id = 'wa_' + weekIdx + '_' + svHash(branchName + '|' + (a.key || a.text));
     if(a._detail){ a._detail.title = a.text; window.WA_DETAILS[a.id] = a._detail; delete a._detail; }
     return a;
   };
@@ -12074,11 +12090,12 @@ function waErr(e){
 async function waFetchActions(force){
   if(window._waActsLoaded && !force) return window.WA_ACTS;
   try{
-    const {data,error} = await db.from('weekly_alert_actions').select('alert_id,action_text,taken_by_name,updated_at');
+    const {data,error} = await db.from('weekly_alert_actions').select('alert_id,action_text,taken_by_name,updated_at,week_idx,branch,alert_text');
     if(error) throw error;
     const m = {};
     (data||[]).forEach(r=>{ m[r.alert_id] = { action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; });
     window.WA_ACTS = m;
+    window.WA_ACTS_RAW = data||[];   // خام — للترحيل من الـ id القديم للـ id الثابت الجديد
     window._waActsLoaded = true;
     await waMigrateLocal();     // ترحيل الإجراءات القديمة من الجهاز مرة واحدة
   }catch(e){
@@ -12151,6 +12168,68 @@ function waActionWhen(id){
   try{ return new Date(a.updated_at).toLocaleDateString('ar-EG',{day:'numeric',month:'long'}); }catch(e){ return ''; }
 }
 function waHasAction(id){ return !!window.WA_ACTS[id]; }
+
+// ── ترحيل الإجراءات القديمة: كانت الـ id مبنية على نص التنبيه (وفيه العدد المتغيّر)،
+//    فلمّا يزيد الغياب كان بيتولّد id جديد ويعيد ظهور تنبيه سبق اتخاذ إجراء فيه (تكرار).
+//    هنا نطابق الإجراء القديم بالطالب/المعلم + نوع القاعدة وننقله للـ id الثابت الجديد. ──
+function _waNorm(x){ return String(x||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\u200f\u200e"']/g,'').replace(/\s+/g,' ').trim(); }
+function _waRuleOf(t){
+  const n = _waNorm(t);
+  if(/المعلم/.test(n)){ if(/تاخير/.test(n)) return 't-late'; if(/متتاليه/.test(n)&&/(غاب|غياب)/.test(n)) return 't-abs'; }
+  if(/غياب/.test(n)&&/متقطعه/.test(n))   return 's-absm';
+  if(/غياب/.test(n)&&/متتاليه/.test(n))  return 's-abs';
+  if(/جيد/.test(n)&&/الحفظ/.test(n))     return 's-memgood';
+  if(/جيد/.test(n)&&/المراجعه/.test(n))  return 's-revgood';
+  if(/اعاده/.test(n)&&/الحفظ/.test(n))    return 's-memretry';
+  if(/اعاده/.test(n)&&/المراجعه/.test(n)) return 's-revretry';
+  if(/تاخير/.test(n)&&/الاسبوع/.test(n))  return 's-late';
+  return '';
+}
+function _waNameOf(t){
+  const raw = String(t||'');
+  let m = raw.match(/الطالب\s+([^()]+?)\s*\(\s*حلقة/);
+  if(m) return _waNorm(m[1]);
+  m = raw.match(/المعلم\/?\s+([^—\-]+?)\s+(?:غاب|تأخير|—|-)/);
+  if(m) return _waNorm(m[1]);
+  return '';
+}
+async function waMigrateLegacyActions(weekIdx, branchName, alerts){
+  try{
+    window._waMigrated = window._waMigrated || new Set();
+    const gk = weekIdx + '|' + branchName;
+    if(window._waMigrated.has(gk)) return;
+    window._waMigrated.add(gk);
+    const raw = window.WA_ACTS_RAW || [];
+    if(!raw.length) return;
+    const legacy = {};
+    raw.forEach(r=>{
+      if(r.week_idx!=null && Number(r.week_idx)!==Number(weekIdx)) return;
+      if(r.branch && branchName && r.branch!==branchName) return;
+      const rule=_waRuleOf(r.alert_text), nm=_waNameOf(r.alert_text);
+      if(rule && nm) legacy[rule+'|'+nm] = r;
+    });
+    if(!Object.keys(legacy).length) return;
+    const jobs = [];
+    (alerts||[]).forEach(a=>{
+      if(window.WA_ACTS[a.id]) return;                 // عليه إجراء بالـ id الجديد بالفعل
+      const rule=_waRuleOf(a.text), nm=_waNameOf(a.text);
+      if(!rule || !nm) return;
+      const row = legacy[rule+'|'+nm];
+      if(!row || row.alert_id===a.id) return;
+      window.WA_ACTS[a.id] = { action_text:row.action_text, taken_by_name:row.taken_by_name||'', updated_at:row.updated_at };
+      jobs.push({ oldId:row.alert_id, row, a });
+    });
+    for(const j of jobs){
+      try{
+        await db.from('weekly_alert_actions').insert({
+          alert_id:j.a.id, action_text:j.row.action_text, taken_by_name:j.row.taken_by_name||null,
+          week_idx:weekIdx, branch:branchName, alert_text:j.a.text
+        }).select('alert_id');
+        await db.from('weekly_alert_actions').delete().eq('alert_id', j.oldId);
+      }catch(_){/* أفضل جهد — الترحيل في الذاكرة يكفي للعرض الفوري */}
+    }
+  }catch(_){}
+}
 
 // ── فصل: اللي مالوش إجراء يفضل ظاهر • اللي ليه إجراء يروح لقسم «تم اتخاذ إجراء» ──
 function waSplitByAction(list){
@@ -12244,6 +12323,7 @@ function waSyncDashboard(){
 
     svGetMyBranches().forEach(b=>{
       const r = waAnalyzeBranch(b, wk);
+      waMigrateLegacyActions(wk, b, [...r.warnings, ...r.alerts]);   // منع إعادة ظهور تنبيه اتُّخذ فيه إجراء
       const auto = [...r.warnings, ...r.alerts];   // الإنذارات أولاً
 
       // احتفظ بالتنبيهات اليدوية فقط (اللي مش جاية من النظام الأسبوعي)
@@ -12292,11 +12372,12 @@ async function renderWAlerts(){
   const branches = svGetMyBranches();
   WA_DATA = {};
   let totAlerts=0, totWarn=0, totOpen=0, totDone=0;
-  branches.forEach(b=>{
+  for(const b of branches){
     const r = waAnalyzeBranch(b); WA_DATA[b]=r;
+    await waMigrateLegacyActions(WA_CURRENT, b, [...r.alerts, ...r.warnings]);   // ترحيل قبل حساب النِّسب
     totAlerts += r.alerts.length; totWarn += r.warnings.length;
     [...r.alerts, ...r.warnings].forEach(a=>{ waHasAction(a.id) ? totDone++ : totOpen++; });
-  });
+  }
 
   // إحصائيات
   document.getElementById('wa-stats').innerHTML = `
@@ -12304,6 +12385,28 @@ async function renderWAlerts(){
     <div class="stat-card" style="border-top-color:var(--red);"><span class="stat-icon">⛔</span><div class="stat-val" style="color:var(--red);">${wkAr(totWarn)}</div><div class="stat-lbl">إنذارات</div><div class="stat-sub">تستوجب إجراء</div></div>
     <div class="stat-card green"><span class="stat-icon">✅</span><div class="stat-val">${wkAr(totDone)}</div><div class="stat-lbl">تم اتخاذ إجراء</div><div class="stat-sub">مسجّل للجميع</div></div>
     <div class="stat-card" style="border-top-color:var(--blue);"><span class="stat-icon">🏫</span><div class="stat-val" style="color:var(--blue);">${wkAr(branches.length)}</div><div class="stat-lbl">الشعب</div><div class="stat-sub">تحت المتابعة</div></div>`;
+
+  // ── مؤشّر الإنجاز: نسبة التنبيهات اللي اتُّخذ فيها إجراء (يفرّق المُنجَز عن المفتوح) ──
+  const totAll = totOpen + totDone;
+  const pct = totAll ? Math.round(totDone*100/totAll) : 0;
+  const prog = document.getElementById('wa-progress');
+  if(prog){
+    if(totAll){
+      const barCol = pct>=80?'var(--jade)':(pct>=40?'var(--gold)':'var(--red)');
+      prog.style.display='block';
+      prog.innerHTML = `
+        <div style="background:var(--white);border:1.5px solid var(--border);border-top:3px solid ${barCol};border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:9px;">
+            <div style="font-weight:800;color:var(--forest);font-size:.92rem;">📊 نسبة الإنجاز في متابعة التنبيهات</div>
+            <div style="font-weight:800;color:${barCol};font-size:1.05rem;">${wkAr(pct)}٪ <span style="font-size:.74rem;color:var(--light);font-weight:600;">(${wkAr(totDone)} من ${wkAr(totAll)})</span></div>
+          </div>
+          <div style="height:12px;background:var(--bg);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${barCol};border-radius:99px;transition:width .5s;"></div>
+          </div>
+          <div style="margin-top:7px;font-size:.74rem;color:var(--light);">${totOpen? ('متبقّي '+wkAr(totOpen)+' تنبيه بدون إجراء') : '👏 تم اتخاذ إجراء في كل التنبيهات'}</div>
+        </div>`;
+    } else { prog.style.display='none'; prog.innerHTML=''; }
+  }
 
   // بطاقات الشعب
   const colorMap = {
@@ -15432,9 +15535,18 @@ async function approvePrep(){
     if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
     const {data,error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:true, p_note:null });
     if(error) throw error;
-    showToast((data && data.points>0) ? '✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم' : '✅ تمت الموافقة (النقاط ممنوحة سابقاً)');
+    const res = Array.isArray(data) ? data[0] : data;
+    // ✔ تأكيد إن الحالة اتغيّرت فعلاً — الـ RPC ممكن يرجع بصمت من غير ما يعتمد (صلاحية/RLS)
+    const {data:chk} = await db.from('lesson_preps').select('status').eq('id', id).maybeSingle();
+    if(!chk || chk.status!=='approved'){
+      const rej = res && (res.ok===false || res.status==='forbidden' || res==='forbidden' || res.error);
+      throw new Error(rej ? 'غير مسموح لك باعتماد تحضير هذا المعلم (خارج نطاق إشرافك)' : 'لم تُحفَظ الموافقة — راجع الصلاحيات وحاول تاني');
+    }
+    const pts = res && (res.points!=null ? res.points : (typeof res==='number'?res:null));
+    showToast(pts>0 ? '✅ تمت الموافقة — أُضيفت ٥٠ نقطة لرصيد المعلم' : '✅ تمت الموافقة (النقاط ممنوحة سابقاً)');
     closeModal('modal-prep-review');
     await loadLessonReviews();
+    lpRefreshPendingBadge();
   }catch(e){ showToast('❌ تعذّرت الموافقة: '+waErr(e)); }
   finally{ if(btns) btns.style.pointerEvents=''; }
 }
@@ -15450,9 +15562,13 @@ async function returnPrep(){
     if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
     const {error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:false, p_note:note });
     if(error) throw error;
+    // ✔ تأكيد إن الإرجاع اتحفظ فعلاً
+    const {data:chk} = await db.from('lesson_preps').select('status').eq('id', id).maybeSingle();
+    if(!chk || chk.status!=='returned') throw new Error('لم يُحفَظ الإرجاع — راجع الصلاحيات وحاول تاني');
     showToast('📌 تم إرجاع التحضير للمعلم بالملاحظات — وصله إشعار');
     closeModal('modal-prep-review');
     await loadLessonReviews();
+    lpRefreshPendingBadge();
   }catch(e){ showToast('❌ تعذّر الإرجاع: '+waErr(e)); }
   finally{ if(btns) btns.style.pointerEvents=''; }
 }
