@@ -5045,8 +5045,6 @@ async function svLoadTeachersFromDB() {
   try {
     const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (cu.role !== 'supervisor' || !cu.id) return false;
-    const { data: ts } = await db.from('users').select('full_name, branch_id').eq('supervisor_id', cu.id);
-    if (!ts || !ts.length) return false; // لا يوجد ربط فعلي بعد → نُبقي السلوك القديم
     const { data: brs } = await db.from('branches').select('id, name');
     const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
 
@@ -5055,21 +5053,35 @@ async function svLoadTeachersFromDB() {
     const uName = {}; (us||[]).forEach(u => uName[u.id] = u.full_name);
     const isUuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
     const toKey = { 'الأبطال':'الأبطال','الرواد':'الرواد','الملكات':'البنات','الأميرات':'البنات','البنات':'البنات' };
+
+    // ✅ المصدر الموحّد: حلقات المشرف (circles.supervisor_id) — الشعبة من circles.branch_id
+    //    لا من users.branch_id (غالباً null، فكان يُسقِط معلمي شعبة كاملة مثل الرواد)
+    const { data: circles } = await db.from('circles')
+      .select('teacher_id,teachers,branch_id').eq('supervisor_id', cu.id);
+    if (!circles || !circles.length) return false; // لا يوجد ربط فعلي بعد → نُبقي السلوك القديم
+
     const map = {};
-    ts.forEach(t => {
-      const bn = brName[t.branch_id] || '';
+    circles.forEach(c => {
+      const bn = brName[c.branch_id] || '';
       const key = toKey[bn] || bn;
       if (!key) return;
+      let tName = (c.teachers || [])[0];
+      if (isUuid(tName)) tName = uName[tName] || tName;
+      if (!tName && c.teacher_id) tName = uName[c.teacher_id] || null;
+      if (!tName) return;
       if (!map[key]) map[key] = [];
-      if (!map[key].includes(t.full_name)) map[key].push(t.full_name);
+      if (!map[key].includes(tName)) map[key].push(tName);
     });
+    if (!Object.keys(map).length) return false;
+
     window.SUPERVISOR_BRANCH_TEACHERS = map;
     window.SUPERVISOR_TEACHER_LIST = [...new Set(Object.values(map).flat())];
     return true;
   } catch(e){ return false; }
 }
 function loadBranchCounts() {
-  const svBranchTeachers = window.__BD_HYDRATED ? null : (window.SUPERVISOR_BRANCH_TEACHERS || null);
+  // نفلتر دائماً بمعلمي المشرف (لا نعتمد على hydrate الذي قد يتوسّع بالجنس عبر genderOk)
+  const svBranchTeachers = window.SUPERVISOR_BRANCH_TEACHERS || null;
   const keyMap = { abtal:'الأبطال', rowad:'الرواد', banat:'البنات' };
 
   Object.entries(keyMap).forEach(([key, branchName]) => {
@@ -5624,6 +5636,13 @@ function processTeachers(data, branchMap) {
               : (USER_GENDER[String(t.id)] || NAME_GENDER[(t.full_name||'').trim()] || null);
       return !g || g===MY_GENDER;
     });
+    // ✅ المشرف يرى معلمي حلقاته فقط (المصدر: circles.supervisor_id عبر SUPERVISOR_TEACHER_LIST)
+    //    نفلتر فقط لو القائمة مبنية فعلاً — وإلا نُبقي فلترة الجنس تفادياً لاختفاء الكل
+    if (window.SUPERVISOR_TEACHER_LIST && window.SUPERVISOR_TEACHER_LIST.length) {
+      const allow = new Set(window.SUPERVISOR_TEACHER_LIST);
+      const scoped = TEACHERS.filter(t => allow.has(t.full_name));
+      if (scoped.length) TEACHERS = scoped;   // أمان: لو صفر (عدم تطابق أسماء) نُبقي فلترة الجنس
+    }
     TEACHERS.forEach((t,i)=>t.idx=i+1);
   }
 
@@ -8016,11 +8035,13 @@ async function hydrateBranchDataFromDB(){
       if (isUuid(tName)) tName = uName[tName] || tName;
       if (!tName && c.teacher_id) tName = uName[c.teacher_id] || null;
       if (!tName) return;
-      // فلترة نطاق المشرف: الحلقة ضمن حلقاته (RPC) أو ضمن شعب جنسه — يضمن ظهور الأبطال والرواد معاً
+      // فلترة نطاق المشرف: نعتمد على حلقاته الفعلية (RPC) عند توفرها — حلقاته فقط لا كل شعب جنسه.
+      // الجنس يُستخدم كشبكة أمان فقط لو رجع الـ RPC صفراً (كي لا تختفي كل الحلقات)
       if (cu.role === 'supervisor' && (myCircleIds || supGender)){
         const inScope  = myCircleIds && myCircleIds.has(String(c.id));
         const genderOk = supGender && (genderOfBranchName(bn) === supGender);
-        if (!(inScope || genderOk)) return;
+        const pass = (myCircleIds && myCircleIds.size) ? inScope : genderOk;
+        if (!pass) return;
       }
       const key = (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
       if (!BRANCH_DATA[key]) BRANCH_DATA[key] = [];
@@ -10701,7 +10722,8 @@ function svBranchTeacherList(branchName){
 // ── حلقات الشعبة الخاصة بالمشرف ──
 function svBranchCircles(branchName){
   const all = (BRANCH_DATA || {})[branchName] || [];
-  if(window.__BD_HYDRATED) return all;   // hydrate فلتر بالفعل بـ supervisor_id
+  // نفلتر دائماً بمعلمي المشرف في هذه الشعبة (يقفل تسرّب أي توسّع بالجنس في hydrate)؛
+  // null = القائمة غير مبنية بعد → نُبقي الكل تفادياً للاختفاء
   const tlist = svBranchTeacherList(branchName);
   return tlist ? all.filter(c=>tlist.includes(c.teacher)) : all;
 }
