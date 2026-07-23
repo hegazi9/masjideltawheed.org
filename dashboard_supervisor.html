@@ -935,6 +935,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div>
       <div class="sb-uname" id="sb-user-name">د.أيمن حجازي</div>
       <div class="sb-urole" id="sb-user-role">مشرف الشعبة</div>
+      <div id="sb-user-points" style="margin-top:4px;font-size:.72rem;font-weight:800;color:var(--gold-l,#f0b429);display:none;align-items:center;gap:4px;">🏆 <span id="sb-points-val">٠</span> نقطة</div>
     </div>
     <div class="sb-online"></div>
   </div>
@@ -1012,6 +1013,11 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
     <div class="sb-item" onclick="nav(this,'finance')" id="sb-finance">
       <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></span> الشؤون المالية
+    </div>
+
+    <div class="sb-section">التطوير</div>
+    <div class="sb-item" onclick="nav(this,'training')">
+      <span class="sb-icon">🎓</span> تأهيل المشرفين
     </div>
   </nav>
 
@@ -4235,6 +4241,39 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </div>
 
+<!-- ══════════════ 🎓 تأهيل المشرفين (مستويات ← دورات ← فيديوهات) ══════════════ -->
+<div id="page-training" class="page">
+
+  <!-- منظر المستويات -->
+  <div id="tr-levels-view">
+    <div class="card">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+        <div class="card-title">🎓 تأهيل المشرفين</div>
+        <span style="font-size:.78rem;color:var(--light);">اختر المستوى لعرض دوراته — كل فيديو تُنهيه = ٥٠ نقطة</span>
+      </div>
+      <div class="card-body">
+        <div id="tr-overall" style="margin-bottom:18px;"></div>
+        <div id="tr-levels-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- منظر دورات المستوى -->
+  <div id="tr-courses-view" style="display:none;">
+    <div class="card">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="trBackToLevels()">← رجوع للمستويات</button>
+        <div class="card-title" id="tr-level-title" style="margin-right:auto;">المستوى</div>
+      </div>
+      <div class="card-body">
+        <div id="tr-level-progress" style="margin-bottom:20px;"></div>
+        <div id="tr-courses-list" style="display:flex;flex-direction:column;gap:22px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ══ FOOTER ══ -->
 <div style="text-align:center;padding:20px 28px;border-top:1px solid var(--border);margin-top:auto;font-size:.78rem;color:var(--light);display:flex;align-items:center;justify-content:space-between;">
   <span>جميع الحقوق محفوظة © ٢٠٢٤ مدرسة التوحيد القرآنية.</span>
@@ -4246,6 +4285,51 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 <!-- ══════════════════════════════════════
      MODALS
 ══════════════════════════════════════ -->
+
+<!-- ══ نافذة تشغيل فيديو التأهيل ══ -->
+<div class="overlay" id="modal-tr-video" onclick="if(event.target===this)closeTrVideo()">
+  <div class="modal" style="max-width:940px;width:95%;">
+    <div class="modal-head"><div class="modal-title" id="tr-vid-title" style="font-size:.92rem;">▶️ الفيديو</div><button class="modal-close" onclick="closeTrVideo()">×</button></div>
+    <div class="modal-body" style="padding:0;">
+      <div style="position:relative;width:100%;padding-top:56.25%;background:#000;">
+        <div id="tr-yt-player" style="position:absolute;inset:0;width:100%;height:100%;"></div>
+      </div>
+      <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);">
+        <div id="tr-vid-status" style="font-size:.82rem;font-weight:700;color:var(--mid);flex:1;min-width:180px;">شاهد الفيديو كاملاً — لا يمكن تجاوز الأجزاء التي لم تشاهدها.</div>
+        <button id="tr-mark-btn" class="btn btn-primary btn-sm" style="display:none;" onclick="trConfirmWatched()">✅ أنهيت المشاهدة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ نافذة اختبار الدورة ══ -->
+<div class="overlay" id="modal-tr-exam">
+  <div class="modal" style="max-width:720px;width:95%;">
+    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" onclick="closeQuiz()">×</button></div>
+    <div class="modal-body">
+      <div id="qz-quiz">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <span id="qz-progress-txt" style="font-size:.82rem;font-weight:800;color:var(--emerald);">سؤال ١</span>
+          <span id="qz-timer" style="font-size:.92rem;font-weight:800;color:var(--emerald);background:var(--pale);border:1px solid var(--border);border-radius:99px;padding:4px 15px;">⏱️ ٣٠:٠٠</span>
+        </div>
+        <div style="height:8px;background:var(--pale);border-radius:99px;overflow:hidden;margin-bottom:14px;">
+          <div id="qz-progress-bar" style="height:100%;width:0;background:linear-gradient(90deg,var(--jade),var(--mint));border-radius:99px;transition:width .3s;"></div>
+        </div>
+        <div id="qz-nav" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
+        <div id="qz-question" style="font-size:1.02rem;font-weight:800;color:var(--forest);line-height:1.7;margin-bottom:16px;"></div>
+        <div id="qz-options" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:20px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;">
+            <button id="qz-prev-btn" class="btn btn-outline btn-sm" onclick="qzPrev()">→ السابق</button>
+            <button id="qz-next-btn" class="btn btn-primary btn-sm" onclick="qzNext()">التالي ←</button>
+          </div>
+          <button id="qz-submit-btn" class="btn btn-gold btn-sm" onclick="qzSubmit()">📊 تسليم وإظهار النتيجة</button>
+        </div>
+      </div>
+      <div id="qz-result" style="display:none;"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Add Student -->
 <div class="overlay" id="modal-add-student">
@@ -7389,6 +7473,7 @@ const PAGE_TITLES = {
   'fin-debt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
   settings:'⚙️ الإعدادات',admins:'🛡️ المديرون',media:'🎬 المرئيات',
+  training:'🎓 تأهيل المشرفين',
   'branch-abtal':'🦁 شعبة الأبطال','branch-rowad':'🚀 شعبة الرواد',
   'branch-banat':'👑 شعبة البنات',
   'parents-branch':'👨‍👦 أولياء الأمور — الشعبة',
@@ -9480,6 +9565,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'fin-mkt')   loadFinExp('marketing');
   if (pageId === 'fin-debt')  loadFinDebts();
   if (pageId === 'dashboard') loadSupervisorDashboard();
+  if (pageId === 'training') loadTraining();
   if (pageId === 'weekly') renderWeekly();
   if (pageId === 'walerts') renderWAlerts();
   if (pageId === 'circles') loadCircles();
@@ -17741,6 +17827,477 @@ document.addEventListener('click', function(e){
     box.classList.remove('open');
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════
+   🎓 تأهيل المشرفين — مستويات ← دورات ← فيديوهات + اختبارات + نقاط
+   نفس محتوى تأهيل المعلمين حرفياً (نفس الجداول ونفس الـ RPC).
+   كل فيديو يُنهيه المشرف = ٥٠ نقطة، والاختبارات تُصحَّح في القاعدة.
+   ملاحظة: هذا الملف لا يحتوي على أي بيانات ثابتة — كل المحتوى من Supabase.
+   ══════════════════════════════════════════════════════════════════════ */
+const POINTS_PER_VIDEO = 50;
+let TRAINING_LEVELS = [];        // تُحمّل من get_training_tree()
+let EXAMS_META = {};             // بيانات الاختبارات (بدون أسئلة/إجابات)
+let TR_EXAM_DONE = {};           // { exam_id: {percent, points} } — نتيجة مسجّلة = مقفول
+let TR_WATCHED = new Set();
+let TR_TITLES = {};
+let TR_ME = null;                // المستخدم الحالي (مشرف/مدير)
+
+let _qzState = null, _qzTimer = null, _qzEndTs = 0;
+let _trCurLevel = null, _trPlaying = null, _trPlayer = null, _trPollTimer = null;
+let _trMaxTime = 0;              // أقصى نقطة اتشافت فعلاً (ثواني) — لمنع السحب للأمام
+let _trSeekMsgAt = 0;
+const _trAwarding = new Set();
+const TR_TITLE_CACHE_KEY = 'sup_tr_titles_v1';
+
+/* ── مساعدات محلية (لوحة المشرف مافيهاش toAr) ── */
+function trAr(n){ if(n===''||n==null) return ''; return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]); }
+function trEsc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function trMe(){ if(!TR_ME) TR_ME=JSON.parse(localStorage.getItem('currentUser')||'{}'); return TR_ME; }
+function trEl(id){ return document.getElementById(id); }
+
+/* ══ المؤقّت ══ */
+function clearQzTimer(){ if(_qzTimer){ clearInterval(_qzTimer); _qzTimer=null; } }
+function qzStartTimer(mins){
+  clearQzTimer();
+  _qzEndTs=Date.now()+(mins||30)*60*1000;
+  qzTickTimer();
+  _qzTimer=setInterval(qzTickTimer,1000);
+}
+function qzTickTimer(){
+  const rem=Math.max(0,Math.round((_qzEndTs-Date.now())/1000));
+  const el=trEl('qz-timer');
+  const m=Math.floor(rem/60), sec=rem%60;
+  if(el){
+    el.textContent='⏱️ '+trAr(String(m).padStart(2,'0'))+':'+trAr(String(sec).padStart(2,'0'));
+    if(rem<=300){ el.style.color='var(--red)'; el.style.background='var(--red-pale)'; el.style.borderColor='var(--red)'; }
+    else{ el.style.color='var(--emerald)'; el.style.background='var(--pale)'; el.style.borderColor='var(--border)'; }
+  }
+  if(rem<=0){ clearQzTimer(); if(_qzState){ showToast('⏰ انتهى وقت الاختبار — سيتم التسليم تلقائياً'); qzShowResult(); } }
+}
+
+/* ══ الاختبارات ══ */
+function trExamHas(cid){ return !!EXAMS_META[cid]; }
+// أكثر من اختبار للدورة = أجزاء. need = الفيديوهات اللازمة لفتح الجزء.
+function trCourseExams(c){
+  const ex=(c.exams||[]); const vids=c.videos||[];
+  const need=e=>{ const n=(e.need_after&&e.need_after>0)?e.need_after:vids.length; return vids.slice(0,n); };
+  if(ex.length<=1) return ex.map(e=>({id:e.id, name:null, count:e.count, mins:e.mins, need:need(e)}));
+  const P=['الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع','الجزء الخامس','الجزء السادس'];
+  return ex.map((e,i)=>({id:e.id, name:(P[i]||('الجزء '+trAr(i+1))), count:e.count, mins:e.mins, need:need(e)}));
+}
+function trExamMins(eid){ return (EXAMS_META[eid] && EXAMS_META[eid].mins) || 30; }
+
+async function openQuiz(cid){
+  const meta=EXAMS_META[cid]; if(!meta) return;
+  if(TR_EXAM_DONE[cid]){ showToast('🔒 تم أداء هذا الاختبار — لا يمكن إعادته إلا بإذن المدير'); return; }
+  // تأكيد ملكية النتيجة من جديد (منع سباق)
+  try{
+    const {data}=await db.from('teacher_exam_results').select('percent,points').eq('teacher_id',trMe().id).eq('exam_id',cid).maybeSingle();
+    if(data){ TR_EXAM_DONE[cid]={percent:data.percent,points:data.points}; renderTrCourses(); showToast('🔒 تم أداء هذا الاختبار مسبقاً'); return; }
+  }catch(e){}
+  // الأسئلة من القاعدة — بدون الإجابات الصحيحة إطلاقاً
+  let ex;
+  try{
+    const {data,error}=await db.rpc('get_exam_questions',{p_exam_id:cid});
+    if(error) throw error; ex=data;
+  }catch(e){ showToast('⚠️ تعذّر تحميل الاختبار: '+(e.message||e.code||'')); return; }
+  if(!ex || !ex.questions || !ex.questions.length){ showToast('لا توجد أسئلة لهذا الاختبار بعد'); return; }
+  _qzState={cid, qs:ex.questions, idx:0, answers:new Array(ex.questions.length).fill(-1)};
+  trEl('qz-title').textContent='🎯 '+(ex.title||meta.title||'الاختبار');
+  trEl('qz-result').style.display='none';
+  trEl('qz-quiz').style.display='';
+  openModal('modal-tr-exam');
+  qzStartTimer(ex.mins||trExamMins(cid));
+  renderQzQ();
+}
+function renderQzQ(){
+  const s=_qzState; if(!s) return;
+  const total=s.qs.length, q=s.qs[s.idx];
+  trEl('qz-progress-txt').textContent='سؤال '+trAr(s.idx+1)+' من '+trAr(total);
+  trEl('qz-progress-bar').style.width=Math.round((s.idx+1)/total*100)+'%';
+  trEl('qz-nav').innerHTML=s.qs.map((_,i)=>{
+    const ans=s.answers[i]>=0, cur=i===s.idx;
+    const bg=cur?'var(--jade)':(ans?'var(--mint)':'#fff'), col=(cur||ans)?'#fff':'var(--mid)', bd=cur?'var(--jade)':(ans?'var(--mint)':'var(--border)');
+    return `<button onclick="qzGoto(${i})" title="سؤال ${trAr(i+1)}" style="width:31px;height:31px;border-radius:8px;border:1.5px solid ${bd};background:${bg};color:${col};font-size:.74rem;font-weight:800;cursor:pointer;transition:all .12s;">${trAr(i+1)}</button>`;
+  }).join('');
+  trEl('qz-question').textContent=q.q;
+  const cur=s.answers[s.idx]; const L=['أ','ب','ج','د'];
+  trEl('qz-options').innerHTML=q.opts.map((o,i)=>`
+    <div onclick="qzSelect(${i})" style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border:2px solid ${cur===i?'var(--jade)':'var(--border)'};background:${cur===i?'var(--pale)':'#fff'};border-radius:12px;cursor:pointer;transition:all .12s;" onmouseenter="if(${cur}!==${i})this.style.borderColor='var(--mint)'" onmouseleave="if(${cur}!==${i})this.style.borderColor='var(--border)'">
+      <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${cur===i?'var(--jade)':'var(--pale)'};color:${cur===i?'#fff':'var(--emerald)'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.86rem;">${L[i]}</span>
+      <span style="font-size:.9rem;font-weight:600;color:var(--forest);line-height:1.6;padding-top:3px;">${trEsc(o)}</span>
+    </div>`).join('');
+  const first=s.idx===0, last=s.idx===total-1;
+  const pv=trEl('qz-prev-btn'), nx=trEl('qz-next-btn');
+  pv.disabled=first; pv.style.opacity=first?'.45':'1'; pv.style.cursor=first?'not-allowed':'pointer';
+  nx.disabled=last;  nx.style.opacity=last?'.45':'1';  nx.style.cursor=last?'not-allowed':'pointer';
+}
+function qzSelect(i){ if(!_qzState) return; _qzState.answers[_qzState.idx]=i; renderQzQ(); }
+function qzGoto(i){ if(!_qzState) return; _qzState.idx=i; renderQzQ(); }
+function qzPrev(){ if(_qzState && _qzState.idx>0){ _qzState.idx--; renderQzQ(); } }
+function qzNext(){ if(_qzState && _qzState.idx<_qzState.qs.length-1){ _qzState.idx++; renderQzQ(); } }
+function qzSubmit(){
+  const s=_qzState; if(!s) return;
+  const un=s.answers.filter(a=>a<0).length;
+  let msg='هل أنت متأكد من تسليم الاختبار وإظهار النتيجة؟\n\n⚠️ بعد التسليم لا يمكن إعادة الاختبار إلا بإذن المدير، ولا الرجوع لمراجعة الأسئلة.';
+  if(un>0) msg='لديك '+trAr(un)+' سؤالاً بدون إجابة (سيُحتسب خطأً).\n\n'+msg;
+  if(!confirm(msg)) return;
+  qzShowResult();
+}
+async function qzShowResult(){
+  const s=_qzState; if(!s) return;
+  clearQzTimer();
+  const cid=s.cid, total=s.qs.length;
+  const answers=s.answers.map(a=>(a==null?-1:a));
+  trEl('qz-quiz').style.display='none';
+  trEl('qz-result').style.display='';
+  trEl('qz-result').innerHTML='<div style="text-align:center;padding:40px 18px;color:var(--mid);font-weight:700;">⏳ جارٍ التصحيح ورصد النتيجة...</div>';
+  // التصحيح والنقاط تُحسب في القاعدة — العميل يرسل اختياراته فقط
+  let correct=0, percent=0, points=0;
+  try{
+    const {data,error}=await db.rpc('record_exam_result',{p_exam_id:cid, p_answers:answers});
+    if(error) throw error;
+    correct=(data&&typeof data.correct==='number')?data.correct:0;
+    percent=(data&&typeof data.percent==='number')?data.percent:0;
+    points =(data&&typeof data.points==='number')?data.points:0;
+    TR_EXAM_DONE[cid]={percent,points};
+    refreshTrPoints();
+  }catch(e){
+    trEl('qz-result').innerHTML='<div style="text-align:center;padding:32px 18px;"><div style="font-size:2rem;">⚠️</div><div style="color:var(--red);font-weight:800;margin:10px 0;">تعذّر حفظ النتيجة</div><div style="font-size:.82rem;color:var(--light);margin-bottom:16px;">'+trEsc(e.message||e.code||'')+'</div><button class="btn btn-primary btn-sm" onclick="closeQuiz()">تم</button></div>';
+    _qzState=null; return;
+  }
+  const rc = percent>=60;
+  trEl('qz-result').innerHTML=`
+    <div style="text-align:center;padding:24px 18px;">
+      <div style="font-size:3rem;margin-bottom:6px;">${rc?'🎉':'📘'}</div>
+      <div style="font-size:1.15rem;font-weight:800;color:var(--forest);margin-bottom:18px;">${rc?'أحسنت! اجتزت الاختبار':'انتهى الاختبار'}</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="background:var(--pale);border:1px solid var(--border);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--emerald);">${trAr(correct)}/${trAr(total)}</div>
+          <div style="font-size:.76rem;color:var(--light);margin-top:2px;">الدرجة</div></div>
+        <div style="background:var(--pale);border:1px solid var(--border);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--jade);">${trAr(percent)}٪</div>
+          <div style="font-size:.76rem;color:var(--light);margin-top:2px;">النسبة المئوية</div></div>
+        <div style="background:var(--gold-pale);border:1px solid var(--gold-l);border-radius:14px;padding:16px 22px;min-width:120px;">
+          <div style="font-size:1.9rem;font-weight:800;color:var(--gold);">${trAr(points)}</div>
+          <div style="font-size:.76rem;color:var(--gold);margin-top:2px;">نقطة أُضيفت</div></div>
+      </div>
+      <div style="font-size:.82rem;color:var(--light);max-width:420px;margin:0 auto 20px;line-height:1.7;">🔒 لا يمكن إعادة هذا الاختبار إلا بإذن المدير. جزاك الله خيراً على اجتهادك.</div>
+      <button class="btn btn-primary btn-sm" onclick="closeQuiz()">تم</button>
+    </div>`;
+  _qzState=null;
+}
+function closeQuiz(){ clearQzTimer(); closeModal('modal-tr-exam'); _qzState=null; renderTrCourses(); }
+
+/* ══ إحصاءات ══ */
+function trCourseStats(c){ const v=c.videos||[]; let d=0; v.forEach(x=>{ if(TR_WATCHED.has(x)) d++; }); return {done:d,total:v.length}; }
+function trLevelStats(lv){ let d=0,t=0; (lv.courses||[]).forEach(c=>{ const s=trCourseStats(c); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
+function trOverallStats(){ let d=0,t=0; TRAINING_LEVELS.forEach(lv=>{ const s=trLevelStats(lv); d+=s.done; t+=s.total; }); return {done:d,total:t}; }
+function trAllVideoIds(){ const a=[]; TRAINING_LEVELS.forEach(lv=>(lv.courses||[]).forEach(c=>(c.videos||[]).forEach(v=>a.push(v)))); return a; }
+
+function trBar(done,total){
+  const pct = total ? Math.round(done/total*100) : 0;
+  return `<div style="display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;height:9px;background:var(--pale);border-radius:99px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--jade),var(--mint));border-radius:99px;transition:width .4s;"></div>
+    </div>
+    <span style="font-size:.75rem;font-weight:800;color:var(--emerald);min-width:98px;text-align:left;">${trAr(done)}/${trAr(total)} • ${trAr(pct)}٪</span>
+  </div>`;
+}
+
+/* ══ العناوين الحقيقية (oEmbed) مع تخزين محلي ══ */
+function trLoadTitleCache(){ try{ const s=localStorage.getItem(TR_TITLE_CACHE_KEY); if(s) TR_TITLES=JSON.parse(s)||{}; }catch(e){ TR_TITLES={}; } }
+function trSaveTitleCache(){ try{ localStorage.setItem(TR_TITLE_CACHE_KEY, JSON.stringify(TR_TITLES)); }catch(e){} }
+async function fetchTrTitles(){
+  let any=false;
+  await Promise.allSettled(trAllVideoIds().map(async id=>{
+    if(TR_TITLES[id]) return;
+    try{
+      const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+id+'&format=json');
+      if(r.ok){ const j=await r.json(); if(j.title){ TR_TITLES[id]=j.title; any=true;
+        const el=trEl('tr-t-'+id); if(el) el.textContent=j.title;
+        if(_trPlaying && _trPlaying.videoId===id){ const pt=trEl('tr-vid-title'); if(pt) pt.textContent='▶️ '+j.title; }
+      } }
+    }catch(e){}
+  }));
+  if(any) trSaveTitleCache();
+}
+
+/* ══ YouTube IFrame API ══ */
+let _ytReady = (typeof YT!=='undefined' && YT && YT.Player), _ytPending=null;
+function trEnsureYT(cb){
+  if(_ytReady){ cb&&cb(); return; }
+  if(cb) _ytPending=cb;
+  if(!document.getElementById('yt-iframe-api')){
+    const s=document.createElement('script'); s.id='yt-iframe-api'; s.src='https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  }
+}
+window.onYouTubeIframeAPIReady=function(){ _ytReady=true; if(_ytPending){ const c=_ytPending; _ytPending=null; c(); } };
+
+/* ══ التحميل الرئيسي ══ */
+async function loadTraining(){
+  trLoadTitleCache();
+  const me=trMe();
+  if(!me || !me.id){ showToast('⚠️ تعذّر تحديد المستخدم — أعد تسجيل الدخول'); return; }
+  // شجرة المحتوى من القاعدة (مستويات/دورات/فيديوهات/اختبارات)
+  try{
+    const {data,error}=await db.rpc('get_training_tree');
+    if(error) throw error;
+    TRAINING_LEVELS = Array.isArray(data)?data:[];
+  }catch(e){ TRAINING_LEVELS=[]; showToast('⚠️ تعذّر تحميل محتوى التأهيل: '+(e.message||e.code||'')); }
+  EXAMS_META={};
+  TRAINING_LEVELS.forEach(lv=>(lv.courses||[]).forEach(c=>(c.exams||[]).forEach(e=>{
+    EXAMS_META[e.id]={title:e.title, mins:e.mins, count:e.count, need_after:e.need_after, pass_pct:e.pass_pct, course_id:c.id};
+  })));
+  try{
+    const {data}=await db.from('teacher_training_progress').select('video_id').eq('teacher_id',me.id);
+    TR_WATCHED=new Set((data||[]).map(r=>r.video_id));
+  }catch(e){ TR_WATCHED=new Set(); }
+  try{
+    const {data}=await db.from('teacher_exam_results').select('exam_id,percent,points').eq('teacher_id',me.id);
+    TR_EXAM_DONE={}; (data||[]).forEach(r=>{ TR_EXAM_DONE[r.exam_id]={percent:r.percent,points:r.points}; });
+  }catch(e){ TR_EXAM_DONE={}; }
+  refreshTrPoints();
+  trBackToLevels();
+  trEnsureYT();
+  fetchTrTitles();
+}
+
+/* ══ منظر المستويات ══ */
+function trBackToLevels(){
+  const cv=trEl('tr-courses-view'), lvv=trEl('tr-levels-view');
+  if(cv) cv.style.display='none'; if(lvv) lvv.style.display='';
+  _trCurLevel=null; renderTrLevels();
+}
+function renderTrLevels(){
+  renderTrOverall();
+  const g=trEl('tr-levels-grid'); if(g) g.innerHTML=TRAINING_LEVELS.map(trLevelCard).join('');
+}
+function renderTrOverall(){
+  const {done,total}=trOverallStats(); const pct=total?Math.round(done/total*100):0;
+  const el=trEl('tr-overall'); if(!el) return;
+  el.innerHTML=`<div style="background:linear-gradient(135deg,var(--forest),var(--emerald));border-radius:var(--r);padding:16px 20px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+      <div style="font-size:.95rem;font-weight:800;">🎯 إجمالي تقدّمك في التأهيل</div>
+      <div style="font-size:.8rem;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:99px;font-weight:800;">🏆 من الفيديوهات: ${trAr(done*POINTS_PER_VIDEO)} نقطة</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;height:10px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--gold-l);border-radius:99px;transition:width .4s;"></div></div>
+      <span style="font-size:.8rem;font-weight:800;min-width:100px;text-align:left;">${trAr(done)}/${trAr(total)} فيديو • ${trAr(pct)}٪</span>
+    </div>
+  </div>`;
+}
+// اكتمال المستوى = كل فيديوهاته اتشافت + كل اختبارات دوراته المتاحة اتأدّت
+function trLevelComplete(lv){
+  if(!lv || !lv.courses || !lv.courses.length) return false;
+  const {done,total}=trLevelStats(lv);
+  if(!total || done<total) return false;
+  return lv.courses.every(c=> trCourseExams(c).every(e=> !trExamHas(e.id) || !!TR_EXAM_DONE[e.id]));
+}
+// المستوى مقفول لو اللي قبله لسه مخلصش — يرجّع المستوى السابق أو null
+function trLevelLockedBy(idx){
+  if(idx<=0) return null;
+  const prev=TRAINING_LEVELS[idx-1];
+  return trLevelComplete(prev) ? null : prev;
+}
+
+function trLevelCard(lv,idx){
+  const {done,total}=trLevelStats(lv); const nC=(lv.courses||[]).length;
+  const prereq=trLevelLockedBy(idx);
+  const soon=!prereq && nC===0;
+  const locked=!!prereq || soon;
+  const complete=trLevelComplete(lv);
+  const badge = prereq
+    ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">🔒 مقفول</span>'
+    : soon
+      ? '<span class="badge bg-gray" style="background:rgba(255,255,255,.15);color:#fff;">قريباً</span>'
+      : (complete ? '<span class="badge bg-green">✅ مكتمل</span>' : '<span class="badge bg-gold">قيد التقدّم</span>');
+  const chips = prereq
+    ? `<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;line-height:1.7;">🔒 يُفتح بعد إتمام <strong style="color:var(--emerald);">${trEsc(prereq.name)}</strong><br><span style="font-size:.75rem;">(مشاهدة كل الفيديوهات + اجتياز اختبارات الدورات)</span></div>`
+    : nC
+      ? lv.courses.map(c=>`<span style="display:block;background:var(--pale);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.79rem;font-weight:700;color:var(--forest);">${trEsc(c.name)}</span>`).join('')
+      : '<div style="font-size:.82rem;color:var(--light);text-align:center;padding:10px 0;">الدورات قريباً بإذن الله 🌿</div>';
+  const btnTxt = prereq ? '🔒 مقفول' : (soon ? 'قريباً' : 'ادخل المستوى ←');
+  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;${prereq?'opacity:.72;':''}">
+    <div style="background:linear-gradient(135deg,${prereq?'#5a6b61,#7d8f84':'var(--forest),var(--emerald)'});padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="font-family:Amiri,serif;font-size:1.28rem;font-weight:800;color:${prereq?'rgba(255,255,255,.85)':'var(--gold-l)'};">${trEsc(lv.name)}</div>${badge}
+    </div>
+    <div style="padding:15px 18px;display:flex;flex-direction:column;gap:11px;flex:1;">
+      <div style="display:flex;flex-direction:column;gap:7px;">${chips}</div>
+      ${(!prereq&&total)?trBar(done,total):''}
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--mid);border-top:1px solid var(--border);padding-top:10px;margin-top:auto;">
+        <span>📚 ${trAr(nC)} دورة</span><span>🎬 ${trAr(total)} فيديو</span><span>🏆 ${trAr(total*POINTS_PER_VIDEO)} نقطة</span>
+      </div>
+      <button class="btn ${locked?'btn-outline':'btn-primary'} btn-sm" ${locked?'disabled style="opacity:.55;cursor:not-allowed;"':''} onclick="openLevel('${lv.id}')">${btnTxt}</button>
+    </div>
+  </div>`;
+}
+
+/* ══ منظر الدورات ══ */
+function openLevel(id){
+  const idx=TRAINING_LEVELS.findIndex(l=>l.id===id); if(idx<0) return;
+  const lv=TRAINING_LEVELS[idx]; if(!lv.courses || !lv.courses.length) return;
+  const prereq=trLevelLockedBy(idx);
+  if(prereq){ showToast('🔒 لازم تُتم '+prereq.name+' الأول'); return; }
+  _trCurLevel=id;
+  trEl('tr-levels-view').style.display='none';
+  trEl('tr-courses-view').style.display='';
+  trEl('tr-level-title').textContent=lv.name;
+  renderTrCourses();
+}
+function renderTrCourses(){
+  const lv=TRAINING_LEVELS.find(l=>l.id===_trCurLevel); if(!lv) return;
+  const {done,total}=trLevelStats(lv);
+  const p=trEl('tr-level-progress');
+  if(p) p.innerHTML=`<div style="background:var(--pale);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;">
+       <div style="font-size:.85rem;font-weight:800;color:var(--forest);margin-bottom:10px;">📊 تقدّمك في ${trEsc(lv.name)}</div>${trBar(done,total)}
+     </div>`;
+  const list=trEl('tr-courses-list');
+  if(list) list.innerHTML=lv.courses.map(c=>trCourseCard(c,lv)).join('');
+}
+function trCourseCard(c,lv){
+  const {done,total}=trCourseStats(c); const complete=total>0 && done===total;
+  const cBadge = complete ? '<span class="badge bg-green">✅ مكتملة</span>' : '<span class="badge bg-gold">'+trAr(done)+'/'+trAr(total)+'</span>';
+  const rows=(c.videos||[]).map((v,i)=>{
+    const w=TR_WATCHED.has(v); const title=TR_TITLES[v]?trEsc(TR_TITLES[v]):('فيديو تدريبي '+trAr(i+1));
+    return `<div onclick="playTrVideo('${v}','${c.id}','${lv.id}')" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;background:${w?'var(--pale)':'#fff'};transition:background .15s;" onmouseenter="this.style.background='var(--gold-pale)'" onmouseleave="this.style.background='${w?'var(--pale)':'#fff'}'">
+      <div style="position:relative;flex-shrink:0;">
+        <img src="https://img.youtube.com/vi/${v}/mqdefault.jpg" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v}/default.jpg'" style="width:78px;height:47px;object-fit:cover;border-radius:6px;display:block;">
+        <div style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.72);color:#fff;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:99px;">${trAr(i+1)}</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div id="tr-t-${v}" style="font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.5;">${title}</div>
+        <div style="font-size:.7rem;color:var(--light);margin-top:2px;">🏆 ٥٠ نقطة عند الإتمام</div>
+      </div>
+      ${w?'<span class="badge bg-green" style="flex-shrink:0;">✅ تمّت</span>':'<span style="flex-shrink:0;color:var(--jade);font-size:1.35rem;line-height:1;">▶</span>'}
+    </div>`;
+  }).join('');
+  const exList = trCourseExams(c);
+  const exam = exList.length ? exList.map(e=>{
+    const w=e.need.filter(v=>TR_WATCHED.has(v)).length, n=e.need.length;
+    const unlocked=n>0 && w===n;
+    const lbl=e.name ? 'اختبار '+e.name : 'اختبار نهاية الدورة';
+    const r=TR_EXAM_DONE[e.id];
+    if(r)
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px solid var(--mint);border-radius:10px;padding:11px;color:var(--emerald);font-size:.82rem;font-weight:800;text-align:center;">✅ ${lbl} — نتيجتك ${trAr(r.percent)}٪ (${trAr(r.points)} نقطة) • لا يمكن إعادته إلا بإذن المدير</div>`;
+    if(!unlocked)
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🔒 ${lbl} — أكمِل مشاهدة فيديوهاته لفتحه (${trAr(w)}/${trAr(n)})</div>`;
+    return `<button class="btn btn-gold btn-sm" style="width:100%;" onclick="openQuiz('${e.id}')">🎯 ابدأ ${lbl} (${trAr(e.count||0)} سؤالاً • ${trAr(e.mins||30)} دقيقة)</button>`;
+  }).join('<div style="height:8px;"></div>')
+  : `<div style="display:flex;align-items:center;gap:8px;justify-content:center;background:var(--pale);border:1px dashed var(--border);border-radius:10px;padding:11px;color:var(--light);font-size:.8rem;font-weight:700;text-align:center;">🎯 اختبار نهاية الدورة — قيد الإعداد، قريباً بإذن الله</div>`;
+  return `<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);">
+    <div style="background:linear-gradient(135deg,var(--forest),var(--emerald));padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:1.02rem;font-weight:800;color:#fff;">📘 ${trEsc(c.name)}</div>${cBadge}
+    </div>
+    <div style="padding:14px 18px;">
+      <div style="margin-bottom:14px;">${trBar(done,total)}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>
+      <div style="margin-top:16px;border-top:1px dashed var(--border);padding-top:14px;">${exam}</div>
+    </div>
+  </div>`;
+}
+
+/* ══ تشغيل الفيديو + رصد الإتمام ══ */
+function playTrVideo(videoId,courseId,levelId){
+  _trPlaying={videoId,courseId,levelId};
+  trEl('tr-vid-title').textContent='▶️ '+(TR_TITLES[videoId]||'الفيديو');
+  const already=TR_WATCHED.has(videoId);
+  const st=trEl('tr-vid-status'), mb=trEl('tr-mark-btn');
+  if(already){ st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تمت مشاهدة هذا الفيديو — احتُسبت نقاطه من قبل</span>'; mb.style.display='none'; }
+  else{ st.textContent='شاهد الفيديو كاملاً — لا يمكن تجاوز الأجزاء التي لم تشاهدها.'; mb.style.display='none'; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
+  _trMaxTime=0; _trSeekMsgAt=0;
+  openModal('modal-tr-video');
+  trEnsureYT(()=>{
+    if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
+    const host=trEl('tr-yt-player'); host.innerHTML='<div id="tr-yt-mount" style="width:100%;height:100%;"></div>';
+    _trPlayer=new YT.Player('tr-yt-mount',{
+      videoId:videoId,
+      playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,origin:location.origin},
+      events:{
+        onReady:e=>{ try{e.target.playVideo();}catch(_){} try{e.target.setPlaybackRate(1);}catch(_){} startTrPoll(); },
+        onPlaybackRateChange:e=>{ if(e.data!==1){ try{_trPlayer.setPlaybackRate(1);}catch(_){} } },
+        onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED && _trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
+      }
+    });
+  });
+}
+function startTrPoll(){
+  if(_trPollTimer) clearInterval(_trPollTimer);
+  _trPollTimer=setInterval(()=>{
+    if(!_trPlayer||!_trPlaying) return;
+    try{
+      const d=_trPlayer.getDuration?_trPlayer.getDuration():0;
+      const t=_trPlayer.getCurrentTime?_trPlayer.getCurrentTime():0;
+      if(d<=0) return;
+      // منع السحب للأمام
+      if(t > _trMaxTime + 2.2){
+        try{ _trPlayer.seekTo(_trMaxTime, true); }catch(_){}
+        const now=Date.now();
+        if(now-_trSeekMsgAt>2500){ _trSeekMsgAt=now; showToast('⚠️ لا يمكن تجاوز ما لم تشاهده — أكمل الفيديو بالترتيب'); }
+      } else if(t > _trMaxTime){
+        _trMaxTime=t;
+      }
+      const mb=trEl('tr-mark-btn');
+      if(mb && !TR_WATCHED.has(_trPlaying.videoId) && _trMaxTime/d>=0.80 && mb.style.display==='none') mb.style.display='';
+      if(_trMaxTime/d>=0.95) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
+    }catch(e){}
+  },600);
+}
+function trConfirmWatched(){
+  if(!_trPlaying) return;
+  try{
+    const d=_trPlayer&&_trPlayer.getDuration?_trPlayer.getDuration():0;
+    if(d>0 && _trMaxTime/d < 0.80){ showToast('⚠️ أكمل مشاهدة الفيديو أولاً'); return; }
+  }catch(_){}
+  markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId);
+}
+function closeTrVideo(){
+  if(_trPollTimer){ clearInterval(_trPollTimer); _trPollTimer=null; }
+  if(_trPlayer){ try{_trPlayer.destroy();}catch(e){} _trPlayer=null; }
+  const host=trEl('tr-yt-player'); if(host) host.innerHTML='';
+  closeModal('modal-tr-video'); _trPlaying=null;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  const vm=trEl('modal-tr-video'), em=trEl('modal-tr-exam');
+  if(vm && vm.classList.contains('open')){ closeTrVideo(); return; }
+  if(em && em.classList.contains('open')){
+    if(_qzState && !confirm('إغلاق الاختبار سيُلغي إجاباتك الحالية. متأكد؟')) return;
+    closeQuiz();
+  }
+});
+
+async function markTrWatched(videoId,courseId,levelId){
+  if(!videoId || TR_WATCHED.has(videoId) || _trAwarding.has(videoId)) return;
+  _trAwarding.add(videoId);
+  try{
+    // النقاط تُحسب في القاعدة عبر RPC آمنة — العميل لا يكتب النقاط
+    const {data,error}=await db.rpc('award_training_video',{p_video_id:videoId, p_course_id:courseId||null, p_level_id:levelId||null});
+    if(error) throw error;
+    TR_WATCHED.add(videoId);
+    if(data && data>0) showToast('🎉 جزاكم الله خيرًا — أُضيفت ٥٠ نقطة لرصيدك');
+    refreshTrPoints();
+    const st=trEl('tr-vid-status'), mb=trEl('tr-mark-btn');
+    if(_trPlaying && _trPlaying.videoId===videoId){ if(st) st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تم — احتُسب هذا الفيديو</span>'; if(mb) mb.style.display='none'; }
+    const cv=trEl('tr-courses-view');
+    if(cv && cv.style.display!=='none') renderTrCourses(); else renderTrLevels();
+  }catch(e){ showToast('⚠️ تعذّر تسجيل النقاط: '+(e.message||e.code||'')); }
+  finally{ _trAwarding.delete(videoId); }
+}
+
+/* ══ رصيد النقاط في السايدبار ══ */
+async function refreshTrPoints(){
+  try{
+    const me=trMe(); if(!me || !me.id) return;
+    const {data}=await db.from('users').select('points').eq('id',me.id).maybeSingle();
+    const p=(data&&data.points)||0;
+    const el=trEl('sb-points-val'); if(el) el.textContent=trAr(p);
+    const box=trEl('sb-user-points'); if(box) box.style.display='flex';
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(refreshTrPoints,1500); });
 
 </script>
 
