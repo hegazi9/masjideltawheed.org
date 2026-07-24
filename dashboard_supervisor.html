@@ -135,6 +135,7 @@
 </script>
 <script src="theme.js"></script>
 <script src="mushaf_madani.js"></script>
+<script src="notifications.js"></script>
 
 
 <style>
@@ -1044,31 +1045,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
   <div class="tb-right">
     <div class="tb-notif" onclick="openThemePicker()" title="تغيير الثيم" style="font-size:1.1rem;">🎨</div>
-    <div class="tb-notif" id="notif-bell" onclick="toggleNotifDropdown()">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <div class="tb-notif-count" id="notif-count"></div>
-      <div class="notif-dropdown" id="notif-dropdown" onclick="event.stopPropagation()">
-        <div class="notif-dd-head">
-          <div class="notif-dd-top">
-            <span class="notif-dd-title">&#x1F514; الإشعارات</span>
-            <span class="notif-dd-clear" onclick="markAllNotifRead()">تعيين الكل كمقروء</span>
-          </div>
-          <div class="notif-tabs">
-            <div class="notif-tab active" id="ntab-msgs" onclick="switchNotifTab('msgs',this)">
-              <span class="ntab-badge" id="ntab-msgs-badge"></span>رسائل
-            </div>
-            <div class="notif-tab" id="ntab-ann" onclick="switchNotifTab('ann',this)">
-              <span class="ntab-badge" id="ntab-ann-badge"></span>إعلانات
-            </div>
-            <div class="notif-tab" id="ntab-acts" onclick="switchNotifTab('acts',this)">
-              <span class="ntab-badge" id="ntab-acts-badge"></span>أنشطة
-            </div>
-          </div>
-        </div>
-        <div class="notif-dd-body" id="notif-dd-body"></div>
-        <div class="notif-dd-footer" onclick="goToMessages()">عرض كل الرسائل</div>
-      </div>
-    </div>
     <div class="tb-date" id="tb-date"></div>
   </div>
 </div>
@@ -2934,7 +2910,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       <select id="subsrep-teacher" onchange="renderSubsRep()"><option value="">كل المعلمين</option></select></div>
     <div class="fg" style="margin:0;min-width:170px;"><label>الحالة</label>
       <select id="subsrep-status" onchange="renderSubsRep()">
-        <option value="all">الكل</option><option value="due">المتأخرون فقط</option><option value="paid">المكتملون فقط</option>
+        <option value="all">الكل</option><option value="due">المتأخرون فقط</option><option value="paid">المكتملون فقط</option><option value="spon">المكفولون فقط</option>
       </select></div>
     <button class="btn btn-outline btn-sm" onclick="loadSubsRep(true)" style="margin-bottom:2px;">🔄 تحديث</button>
     <div style="font-size:.72rem;color:var(--light);flex:1;line-height:1.7;">البيان بيتحدّث تلقائيًا مع كل عملية دفع.<br>سعر الشهر يضبطه المدير من إعدادات الخزنة.</div>
@@ -3804,19 +3780,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   <div class="section-title"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> المصروفات</div>
   <div style="font-size:.82rem;color:var(--light);margin-bottom:22px;">اختر بند المصروفات المطلوب.</div>
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
-    <div onclick="nav(null,'fin-sal')"
-      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--emerald);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
-      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
-      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">مرتبات</div>
-          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">المرتبات الشهرية والحوافز</div>
-        </div>
-        <div style="font-size:1.3rem;color:var(--emerald);">‹</div>
-      </div>
-    </div>
     <div onclick="nav(null,'fin-food')"
       style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
       onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
@@ -3997,36 +3960,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
           </tr>
         </thead>
         <tbody id="fin-subs-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ══ PAGE: مرتبات ══ -->
-<div id="page-fin-sal" class="page">
-  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
-    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
-    <span style="margin:0 8px;">/ </span>
-    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
-    <span style="margin:0 8px;">/ </span>
-    <span>مرتبات</span>
-  </div>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> المرتبات</div>
-    <button class="btn btn-primary" onclick="openSalModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة مرتب</button>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> سجل المرتبات</div>
-      <span class="badge bg-green" id="fin-sal-total">— ج.م</span>
-    </div>
-    <div class="card-body card-body-0" style="overflow-x:auto;">
-      <table class="tbl">
-        <thead><tr>
-          <th style="text-align:center;">م</th><th>اسم المستلم</th><th>المبلغ</th><th>نوع المرتب</th>
-          <th>المدير</th><th>التاريخ</th><th>ملاحظات</th>
-        </tr></thead>
-        <tbody id="fin-sal-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -7468,7 +7401,7 @@ const PAGE_TITLES = {
   reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg> الشؤون المالية',
   'fin-rev':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> الواردات','fin-exp':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> المصروفات',
   'fin-don':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> التبرعات','fin-spon':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> الكفالات','fin-subs':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg> اشتراكات الطلاب',
-  'fin-sal':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> المرتبات','fin-food':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> طعام','fin-maint':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> صيانة',
+'fin-food':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> طعام','fin-maint':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> صيانة',
   'fin-mot':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> تحفيز وترفيه','fin-purch':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg> مشتريات','fin-mkt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> تسويق',
   'fin-debt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
@@ -7749,196 +7682,10 @@ async function saveEditStudent() {
 }
 
 // ══════════════════════════════════════
-// NOTIFICATION SYSTEM
+// NOTIFICATION SYSTEM → اتنقل بالكامل لـ notifications.js
+// المصدر: جدول public.notifications (Realtime) — مفيش localStorage
+// الدوال القديمة متاحة كـ shims من نفس الملف
 // ══════════════════════════════════════
-let NOTIF_ANN_DATA=[], NOTIF_MSG_DATA=[], NOTIF_ACT_DATA=[], NOTIF_CUR_TAB='msgs';
-const NK_ANN='nr_ann_a', NK_MSG='nr_msg_a', NK_ACT='nr_act_a';
-function _nkGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){return[];} }
-function _nkSet(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
-function _nkMark(k,id){ const a=_nkGet(k); if(!a.includes(String(id))) a.push(String(id)); _nkSet(k,a); }
-function _nkMarkAll(k,arr){ _nkSet(k,arr.map(x=>String(x.id))); }
-function _nkIsRead(k,id){ return _nkGet(k).includes(String(id)); }
-function _nkFmt(iso){
-  if(!iso) return '';
-  const d=new Date(iso),now=new Date(),diff=(now-d)/1000;
-  if(diff<60) return 'الآن';
-  if(diff<3600) return Math.floor(diff/60)+' د';
-  if(diff<86400) return Math.floor(diff/3600)+' س';
-  if(diff<172800) return 'أمس';
-  return d.toLocaleDateString('ar-EG',{day:'numeric',month:'short'});
-}
-
-async function loadNotifications(){
-  const cu=JSON.parse(localStorage.getItem('currentUser')||'{}');
-  const myId=String(cu.id||'');
-  // تاب الرسائل — جيب الواردة (to_id=myId) والمرسلة (sender_id=myId)
-  try{
-    const{data}=await db.from('messages').select('id,subject,body,sender_name,sender_role,sender_id,created_at,to_id,to_name,to_role,is_read').or(`sender_id.eq.${myId},to_id.eq.${myId}`).order('created_at',{ascending:false}).limit(100);
-    const all=(data||[]).filter(m=>!m.deleted && !m.is_draft);
-    const inbox=all.filter(m=>String(m.to_id)===myId).map(m=>({...m,_isSent:false}));
-    const sent=all.filter(m=>String(m.sender_id)===myId && String(m.to_id)!==myId).map(m=>({...m,_isSent:true}));
-    NOTIF_MSG_DATA=[...inbox,...sent].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,50);
-  }catch(e){ NOTIF_MSG_DATA=[]; }
-  // تاب الإعلانات
-  try{
-    const{data}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false}).limit(30);
-    NOTIF_ANN_DATA=data||[];
-  }catch(e){ NOTIF_ANN_DATA=[]; }
-  // تاب الأنشطة
-  try{ NOTIF_ACT_DATA=JSON.parse(localStorage.getItem('sv_actions_log')||'[]'); }catch(e){ NOTIF_ACT_DATA=[]; }
-  _notifRender();
-  _notifUpdateBell();
-}
-
-function switchNotifTab(tab,el){
-  NOTIF_CUR_TAB=tab;
-  document.querySelectorAll('.notif-tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  _notifRender();
-}
-
-function _notifRender(){
-  const body=document.getElementById('notif-dd-body');
-  if(!body) return;
-  if(NOTIF_CUR_TAB==='msgs')     _renderNMsgs(body);
-  else if(NOTIF_CUR_TAB==='ann') _renderNAnn(body);
-  else                            _renderNActs(body);
-  _notifUpdateBadges();
-}
-
-function _renderNMsgs(body){
-  if(!NOTIF_MSG_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد رسائل</div>'; return; }
-  const colors={teacher:'#1e5c36',student:'#1d6fa4',parent:'#6b3fa0',supervisor:'#c8920a',admin:'#0f2318'};
-  body.innerHTML=NOTIF_MSG_DATA.slice(0,30).map(m=>{
-    const read=_nkIsRead(NK_MSG,m.id);
-    const isSent=m._isSent||false;
-    const col=colors[m.sender_role]||'#2d7a50';
-    const init=(m.sender_name||'؟')[0];
-    const dirLabel=isSent
-      ?`<span style="font-size:.6rem;background:#e8f2fb;color:#1d6fa4;padding:1px 5px;border-radius:99px;font-weight:700;">مُرسَل → ${m.to_name||''}</span>`
-      :`<span style="font-size:.6rem;background:var(--pale);color:var(--jade);padding:1px 5px;border-radius:99px;font-weight:700;">وارد</span>`;
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadMsg('${m.id}')">
-      <div class="notif-item-icon" style="background:${col};color:#fff;font-size:.85rem;font-weight:800;">${init}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${m.subject||'(بدون موضوع)'}</div>
-        <div class="notif-item-body">${m.sender_name||''}: ${m.body||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(m.created_at)}</span>
-          ${dirLabel}
-          ${(!isSent&&!read)?'<span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;flex-shrink:0;"></span>':''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function _renderNAnn(body){
-  const rm={all:'الجميع',teacher:'المعلمين',student:'الطلاب',parent:'أولياء',supervisor:'المشرفين',employee:'الموظفين'};
-  if(!NOTIF_ANN_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد إعلانات</div>'; return; }
-  body.innerHTML=NOTIF_ANN_DATA.map(a=>{
-    const read=_nkIsRead(NK_ANN,a.id);
-    const roles=(a.target_role||'all').split(',').map(r=>rm[r]||r).join('+');
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadAnn('${a.id}')">
-      <div class="notif-item-icon" style="background:var(--gold-pale);">&#x1F4E2;</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${a.title||''}</div>
-        <div class="notif-item-body">${a.body||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(a.created_at)}</span>
-          <span style="font-size:.62rem;background:var(--pale);color:var(--jade);padding:1px 5px;border-radius:99px;">${roles}</span>
-          ${read?'':'<span style="width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0;"></span>'}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function _renderNActs(body){
-  if(!NOTIF_ACT_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد أنشطة مسجّلة</div>'; return; }
-  body.innerHTML=NOTIF_ACT_DATA.slice(0,30).map(a=>{
-    const read=_nkIsRead(NK_ACT,a.id);
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadAct('${a.id}')">
-      <div class="notif-item-icon" style="background:var(--purple-pale);">&#x1F537;</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${a.actor_name||'مشرف'}</div>
-        <div class="notif-item-body">${a.description||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(a.created_at)}</span>
-          ${a.branch_name?`<span style="font-size:.62rem;background:var(--purple-pale);color:var(--purple);padding:1px 5px;border-radius:99px;">${a.branch_name}</span>`:''}
-          ${read?'':'<span style="width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block;flex-shrink:0;"></span>'}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function notifReadMsg(id){ _nkMark(NK_MSG,id); _notifRender(); _notifUpdateBell(); goToMessages(); }
-function notifReadAnn(id){ _nkMark(NK_ANN,id); _notifRender(); _notifUpdateBell(); }
-function notifReadAct(id){ _nkMark(NK_ACT,id); _notifRender(); _notifUpdateBell(); }
-
-function markAllNotifRead(){
-  _nkMarkAll(NK_MSG,NOTIF_MSG_DATA);
-  _nkMarkAll(NK_ANN,NOTIF_ANN_DATA);
-  _nkMarkAll(NK_ACT,NOTIF_ACT_DATA);
-  _notifRender(); _notifUpdateBell();
-  document.getElementById('notif-dropdown').classList.remove('open');
-}
-
-function _notifUpdateBadges(){
-  const _s=(id,n)=>{ const el=document.getElementById(id); if(el) el.textContent=n>0?n:''; };
-  // تاب الرسائل: عدد الواردة غير مقروءة فقط
-  _s('ntab-msgs-badge', NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length);
-  _s('ntab-ann-badge',  NOTIF_ANN_DATA.filter(a=>!_nkIsRead(NK_ANN,a.id)).length);
-  _s('ntab-acts-badge', NOTIF_ACT_DATA.filter(a=>!_nkIsRead(NK_ACT,a.id)).length);
-}
-
-function _notifUpdateBell(){
-  _notifUpdateBadges();
-  // العداد يحسب: الرسائل الواردة غير مقروءة + الإعلانات + الأنشطة
-  const total=
-    NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length+
-    NOTIF_ANN_DATA.filter(a=>!_nkIsRead(NK_ANN,a.id)).length+
-    NOTIF_ACT_DATA.filter(a=>!_nkIsRead(NK_ACT,a.id)).length;
-  const el=document.getElementById('notif-count');
-  if(el){ el.textContent=total>99?'99+':(total>0?String(total):''); el.style.display=total>0?'flex':'none'; }
-  // حدّث badge الرسائل المُرسَلة في السايد بار واللوحة (كل الرسائل غير المقروءة الواردة)
-  const inboxUnread = NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length;
-  const sbBadge=document.getElementById('sb-msg-badge');
-  const igBadge=document.getElementById('ig-msg-badge');
-  const nb=inboxUnread>0?(inboxUnread>99?'99+':String(inboxUnread)):'';
-  if(sbBadge){ sbBadge.textContent=nb; sbBadge.style.display=nb?'inline-block':'none'; }
-  if(igBadge){ igBadge.textContent=nb; igBadge.style.display=nb?'inline-block':'none'; }
-}
-
-// يُستدعى من _sendMessageToUser لتحديث الجرس فوراً
-function _notifAddMsg(m){ NOTIF_MSG_DATA.unshift(m); _notifUpdateBell(); }
-
-function toggleNotifDropdown(){
-  const dd=document.getElementById('notif-dropdown');
-  const opening=!dd.classList.contains('open');
-  dd.classList.toggle('open');
-  if(opening) loadNotifications();
-}
-
-document.addEventListener('click', function(e){
-  const bell=document.getElementById('notif-bell');
-  if(bell && !bell.contains(e.target)){
-    const dd=document.getElementById('notif-dropdown');
-    if(dd) dd.classList.remove('open');
-  }
-});
-
-function goToMessages(){ document.getElementById('notif-dropdown').classList.remove('open'); navPage('messages'); }
-function logSupervisorAction(type,actor,desc,branch){
-  try{
-    const acts=JSON.parse(localStorage.getItem('sv_actions_log')||'[]');
-    acts.unshift({id:Date.now(),action_type:type,actor_name:actor||'مشرف',description:desc||'',branch_name:branch||'',created_at:new Date().toISOString()});
-    localStorage.setItem('sv_actions_log',JSON.stringify(acts.slice(0,50)));
-    NOTIF_ACT_DATA=acts.slice(0,50);
-    _notifUpdateBell();
-  }catch(e){}
-}
-function renderNotifications(){ _notifRender(); _notifUpdateBell(); }
 
 
 // ═══════════════════════════════════════════════════════
@@ -9557,7 +9304,6 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'fin-don')   loadFinDonations();
   if (pageId === 'fin-spon')  loadFinSponsorships();
   if (pageId === 'fin-subs')  loadFinSubs();
-  if (pageId === 'fin-sal')   loadFinSalaries();
   if (pageId === 'fin-food')  loadFinExp('food');
   if (pageId === 'fin-maint') loadFinExp('maintenance');
   if (pageId === 'fin-mot')   loadFinExp('motivation');
@@ -16663,42 +16409,6 @@ function tcRenderMetric(){
   </div>
 </div>
 
-<!-- إضافة مرتب -->
-<div class="overlay" id="modal-fin-sal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-head">
-      <div class="modal-title">إضافة مرتب</div>
-      <button class="modal-close" onclick="closeModal('modal-fin-sal')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg" style="position:relative;"><label>اسم المستلم *</label>
-        <input type="text" id="sal-sq" placeholder="ابحث باسم المعلم أو المشرف أو الموظف…" autocomplete="off" oninput="finStaffSearch('sal')">
-        <div id="sal-sres" class="fin-sres"></div>
-        <div id="sal-spick" class="fin-spick" style="display:none;"></div>
-      </div>
-      <div class="form-grid-2">
-        <div class="fg"><label>المبلغ (ج.م) *</label>
-          <input type="number" id="sal-amount" min="0" step="1" placeholder="مثال: 1500" autocomplete="off"></div>
-        <div class="fg"><label>نوع المرتب *</label>
-          <select id="sal-kind">
-            <option value="monthly">مرتب شهري</option>
-            <option value="bonus">حوافز</option>
-          </select></div>
-        <div class="fg full"><label>المدير (تلقائي — المسجِّل)</label>
-          <input type="text" id="sal-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
-        <div class="fg full"><label>ملاحظات</label>
-          <textarea id="sal-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
-        <div class="fg full"><label>التاريخ</label>
-          <input type="text" id="sal-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
-      </div>
-    </div>
-    <div class="modal-foot" style="justify-content:center;gap:16px;">
-      <button class="btn btn-primary" style="min-width:130px;" onclick="saveSalary(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-fin-sal')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
 <!-- إضافة مصروف عام -->
 <div class="overlay" id="modal-fin-exp">
   <div class="modal" style="max-width:500px;">
@@ -16755,7 +16465,7 @@ function tcRenderMetric(){
           <input type="text" id="dbt-creditor" placeholder="اسم صاحب الدين" autocomplete="off"></div>
         <div class="fg"><label>البند *</label>
           <select id="dbt-cat">
-            <option value="salaries">مرتبات</option><option value="food">طعام</option>
+            <option value="food">طعام</option>
             <option value="maintenance">صيانة</option><option value="motivation">تحفيز وترفيه</option>
             <option value="purchases">مشتريات</option><option value="marketing">تسويق</option>
           </select></div>
@@ -16992,6 +16702,28 @@ function finValidate(p, needStudent){
   return { amt, pay, rec, notes:(document.getElementById(p+'-notes').value||'').trim() || null };
 }
 
+
+/* ══ قفل الفترة ══ */
+let FIN_LOCK_UNTIL = null;
+async function finLoadLock(){
+  try{
+    const { data } = await db.from('fin_settings').select('v').eq('k','locked_until').single();
+    FIN_LOCK_UNTIL = (data && data.v) || '1900-01-01';
+  }catch(e){ FIN_LOCK_UNTIL = '1900-01-01'; }
+  return FIN_LOCK_UNTIL;
+}
+function finLockBlocks(dateISO){
+  if(!FIN_LOCK_UNTIL) return false;
+  return String(dateISO) <= String(FIN_LOCK_UNTIL);
+}
+function finLockGuard(){
+  if(finLockBlocks(finTodayISO())){
+    showToast('🔒 الفترة مقفولة حتى ' + finDateAr(FIN_LOCK_UNTIL) + ' — التسجيل ممنوع');
+    return false;
+  }
+  return true;
+}
+
 /* ══════════ التبرعات ══════════ */
 /* ══ الإيصالات / القيد العكسي / وسيلة الدفع / نهاية الكفالة ══ */
 /* ══ الإيصالات ══ */
@@ -17084,6 +16816,24 @@ function finSponExpiry(r){
   return '';
 }
 
+/* ══ أسعار الاشتراك لكل شعبة — قراءة فقط ══ */
+let FIN_PRICES = null;
+async function getBranchPrices(force){
+  if(FIN_PRICES && !force) return FIN_PRICES;
+  try{
+    const { data:brs } = await db.from('branches').select('id,name');
+    const { data:pr }  = await db.from('fin_branch_prices').select('branch_id,monthly_price');
+    const map = {}; (pr||[]).forEach(r => map[r.branch_id] = Number(r.monthly_price||0));
+    FIN_PRICES = (brs||[]).map(b => ({ branch_id:b.id, branch_name:b.name, monthly_price: map[b.id] || 0 }));
+  }catch(e){ console.warn('branch prices:', e); FIN_PRICES = FIN_PRICES || []; }
+  return FIN_PRICES;
+}
+function finPrice(branchName){
+  if(!FIN_PRICES) return 0;
+  const b = FIN_PRICES.find(x => finNorm(x.branch_name) === finNorm(branchName));
+  return b ? Number(b.monthly_price||0) : 0;
+}
+
 /* ══════════════════════════════════════════════════════
    تقارير الاشتراكات — لوحة المشرف
    مين دفع ومين متأخر للأشهر الثلاثة، مرتّب حسب المعلم
@@ -17103,12 +16853,19 @@ async function loadSubsRep(force){
       return;
     }
 
-    // سعر الشهر من الإعدادات (قراءة فقط — RLS بيسمح للمشرف)
-    let price = 0;
+    // أسعار الشُّعب (قراءة فقط — RLS بيسمح للمشرف)
+    await getBranchPrices(true);
+
+    // الطلاب المكفولون بكفالة سارية
+    const sponMap = {};
     try{
-      const { data } = await db.from('fin_settings').select('v').eq('k','subs_price').single();
-      price = Number((data && data.v) || 0);
-    }catch(e){ price = 0; }
+      const today0 = finTodayISO();
+      const { data } = await db.from('fin_sponsorships')
+        .select('student_id,sponsor_name,end_date,reversed,reversal_of');
+      (data||[]).filter(r => !r.reversed && !r.reversal_of && r.student_id
+                          && (!r.end_date || r.end_date >= today0))
+        .forEach(r => sponMap[r.student_id] = r.sponsor_name || 'كفيل');
+    }catch(e){ /* بدون تعليم */ }
 
     // كل اشتراكات طلاب المشرف (استبعاد القيود العكسية والملغاة)
     const ids = students.map(s => s.id);
@@ -17133,8 +16890,10 @@ async function loadSubsRep(force){
       const p = paid[st.id] || {};
       const months = [1,2,3].map(m => ({ m, amt: (p[m] != null ? p[m] : null) }));
       const paidCnt = months.filter(x => x.amt != null).length;
+      const sponsor = sponMap[st.id] || null;
       gmap[key].rows.push({ id: st.id, name: st.name, branch: st.branch_name||'—', months,
-                            paidCnt, dueCnt: 3 - paidCnt,
+                            price: finPrice(st.branch_name), sponsor,
+                            paidCnt, dueCnt: sponsor ? 0 : (3 - paidCnt),
                             paidSum: months.reduce((a,x)=>a+(x.amt||0),0) });
     });
 
@@ -17142,7 +16901,7 @@ async function loadSubsRep(force){
       (a.branch.localeCompare(b.branch,'ar')) || (a.teacher.localeCompare(b.teacher,'ar')));
     groups.forEach(g => g.rows.sort((a,b) => (b.dueCnt - a.dueCnt) || a.name.localeCompare(b.name,'ar')));
 
-    SUBSREP = { groups, price };
+    SUBSREP = { groups };
 
     // فلتر المعلمين
     const sel = document.getElementById('subsrep-teacher');
@@ -17158,7 +16917,7 @@ async function loadSubsRep(force){
 }
 
 function renderSubsRep(){
-  const { groups, price } = SUBSREP;
+  const { groups } = SUBSREP;
   const tSel = document.getElementById('subsrep-teacher').value;
   const stat = document.getElementById('subsrep-status').value;
 
@@ -17168,31 +16927,38 @@ function renderSubsRep(){
   // فلترة الطلاب داخل كل مجموعة حسب الحالة
   gs = gs.map(g => {
     let rows = g.rows;
-    if(stat === 'due')  rows = rows.filter(r => r.dueCnt > 0);
-    if(stat === 'paid') rows = rows.filter(r => r.dueCnt === 0);
+    if(stat === 'due')  rows = rows.filter(r => r.dueCnt > 0 && !r.sponsor);
+    if(stat === 'paid') rows = rows.filter(r => r.dueCnt === 0 && !r.sponsor);
+    if(stat === 'spon') rows = rows.filter(r => r.sponsor);
     return Object.assign({}, g, { rows });
   }).filter(g => g.rows.length);
 
   // إجماليات
-  let nSt=0, nPaid=0, nDue=0;
-  gs.forEach(g => g.rows.forEach(r => { nSt++; nPaid += r.paidCnt; nDue += r.dueCnt; }));
-  const totMonths = nSt * 3;
+  let nSt=0, nPaid=0, nDue=0, nSpon=0, dueMoney=0;
+  gs.forEach(g => g.rows.forEach(r => {
+    nSt++; nPaid += r.paidCnt; nDue += r.dueCnt;
+    if(r.sponsor) nSpon++;
+    dueMoney += r.dueCnt * (r.price||0);
+  }));
+  const totMonths = gs.reduce((a,g)=>a+g.rows.filter(r=>!r.sponsor).length*3,0);
   const set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent = v; };
-  set('subsrep-k-st',   finAr(nSt));
+  set('subsrep-k-st',   finAr(nSt) + (nSpon ? ' (منهم '+finAr(nSpon)+' مكفول)' : ''));
   set('subsrep-k-paid', finAr(nPaid));
-  set('subsrep-k-due',  finAr(nDue));
+  set('subsrep-k-due',  finAr(nDue) + (dueMoney ? ' — ' + finMoney(dueMoney) : ''));
   set('subsrep-k-pct',  totMonths ? finAr((nPaid/totMonths*100).toFixed(1))+'٪' : '—');
 
   const myBr = (typeof finMyBranches === 'function') ? finMyBranches().join(' + ') : '';
-  const cell = x => x.amt != null
+  const cell = (x, r) => x.amt != null
     ? '<td class="srep-num"><span class="srep-p">✓ دفع</span>'+(x.amt?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(x.amt)+'</div>':'')+'</td>'
-    : '<td class="srep-num"><span class="srep-d">متأخر</span>'+(price>0?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(price)+'</div>':'')+'</td>';
+    : (r.sponsor
+        ? '<td class="srep-num"><span style="color:var(--gold);font-weight:800;">مكفول</span></td>'
+        : '<td class="srep-num"><span class="srep-d">متأخر</span>'+(r.price>0?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(r.price)+'</div>':'')+'</td>');
 
   let html = '<div class="rep-sheet">'
     + '<div class="rep-head"><div><div class="rep-h1">مدرسة التوحيد القرآنية</div>'
     +   '<div class="rep-h2">تقرير اشتراك الدورة الصيفية ٢٠٢٦م' + (myBr ? ' — ' + finEsc(myBr) : '') + '</div></div>'
     +   '<div class="rep-meta"><div>تاريخ الإصدار: '+finDateAr(finTodayISO())+'</div>'
-    +     '<div>سعر الشهر: '+(price>0?finMoney(price):'غير مضبوط')+'</div>'
+    +     '<div>الأسعار: '+((FIN_PRICES||[]).filter(b=>b.monthly_price>0).map(b=>finEsc(b.branch_name)+' '+finMoney(b.monthly_price)).join(' • ')||'غير مضبوطة')+'</div>'
     +     '<div>عدد الطلاب: '+finAr(nSt)+'</div></div></div>';
 
   if(!gs.length){
@@ -17205,19 +16971,23 @@ function renderSubsRep(){
     const gPaid = g.rows.reduce((a,r)=>a+r.paidCnt,0);
     const gDue  = g.rows.reduce((a,r)=>a+r.dueCnt,0);
     const gSum  = g.rows.reduce((a,r)=>a+r.paidSum,0);
+    const gSpon = g.rows.filter(r=>r.sponsor).length;
     html += '<div class="rep-grp"><span>👨‍🏫 '+finEsc(g.teacher)+' — '+finEsc(g.circle)+' <span style="color:var(--light);font-weight:600;">('+finEsc(g.branch)+')</span></span>'
-      + '<span class="sub">طلاب: '+finAr(g.rows.length)+' • مدفوع: '+finAr(gPaid)+' • متأخر: '+finAr(gDue)+' • محصَّل: '+finMoney(gSum)+'</span></div>';
+      + '<span class="sub">طلاب: '+finAr(g.rows.length)+(gSpon?' • مكفول: '+finAr(gSpon):'')+' • مدفوع: '+finAr(gPaid)+' • متأخر: '+finAr(gDue)+' • محصَّل: '+finMoney(gSum)+'</span></div>';
     html += '<table class="srep-tbl"><thead><tr>'
       + '<th style="width:40px;">م</th><th>اسم الطالب</th>'
       + '<th style="width:110px;">الشهر الأول</th><th style="width:110px;">الشهر الثاني</th><th style="width:110px;">الشهر الثالث</th>'
       + '<th style="width:90px;">الحالة</th></tr></thead><tbody>'
       + g.rows.map((r,i) => {
-          const stTxt = r.dueCnt === 0
-            ? '<span class="badge bg-green">مكتمل</span>'
-            : '<span class="badge bg-red">'+finAr(r.dueCnt)+' متأخر</span>';
+          const stTxt = r.sponsor
+            ? '<span class="badge bg-gold">مكفول</span>'
+            : (r.dueCnt === 0
+                ? '<span class="badge bg-green">مكتمل</span>'
+                : '<span class="badge bg-red">'+finAr(r.dueCnt)+' متأخر</span>');
           return '<tr><td class="srep-num" style="color:var(--light);font-weight:700;">'+finAr(i+1)+'</td>'
-            + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.name)+'</td>'
-            + r.months.map(cell).join('')
+            + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.name)
+            +   (r.sponsor ? '<div style="font-size:.65rem;color:var(--gold);font-weight:700;">كفيل: '+finEsc(r.sponsor)+'</div>' : '')+'</td>'
+            + r.months.map(x => cell(x, r)).join('')
             + '<td class="srep-num">'+stTxt+'</td></tr>';
         }).join('')
       + '</tbody><tfoot><tr><td colspan="2">الإجمالي</td>'
@@ -17230,6 +17000,7 @@ function renderSubsRep(){
 }
 
 function openDonModal(){
+  if(!finLockGuard()) return;
   document.getElementById('don-receipt').value = '';
   document.getElementById('don-amount').value = '';
   document.getElementById('don-donor').value  = '';
@@ -17244,6 +17015,7 @@ async function saveDonation(btn){
   const v = finValidate('don', false); if(!v) return;
   const donor = (document.getElementById('don-donor').value||'').trim();
   if(!donor){ showToast('⚠️ اكتب اسم دافع المبلغ'); return; }
+  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
@@ -17294,6 +17066,7 @@ async function loadFinDonations(){
 
 /* ══════════ الكفالات ══════════ */
 function openSponModal(){
+  if(!finLockGuard()) return;
   document.getElementById('spon-receipt').value = '';
   document.getElementById('spon-start').value   = finTodayISO();
   document.getElementById('spon-amount').value  = '';
@@ -17316,6 +17089,7 @@ async function saveSponsorship(btn){
   if(!finInMySection(s.branch)){ showToast('⚠️ الطالب خارج نطاق شُعبك'); return; }
   const sd = document.getElementById('spon-start').value;
   if(!sd){ showToast('⚠️ اختر تاريخ بداية الكفالة'); return; }
+  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
@@ -17375,6 +17149,7 @@ async function loadFinSponsorships(){
 
 /* ══════════ اشتراكات الطلاب ══════════ */
 function openSubsModal(){
+  if(!finLockGuard()) return;
   document.getElementById('subs-receipt').value = '';
   document.getElementById('subs-sq').value     = '';
   document.getElementById('subs-amount').value = '';
@@ -17412,6 +17187,7 @@ async function saveSubscription(btn){
   const mo = parseInt(document.getElementById('subs-month').value,10);
   const opt = [...document.getElementById('subs-month').options].find(o => +o.value === mo);
   if(opt && opt.disabled){ showToast('⚠️ هذا الشهر مدفوع بالفعل'); return; }
+  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
@@ -17476,121 +17252,6 @@ async function loadFinSubs(){
   }
 }
 
-/* ══════════ المرتبات ══════════ */
-async function getFinStaff(){
-  if(window._finStaff) return window._finStaff;
-  const out = [];
-  try{
-    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin']);
-    (data||[]).forEach(u => { const nm=(u.full_name||'').trim(); if(!nm) return;
-      if(!sameSection({ id:u.id, full_name:u.full_name, role:u.role })) return;
-      out.push({ id:u.id, name:nm, role:FIN_ROLE_AR[u.role]||u.role, job:u.job_title||'' }); });
-  }catch(e){ console.warn('finStaff users:', e); }
-  try{
-    const { data } = await db.from('employees').select('id,name,lname,job');
-    (data||[]).forEach(e => { const nm=((e.name||'')+' '+(e.lname||'')).trim(); if(nm) out.push({ id:null, name:nm, role:'موظف', job:e.job||'' }); });
-  }catch(e){ console.warn('finStaff employees:', e); }
-  const seen = new Set(), list = [];
-  out.forEach(x => { const k = finNorm(x.name); if(!k || seen.has(k)) return; seen.add(k); list.push(x); });
-  list.sort((a,b) => a.name.localeCompare(b.name,'ar'));
-  window._finStaff = list;
-  return list;
-}
-
-function finStaffSearch(p){
-  const q   = document.getElementById(p+'-sq').value.trim();
-  const box = document.getElementById(p+'-sres'); if(!box) return;
-  if(!q){ box.classList.remove('open'); box.innerHTML=''; return; }
-  const nq = finNorm(q);
-  const hits = (window._finStaff||[]).filter(s => finNorm(s.name).includes(nq)).slice(0,25);
-  if(!hits.length){ box.innerHTML = '<div class="fin-sres-empty">لا توجد نتائج</div>'; box.classList.add('open'); return; }
-  box.innerHTML = hits.map((s,i) =>
-    '<div class="fin-sres-item" onclick="finStaffPick(\''+p+'\','+i+')">'
-    + '<div class="fin-sres-name">'+finEsc(s.name)+'</div>'
-    + '<div class="fin-sres-meta">'+finEsc(s.role)+(s.job ? ' • '+finEsc(s.job) : '')+'</div></div>'
-  ).join('');
-  box._hits = hits;
-  box.classList.add('open');
-}
-
-function finStaffPick(p, i){
-  const box = document.getElementById(p+'-sres');
-  const s = (box._hits||[])[i]; if(!s) return;
-  FIN_SEL[p] = { id:s.id, name:s.name, branch:s.role, circle:s.job||'—' };
-  finRenderPick(p);
-  box.classList.remove('open');
-  document.getElementById(p+'-sq').value = '';
-}
-
-async function openSalModal(){
-  await getFinStaff();
-  document.getElementById('sal-sq').value     = '';
-  document.getElementById('sal-amount').value = '';
-  document.getElementById('sal-notes').value  = '';
-  document.getElementById('sal-kind').value   = 'monthly';
-  document.getElementById('sal-by').value     = finMe().name;
-  document.getElementById('sal-date').value   = finDateAr(finTodayISO());
-  document.getElementById('sal-sres').classList.remove('open');
-  finClearPick('sal');
-  openModal('modal-fin-sal');
-}
-
-async function saveSalary(btn){
-  const amt = parseFloat(document.getElementById('sal-amount').value);
-  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
-  const s = FIN_SEL['sal'];
-  if(!s){ showToast('⚠️ اختر اسم المستلم'); return; }
-  finBusy(btn, true);
-  try{
-    const me = finMe();
-    const { error, status } = await db.from('fin_expenses').insert([{
-      category:'salaries', amount:amt,
-      recipient: s.name, recipient_id: s.id, recipient_role: s.branch,
-      kind: document.getElementById('sal-kind').value,
-      by_name: me.name, by_id: me.id,
-      notes: (document.getElementById('sal-notes').value||'').trim() || null,
-      date: finTodayISO(), source:'direct', created_by: me.id
-    }]);
-    if(error) throw error;
-    if(status !== 201 && status !== 200 && status !== 204){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
-    showToast('✅ تم تسجيل المرتب');
-    closeModal('modal-fin-sal');
-    loadFinSalaries();
-  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
-  finBusy(btn, false);
-}
-
-function finSalKindAr(k){ return FIN_SAL_KIND_AR[k] || k || '—'; }
-
-async function loadFinSalaries(){
-  const tb = document.getElementById('fin-sal-tbody'); if(!tb) return;
-  tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
-  try{
-    const { data, error } = await db.from('fin_expenses').select('*').eq('category','salaries')
-      .order('date',{ascending:false}).order('created_at',{ascending:false});
-    if(error) throw error;
-    const rows = data || [];
-    const tot = document.getElementById('fin-sal-total');
-    if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
-    if(!rows.length){
-      tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:34px;">لا توجد مرتبات مسجّلة بعد</td></tr>';
-      return;
-    }
-    tb.innerHTML = rows.map((r,i) =>
-      '<tr><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
-      + '<td><div style="font-weight:700;color:var(--forest);">'+finEsc(r.recipient||'—')+'</div>'
-      +   (r.recipient_role ? '<div style="font-size:.7rem;color:var(--light);">'+finEsc(r.recipient_role)+'</div>' : '') + '</td>'
-      + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
-      + '<td><span class="badge '+(r.kind==='bonus'?'bg-gold':(r.kind==='monthly'?'bg-green':'bg-red'))+'">'+finEsc(finSalKindAr(r.kind))+'</span></td>'
-      + '<td>'+finEsc(r.by_name||'—')+'</td>'
-      + '<td>'+finDateAr(r.date)+'</td>'
-      + '<td style="font-size:.76rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>'
-    ).join('');
-  }catch(e){
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
-  }
-}
-
 /* ══════════ مصروفات عامة ══════════ */
 const FIN_EXP_CFG = {
   food:        { page:'fin-food',  ico:'utensils',  title:'إضافة طعام',    lbl:'نوع الطعام *',  mode:'select', opts:['فطار','غداء','عشاء','ضيافة'] },
@@ -17603,6 +17264,7 @@ let EXP_CAT = null;
 
 function openExpModal(cat){
   const c = FIN_EXP_CFG[cat]; if(!c) return;
+  if(!finLockGuard()) return;
   EXP_CAT = cat;
   document.getElementById('exp-m-title').innerHTML = finIcon(c.ico, 18, 'currentColor') + ' ' + c.title;
   document.getElementById('exp-kind-lbl').textContent = c.lbl;
@@ -17641,6 +17303,7 @@ async function saveExpense(btn){
     wallet = document.getElementById('exp-wallet').value;
     if(!wallet){ showToast('⚠️ اختر المحفظة المدفوع منها'); return; }
   }
+  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
@@ -17696,6 +17359,7 @@ async function loadFinExp(cat){
 
 /* ══════════ الديون ══════════ */
 function openDebtModal(){
+  if(!finLockGuard()) return;
   document.getElementById('dbt-amount').value   = '';
   document.getElementById('dbt-creditor').value = '';
   document.getElementById('dbt-notes').value    = '';
@@ -17711,6 +17375,7 @@ async function saveDebt(btn){
   if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
   const cr = (document.getElementById('dbt-creditor').value||'').trim();
   if(!cr){ showToast('⚠️ اكتب اسم صاحب الدين'); return; }
+  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
@@ -17817,6 +17482,8 @@ async function confirmDebtPay(btn){
   }catch(e){ showToast('❌ تعذّر التأكيد: '+(e.message||e.code||'')); }
   finBusy(btn, false);
 }
+
+finLoadLock();
 
 /* إغلاق نتائج البحث عند الضغط بره */
 document.addEventListener('click', function(e){
@@ -18301,5 +17968,6 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(refreshTrPoints,15
 
 </script>
 
+<script src="messages.js"></script>
 </body>
 </html>

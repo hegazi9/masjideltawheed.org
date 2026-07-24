@@ -134,6 +134,7 @@
 </script>
 <script src="theme.js"></script>
 <script src="mushaf_madani.js"></script>
+<script src="notifications.js"></script>
 
 <style>
 /* ── THEME CSS VARS (يتغير بـ theme.js) ── */
@@ -1017,7 +1018,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div class="sb-item" onclick="nav(this,'media')">
       <span class="sb-icon">🎬</span> المرئيات
     </div>
-    <div class="sb-item" onclick="nav(this,'library')">
+    <div class="sb-item" onclick="nav(this,'library')" style="display:none;">
       <span class="sb-icon">📚</span> المكتبة
     </div>
     <div class="sb-item" onclick="nav(this,'finance')">
@@ -1048,31 +1049,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       <input type="text" placeholder="ابحث عن طالب أو معلم...">
     </div>
     <div class="tb-notif" onclick="openThemePicker()" title="تغيير الثيم" style="font-size:1.1rem;">🎨</div>
-    <div class="tb-notif" id="notif-bell" onclick="toggleNotifDropdown()" title="الإشعارات">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <div class="tb-notif-count" id="notif-count"></div>
-      <div class="notif-dropdown" id="notif-dropdown" onclick="event.stopPropagation()">
-        <div class="notif-dd-head">
-          <div class="notif-dd-top">
-            <span class="notif-dd-title">&#x1F514; الإشعارات</span>
-            <span class="notif-dd-clear" onclick="markAllNotifRead()">تعيين الكل كمقروء</span>
-          </div>
-          <div class="notif-tabs">
-            <div class="notif-tab active" id="ntab-msgs" onclick="switchNotifTab('msgs',this)">
-              <span class="ntab-badge" id="ntab-msgs-badge"></span>رسائل
-            </div>
-            <div class="notif-tab" id="ntab-ann" onclick="switchNotifTab('ann',this)">
-              <span class="ntab-badge" id="ntab-ann-badge"></span>إعلانات
-            </div>
-            <div class="notif-tab" id="ntab-acts" onclick="switchNotifTab('acts',this)">
-              <span class="ntab-badge" id="ntab-acts-badge"></span>أنشطة
-            </div>
-          </div>
-        </div>
-        <div class="notif-dd-body" id="notif-dd-body"></div>
-        <div class="notif-dd-footer" onclick="goToMessages()">عرض كل الرسائل</div>
-      </div>
-    </div>
     <div class="tb-date" id="tb-date"></div>
   </div>
 </div>
@@ -3860,55 +3836,13 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div></div>
 </div>
 
-<!-- ══ PAGE: LIBRARY (معرض الكتب) ══ -->
+<!-- ══ PAGE: LIBRARY ══ -->
 <div id="page-library" class="page">
-  <div class="card">
-    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
-      <div class="card-title">📚 المكتبة</div>
-      <div style="display:flex;gap:8px;flex:1;justify-content:flex-end;flex-wrap:wrap;align-items:center;">
-        <input id="lib-search" oninput="renderLibraryPage()" placeholder="🔎 ابحث عن كتاب…"
-          style="flex:1;min-width:180px;max-width:320px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:.85rem;">
-        <button class="btn btn-primary btn-sm" onclick="openBookModal()">➕ إضافة كتاب</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-head" style="flex-wrap:wrap;gap:10px;">
-      <div class="card-title" id="lib-count">📖 الكتب</div>
-      <div id="lib-tabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-    </div>
-    <div class="card-body">
-      <div id="lib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px;"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ مودال إضافة/تعديل كتاب ══ -->
-<div class="overlay" id="modal-book">
-  <div class="modal" style="max-width:500px;">
-    <div class="modal-head">
-      <div class="modal-title" id="book-modal-title">➕ إضافة كتاب</div>
-      <button class="modal-close" onclick="closeModal('modal-book')">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="book-id">
-      <div class="fg"><label>عنوان الكتاب</label><input id="book-title" type="text" placeholder="مثال: كتيب الرقية الشرعية"></div>
-      <div class="fg"><label>رابط جوجل درايف</label><input id="book-link" type="text" dir="ltr" style="text-align:left;" placeholder="https://drive.google.com/file/d/.../view"></div>
-      <div class="fg"><label>التصنيف</label>
-        <select id="book-cat">
-          <option value="grade">🎓 الصفوف الدراسية</option>
-          <option value="kunooz">💎 الكنوز الأثرية</option>
-          <option value="ahkam">📗 الأحكام والكتيبات</option>
-          <option value="other">📄 أخرى</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" id="book-save-btn" onclick="saveBook()">💾 حفظ</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-book')">إلغاء</button>
-    </div>
-  </div>
+  <div class="section-title">📚 المكتبة</div>
+  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
+    <div style="font-size:3rem;margin-bottom:12px;">📚</div>
+    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
+  </div></div>
 </div>
 
 <!-- ══ PAGE: FINANCE ══ -->
@@ -4153,7 +4087,16 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
     <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> الكفالات</div>
-    <button class="btn btn-primary" onclick="openSponModal()">➕ إضافة كفالة</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="openSponBulk()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> كفالة جماعية</button>
+      <button class="btn btn-primary" onclick="openSponModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة كفالة</button>
+    </div>
+  </div>
+  <div class="stats-row" style="margin-bottom:18px;">
+    <div class="stat-card"><div class="stat-label">عدد المكفولين</div><div class="stat-value" id="spon-k-st">—</div></div>
+    <div class="stat-card green"><div class="stat-label">إجمالي مبالغ الكفالات</div><div class="stat-value" id="spon-k-sum">—</div></div>
+    <div class="stat-card blue"><div class="stat-label">كفالات سارية</div><div class="stat-value" id="spon-k-act">—</div></div>
+    <div class="stat-card gold"><div class="stat-label">منتهية / قربت تنتهي</div><div class="stat-value" id="spon-k-exp">—</div></div>
   </div>
   <div class="card">
     <div class="card-head">
@@ -4709,12 +4652,22 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
           <input type="number" id="set-opening" step="1" placeholder="0"></div>
         <div class="fg"><label>بتاريخ</label>
           <input type="date" id="set-opening-date"></div>
-        <div class="fg"><label>سعر اشتراك الشهر الواحد (ج.م)</label>
-          <input type="number" id="set-price" step="1" placeholder="0"></div>
         <div class="fg"><label>قفل الفترة حتى تاريخ (منع أي تسجيل قبله أو فيه)</label>
           <input type="date" id="set-lock"></div>
         <button class="btn btn-primary" style="width:100%;" onclick="saveFinSettings(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ الإعدادات</button>
       </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M7.5 7.5h.01"/><path d="M3 6.6V3.6a.6.6 0 0 1 .6-.6h3a2 2 0 0 1 1.4.6l11.4 11.4a2 2 0 0 1 0 2.8l-3.6 3.6a2 2 0 0 1-2.8 0L3.6 10A2 2 0 0 1 3 8.6"/></svg> أسعار اشتراك الشهر لكل شعبة</div>
+      <span class="badge bg-gold">تُطبَّق تلقائيًا عند التسجيل</span>
+    </div>
+    <div class="card-body">
+      <div style="font-size:.76rem;color:var(--light);margin-bottom:12px;">السعر بيتحط تلقائيًا في نافذة إضافة الاشتراك حسب شعبة الطالب، وبيتحسب عليه المتأخرات.</div>
+      <div id="price-rows"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="saveBranchPrices(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ الأسعار</button>
     </div>
   </div>
 
@@ -8753,196 +8706,10 @@ async function saveEditStudent() {
 }
 
 // ══════════════════════════════════════
-// NOTIFICATION SYSTEM
+// NOTIFICATION SYSTEM → اتنقل بالكامل لـ notifications.js
+// المصدر: جدول public.notifications (Realtime) — مفيش localStorage
+// الدوال القديمة متاحة كـ shims من نفس الملف
 // ══════════════════════════════════════
-let NOTIF_ANN_DATA=[], NOTIF_MSG_DATA=[], NOTIF_ACT_DATA=[], NOTIF_CUR_TAB='msgs';
-const NK_ANN='nr_ann_a', NK_MSG='nr_msg_a', NK_ACT='nr_act_a';
-function _nkGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){return[];} }
-function _nkSet(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
-function _nkMark(k,id){ const a=_nkGet(k); if(!a.includes(String(id))) a.push(String(id)); _nkSet(k,a); }
-function _nkMarkAll(k,arr){ _nkSet(k,arr.map(x=>String(x.id))); }
-function _nkIsRead(k,id){ return _nkGet(k).includes(String(id)); }
-function _nkFmt(iso){
-  if(!iso) return '';
-  const d=new Date(iso),now=new Date(),diff=(now-d)/1000;
-  if(diff<60) return 'الآن';
-  if(diff<3600) return Math.floor(diff/60)+' د';
-  if(diff<86400) return Math.floor(diff/3600)+' س';
-  if(diff<172800) return 'أمس';
-  return d.toLocaleDateString('ar-EG',{day:'numeric',month:'short'});
-}
-
-async function loadNotifications(){
-  const cu=JSON.parse(localStorage.getItem('currentUser')||'{}');
-  const myId=String(cu.id||'');
-  // تاب الرسائل — جيب الواردة (to_id=myId) والمرسلة (sender_id=myId)
-  try{
-    const{data}=await db.from('messages').select('id,subject,body,sender_name,sender_role,sender_id,created_at,to_id,to_name,to_role,is_read').or(`sender_id.eq.${myId},to_id.eq.${myId}`).order('created_at',{ascending:false}).limit(100);
-    const all=(data||[]).filter(m=>!m.deleted && !m.is_draft);
-    const inbox=all.filter(m=>String(m.to_id)===myId).map(m=>({...m,_isSent:false}));
-    const sent=all.filter(m=>String(m.sender_id)===myId && String(m.to_id)!==myId).map(m=>({...m,_isSent:true}));
-    NOTIF_MSG_DATA=[...inbox,...sent].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,50);
-  }catch(e){ NOTIF_MSG_DATA=[]; }
-  // تاب الإعلانات
-  try{
-    const{data}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false}).limit(30);
-    NOTIF_ANN_DATA=data||[];
-  }catch(e){ NOTIF_ANN_DATA=[]; }
-  // تاب الأنشطة
-  try{ NOTIF_ACT_DATA=JSON.parse(localStorage.getItem('sv_actions_log')||'[]'); }catch(e){ NOTIF_ACT_DATA=[]; }
-  _notifRender();
-  _notifUpdateBell();
-}
-
-function switchNotifTab(tab,el){
-  NOTIF_CUR_TAB=tab;
-  document.querySelectorAll('.notif-tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  _notifRender();
-}
-
-function _notifRender(){
-  const body=document.getElementById('notif-dd-body');
-  if(!body) return;
-  if(NOTIF_CUR_TAB==='msgs')     _renderNMsgs(body);
-  else if(NOTIF_CUR_TAB==='ann') _renderNAnn(body);
-  else                            _renderNActs(body);
-  _notifUpdateBadges();
-}
-
-function _renderNMsgs(body){
-  if(!NOTIF_MSG_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد رسائل</div>'; return; }
-  const colors={teacher:'#1e5c36',student:'#1d6fa4',parent:'#6b3fa0',supervisor:'#c8920a',admin:'#0f2318'};
-  body.innerHTML=NOTIF_MSG_DATA.slice(0,30).map(m=>{
-    const read=_nkIsRead(NK_MSG,m.id);
-    const isSent=m._isSent||false;
-    const col=colors[m.sender_role]||'#2d7a50';
-    const init=(m.sender_name||'؟')[0];
-    const dirLabel=isSent
-      ?`<span style="font-size:.6rem;background:#e8f2fb;color:#1d6fa4;padding:1px 5px;border-radius:99px;font-weight:700;">مُرسَل → ${m.to_name||''}</span>`
-      :`<span style="font-size:.6rem;background:var(--pale);color:var(--jade);padding:1px 5px;border-radius:99px;font-weight:700;">وارد</span>`;
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadMsg('${m.id}')">
-      <div class="notif-item-icon" style="background:${col};color:#fff;font-size:.85rem;font-weight:800;">${init}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${m.subject||'(بدون موضوع)'}</div>
-        <div class="notif-item-body">${m.sender_name||''}: ${m.body||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(m.created_at)}</span>
-          ${dirLabel}
-          ${(!isSent&&!read)?'<span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;flex-shrink:0;"></span>':''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function _renderNAnn(body){
-  const rm={all:'الجميع',teacher:'المعلمين',student:'الطلاب',parent:'أولياء',supervisor:'المشرفين',employee:'الموظفين'};
-  if(!NOTIF_ANN_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد إعلانات</div>'; return; }
-  body.innerHTML=NOTIF_ANN_DATA.map(a=>{
-    const read=_nkIsRead(NK_ANN,a.id);
-    const roles=(a.target_role||'all').split(',').map(r=>rm[r]||r).join('+');
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadAnn('${a.id}')">
-      <div class="notif-item-icon" style="background:var(--gold-pale);">&#x1F4E2;</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${a.title||''}</div>
-        <div class="notif-item-body">${a.body||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(a.created_at)}</span>
-          <span style="font-size:.62rem;background:var(--pale);color:var(--jade);padding:1px 5px;border-radius:99px;">${roles}</span>
-          ${read?'':'<span style="width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0;"></span>'}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function _renderNActs(body){
-  if(!NOTIF_ACT_DATA.length){ body.innerHTML='<div class="notif-dd-empty">لا توجد أنشطة مسجّلة</div>'; return; }
-  body.innerHTML=NOTIF_ACT_DATA.slice(0,30).map(a=>{
-    const read=_nkIsRead(NK_ACT,a.id);
-    return `<div class="notif-item ${read?'':'unread'}" onclick="notifReadAct('${a.id}')">
-      <div class="notif-item-icon" style="background:var(--purple-pale);">&#x1F537;</div>
-      <div style="flex:1;min-width:0;">
-        <div class="notif-item-title">${a.actor_name||'مشرف'}</div>
-        <div class="notif-item-body">${a.description||''}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:3px;">
-          <span class="notif-item-date">${_nkFmt(a.created_at)}</span>
-          ${a.branch_name?`<span style="font-size:.62rem;background:var(--purple-pale);color:var(--purple);padding:1px 5px;border-radius:99px;">${a.branch_name}</span>`:''}
-          ${read?'':'<span style="width:6px;height:6px;border-radius:50%;background:var(--purple);display:inline-block;flex-shrink:0;"></span>'}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function notifReadMsg(id){ _nkMark(NK_MSG,id); _notifRender(); _notifUpdateBell(); goToMessages(); }
-function notifReadAnn(id){ _nkMark(NK_ANN,id); _notifRender(); _notifUpdateBell(); }
-function notifReadAct(id){ _nkMark(NK_ACT,id); _notifRender(); _notifUpdateBell(); }
-
-function markAllNotifRead(){
-  _nkMarkAll(NK_MSG,NOTIF_MSG_DATA);
-  _nkMarkAll(NK_ANN,NOTIF_ANN_DATA);
-  _nkMarkAll(NK_ACT,NOTIF_ACT_DATA);
-  _notifRender(); _notifUpdateBell();
-  document.getElementById('notif-dropdown').classList.remove('open');
-}
-
-function _notifUpdateBadges(){
-  const _s=(id,n)=>{ const el=document.getElementById(id); if(el) el.textContent=n>0?n:''; };
-  // تاب الرسائل: عدد الواردة غير مقروءة فقط
-  _s('ntab-msgs-badge', NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length);
-  _s('ntab-ann-badge',  NOTIF_ANN_DATA.filter(a=>!_nkIsRead(NK_ANN,a.id)).length);
-  _s('ntab-acts-badge', NOTIF_ACT_DATA.filter(a=>!_nkIsRead(NK_ACT,a.id)).length);
-}
-
-function _notifUpdateBell(){
-  _notifUpdateBadges();
-  // العداد يحسب: الرسائل الواردة غير مقروءة + الإعلانات + الأنشطة
-  const total=
-    NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length+
-    NOTIF_ANN_DATA.filter(a=>!_nkIsRead(NK_ANN,a.id)).length+
-    NOTIF_ACT_DATA.filter(a=>!_nkIsRead(NK_ACT,a.id)).length;
-  const el=document.getElementById('notif-count');
-  if(el){ el.textContent=total>99?'99+':(total>0?String(total):''); el.style.display=total>0?'flex':'none'; }
-  // حدّث badge الرسائل المُرسَلة في السايد بار واللوحة (كل الرسائل غير المقروءة الواردة)
-  const inboxUnread = NOTIF_MSG_DATA.filter(m=>!m._isSent && !_nkIsRead(NK_MSG,m.id)).length;
-  const sbBadge=document.getElementById('sb-msg-badge');
-  const igBadge=document.getElementById('ig-msg-badge');
-  const nb=inboxUnread>0?(inboxUnread>99?'99+':String(inboxUnread)):'';
-  if(sbBadge){ sbBadge.textContent=nb; sbBadge.style.display=nb?'inline-block':'none'; }
-  if(igBadge){ igBadge.textContent=nb; igBadge.style.display=nb?'inline-block':'none'; }
-}
-
-// يُستدعى من _sendMessageToUser لتحديث الجرس فوراً
-function _notifAddMsg(m){ NOTIF_MSG_DATA.unshift(m); _notifUpdateBell(); }
-
-function toggleNotifDropdown(){
-  const dd=document.getElementById('notif-dropdown');
-  const opening=!dd.classList.contains('open');
-  dd.classList.toggle('open');
-  if(opening) loadNotifications();
-}
-
-document.addEventListener('click', function(e){
-  const bell=document.getElementById('notif-bell');
-  if(bell && !bell.contains(e.target)){
-    const dd=document.getElementById('notif-dropdown');
-    if(dd) dd.classList.remove('open');
-  }
-});
-
-function goToMessages(){ document.getElementById('notif-dropdown').classList.remove('open'); navPage('messages'); }
-function logSupervisorAction(type,actor,desc,branch){
-  try{
-    const acts=JSON.parse(localStorage.getItem('sv_actions_log')||'[]');
-    acts.unshift({id:Date.now(),action_type:type,actor_name:actor||'مشرف',description:desc||'',branch_name:branch||'',created_at:new Date().toISOString()});
-    localStorage.setItem('sv_actions_log',JSON.stringify(acts.slice(0,50)));
-    NOTIF_ACT_DATA=acts.slice(0,50);
-    _notifUpdateBell();
-  }catch(e){}
-}
-function renderNotifications(){ _notifRender(); _notifUpdateBell(); }
 
 
 // ═══════════════════════════════════════════════════════
@@ -10706,180 +10473,6 @@ function closeMediaVideo(){
   _curMedia = null;
 }
 
-// ══════════════ معرض المكتبة (Supabase + Google Drive) ══════════════
-let LIBRARY_BOOKS = [];
-let LIB_CAT = 'all';
-const LIB_CATS = [
-  {key:'all',    label:'الكل',              icon:'📚'},
-  {key:'grade',  label:'الصفوف الدراسية',   icon:'🎓'},
-  {key:'kunooz', label:'الكنوز الأثرية',    icon:'💎'},
-  {key:'ahkam',  label:'الأحكام والكتيبات', icon:'📗'},
-  {key:'other',  label:'أخرى',              icon:'📄'}
-];
-
-function _libNorm(t){
-  return String(t||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,'').toLowerCase();
-}
-function libExtractDriveId(url){
-  var s = String(url||'').trim();
-  var m = s.match(/\/d\/([A-Za-z0-9_-]{20,})/) || s.match(/[?&]id=([A-Za-z0-9_-]{20,})/);
-  if (m) return m[1];
-  if (/^[A-Za-z0-9_-]{20,}$/.test(s)) return s;
-  return '';
-}
-
-async function loadLibraryBooks(){
-  const grid = document.getElementById('lib-grid');
-  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--light);">⏳ جارٍ التحميل…</div>';
-  try{
-    await db.auth.getSession();
-    const { data, error } = await db.from('library_books')
-      .select('id,title,drive_id,category,sort_order,is_active')
-      .eq('is_active', true)
-      .order('sort_order', {ascending:true});
-    if (error) throw error;
-    LIBRARY_BOOKS = data || [];
-  }catch(e){
-    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--red);">تعذّر تحميل الكتب — تأكد من الاتصال</div>';
-    showToast('❌ تعذّر تحميل المكتبة');
-    return;
-  }
-  renderLibTabs();
-  renderLibraryPage();
-}
-
-function renderLibTabs(){
-  const wrap = document.getElementById('lib-tabs');
-  if (!wrap) return;
-  wrap.innerHTML = LIB_CATS.map(function(c){
-    var n = c.key==='all' ? LIBRARY_BOOKS.length : LIBRARY_BOOKS.filter(function(b){ return b.category===c.key; }).length;
-    var on = LIB_CAT===c.key;
-    return '<button onclick="libSetCat(\'' + c.key + '\')" style="cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:700;padding:7px 14px;border-radius:99px;border:1.5px solid '
-      + (on?'var(--jade)':'var(--border)') + ';background:' + (on?'var(--jade)':'#fff') + ';color:' + (on?'#fff':'var(--mid)') + ';transition:.15s;">'
-      + c.icon + ' ' + c.label + ' (' + toAr(n) + ')</button>';
-  }).join('');
-}
-function libSetCat(k){ LIB_CAT = k; renderLibTabs(); renderLibraryPage(); }
-
-function renderLibraryPage(){
-  const grid = document.getElementById('lib-grid');
-  if (!grid) return;
-  const qEl = document.getElementById('lib-search');
-  const q = qEl ? _libNorm(qEl.value) : '';
-  var list = LIBRARY_BOOKS.slice();
-  if (LIB_CAT !== 'all') list = list.filter(function(b){ return b.category === LIB_CAT; });
-  if (q) list = list.filter(function(b){ return _libNorm(b.title).indexOf(q) !== -1; });
-  const cnt = document.getElementById('lib-count');
-  if (cnt) cnt.textContent = '📖 الكتب (' + toAr(list.length) + ')';
-  if (!list.length){
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--light);">لا توجد كتب مطابقة</div>';
-    return;
-  }
-  grid.innerHTML = list.map(function(b){
-    var title = (b.title||'').replace(/</g,'&lt;');
-    var did = b.drive_id;
-    return '<div style="position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;"'
-      + ' onmouseenter="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--shadow-lg)\'" onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'var(--shadow)\'">'
-      +   '<div style="position:absolute;top:7px;left:7px;z-index:3;display:flex;gap:5px;">'
-      +     '<button onclick="event.stopPropagation();openBookModal(\'' + b.id + '\')" title="تعديل" style="cursor:pointer;border:0;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 1px 5px rgba(0,0,0,.2);font-size:.82rem;line-height:1;">✏️</button>'
-      +     '<button onclick="event.stopPropagation();deleteBook(\'' + b.id + '\')" title="حذف" style="cursor:pointer;border:0;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 1px 5px rgba(0,0,0,.2);font-size:.82rem;line-height:1;">🗑️</button>'
-      +   '</div>'
-      +   '<div style="cursor:pointer;position:relative;padding-top:140%;background:linear-gradient(135deg,var(--pale),#dbeee2);" onclick="openBook(\'' + did + '\')" title="' + title + '">'
-      +     '<img src="https://drive.google.com/thumbnail?id=' + did + '&sz=w400" alt="" loading="lazy"'
-      +       ' onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.lib-fallback\').style.display=\'flex\'"'
-      +       ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'
-      +     '<div class="lib-fallback" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;">'
-      +       '<div style="font-size:2.6rem;">📕</div>'
-      +       '<div style="font-size:.72rem;font-weight:700;padding:0 10px;text-align:center;color:var(--mid);">' + title + '</div>'
-      +     '</div>'
-      +   '</div>'
-      +   '<div style="cursor:pointer;padding:11px 12px;font-size:.82rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:58px;display:flex;align-items:center;" onclick="openBook(\'' + did + '\')">' + title + '</div>'
-      + '</div>';
-  }).join('');
-}
-
-function openBook(did){
-  window.open('https://drive.google.com/file/d/' + did + '/view', '_blank');
-}
-
-function openBookModal(id){
-  var t = document.getElementById('book-modal-title');
-  document.getElementById('book-id').value = id || '';
-  if (id){
-    var b = LIBRARY_BOOKS.find(function(x){ return x.id === id; });
-    if (!b) return;
-    if (t) t.textContent = '✏️ تعديل كتاب';
-    document.getElementById('book-title').value = b.title || '';
-    document.getElementById('book-link').value = 'https://drive.google.com/file/d/' + b.drive_id + '/view';
-    document.getElementById('book-cat').value = b.category || 'ahkam';
-  } else {
-    if (t) t.textContent = '➕ إضافة كتاب';
-    document.getElementById('book-title').value = '';
-    document.getElementById('book-link').value = '';
-    document.getElementById('book-cat').value = 'ahkam';
-  }
-  openModal('modal-book');
-}
-
-async function saveBook(){
-  var id = document.getElementById('book-id').value;
-  var title = document.getElementById('book-title').value.trim();
-  var link = document.getElementById('book-link').value.trim();
-  var cat = document.getElementById('book-cat').value;
-  if (!title){ showToast('⚠️ اكتب عنوان الكتاب'); return; }
-  var did = libExtractDriveId(link);
-  if (!did){ showToast('⚠️ رابط درايف غير صحيح'); return; }
-  var btn = document.getElementById('book-save-btn');
-  if (btn){ btn.disabled = true; btn.textContent = '⏳ جارٍ الحفظ…'; }
-  try{
-    await db.auth.getSession();
-    if (id){
-      const { data, error } = await db.from('library_books')
-        .update({ title:title, drive_id:did, category:cat })
-        .eq('id', id).select('id');
-      if (error){
-        if (error.code==='23505' || String(error.message||'').indexOf('duplicate')!==-1){ showToast('⚠️ يوجد كتاب آخر بنفس الرابط'); return; }
-        throw error;
-      }
-      if (!data || !data.length){ showToast('❌ لم يُحفظ — تأكد من صلاحيتك'); return; }
-    } else {
-      var maxo = LIBRARY_BOOKS.reduce(function(m,b){ return Math.max(m, b.sort_order||0); }, 0);
-      var meId = (JSON.parse(localStorage.getItem('currentUser')||'{}').id) || null;
-      const { data, error } = await db.from('library_books')
-        .insert({ title:title, drive_id:did, category:cat, sort_order:maxo+10, created_by:meId })
-        .select('id');
-      if (error){
-        if (error.code==='23505' || String(error.message||'').indexOf('duplicate')!==-1){ showToast('⚠️ الكتاب مضاف بالفعل'); return; }
-        throw error;
-      }
-      if (!data || !data.length){ showToast('❌ لم يُحفظ — تأكد من صلاحيتك'); return; }
-    }
-    closeModal('modal-book');
-    showToast('✅ تم الحفظ');
-    await loadLibraryBooks();
-  }catch(e){
-    showToast('❌ خطأ في الحفظ');
-  }finally{
-    if (btn){ btn.disabled = false; btn.textContent = '💾 حفظ'; }
-  }
-}
-
-async function deleteBook(id){
-  var b = LIBRARY_BOOKS.find(function(x){ return x.id === id; });
-  if (!b) return;
-  if (!confirm('حذف «' + (b.title||'') + '» من المكتبة؟')) return;
-  try{
-    await db.auth.getSession();
-    const { data, error } = await db.from('library_books').delete().eq('id', id).select('id');
-    if (error) throw error;
-    if (!data || !data.length){ showToast('❌ لم يُحذف — تأكد من صلاحيتك'); return; }
-    showToast('🗑️ تم الحذف');
-    await loadLibraryBooks();
-  }catch(e){
-    showToast('❌ خطأ في الحذف');
-  }
-}
-
 function nav(el, pageId, fromPopstate){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -10938,7 +10531,6 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'tadmin') tadminInit();
   if (pageId === 'media') renderMediaPage();
-  if (pageId === 'library') loadLibraryBooks();
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -16342,6 +15934,67 @@ function tcRenderMetric(){
 </div>
 
 
+<!-- كفالة جماعية -->
+<div class="overlay" id="modal-spon-bulk">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-head">
+      <div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> كفالة جماعية — تسجيل عدة طلاب مكفولين</div>
+      <button class="modal-close" onclick="closeModal('modal-spon-bulk')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>اسم الكفيل *</label>
+          <input type="text" id="sb-sponsor" placeholder="اسم الكفيل" autocomplete="off"></div>
+        <div class="fg"><label>المبلغ لكل طالب (ج.م) *</label>
+          <input type="number" id="sb-amount" min="0" step="1" placeholder="مثال: 500" autocomplete="off"></div>
+        <div class="fg"><label>تاريخ بداية الكفالة *</label>
+          <input type="date" id="sb-start" onchange="sbCalcEnd()"></div>
+        <div class="fg"><label>مدة الكفالة *</label>
+          <select id="sb-months" onchange="sbCalcEnd()">
+            <option value="1">شهر</option><option value="2">شهرين</option><option value="3">ثلاثة أشهر</option>
+          </select></div>
+        <div class="fg"><label>تنتهي في</label>
+          <input type="text" id="sb-end" readonly style="background:#f3f4f6;text-align:center;font-weight:700;color:var(--emerald);"></div>
+        <div class="fg"><label>وسيلة الدفع *</label>
+          <select id="sb-pay" onchange="finPayChange('sb')">
+            <option value="cash">نقدي</option><option value="vodafone_cash">فودافون كاش</option>
+            <option value="instapay">انستاباي</option>
+          </select></div>
+        <div class="fg full"><label id="sb-receiver-lbl">المستلم (تلقائي)</label>
+          <input type="text" id="sb-receiver" autocomplete="off"></div>
+        <div class="fg full" id="sb-recsel-wrap" style="display:none;">
+          <label>اسم صاحب المحفظة (العميل) *</label>
+          <select id="sb-recsel" onchange="finRecSelChange('sb')"></select>
+          <input type="text" id="sb-recnew" placeholder="اكتب اسم العميل الجديد" autocomplete="off" style="display:none;margin-top:7px;"></div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:14px 0 12px;padding-top:12px;">
+        <label style="display:block;font-size:.82rem;font-weight:700;color:var(--forest);margin-bottom:8px;">اختر الطلاب المكفولين *</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px;">
+          <select id="sb-branch" onchange="sbRender()" style="max-width:190px;"><option value="">كل الشُّعب</option></select>
+          <input type="text" id="sb-q" placeholder="ابحث بالاسم…" oninput="sbRender()" style="max-width:200px;">
+          <button class="btn btn-ghost btn-xs" onclick="sbAll(true)">تحديد الظاهر</button>
+          <button class="btn btn-ghost btn-xs" onclick="sbAll(false)">إلغاء الكل</button>
+        </div>
+        <div id="sb-list" style="max-height:230px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:var(--pale);border-radius:var(--r-sm);">
+        <span style="font-weight:800;color:var(--forest);" id="sb-count">٠ طالب محدَّد</span>
+        <span style="font-weight:800;color:var(--emerald);" id="sb-total">٠ ج.م</span>
+      </div>
+      <div class="fg" style="margin-top:12px;"><label>ملاحظات</label>
+        <textarea id="sb-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+      <div class="fg"><label>التاريخ</label>
+        <input type="text" id="sb-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:150px;" onclick="saveSponBulk(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> تسجيل الكفالات</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-spon-bulk')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- تحصيل جزئي: اختيار البنود -->
 <div class="overlay" id="modal-fin-collect2">
   <div class="modal" style="max-width:640px;">
@@ -16833,6 +16486,19 @@ async function loadFinSponsorships(){
     const rows = data || [];
     const tot = document.getElementById('fin-spon-total');
     if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
+    (function(){
+      const live = rows.filter(r => !r.reversed && !r.reversal_of);
+      const t = finTodayISO();
+      const act = live.filter(r => !r.end_date || r.end_date >= t);
+      const exp = live.filter(r => r.end_date && r.end_date < t);
+      const soon = act.filter(r => r.end_date && Math.round((new Date(r.end_date+'T00:00:00')-new Date(t+'T00:00:00'))/86400000) <= 14);
+      const ids = new Set(live.map(r => r.student_id || ('n:'+r.student_name)));
+      const set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent = v; };
+      set('spon-k-st',  finAr(ids.size));
+      set('spon-k-sum', finMoney(live.reduce((a,r)=>a+Number(r.amount||0),0)));
+      set('spon-k-act', finAr(act.length));
+      set('spon-k-exp', finAr(exp.length) + (soon.length ? ' + '+finAr(soon.length)+' قربت' : ''));
+    })();
     if(!rows.length){
       tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--light);padding:34px;">لا توجد كفالات مسجّلة بعد</td></tr>';
       return;
@@ -16878,6 +16544,12 @@ async function openSubsModal(){
 async function subsAfterPick(){
   const rest = document.getElementById('subs-rest');
   rest.style.display = 'block';
+  await getBranchPrices();
+  const _s = FIN_SEL['subs'];
+  const _p = _s ? finPrice(_s.branch) : 0;
+  const _a = document.getElementById('subs-amount');
+  if(_p > 0){ _a.value = _p; _a.placeholder = 'سعر ' + (_s.branch||'') + ': ' + _p; }
+  else { _a.value = ''; _a.placeholder = 'اضبط سعر الشعبة من الخزنة'; }
   const sel = document.getElementById('subs-month');
   [...sel.options].forEach(o => { o.disabled = false; o.textContent = FIN_MONTH_AR[+o.value]; });
   document.getElementById('subs-paid-hint').textContent = '';
@@ -17852,8 +17524,8 @@ async function loadFinCash(){
   ['cash-k-cash','cash-k-wal','cash-k-tot','cash-k-net'].forEach(id => set([id,'…']));
   document.getElementById('set-opening').value      = FIN_SET['opening_cash'] || 0;
   document.getElementById('set-opening-date').value = FIN_SET['opening_date'] === '1900-01-01' ? '' : (FIN_SET['opening_date']||'');
-  document.getElementById('set-price').value        = FIN_SET['subs_price'] || 0;
   document.getElementById('set-lock').value         = FIN_SET['locked_until'] === '1900-01-01' ? '' : (FIN_SET['locked_until']||'');
+  renderBranchPrices();
 
   const tbM = document.getElementById('cash-move-tbody');
   const tbW = document.getElementById('cash-wal-tbody');
@@ -17923,7 +17595,6 @@ async function saveFinSettings(btn){
   try{
     await finSaveSetting('opening_cash', document.getElementById('set-opening').value || 0);
     await finSaveSetting('opening_date', document.getElementById('set-opening-date').value || '1900-01-01');
-    await finSaveSetting('subs_price',   document.getElementById('set-price').value || 0);
     await finSaveSetting('locked_until', document.getElementById('set-lock').value || '1900-01-01');
     showToast('✅ تم حفظ الإعدادات');
     loadFinCash();
@@ -17939,20 +17610,30 @@ async function loadFinDue(){
   const sheet = document.getElementById('fin-due-sheet');
   sheet.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:38px;color:var(--light);">جاري التحميل…</div></div>';
   try{
-    const [studs, subs] = await Promise.all([ getAdmStudents(), db.from('fin_subscriptions').select('*') ]);
+    const [studs, subs, spon] = await Promise.all([
+      getAdmStudents(),
+      db.from('fin_subscriptions').select('*'),
+      db.from('fin_sponsorships').select('student_id,end_date,sponsor_name,amount,reversed,reversal_of')
+    ]);
+    await getBranchPrices();
     const paid = {};
     (subs.data||[]).filter(r => !r.reversed && !r.reversal_of).forEach(r => {
       const k = r.student_id || ('n:'+r.student_name);
       (paid[k] = paid[k] || {})[r.month_no] = Number(r.amount||0);
     });
-    const price = Number(FIN_SET['subs_price'] || 0);
+    const today = finTodayISO(), sponMap = {};
+    (spon.data||[]).filter(r => !r.reversed && !r.reversal_of && r.student_id
+                             && (!r.end_date || r.end_date >= today))
+      .forEach(r => sponMap[r.student_id] = r.sponsor_name || 'كفيل');
     DUE_ROWS = (studs||[]).map(st => {
       const p = paid[st.id] || {};
+      const price = finPrice(st.branch);
       const months = [1,2,3].map(m => ({ m, amt: p[m] != null ? p[m] : null }));
       const paidSum = months.reduce((a,x) => a + (x.amt||0), 0);
-      const dueCnt  = months.filter(x => x.amt == null).length;
+      const sponsor = sponMap[st.id] || null;
+      const dueCnt  = sponsor ? 0 : months.filter(x => x.amt == null).length;
       return { id:st.id, name:st.name, branch:st.branch||'—', circle:st.circle||'—',
-               months, paidSum, dueCnt, dueSum: dueCnt * price };
+               price, sponsor, months, paidSum, dueCnt, dueSum: dueCnt * price };
     }).sort((a,b) => (b.dueCnt - a.dueCnt) || a.name.localeCompare(b.name,'ar'));
 
     const sel = document.getElementById('due-branch');
@@ -17972,26 +17653,29 @@ function renderFinDue(){
   if(st === 'due')  rows = rows.filter(r => r.dueCnt > 0);
   if(st === 'paid') rows = rows.filter(r => r.dueCnt === 0);
 
-  const price = Number(FIN_SET['subs_price'] || 0);
   const paidT = rows.reduce((a,r)=>a+r.paidSum,0);
   const dueT  = rows.reduce((a,r)=>a+r.dueSum,0);
+  const nSpon = rows.filter(r => r.sponsor).length;
   const target = paidT + dueT;
+  const noPrice = rows.some(r => !r.sponsor && !r.price);
   const set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent = v; };
-  set('due-k-st',   finAr(rows.length));
+  set('due-k-st',   finAr(rows.length) + (nSpon ? ' (منهم '+finAr(nSpon)+' مكفول)' : ''));
   set('due-k-paid', finMoney(paidT));
-  set('due-k-due',  price > 0 ? finMoney(dueT) : '— (اضبط السعر)');
+  set('due-k-due',  noPrice ? finMoney(dueT)+' *' : finMoney(dueT));
   set('due-k-pct',  target > 0 ? finAr((paidT/target*100).toFixed(1))+'٪' : '—');
 
-  const cell = x => x.amt != null
+  const cell = (x, r) => x.amt != null
     ? '<td style="text-align:center;"><span class="badge bg-green">'+finMoney(x.amt)+'</span></td>'
-    : '<td style="text-align:center;"><span class="badge bg-red">متأخر</span></td>';
+    : (r.sponsor
+        ? '<td style="text-align:center;"><span class="badge bg-gold">مكفول</span></td>'
+        : '<td style="text-align:center;"><span class="badge bg-red">متأخر</span></td>');
 
   document.getElementById('fin-due-sheet').innerHTML =
     '<div class="rep-sheet">'
     + '<div class="rep-head"><div><div class="rep-h1">مدرسة التوحيد القرآنية</div>'
     +   '<div class="rep-h2">متأخرات اشتراك الدورة الصيفية ٢٠٢٦م' + (br ? ' — ' + finEsc(br) : '') + '</div></div>'
     +   '<div class="rep-meta"><div>تاريخ الإصدار: '+finDateAr(finTodayISO())+'</div>'
-    +     '<div>سعر الشهر: '+(price>0?finMoney(price):'غير مضبوط')+'</div>'
+    +     '<div>الأسعار: '+((FIN_PRICES||[]).filter(b=>b.monthly_price>0).map(b=>finEsc(b.branch_name)+' '+finMoney(b.monthly_price)).join(' • ')||'غير مضبوطة')+'</div>'
     +     '<div>عدد الطلاب: '+finAr(rows.length)+'</div></div></div>'
     + (rows.length
       ? '<table class="rep-tbl"><thead><tr><th style="width:40px;">م</th><th>اسم الطالب</th><th>الشعبة / الحلقة</th>'
@@ -18000,10 +17684,11 @@ function renderFinDue(){
         + rows.map((r,i) =>
             '<tr><td class="rep-num">'+finAr(i+1)+'</td>'
             + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.name)+'</td>'
-            + '<td style="font-size:.74rem;color:var(--mid);">'+finEsc(r.branch)+' • '+finEsc(r.circle)+'</td>'
-            + r.months.map(cell).join('')
+            + '<td style="font-size:.74rem;color:var(--mid);">'+finEsc(r.branch)+' • '+finEsc(r.circle)
+            +   (r.sponsor ? '<div style="font-size:.66rem;color:var(--gold);font-weight:700;">كفيل: '+finEsc(r.sponsor)+'</div>' : '')+'</td>'
+            + r.months.map(x => cell(x, r)).join('')
             + '<td class="rep-num" style="color:var(--emerald);">'+finMoney(r.paidSum)+'</td>'
-            + '<td class="rep-num" style="color:'+(r.dueSum>0?'var(--red)':'var(--light)')+';">'+(r.dueCnt?finMoney(r.dueSum):'—')+'</td></tr>').join('')
+            + '<td class="rep-num" style="color:'+(r.dueSum>0?'var(--red)':'var(--light)')+';">'+(r.dueCnt?finMoney(r.dueSum):(r.sponsor?'<span style="color:var(--gold);">مكفول</span>':'—'))+'</td></tr>').join('')
         + '</tbody><tfoot><tr><td colspan="6">الإجمالي</td>'
         + '<td class="rep-num">'+finMoney(paidT)+'</td><td class="rep-num">'+finMoney(dueT)+'</td></tr></tfoot></table>'
       : '<div style="text-align:center;padding:40px;color:var(--light);">لا توجد نتائج بهذا الفلتر</div>')
@@ -18124,6 +17809,190 @@ async function confirmCollect2(btn){
   finBusy(btn, false);
 }
 
+
+/* ══════════════════════════════════════════════════════
+   أسعار الشُّعب + الكفالات الجماعية
+══════════════════════════════════════════════════════ */
+
+/* ══ أسعار الاشتراك لكل شعبة ══ */
+let FIN_PRICES = null;   // [{branch_id, branch_name, monthly_price}]
+
+async function getBranchPrices(force){
+  if(FIN_PRICES && !force) return FIN_PRICES;
+  try{
+    const { data:brs, error:e1 } = await db.from('branches').select('id,name').order('name');
+    if(e1) throw e1;
+    const { data:pr } = await db.from('fin_branch_prices').select('branch_id,monthly_price');
+    const map = {}; (pr||[]).forEach(r => map[r.branch_id] = Number(r.monthly_price||0));
+    FIN_PRICES = (brs||[]).map(b => ({ branch_id:b.id, branch_name:b.name, monthly_price: map[b.id] || 0 }));
+  }catch(e){ console.warn('branch prices:', e); FIN_PRICES = FIN_PRICES || []; }
+  return FIN_PRICES;
+}
+
+/* سعر الشهر لشعبة بالاسم */
+function finPrice(branchName){
+  if(!FIN_PRICES) return 0;
+  const b = FIN_PRICES.find(x => finNorm(x.branch_name) === finNorm(branchName));
+  return b ? Number(b.monthly_price||0) : 0;
+}
+
+async function renderBranchPrices(){
+  const w = document.getElementById('price-rows'); if(!w) return;
+  w.innerHTML = '<div style="text-align:center;color:var(--light);padding:18px;">جاري التحميل…</div>';
+  const list = await getBranchPrices(true);
+  if(!list.length){ w.innerHTML = '<div style="text-align:center;color:var(--light);padding:18px;">لا توجد شُعب مسجّلة</div>'; return; }
+  w.innerHTML = list.map(b =>
+    '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);">'
+    + '<div style="flex:1;font-weight:700;color:var(--forest);font-size:.88rem;">'+finEsc(b.branch_name)+'</div>'
+    + '<input type="number" min="0" step="1" class="price-in" data-bid="'+b.branch_id+'" data-bname="'+finEsc(b.branch_name)+'" value="'+Number(b.monthly_price||0)+'" '
+    +   'style="max-width:150px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:\'Tajawal\';text-align:center;font-weight:700;">'
+    + '<span style="font-size:.75rem;color:var(--light);width:56px;">ج.م / شهر</span></div>'
+  ).join('');
+}
+
+async function saveBranchPrices(btn){
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    const rows = [...document.querySelectorAll('.price-in')].map(i => ({
+      branch_id: i.dataset.bid, branch_name: i.dataset.bname,
+      monthly_price: Number(i.value||0), updated_by: me.id, updated_at: new Date().toISOString()
+    }));
+    if(!rows.length){ showToast('⚠️ لا توجد شُعب'); finBusy(btn,false); return; }
+    const { error } = await db.from('fin_branch_prices').upsert(rows, { onConflict:'branch_id' });
+    if(error) throw error;
+    await getBranchPrices(true);
+    showToast('✅ تم حفظ أسعار الشُّعب');
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+/* ══════════ الكفالات الجماعية ══════════ */
+let SB_STUDENTS = [], SB_SEL = {};
+
+async function openSponBulk(){
+  if(!finLockGuard()) return;
+  document.getElementById('sb-sponsor').value = '';
+  document.getElementById('sb-amount').value  = '';
+  document.getElementById('sb-notes').value   = '';
+  document.getElementById('sb-q').value       = '';
+  document.getElementById('sb-months').value  = '1';
+  document.getElementById('sb-pay').value     = 'cash';
+  document.getElementById('sb-start').value   = finTodayISO();
+  document.getElementById('sb-date').value    = finDateAr(finTodayISO());
+  SB_SEL = {};
+  finPayChange('sb'); sbCalcEnd();
+  openModal('modal-spon-bulk');
+
+  document.getElementById('sb-list').innerHTML = '<div style="padding:16px;text-align:center;color:var(--light);">جاري تحميل الطلاب…</div>';
+  await getBranchPrices();
+  const studs = await getAdmStudents();
+  // الطلاب المكفولين بالفعل بكفالة سارية
+  let already = new Set();
+  try{
+    const { data } = await db.from('fin_sponsorships').select('student_id,end_date,reversed,reversal_of');
+    const today = finTodayISO();
+    (data||[]).filter(r => !r.reversed && !r.reversal_of && r.student_id
+                        && (!r.end_date || r.end_date >= today)).forEach(r => already.add(r.student_id));
+  }catch(e){ /* بدون تعليم */ }
+  SB_STUDENTS = (studs||[]).map(st => Object.assign({}, st, { sponsored: already.has(st.id) }));
+
+  const bsel = document.getElementById('sb-branch');
+  const brs = [...new Set(SB_STUDENTS.map(x => x.branch))].filter(Boolean).sort((a,b)=>a.localeCompare(b,'ar'));
+  bsel.innerHTML = '<option value="">كل الشُّعب</option>' + brs.map(b => '<option value="'+finEsc(b)+'">'+finEsc(b)+'</option>').join('');
+  sbRender();
+}
+
+function sbFiltered(){
+  const br = document.getElementById('sb-branch').value;
+  const q  = finNorm(document.getElementById('sb-q').value.trim());
+  return SB_STUDENTS.filter(x => (!br || x.branch === br) && (!q || finNorm(x.name).includes(q)));
+}
+
+function sbRender(){
+  const list = sbFiltered();
+  const w = document.getElementById('sb-list');
+  if(!list.length){ w.innerHTML = '<div style="padding:16px;text-align:center;color:var(--light);">لا توجد نتائج</div>'; sbSum(); return; }
+  w.innerHTML = list.map(x =>
+    '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;'+(x.sponsored?'background:var(--gold-pale);':'')+'">'
+    + '<input type="checkbox" class="sb-c" data-id="'+x.id+'" '+(SB_SEL[x.id]?'checked':'')+' onchange="sbToggle(this)" style="width:16px;height:16px;">'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:.83rem;font-weight:700;color:var(--forest);">'+finEsc(x.name)
+    +   (x.sponsored?' <span class="badge bg-gold" style="font-size:.6rem;">مكفول بالفعل</span>':'')+'</div>'
+    +   '<div style="font-size:.68rem;color:var(--light);">'+finEsc(x.branch||'—')+' • '+finEsc(x.circle||'—')+'</div></div></label>'
+  ).join('');
+  sbSum();
+}
+
+function sbToggle(el){
+  const id = el.dataset.id;
+  if(el.checked) SB_SEL[id] = SB_STUDENTS.find(x => x.id === id);
+  else delete SB_SEL[id];
+  sbSum();
+}
+function sbAll(v){
+  sbFiltered().forEach(x => { if(v) SB_SEL[x.id] = x; else delete SB_SEL[x.id]; });
+  document.querySelectorAll('.sb-c').forEach(c => c.checked = !!SB_SEL[c.dataset.id]);
+  sbSum();
+}
+function sbSum(){
+  const cnt = Object.keys(SB_SEL).length;
+  const amt = Number(document.getElementById('sb-amount').value||0);
+  document.getElementById('sb-count').textContent = finAr(cnt) + ' طالب محدَّد';
+  document.getElementById('sb-total').textContent = finMoney(cnt * amt);
+}
+function sbCalcEnd(){
+  const sd = document.getElementById('sb-start').value;
+  const mo = parseInt(document.getElementById('sb-months').value,10) || 1;
+  const out = document.getElementById('sb-end');
+  if(!sd){ out.value = '—'; out.dataset.iso = ''; return; }
+  const d = new Date(sd + 'T00:00:00');
+  d.setMonth(d.getMonth() + mo); d.setDate(d.getDate() - 1);
+  const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  out.value = finDateAr(iso); out.dataset.iso = iso;
+}
+
+async function saveSponBulk(btn){
+  const sponsor = (document.getElementById('sb-sponsor').value||'').trim();
+  if(!sponsor){ showToast('⚠️ اكتب اسم الكفيل'); return; }
+  const amt = parseFloat(document.getElementById('sb-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ لكل طالب'); return; }
+  const sd = document.getElementById('sb-start').value;
+  if(!sd){ showToast('⚠️ اختر تاريخ بداية الكفالة'); return; }
+  const sel = Object.values(SB_SEL);
+  if(!sel.length){ showToast('⚠️ اختر طالباً واحداً على الأقل'); return; }
+  const pay = document.getElementById('sb-pay').value;
+  const rec = finReceiverValue('sb');
+  if(!rec){ showToast(pay==='cash' ? '⚠️ اسم المستلم غير معروف' : '⚠️ اختر أو اكتب اسم صاحب المحفظة'); return; }
+  if(!finLockGuard()) return;
+  const dup = sel.filter(x => x.sponsored).length;
+  if(dup && !confirm('في ' + dup + ' طالب مكفول بالفعل بكفالة سارية.\nهيتسجّلهم كفالة إضافية. تكمّل؟')) return;
+
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    if(pay !== 'cash') await finEnsureClient(rec);
+    const end = document.getElementById('sb-end').dataset.iso || null;
+    const months = parseInt(document.getElementById('sb-months').value,10);
+    const notes = (document.getElementById('sb-notes').value||'').trim() || null;
+    const rows = sel.map(x => ({
+      amount: amt, sponsor_name: sponsor, collected: pay === 'cash',
+      student_id: x.id, student_name: x.name, student_branch: x.branch, student_circle: x.circle,
+      months, start_date: sd, end_date: end,
+      pay_method: pay, receiver: rec, notes,
+      date: finTodayISO(), created_by: me.id
+    }));
+    const { data, error } = await db.from('fin_sponsorships').insert(rows).select('id');
+    if(error) throw error;
+    if(!data || data.length !== rows.length){
+      showToast('⚠️ اتسجّل ' + finAr((data||[]).length) + ' من ' + finAr(rows.length) + ' (صلاحيات RLS)');
+    } else {
+      showToast('✅ تم تسجيل ' + finAr(rows.length) + ' كفالة بإجمالي ' + finMoney(rows.length * amt));
+    }
+    closeModal('modal-spon-bulk');
+    loadFinSponsorships();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
 
 /* ══════════════════════════════════════════════════════
    سجل التعديلات
@@ -18733,5 +18602,6 @@ async function tadminDelQ(id){ if(!confirm('حذف هذا السؤال؟')) retu
 
 </script>
 
+<script src="messages.js"></script>
 </body>
 </html>

@@ -32,6 +32,7 @@
 </script>
 <script src="theme.js"></script>
 <script src="mushaf_madani.js"></script>
+<script src="notifications.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal','Noto Color Emoji',sans-serif;}
@@ -2446,20 +2447,28 @@ async function submitLessonPrep(){
   }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الإرسال: '+recFriendlyErr(e)); }
 }
 
-// إشعار المشرف المتابع للحلقة
+// إشعار المشرف المتابع للحلقة (رسالة في صندوقه — والإشعار نفسه بيجي من تريجر lesson_preps)
 async function lpNotifySupervisor(title){
   try{
     const c=activeCircle(); if(!c) return;
     const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
     const sup=cir&&cir.supervisor_id; if(!sup) return;
+    let supName='المشرف';
+    try{
+      const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle();
+      if(su&&su.full_name) supName=su.full_name;
+    }catch(e){}
     const date=document.getElementById('lp-date').value||D();
-    await db.from('messages').insert({
-      sender_id:cu.id, receiver_id:sup,
+    const {data,error}=await db.from('messages').insert({
+      sender_id:cu.id, sender_name:cu.full_name||'معلم', sender_role:'teacher',
+      to_id:String(sup), to_name:supName, to_role:'supervisor',
       subject:'📝 نموذج تحضير جديد للمراجعة',
       body:'المعلم/ '+(cu.full_name||'')+' أرسل تحضير درس «'+title+'» ('+(lpSubject()==='tajweed'?'التجويد':'المنهج المصاحب')+') بتاريخ '+date+' — من حلقة '+c.name+' ('+c.branch+').\nراجعه من: التقارير ← تحضير الدروس.',
-      is_read:false
-    });
-  }catch(e){ /* الإشعار مش شرط ينجح — التحضير اتسجّل */ }
+      is_read:false, starred:false, urgent:false, is_draft:false, deleted:false
+    }).select('id');
+    if(error) throw error;
+    if(!data || !data.length) console.warn('⚠️ رسالة المشرف اترفضت من RLS (صفر صفوف)');
+  }catch(e){ console.warn('تعذّر إرسال رسالة للمشرف:', e && e.message); }
 }
 
 async function exportLessonPdf(){
@@ -4718,5 +4727,6 @@ function printPointsReport(){
 // ══ INIT ══
 boot();
 </script>
+<script src="messages.js"></script>
 </body>
 </html>
