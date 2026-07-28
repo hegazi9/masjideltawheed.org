@@ -168,7 +168,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   font-size:.9rem;color:#fff;font-weight:700;
 }
 .sb-uname{font-size:.82rem;font-weight:700;color:#fff;}
-.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);background:none!important;box-shadow:none!important;text-shadow:none!important;padding:0;border:none;border-radius:0;}
+.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);background:none!important;background-image:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;padding:0!important;border:none!important;border-radius:0!important;}
 .sb-online{width:7px;height:7px;background:#52c77c;border-radius:50%;margin-right:auto;flex-shrink:0;box-shadow:0 0 6px #52c77c;}
 
 .sb-nav{flex:1;overflow-y:auto;padding:8px 12px;}
@@ -1260,6 +1260,30 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
+<!-- ══════════════ مودال تلخيص الدورة ══════════════ -->
+<div class="overlay" id="modal-cs" onclick="if(event.target===this)closeModal('modal-cs')">
+  <div class="modal" style="max-width:640px;width:95%;">
+    <div class="modal-head">
+      <div class="modal-title" id="cs-title" style="font-size:.94rem;">📝 تلخيص الدورة</div>
+      <button class="modal-close" onclick="closeModal('modal-cs')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cs-course-name" style="font-size:.86rem;font-weight:800;color:var(--emerald);margin-bottom:12px;"></div>
+      <div id="cs-returned-note" style="display:none;background:var(--red-pale);border:1px solid var(--red);border-radius:10px;padding:10px 12px;color:var(--red);font-size:.8rem;font-weight:700;line-height:1.6;margin-bottom:12px;"></div>
+      <label style="font-size:.82rem;font-weight:800;color:var(--forest);display:block;margin-bottom:6px;">التلخيص النصي <span style="color:var(--light);font-weight:600;">(اختياري لو رفعت صورة)</span></label>
+      <textarea id="cs-text" placeholder="اكتب أهم النقاط اللي استفدتها من الدورة…" style="width:100%;min-height:130px;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-family:Tajawal;font-size:.85rem;line-height:1.8;resize:vertical;background:#fff;box-sizing:border-box;"></textarea>
+      <label style="font-size:.82rem;font-weight:800;color:var(--forest);display:block;margin:14px 0 6px;">صور التلخيص <span style="color:var(--light);font-weight:600;">(اختياري)</span></label>
+      <input type="file" id="cs-file" accept="image/*" multiple onchange="csAddImages(this)" style="font-size:.8rem;">
+      <div id="cs-uploading" style="display:none;font-size:.76rem;color:var(--blue);margin-top:6px;font-weight:700;">⏳ جارٍ رفع الصور…</div>
+      <div id="cs-images" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+      <div style="display:flex;gap:8px;margin-top:18px;">
+        <button class="btn btn-primary" id="cs-submit-btn" style="flex:1;" onclick="submitCourseSummary()">📤 إرسال للمشرف</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-cs')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ الرسائل (نظام كامل) ══════════════ -->
 <div id="page-messages" class="page">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
@@ -1509,17 +1533,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="fg"><label>حتى الآية</label><input type="number" min="1" id="ev-ato" placeholder="رقم الآية" oninput="evAutoFaces()"></div>
       </div>
 
-      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;">
-        <div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:8px;">🎙️ التسجيل الصوتي</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
-          <button class="btn btn-xs" style="background:var(--red);color:#fff;" onclick="recStart()">🔴 تسجيل</button>
-          <button class="btn btn-xs btn-outline" onclick="recPause()">⏸️ إيقاف مؤقت</button>
-          <button class="btn btn-xs btn-outline" onclick="recStop()">⏹️ إيقاف</button>
-          <span id="ev-rec-state" style="font-size:.76rem;font-weight:700;color:var(--mid);"></span>
-        </div>
-        <audio id="ev-audio" controls style="display:none;width:100%;margin-top:10px;"></audio>
-      </div>
-
       <div class="form-grid-2">
         <div class="fg"><label>عدد الأخطاء (الإجمالي)</label>
           <input type="number" min="0" id="ev-errors" placeholder="اكتب عدد الأخطاء" oninput="evGrade()">
@@ -1745,7 +1758,6 @@ function sameSection(u){ const g=genderOfUser(u); return !g || g===MY_GENDER; }
 // ── حالة التسميع/المراجعة لكل طالب ──
 let REC_STATE = {};
 let REC_CTX = { sid:null, type:'new' };
-let _mediaRec=null, _audioChunks=[], _audioBlob=null, _recState='idle';
 
 // ── تاريخ موعد الحلقة = اليوم فقط (إجباري، بيان ظاهر، لا يُختار) ──
 let REPORT_DATE = new Date().toISOString().split('T')[0];
@@ -2015,9 +2027,6 @@ async function boot(){
   document.getElementById('wb-hello').textContent='أهلاً المعلم '+fn;
   document.getElementById('tb-date').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
   if(typeof loadUserTheme==='function') loadUserTheme();
-
-  // تعديل ٦: أعِد رفع أي تسجيلات فشل رفعها قبل كده
-  setTimeout(()=>{ try{ recQueueFlush(); }catch(e){} }, 2500);
 
   // الشعب (branches)
   try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BRANCH_MAP[b.id]=b.name); }catch(e){}
@@ -2391,7 +2400,7 @@ async function lpUpsert(extra){
   const subject=lpSubject();
   if(!(await ensureFreshSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
   const body=Object.assign({
-    circle_id:(activeCircle()||{}).id||null,
+    circle_id:(activeCircle()||MY_CIRCLES[0]||{}).id||null,   // fallback لأول حلقة لو مفيش لقاء النهاردة (يمنع circle_id فاضي)
     title:document.getElementById('lp-title').value.trim(),
     data:lpCollect(), updated_at:new Date().toISOString(),
   }, extra||{});
@@ -2450,7 +2459,7 @@ async function submitLessonPrep(){
 // إشعار المشرف المتابع للحلقة (رسالة في صندوقه — والإشعار نفسه بيجي من تريجر lesson_preps)
 async function lpNotifySupervisor(title){
   try{
-    const c=activeCircle(); if(!c) return;
+    const c=activeCircle()||MY_CIRCLES[0]; if(!c) return;
     const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
     const sup=cir&&cir.supervisor_id; if(!sup) return;
     let supName='المشرف';
@@ -3067,9 +3076,6 @@ function openEval(sid,type){
   evGrade();
   const pw=document.getElementById('ev-plan-wrap'); if(pw) pw.style.display=planAllowed()?'':'none';
   setPlan(st.plan_done!==undefined?st.plan_done:true);
-  // audio reset
-  resetRecorder();
-  if(st.audio_url){ const a=document.getElementById('ev-audio'); a.src=st.audio_url; a.style.display='block'; }
   openModal('modal-eval');
 }
 // ── المراجعة: حساب قديم على إجمالي الأخطاء (بدون أوجه) | الحفظ: متوسط الأخطاء في الوجه ──
@@ -3106,41 +3112,7 @@ function setPlan(done){ _evPlan=done;
   document.getElementById('ev-plan-no').className='btn btn-xs '+(!done?'btn-danger':'btn-outline');
 }
 
-// ── التسجيل الصوتي ──
-async function recStart(){
-  if(_recState==='paused'){ _mediaRec.resume(); _recState='recording'; recUI(); return; }
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
-    _audioChunks=[]; const _mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    _mediaRec=new MediaRecorder(stream,{mimeType:_mime,audioBitsPerSecond:24000});
-    _mediaRec.ondataavailable=e=>{ if(e.data.size) _audioChunks.push(e.data); };
-    _mediaRec.onstop=()=>{ _audioBlob=new Blob(_audioChunks,{type:'audio/webm'}); const a=document.getElementById('ev-audio'); a.src=URL.createObjectURL(_audioBlob); a.style.display='block'; stream.getTracks().forEach(t=>t.stop()); };
-    _mediaRec.start(); _recState='recording'; recUI();
-  }catch(e){ showToast('🎙️ تعذّر الوصول للميكروفون'); }
-}
-function recPause(){ if(_mediaRec&&_recState==='recording'){ _mediaRec.pause(); _recState='paused'; recUI(); } }
-function recStop(){ if(_mediaRec&&_recState!=='idle'){ _mediaRec.stop(); _recState='stopped'; recUI(); } }
-function recUI(){
-  document.getElementById('ev-rec-state').textContent =
-    _recState==='recording'?'🔴 جارٍ التسجيل...':_recState==='paused'?'⏸️ متوقف مؤقتاً':_recState==='stopped'?'✅ تم التسجيل':'';
-}
-function resetRecorder(){ _mediaRec=null; _audioChunks=[]; _audioBlob=null; _recState='idle'; const a=document.getElementById('ev-audio'); a.src=''; a.style.display='none'; document.getElementById('ev-rec-state').textContent=''; }
-// تضمن إيقاف التسجيل واكتمال الـ blob قبل الحفظ (يحل مشكلة الحفظ السريع بعد الإيقاف)
-function ensureRecStopped(){
-  return new Promise(res=>{
-    if(!_mediaRec && !_audioBlob){ res(); return; }
-    const waitBlob=()=>{ let n=0; const t=setInterval(()=>{ if(_audioBlob||++n>40){ clearInterval(t); res(); } },40); };
-    if(_recState==='recording'||_recState==='paused'){
-      _mediaRec.addEventListener('stop',waitBlob,{once:true});
-      try{ _mediaRec.stop(); }catch(e){ waitBlob(); } _recState='stopped'; recUI();
-    } else { waitBlob(); }
-  });
-}
-
-// ══════════════ تعديل ٦: رفع التسجيل الصوتي بشكل موثوق ══════════════
-// الأسباب الشائعة لرسالة «السيرفر لا يعمل»: انتهاء جلسة Auth (401) أو انقطاع مؤقت.
-// الحل: تأكيد الجلسة قبل الرفع + إعادة محاولة تلقائية + رسالة عربية واضحة + طابور محلي لإعادة الرفع.
-const REC_QUEUE_KEY='rec_upload_queue_v1';
+// ══════════════ الجلسة ورسائل الأخطاء (مستخدمة في المهام اليومية وتحضير الدروس) ══════════════
 
 async function ensureFreshSession(){
   try{
@@ -3154,66 +3126,12 @@ async function ensureFreshSession(){
 
 function recFriendlyErr(e){
   const m=String((e&&(e.message||e.error||e.statusText))||e||'');
-  if(/Failed to fetch|NetworkError|network|ERR_INTERNET|Load failed/i.test(m)) return 'الشبكة مقطوعة — التسجيل محفوظ محلياً وهيترفع تلقائياً لما النت يرجع';
+  if(/Failed to fetch|NetworkError|network|ERR_INTERNET|Load failed/i.test(m)) return 'الشبكة مقطوعة — تأكد من الاتصال وحاول تاني';
   if(/401|jwt|JWT|token|Unauthorized|expired/i.test(m)) return 'الجلسة انتهت — اعمل خروج ودخول تاني';
-  if(/403|not authorized|violates|policy|row-level/i.test(m)) return 'الصلاحية مرفوضة على مخزن التسجيلات (RLS)';
-  if(/413|too large|Payload/i.test(m)) return 'حجم التسجيل كبير جداً';
-  if(/404|Bucket not found/i.test(m)) return 'مخزن التسجيلات (recitations) غير موجود';
+  if(/403|not authorized|violates|policy|row-level/i.test(m)) return 'الصلاحية مرفوضة (RLS)';
   return m || 'خطأ غير معروف';
 }
 
-// طابور محلي — يخزّن التسجيلات اللي فشل رفعها ويعيد المحاولة تلقائياً
-async function recQueuePush(sid,type,blob,path){
-  try{
-    const b64=await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(blob); });
-    const q=JSON.parse(localStorage.getItem(REC_QUEUE_KEY)||'[]');
-    q.push({sid,type,path,date:D(),b64,ts:Date.now()});
-    while(q.length>12) q.shift();          // سقف للحجم
-    localStorage.setItem(REC_QUEUE_KEY,JSON.stringify(q));
-  }catch(e){}
-}
-function b64ToBlob(b64){
-  const bin=atob(b64); const a=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i);
-  return new Blob([a],{type:'audio/webm'});
-}
-async function recQueueFlush(){
-  let q=[]; try{ q=JSON.parse(localStorage.getItem(REC_QUEUE_KEY)||'[]'); }catch(e){ return; }
-  if(!q.length) return;
-  if(!(await ensureFreshSession())) return;
-  const rest=[];
-  for(const it of q){
-    try{
-      const up=await db.storage.from('recitations').upload(it.path,b64ToBlob(it.b64),{contentType:'audio/webm',upsert:true});
-      if(up.error){ rest.push(it); continue; }
-      const {data}=db.storage.from('recitations').getPublicUrl(it.path);
-      await db.from('recitation_records').insert({student_id:it.sid,date:it.date,type:it.type,audio_url:data.publicUrl,file_path:it.path,recorded_by:cu.id});
-      try{ await db.from('memorization').update({audio_url:data.publicUrl}).eq('student_id',it.sid).eq('date',it.date).eq('type',it.type); }catch(e){}
-    }catch(e){ rest.push(it); }
-  }
-  localStorage.setItem(REC_QUEUE_KEY,JSON.stringify(rest));
-  const done=q.length-rest.length;
-  if(done>0 && typeof showToast==='function') showToast('🎧 تم رفع '+toAr(done)+' تسجيل كان متأخّر');
-}
-
-async function uploadRecitation(sid,type,blob){
-  const path='rec_'+sid+'_'+type+'_'+Date.now()+'.webm';
-  const ok=await ensureFreshSession();
-  if(!ok){ await recQueuePush(sid,type,blob,path); return {url:null,path:null,msg:' • ⚠️ الصوت لم يُرفع: الجلسة انتهت — اعمل خروج ودخول تاني'}; }
-  let lastErr=null;
-  for(let i=0;i<3;i++){
-    try{
-      const up=await db.storage.from('recitations').upload(path,blob,{contentType:'audio/webm',upsert:true});
-      if(!up.error){ const {data}=db.storage.from('recitations').getPublicUrl(path); return {url:data.publicUrl,path,msg:' • 🎧 صوت محفوظ'}; }
-      lastErr=up.error;
-      if(/401|jwt|expired/i.test(String(up.error.message||''))) await db.auth.refreshSession();
-    }catch(e){ lastErr=e; }
-    await new Promise(r=>setTimeout(r,700*(i+1)));   // 0.7s ثم 1.4s
-  }
-  await recQueuePush(sid,type,blob,path);
-  return {url:null,path:null,msg:' • ⚠️ الصوت لم يُرفع: '+recFriendlyErr(lastErr)};
-}
-window.addEventListener('online',()=>{ recQueueFlush(); });
 
 // ── حفظ التسميع ──
 async function saveEval(){
@@ -3229,16 +3147,6 @@ async function saveEval(){
   };
   const prev=(REC_STATE[sid]&&REC_STATE[sid][type])||null;
   const delta = pts - (prev?prev.points:0);
-  // رفع الصوت (إن وُجد)
-  await ensureRecStopped();
-  let audioUrl=prev?prev.audio_url:null, audioMsg='', audioPath=null;
-  const hasBlob=_audioBlob && _audioBlob.size>0;
-  if(hasBlob && (s._static||s._guest)){ audioMsg=' • ℹ️ صوت محلي (طالب تجريبي)'; }
-  else if(hasBlob){
-    const r=await uploadRecitation(sid,type,_audioBlob);
-    audioUrl=r.url||audioUrl; audioPath=r.path; audioMsg=r.msg;
-  } else if(_audioBlob){ audioMsg=' • ⚠️ التسجيل فارغ'; }
-  rec.audio_url=audioUrl;
   // حفظ في قاعدة البيانات
   if(!s._static && !s._guest){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
@@ -3246,7 +3154,6 @@ async function saveEval(){
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
     try{ await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}); }
     catch(e){ try{ const {error}=await db.from('memorization').insert([{student_id:sid,date:D(),type,grade,errors,points:pts,notes:rec.notes,recorded_by:cu.id}]); if(error) throw error; }catch(e2){ showToast('❌ خطأ في الحفظ'); return; } }
-    if(audioUrl && audioPath){ try{ const {error}=await db.from('recitation_records').insert({student_id:sid,date:D(),type,audio_url:audioUrl,file_path:audioPath,recorded_by:cu.id}); if(error) audioMsg=' • ⚠️ الصوت اترفع بس مش متسجّل بالجدول: '+recFriendlyErr(error); }catch(e){ audioMsg=' • ⚠️ recitation_records: '+recFriendlyErr(e); } }
     s.points+=delta; try{ await db.from('students').update({total_points:s.points}).eq('id',sid); }catch(e){}
   } else { s.points+=delta; }
   // تحديث الحالة المحلية والجدول
@@ -3254,7 +3161,7 @@ async function saveEval(){
   window._todayPts=(window._todayPts||0)+(delta>0?delta:0);
   reflectRow(sid);
   closeModal('modal-eval');
-  showToast('✅ '+(type==='new'?'حُفظ التسميع':'حُفظت المراجعة')+' — '+GRADE_AR[grade]+' (+'+pts+' نقطة)'+audioMsg);
+  showToast('✅ '+(type==='new'?'حُفظ التسميع':'حُفظت المراجعة')+' — '+GRADE_AR[grade]+' (+'+pts+' نقطة)');
 }
 
 // ── تحميل تسميع اليوم المسجّل مسبقاً (مزامنة) ──
@@ -3573,6 +3480,9 @@ let EXAMS_META = {};             // بيانات الاختبارات (بدون 
 
 // ── اختبارات نهاية الدورة (اختيار من متعدد) ──
 let TR_EXAM_DONE = {};                 // { course_id: {percent, points} } — نتيجة مسجّلة = مقفول
+let CS_MAP = {};                       // { course_id: صف course_summaries } — تلخيصات المعلم
+let _csCtx = null;                     // سياق مودال التلخيص المفتوح
+let _csImages = [];                    // مسارات صور التلخيص الجاري رفعها
 let _qzState = null;                    // {cid, qs, idx, answers[]}
 let _qzTimer = null, _qzEndTs = 0;
 
@@ -3789,6 +3699,10 @@ async function loadTraining(){
     const {data}=await db.from('teacher_exam_results').select('exam_id,percent,points').eq('teacher_id',cu.id);
     TR_EXAM_DONE={}; (data||[]).forEach(r=>{ TR_EXAM_DONE[r.exam_id]={percent:r.percent,points:r.points}; });
   }catch(e){ TR_EXAM_DONE={}; }
+  try{
+    const {data}=await db.from('course_summaries').select('*').eq('teacher_id',cu.id);
+    CS_MAP={}; (data||[]).forEach(r=>{ CS_MAP[r.course_id]=r; });
+  }catch(e){ CS_MAP={}; }
   renderTrQuick();
   trBackToLevels();
   trEnsureYT();
@@ -3820,12 +3734,22 @@ function renderTrOverall(){
     </div>
   </div>`;
 }
-// اكتمال المستوى = كل فيديوهاته اتشافت + كل اختبارات دوراته المتاحة اتأدّت
+// ── تلخيص الدورة: شرط لتعدّي الدورة (ومن ثمّ المستوى) ──
+function csForCourse(cid){ return CS_MAP[cid]||null; }
+function csApproved(cid){ const x=CS_MAP[cid]; return !!(x && x.status==='approved'); }
+// الفيديوهات كلها + الاختبارات المتاحة كلها اتأدّت (شرط فتح التلخيص)
+function trCourseVideosExamsDone(c){
+  const {done,total}=trCourseStats(c);
+  if(!total || done<total) return false;
+  return trCourseExams(c).every(e=> !trExamHas(e.id) || !!TR_EXAM_DONE[e.id]);
+}
+// الدورة مكتملة = الفيديوهات + الاختبار + تلخيص معتمد
+function trCourseComplete(c){ return trCourseVideosExamsDone(c) && csApproved(c.id); }
+
+// اكتمال المستوى = كل دوراته مكتملة (فيديوهات + اختبار + تلخيص معتمد)
 function trLevelComplete(lv){
   if(!lv || !lv.courses.length) return false;
-  const {done,total}=trLevelStats(lv);
-  if(!total || done<total) return false;
-  return lv.courses.every(c=> trCourseExams(c).every(e=> !trExamHas(e.id) || !!TR_EXAM_DONE[e.id]));
+  return lv.courses.every(trCourseComplete);
 }
 // المستوى مقفول لو اللي قبله لسه مخلصش — يرجّع المستوى السابق أو null
 function trLevelLockedBy(idx){
@@ -3887,8 +3811,29 @@ function renderTrCourses(){
      </div>`;
   document.getElementById('tr-courses-list').innerHTML=lv.courses.map(c=>trCourseCard(c,lv)).join('');
 }
+// ── قسم تلخيص الدورة داخل كارت الدورة ──
+function trSummarySection(c,lv){
+  const gate=trCourseVideosExamsDone(c);
+  const x=CS_MAP[c.id];
+  const box=(bg,bd,col,html)=>`<div style="background:${bg};border:1px solid ${bd};border-radius:10px;padding:12px 14px;color:${col};font-size:.82rem;font-weight:700;line-height:1.7;">${html}</div>`;
+  if(!gate)
+    return box('var(--pale)','var(--border)','var(--light)','🔒 تلخيص الدورة — يُفتح بعد إكمال كل الفيديوهات واجتياز الاختبار');
+  if(!x)
+    return '<div style="display:flex;flex-direction:column;gap:8px;">'
+      +'<div style="font-size:.82rem;font-weight:800;color:var(--forest);">📝 تلخيص الدورة <span style="color:var(--gold);">(شرط تعدّيها • +٥٠ نقطة)</span></div>'
+      +'<div style="font-size:.76rem;color:var(--mid);line-height:1.6;">اكتب أهم ما استفدته من الدورة في نقاط، أو ارفع صورة تلخيصك. لن تتعدّى الدورة قبل اعتماد المشرف.</div>'
+      +'<button class="btn btn-primary btn-sm" style="width:100%;" onclick="openCsModal(\''+c.id+'\')">📝 قدّم تلخيص الدورة</button></div>';
+  if(x.status==='submitted')
+    return box('var(--blue-pale)','var(--blue)','var(--blue)','⏳ تلخيصك قيد مراجعة المشرف — سيصلك إشعار عند الاعتماد');
+  if(x.status==='returned')
+    return '<div style="display:flex;flex-direction:column;gap:8px;">'
+      +box('var(--red-pale)','var(--red)','var(--red)','↩️ أعاد المشرف تلخيصك للتعديل:<br><span style="font-weight:600;">'+trEsc(x.supervisor_note||'—')+'</span>')
+      +'<button class="btn btn-outline btn-sm" style="width:100%;border-color:var(--gold);color:var(--gold);" onclick="openCsModal(\''+c.id+'\')">✏️ عدّل التلخيص وأعد الإرسال</button></div>';
+  return box('var(--pale)','var(--mint)','var(--emerald)','✅ تلخيص الدورة معتمد — أُضيفت ٥٠ نقطة • الدورة مُتعدّاة');
+}
+
 function trCourseCard(c,lv){
-  const {done,total}=trCourseStats(c); const complete=total>0 && done===total;
+  const {done,total}=trCourseStats(c); const complete=trCourseComplete(c);
   const cBadge = complete ? '<span class="badge bg-green">✅ مكتملة</span>' : '<span class="badge bg-gold">'+toAr(done)+'/'+toAr(total)+'</span>';
   const rows=c.videos.map((v,i)=>{
     const w=TR_WATCHED.has(v); const title=TR_TITLES[v]?trEsc(TR_TITLES[v]):('فيديو تدريبي '+toAr(i+1));
@@ -3925,6 +3870,7 @@ function trCourseCard(c,lv){
       <div style="margin-bottom:14px;">${trBar(done,total)}</div>
       <div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>
       <div style="margin-top:16px;border-top:1px dashed var(--border);padding-top:14px;">${exam}</div>
+      <div style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px;">${trSummarySection(c,lv)}</div>
     </div>
   </div>`;
 }
@@ -3936,7 +3882,7 @@ function playTrVideo(videoId,courseId,levelId){
   const already=TR_WATCHED.has(videoId);
   const st=document.getElementById('tr-vid-status'), mb=document.getElementById('tr-mark-btn');
   if(already){ st.innerHTML='<span style="color:var(--emerald);font-weight:800;">✅ تمت مشاهدة هذا الفيديو — احتُسبت نقاطه من قبل</span>'; mb.style.display='none'; }
-  else{ st.textContent='شاهد الفيديو كاملاً — لا يمكن تجاوز الأجزاء التي لم تشاهدها.'; mb.style.display='none'; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
+  else{ st.textContent='شاهد الفيديو حتى نهايته لاحتساب النقاط.'; mb.style.display='none'; mb.disabled=false; mb.textContent='✅ أنهيت المشاهدة'; }
   _trMaxTime=0; _trSeekMsgAt=0;
   openModal('modal-tr-video');
   trEnsureYT(()=>{
@@ -3946,8 +3892,7 @@ function playTrVideo(videoId,courseId,levelId){
       videoId:videoId,
       playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,origin:location.origin},
       events:{
-        onReady:e=>{ try{e.target.playVideo();}catch(_){} try{e.target.setPlaybackRate(1);}catch(_){} startTrPoll(); },
-        onPlaybackRateChange:e=>{ if(e.data!==1){ try{_trPlayer.setPlaybackRate(1);}catch(_){} } },  // قفل السرعة على ١×
+        onReady:e=>{ try{e.target.playVideo();}catch(_){} startTrPoll(); },
         onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED && _trPlaying) markTrWatched(_trPlaying.videoId,_trPlaying.courseId,_trPlaying.levelId); }
       }
     });
@@ -3961,14 +3906,8 @@ function startTrPoll(){
       const d=_trPlayer.getDuration?_trPlayer.getDuration():0;
       const t=_trPlayer.getCurrentTime?_trPlayer.getCurrentTime():0;
       if(d<=0) return;
-      // منع السحب للأمام: أي قفزة أبعد من المسموح تُرجَّع لأقصى نقطة اتشافت
-      if(t > _trMaxTime + 2.2){
-        try{ _trPlayer.seekTo(_trMaxTime, true); }catch(_){}
-        const now=Date.now();
-        if(now-_trSeekMsgAt>2500){ _trSeekMsgAt=now; showToast('⚠️ لا يمكن تجاوز ما لم تشاهده — أكمل الفيديو بالترتيب'); }
-      } else if(t > _trMaxTime){
-        _trMaxTime=t;                                   // تقدّم طبيعي
-      }
+      // السحب والتسريع مسموحان — نتتبّع أقصى نقطة تمّت مشاهدتها فقط
+      if(t > _trMaxTime) _trMaxTime = t;
       // إظهار زر الإنهاء اليدوي في آخر ٢٠٪ فقط (بعد مشاهدة فعلية)
       const mb=document.getElementById('tr-mark-btn');
       if(mb && !TR_WATCHED.has(_trPlaying.videoId) && _trMaxTime/d>=0.80 && mb.style.display==='none') mb.style.display='';
@@ -4009,6 +3948,100 @@ async function markTrWatched(videoId,courseId,levelId){
     if(document.getElementById('tr-courses-view').style.display!=='none') renderTrCourses(); else renderTrLevels();
   }catch(e){ showToast('⚠️ تعذّر تسجيل النقاط: '+(e.message||e.code||'')); }
   finally{ _trAwarding.delete(videoId); }
+}
+
+// ══════════════ تلخيص الدورة (المعلم) ══════════════
+async function csSignedUrl(path){
+  try{ const {data}=await db.storage.from('course-summaries').createSignedUrl(path,3600); return data?data.signedUrl:''; }
+  catch(e){ return ''; }
+}
+function openCsModal(courseId){
+  let course=null, level=null;
+  TRAINING_LEVELS.forEach(lv=>(lv.courses||[]).forEach(c=>{ if(c.id===courseId){ course=c; level=lv; } }));
+  if(!course){ showToast('⚠️ تعذّر فتح الدورة'); return; }
+  const x=CS_MAP[courseId]||null;
+  _csCtx={courseId, courseName:course.name, levelId:level?level.id:null};
+  _csImages = (x && Array.isArray(x.images)) ? x.images.slice() : [];
+  document.getElementById('cs-course-name').textContent='📘 '+course.name;
+  document.getElementById('cs-text').value = (x && x.content) ? x.content : '';
+  const rn=document.getElementById('cs-returned-note');
+  if(x && x.status==='returned' && x.supervisor_note){ rn.style.display='block'; rn.innerHTML='↩️ ملاحظة المشرف: '+trEsc(x.supervisor_note); }
+  else rn.style.display='none';
+  document.getElementById('cs-file').value='';
+  csRenderImages();
+  openModal('modal-cs');
+}
+async function csAddImages(input){
+  const files=Array.from(input.files||[]); if(!files.length) return;
+  if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول'); return; }
+  const up=document.getElementById('cs-uploading'); up.style.display='block';
+  for(const f of files){
+    if(!f.type.startsWith('image/')){ showToast('⚠️ الملفات صور فقط'); continue; }
+    if(f.size>5*1024*1024){ showToast('⚠️ حجم الصورة أكبر من ٥ ميجا: '+f.name); continue; }
+    const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=cu.id+'/'+_csCtx.courseId+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ext;
+    try{
+      const {error}=await db.storage.from('course-summaries').upload(path,f,{upsert:false,contentType:f.type});
+      if(error) throw error;
+      _csImages.push(path);
+    }catch(e){ showToast('❌ تعذّر رفع '+f.name+': '+(e.message||'')); }
+  }
+  up.style.display='none'; input.value=''; csRenderImages();
+}
+async function csRenderImages(){
+  const box=document.getElementById('cs-images'); if(!box) return;
+  if(!_csImages.length){ box.innerHTML='<div style="font-size:.74rem;color:var(--light);">لا صور مرفوعة</div>'; return; }
+  box.innerHTML=_csImages.map((p,i)=>`<div style="position:relative;width:78px;height:78px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--pale);" id="cs-img-${i}"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--light);">⏳</span><button type="button" onclick="csRemoveImage(${i})" style="position:absolute;top:2px;left:2px;z-index:2;background:rgba(192,57,43,.92);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.8rem;cursor:pointer;line-height:1;">×</button></div>`).join('');
+  for(let i=0;i<_csImages.length;i++){
+    const url=await csSignedUrl(_csImages[i]); const el=document.getElementById('cs-img-'+i);
+    if(el && url){ const sp=el.querySelector('span'); if(sp) sp.outerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;">'; }
+  }
+}
+function csRemoveImage(i){ _csImages.splice(i,1); csRenderImages(); }
+async function submitCourseSummary(){
+  if(!_csCtx) return;
+  const content=document.getElementById('cs-text').value.trim();
+  if(!content && !_csImages.length){ showToast('⚠️ اكتب تلخيصاً أو ارفع صورة على الأقل'); return; }
+  if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول'); return; }
+  const btn=document.getElementById('cs-submit-btn'); const ot=btn.textContent; btn.disabled=true; btn.textContent='⏳ جارٍ الإرسال…';
+  const cid=_csCtx.courseId;
+  const body={ teacher_id:cu.id, course_id:cid, level_id:_csCtx.levelId||null, course_name:_csCtx.courseName||null,
+    content:content||null, images:_csImages, status:'submitted', supervisor_note:null,
+    submitted_at:new Date().toISOString(), updated_at:new Date().toISOString() };
+  try{
+    const {data:ex}=await db.from('course_summaries').select('id,status').eq('teacher_id',cu.id).eq('course_id',cid).maybeSingle();
+    if(ex){
+      if(ex.status==='approved'){ showToast('✅ التلخيص معتمد بالفعل'); btn.disabled=false; btn.textContent=ot; return; }
+      const {data,error}=await db.from('course_summaries').update(body).eq('id',ex.id).select('id');
+      if(error) throw error; if(!data||!data.length) throw new Error('التعديل مرفوض من RLS');
+    }else{
+      const {data,error}=await db.from('course_summaries').insert(body).select('id');
+      if(error) throw error; if(!data||!data.length) throw new Error('الإضافة مرفوضة من RLS');
+    }
+    await csNotifySupervisor(_csCtx.courseName);
+    const {data:all}=await db.from('course_summaries').select('*').eq('teacher_id',cu.id);
+    CS_MAP={}; (all||[]).forEach(r=>{ CS_MAP[r.course_id]=r; });
+    closeModal('modal-cs');
+    showToast('📤 تم إرسال التلخيص للمشرف — هيوصله إشعار');
+    renderTrCourses();
+  }catch(e){ showToast('❌ تعذّر الإرسال: '+(e.message||e.code||'')); }
+  finally{ btn.disabled=false; btn.textContent=ot; }
+}
+async function csNotifySupervisor(courseName){
+  try{
+    const c=activeCircle()||MY_CIRCLES[0]; if(!c) return;
+    const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
+    const sup=cir&&cir.supervisor_id; if(!sup) return;
+    let supName='المشرف';
+    try{ const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle(); if(su&&su.full_name) supName=su.full_name; }catch(e){}
+    await db.from('messages').insert({
+      sender_id:cu.id, sender_name:cu.full_name||'معلم', sender_role:'teacher',
+      to_id:String(sup), to_name:supName, to_role:'supervisor',
+      subject:'📝 تلخيص دورة جديد للمراجعة',
+      body:'المعلم/ '+(cu.full_name||'')+' أرسل تلخيص دورة «'+(courseName||'')+'» للمراجعة.\nراجعه من: التقارير ← تلخيصات الدورات.',
+      is_read:false, starred:false, urgent:false, is_draft:false, deleted:false
+    }).select('id');
+  }catch(e){ console.warn('csNotifySupervisor:', e && e.message); }
 }
 
 // ── رصيد النقاط في السايدبار ──

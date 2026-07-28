@@ -270,7 +270,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   font-size:.9rem;color:#fff;font-weight:700;
 }
 .sb-uname{font-size:.82rem;font-weight:700;color:#fff;}
-.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);}
+.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);background:none!important;background-image:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;padding:0!important;border:none!important;border-radius:0!important;}
 .sb-online{width:7px;height:7px;background:#52c77c;border-radius:50%;margin-right:auto;flex-shrink:0;box-shadow:0 0 6px #52c77c;}
 
 .sb-nav{flex:1;overflow-y:auto;padding:8px 12px;}
@@ -2812,6 +2812,23 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         <div style="font-size:1.3rem;color:var(--purple);">‹</div>
       </div>
     </div>
+
+    <!-- تلخيصات الدورات -->
+    <div onclick="nav(null,'rep-summaries')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 12px rgba(200,146,10,.25);">📝</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);display:flex;align-items:center;gap:8px;">تلخيصات الدورات
+            <span id="rep-summaries-badge" class="badge bg-red" style="display:none;font-size:.7rem;align-items:center;"></span>
+          </div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مراجعة تلخيصات المعلمين للدورات واعتمادها (+٥٠ نقطة)</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2841,6 +2858,38 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       <button class="btn btn-primary" onclick="approvePrep()">✅ موافقة (+٥٠ نقطة)</button>
       <button class="btn btn-danger" onclick="returnPrep()">↩️ إرجاع بملاحظات</button>
       <button class="btn btn-outline" onclick="closeModal('modal-prep-review')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: مراجعة تلخيصات الدورات -->
+<div id="page-rep-summaries" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'reports')">مركز التقارير</span>
+    <span style="margin:0 8px;">/ </span><span>تلخيصات الدورات</span>
+  </div>
+  <div class="section-title" style="margin-bottom:16px;">📝 مراجعة تلخيصات الدورات</div>
+  <div id="rep-summaries-out"></div>
+</div>
+
+<!-- MODAL: مراجعة تلخيص دورة -->
+<div class="overlay" id="modal-cs-review">
+  <div class="modal" style="max-width:720px;width:94%;">
+    <div class="modal-head"><div class="modal-title">📝 مراجعة تلخيص الدورة</div><button class="modal-close" onclick="closeModal('modal-cs-review')">×</button></div>
+    <div class="modal-body">
+      <div id="csr-head"></div>
+      <div id="csr-content"></div>
+      <div id="csr-images"></div>
+      <div id="csr-approved-tag" style="display:none;margin-top:14px;padding:12px;background:var(--pale);border:1.5px solid var(--mint);border-radius:10px;color:var(--emerald);font-weight:800;text-align:center;">✅ تم اعتماد هذا التلخيص ومنح ٥٠ نقطة للمعلم</div>
+      <div style="margin-top:14px;">
+        <label style="font-weight:700;color:var(--forest);font-size:.82rem;">ملاحظات المشرف (تظهر للمعلم عند الإرجاع)</label>
+        <textarea id="csr-note" rows="3" placeholder="اكتب ملاحظاتك…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:Tajawal;font-size:.85rem;margin-top:6px;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot" id="csr-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="approveCsReview()">✅ موافقة (+٥٠ نقطة)</button>
+      <button class="btn btn-danger" onclick="returnCsReview()">↩️ إرجاع بملاحظات</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-cs-review')">إغلاق</button>
     </div>
   </div>
 </div>
@@ -7397,6 +7446,7 @@ const PAGE_TITLES = {
   'stats-students':'إحصاءات الطلاب','stats-circles':'إحصاءات الحلقات','stats-teachers':'إحصاءات المعلمين',
   'rep-students':'👨‍🎓 تقارير الطلاب','rep-teachers':'👨‍🏫 تقارير المعلمين','rep-circles':'🕌 تقارير الحلقات',
   'rep-lessons':'📝 مراجعة تحضير الدروس',
+  'rep-summaries':'📝 مراجعة تلخيصات الدورات',
   exams:'✍️ الامتحانات',golden:'🏅 السجل الذهبي',cards:'🪪 بطاقات الطلاب',
   reading:'🎥 المقرأة الإلكترونية',library:'📚 المكتبة',finance:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg> الشؤون المالية',
   'fin-rev':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> الواردات','fin-exp':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 16V6"/><path d="m8 10 4-4 4 4"/><path d="M4 14v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M4 14h4l1.2 2h5.6l1.2-2h4"/></svg> المصروفات',
@@ -8075,6 +8125,7 @@ async function init(){
   loadSupervisorDashboard();
   try { waStartAutoSync(); } catch(e){ console.log('waStartAutoSync:', e); }   // مزامنة التنبيهات الأسبوعية مع لوحة القيادة
   try { lpRefreshPendingBadge(); setInterval(lpRefreshPendingBadge, 120000); } catch(e){}   // عدّاد تحضيرات المعلمين المنتظرة
+  try { csRefreshPendingBadge(); setInterval(csRefreshPendingBadge, 120000); } catch(e){}   // عدّاد تلخيصات الدورات المنتظرة
   loadBranchCounts();        // ← أعداد الشعب بعد تحديد SUPERVISOR_TEACHER_LIST
   initParentBranchCounts();  // ← أعداد أولياء الأمور بعد تحديد SUPERVISOR_TEACHER_LIST
   loadUnreadMsgCount();
@@ -9328,7 +9379,8 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
   if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
   if (pageId === 'rep-lessons') loadLessonReviews();
-  if (pageId === 'reports') lpRefreshPendingBadge();
+  if (pageId === 'rep-summaries') loadCsReviews();
+  if (pageId === 'reports') { lpRefreshPendingBadge(); csRefreshPendingBadge(); }
   if (pageId === 'rep-subs') loadSubsRep();
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'library') loadLibraryBooks();
@@ -11908,7 +11960,7 @@ function waAnalyzeBranch(branchName, weekIdx){
   // id ثابت لكل عنصر + تخزين التفاصيل
   window.WA_DETAILS = window.WA_DETAILS || {};
   const stamp = (a)=>{
-    a.id = 'wa_' + weekIdx + '_' + svHash(branchName + '|' + (a.key || a.text));
+    a.id = 'wa_' + svHash(branchName + '|' + (a.key || a.text));   // ثابت — مستقل عن رقم الأسبوع (يمنع تكرار التنبيه اللي اتّخذ فيه إجراء)
     if(a._detail){ a._detail.title = a.text; window.WA_DETAILS[a.id] = a._detail; delete a._detail; }
     return a;
   };
@@ -11948,6 +12000,8 @@ async function waFetchActions(force){
     if(error) throw error;
     const m = {};
     (data||[]).forEach(r=>{ m[r.alert_id] = { action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; });
+    // توافق رجعي: الإجراءات القديمة اتخزّنت بـ id فيه رقم الأسبوع — نطابقها بالـ id الثابت الجديد
+    (data||[]).forEach(r=>{ const mo=/^wa_\d+_(.+)$/.exec(r.alert_id||''); if(mo){ const nid='wa_'+mo[1]; if(!m[nid]) m[nid]={ action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; } });
     window.WA_ACTS = m;
     window.WA_ACTS_RAW = data||[];   // خام — للترحيل من الـ id القديم للـ id الثابت الجديد
     window._waActsLoaded = true;
@@ -15436,6 +15490,97 @@ async function lpRefreshPendingBadge(){
       const el=document.getElementById(id); if(!el) return;
       if(n>0){ el.style.display='inline-flex'; el.textContent=rptAr(n); } else el.style.display='none';
     });
+  }catch(e){}
+}
+
+
+// ══════════════════════════════════════════════════════
+// مراجعة تلخيصات الدورات (يظهر للمشرف — RLS يقصر على معلميه)
+// ══════════════════════════════════════════════════════
+function csrBadge(st){
+  const m={submitted:['قيد المراجعة','bg-blue'],approved:['معتمَد','bg-green'],returned:['مُعاد بملاحظات','bg-red']};
+  const x=m[st]||['—','bg-gray']; return '<span class="badge '+x[1]+'">'+x[0]+'</span>';
+}
+async function loadCsReviews(){
+  const out=document.getElementById('rep-summaries-out');
+  out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let rows=[];
+  try{ const {data}=await db.from('course_summaries').select('*').in('status',['submitted','returned','approved']).order('submitted_at',{ascending:false}); rows=data||[]; }
+  catch(e){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر التحميل</div>'; return; }
+  const ids=[...new Set(rows.map(r=>r.teacher_id))]; const names={};
+  if(ids.length){ try{ const {data}=await db.from('users').select('id,full_name').in('id',ids); (data||[]).forEach(u=>names[u.id]=u.full_name); }catch(e){} }
+  window._CSR_ROWS={}; rows.forEach(r=>{ r._tname=names[r.teacher_id]||'—'; window._CSR_ROWS[r.id]=r; });
+  if(!rows.length){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد تلخيصات مُرسلة للمراجعة</div>'; return; }
+  const pending=rows.filter(r=>r.status==='submitted'), others=rows.filter(r=>r.status!=='submitted');
+  const rowHtml=(r)=>'<tr>'+
+    '<td style="font-weight:700;color:var(--forest);">'+(r._tname)+'</td>'+
+    '<td>'+((r.course_name||'—'))+'</td>'+
+    '<td style="text-align:center;white-space:nowrap;">'+(r.content?'📝':'')+((r.images&&r.images.length)?(' 🖼️'+rptAr(r.images.length)):'')+'</td>'+
+    '<td>'+csrBadge(r.status)+'</td>'+
+    '<td><button class="btn btn-primary btn-sm" onclick="openCsReview(\''+r.id+'\')">مراجعة</button></td></tr>';
+  const tbl=(list,empty)=>'<div style="overflow-x:auto;"><table class="rpt-table" style="min-width:560px;"><thead><tr><th>المعلم</th><th>الدورة</th><th>المحتوى</th><th>الحالة</th><th></th></tr></thead><tbody>'+(list.map(rowHtml).join('')||('<tr><td colspan="5" style="text-align:center;color:var(--light);padding:16px;">'+empty+'</td></tr>'))+'</tbody></table></div>';
+  out.innerHTML='<div class="card"><div class="card-head"><div class="card-title">📥 بانتظار المراجعة ('+rptAr(pending.length)+')</div></div>'+tbl(pending,'لا يوجد')+'</div>'+
+    (others.length?('<div class="card" style="margin-top:16px;"><div class="card-head"><div class="card-title">📋 مراجَعة سابقاً</div></div>'+tbl(others,'—')+'</div>'):'');
+}
+async function csrSignedUrl(path){ try{ const {data}=await db.storage.from('course-summaries').createSignedUrl(path,3600); return data?data.signedUrl:''; }catch(e){ return ''; } }
+async function openCsReview(id){
+  const r=window._CSR_ROWS[id]; if(!r) return; window._CSR_CUR=id;
+  const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  document.getElementById('csr-head').innerHTML='<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;"><b style="font-family:Amiri,serif;color:var(--forest);font-size:1.02rem;">📘 '+esc(r.course_name||'الدورة')+'</b><span style="font-size:.78rem;color:var(--light);">المعلم/ '+esc(r._tname)+'</span></div>';
+  document.getElementById('csr-content').innerHTML = r.content ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.86rem;color:var(--ink);background:var(--pale);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">'+esc(r.content)+'</div>' : '<div style="font-size:.8rem;color:var(--light);">لا يوجد نص — التلخيص بالصور.</div>';
+  const imgBox=document.getElementById('csr-images'); imgBox.innerHTML='';
+  const imgs=Array.isArray(r.images)?r.images:[];
+  if(imgs.length){
+    imgBox.innerHTML='<div style="font-size:.8rem;font-weight:800;color:var(--forest);margin:12px 0 8px;">🖼️ صور التلخيص (اضغط للتكبير):</div><div id="csr-img-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>';
+    const grid=document.getElementById('csr-img-grid');
+    for(let i=0;i<imgs.length;i++){
+      const url=await csrSignedUrl(imgs[i]);
+      if(url){ const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.innerHTML='<img src="'+url+'" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;">'; grid.appendChild(a); }
+    }
+  }
+  document.getElementById('csr-note').value = r.supervisor_note || '';
+  const approved = r.status==='approved';
+  document.getElementById('csr-approved-tag').style.display = approved?'block':'none';
+  document.getElementById('csr-actions').style.display = approved?'none':'flex';
+  openModal('modal-cs-review');
+}
+async function approveCsReview(){
+  const id=window._CSR_CUR; if(!id) return;
+  const btns=document.getElementById('csr-actions'); if(btns) btns.style.pointerEvents='none';
+  try{
+    if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {data,error}=await db.rpc('approve_course_summary',{ p_id:id, p_approve:true, p_note:null });
+    if(error) throw error;
+    const res=Array.isArray(data)?data[0]:data;
+    if(res==='no_perm') throw new Error('غير مسموح لك باعتماد تلخيص هذا المعلم (خارج نطاق إشرافك)');
+    const {data:chk}=await db.from('course_summaries').select('status').eq('id',id).maybeSingle();
+    if(!chk || chk.status!=='approved') throw new Error('لم تُحفظ الموافقة — راجع الصلاحيات');
+    showToast('✅ تم اعتماد التلخيص — أُضيفت ٥٠ نقطة لرصيد المعلم');
+    closeModal('modal-cs-review'); await loadCsReviews(); csRefreshPendingBadge();
+  }catch(e){ showToast('❌ تعذّرت الموافقة: '+waErr(e)); }
+  finally{ if(btns) btns.style.pointerEvents=''; }
+}
+async function returnCsReview(){
+  const id=window._CSR_CUR; if(!id) return;
+  const note=document.getElementById('csr-note').value.trim();
+  if(!note){ showToast('⚠️ اكتب الملاحظة قبل الإرجاع'); return; }
+  const btns=document.getElementById('csr-actions'); if(btns) btns.style.pointerEvents='none';
+  try{
+    if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {error}=await db.rpc('approve_course_summary',{ p_id:id, p_approve:false, p_note:note });
+    if(error) throw error;
+    const {data:chk}=await db.from('course_summaries').select('status').eq('id',id).maybeSingle();
+    if(!chk || chk.status!=='returned') throw new Error('لم يُحفظ الإرجاع — راجع الصلاحيات');
+    showToast('📌 تم إرجاع التلخيص للمعلم بالملاحظات — وصله إشعار');
+    closeModal('modal-cs-review'); await loadCsReviews(); csRefreshPendingBadge();
+  }catch(e){ showToast('❌ تعذّر الإرجاع: '+waErr(e)); }
+  finally{ if(btns) btns.style.pointerEvents=''; }
+}
+async function csRefreshPendingBadge(){
+  try{
+    const {count}=await db.from('course_summaries').select('id',{count:'exact',head:true}).eq('status','submitted');
+    const n=count||0;
+    ['rep-summaries-badge','sb-summaries-badge'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; if(n>0){ el.style.display='inline-flex'; el.textContent=rptAr(n); } else el.style.display='none'; });
   }catch(e){}
 }
 
