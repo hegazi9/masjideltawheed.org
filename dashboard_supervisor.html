@@ -2913,6 +2913,17 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       <button class="btn btn-primary" onclick="rptRunStudent()" style="height:42px;">📊 أظهر التقرير</button>
     </div>
   </div>
+  <div class="card" style="margin-bottom:18px;border-top:3px solid var(--gold);">
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px;">
+      <div style="min-width:220px;flex:1;">
+        <label class="rpt-lbl">تصدير جماعي — الحلقة</label>
+        <select id="rep-st-bulk-circle" class="rpt-inp"><option value="">كل الطلاب (جميع الحلقات)</option></select>
+      </div>
+      <button class="btn btn-gold" id="rep-st-bulk-btn" onclick="rptExportAllStudents()" style="height:42px;">📄 تصدير تقارير جميع الطلاب PDF</button>
+      <div style="font-size:.72rem;color:var(--light);flex-basis:100%;">كل طالب في صفحة مستقلة — يستخدم نفس الفترة (من/إلى) بالأعلى.</div>
+    </div>
+    <div id="rep-st-bulk-prog" style="display:none;padding:0 16px 16px;"></div>
+  </div>
   <div id="rep-st-out"></div>
 </div>
 
@@ -9375,7 +9386,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'memorization') loadSupMemo();
   if (pageId === 'messages') initMessages();
   if (pageId === 'reports') { /* صفحة الهاب فقط */ }
-  if (pageId === 'rep-students') rptInitIndex().then(()=>rptFillDatalist('student'));
+  if (pageId === 'rep-students') rptInitIndex().then(()=>{rptFillDatalist('student');rptFillBulkCircles();});
   if (pageId === 'rep-teachers') rptInitIndex().then(()=>rptFillDatalist('teacher'));
   if (pageId === 'rep-circles')  rptInitIndex().then(()=>rptFillDatalist('circle'));
   if (pageId === 'rep-lessons') loadLessonReviews();
@@ -10719,8 +10730,9 @@ async function svSaveSessionData(date, teacher, obj, branch){
     const { data: rows, error: selErr } = await db.from('supervisory_sessions')
       .select('id,branch').eq('session_date',date).eq('teacher_name',teacher);
     if(selErr){ console.log('sess sel:', selErr.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
-    let target = (rows||[]).find(r=> (r.branch||'')===b);
+    let target = (rows||[]).find(r=> String(r.branch||'').trim()===String(b||'').trim());
     if(!target)   target = (rows||[]).find(r=> !r.branch);   // صف قديم بلا شعبة → رقّيه لهذه الشعبة
+    if(!target && (rows||[]).length===1) target = rows[0];   // صف وحيد لنفس المعلم/التاريخ → حدّثه بدل تكراره
     let error;
     if(target){
       ({ error } = await db.from('supervisory_sessions').update(row).eq('id', target.id));
@@ -11032,6 +11044,20 @@ function svFmtReportDate(iso){
   catch(e){ return iso; }
 }
 
+// إزالة الجلسات المكررة لنفس (المعلم + التاريخ + الشعبة) مع الاحتفاظ بالأحدث
+function svDedupeSessions(rows){
+  const seen = {}, out = [];
+  (rows||[]).forEach(r=>{
+    const k = String(r.teacher_name||'').trim()+'|'+(r.session_date||'')+'|'+String(r.branch||'').trim();
+    const prev = seen[k];
+    if(!prev){ seen[k]=r; out.push(r); return; }
+    const t1 = new Date(prev.saved_at||prev.session_date||0).getTime();
+    const t2 = new Date(r.saved_at||r.session_date||0).getTime();
+    if(t2 >= t1){ const idx=out.indexOf(prev); if(idx>=0) out[idx]=r; seen[k]=r; }
+  });
+  return out;
+}
+
 async function loadReports(){
   const body = document.getElementById('reports-body');
   const cnt  = document.getElementById('reports-count');
@@ -11046,6 +11072,9 @@ async function loadReports(){
     if(error){ console.log('loadReports:', error.message); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل التقارير</div>'; return; }
     rows = data || [];
   }catch(e){ console.log('loadReports ex:', e); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر الاتصال بالخادم</div>'; return; }
+
+  // إزالة التكرار: صف واحد فقط لكل (معلم + تاريخ + شعبة) — نحتفظ بالأحدث
+  rows = svDedupeSessions(rows);
 
   if(cnt) cnt.textContent = rows.length ? (rows.length + ' جلسة') : '—';
   if(!rows.length){
@@ -15304,32 +15333,219 @@ function rptBranchMatch(sessBranch, circleBranch){
   return girls.includes(sessBranch) && girls.includes(circleBranch);
 }
 
-// ── تصدير PDF لأي عنصر ──
+// ── تصدير PDF لأي عنصر — قطع ذكي عند حدود الصفوف (بلا قطع صف أو تداخل) ──
 async function rptExportPdf(elId, fname){
   const el = document.getElementById(elId);
   if(!el){ return; }
-  if(!window.html2canvas || !(window.jspdf||window.jsPDF)){ window.print(); return; }
+  const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if(!window.html2canvas || !JsPDF){ window.print(); return; }
   showToast('⏳ جاري تجهيز ملف PDF...');
+
+  const SCALE = 2, RENDER_W = 820;   // عرض ثابت للتصوير حتى تظهر الجداول كاملة
+  // إخفاء الأزرار + توسيع العنصر وإلغاء scroll الجداول مؤقتاً
+  const noprint = [...el.querySelectorAll('.rpt-noprint')];
+  const prevVis = noprint.map(n=>n.style.visibility);
+  noprint.forEach(n=>n.style.visibility='hidden');
+  const prevElStyle = el.getAttribute('style') || '';
+  el.style.width = RENDER_W+'px';
+  el.style.maxWidth = 'none';
+  const scrollers = [...el.querySelectorAll('*')].filter(n=>{
+    const ov = getComputedStyle(n).overflowX; return ov==='auto'||ov==='scroll';
+  });
+  const prevOv = scrollers.map(n=>n.style.overflowX);
+  scrollers.forEach(n=>n.style.overflowX='visible');
+
   try{
-    const canvas = await html2canvas(el, { scale:2, backgroundColor:'#ffffff', useCORS:true });
-    const img = canvas.toDataURL('image/jpeg', 0.92);
-    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    const canvas = await html2canvas(el, {
+      scale:SCALE, backgroundColor:'#ffffff', useCORS:true, logging:false,
+      windowWidth:900, width:RENDER_W, scrollX:0, scrollY:0
+    });
+    const cw = canvas.width, chH = canvas.height;
     const pdf = new JsPDF('p','mm','a4');
     const pw = pdf.internal.pageSize.getWidth();
     const ph = pdf.internal.pageSize.getHeight();
-    const iw = pw - 12;
-    const ih = canvas.height * iw / canvas.width;
-    let left = ih, pos = 6;
-    pdf.addImage(img, 'JPEG', 6, pos, iw, ih);
-    left -= (ph - 12);
-    while(left > 0){
-      pos = left - ih + 6;
-      pdf.addPage();
-      pdf.addImage(img, 'JPEG', 6, pos, iw, ih);
-      left -= (ph - 12);
+    const M = 6, iw = pw - M*2;
+    const pxPerMm = cw / iw;                       // بكسل الكانفاس لكل مم في الصفحة
+    const pageHpx = Math.floor((ph - M*2) * pxPerMm);
+
+    // نقاط قطع آمنة = أسفل كل صف/بطاقة/كارت (بإحداثيات الكانفاس)
+    const elTop = el.getBoundingClientRect().top;
+    const breaks = [];
+    el.querySelectorAll('tr, .stat-card, .card, .empty').forEach(n=>{
+      breaks.push((n.getBoundingClientRect().bottom - elTop) * SCALE);
+    });
+    breaks.sort((a,b)=>a-b);
+
+    let start = 0, firstPage = true, guard = 0;
+    while(start < chH-1 && guard++ < 200){
+      let end = start + pageHpx;
+      if(end < chH){
+        let safe = 0;
+        for(const b of breaks){ if(b > start+60 && b <= end) safe = b; }
+        if(safe > start+60) end = safe;            // اقطع عند آخر صف كامل يدخل
+      } else end = chH;
+      const sliceH = Math.max(1, Math.round(end - start));
+      const slice = document.createElement('canvas');
+      slice.width = cw; slice.height = sliceH;
+      slice.getContext('2d').drawImage(canvas, 0, start, cw, sliceH, 0, 0, cw, sliceH);
+      const img = slice.toDataURL('image/jpeg', 0.92);
+      const ihmm = sliceH / pxPerMm;
+      if(!firstPage) pdf.addPage();
+      firstPage = false;
+      pdf.addImage(img, 'JPEG', M, M, iw, ihmm);
+      start = end;
     }
     pdf.save((fname||'تقرير')+'.pdf');
   }catch(e){ console.warn('pdf:', e); window.print(); }
+  finally{
+    el.setAttribute('style', prevElStyle);
+    scrollers.forEach((n,i)=>n.style.overflowX = prevOv[i]);
+    noprint.forEach((n,i)=>n.style.visibility = prevVis[i]);
+  }
+}
+
+// ── تعمير قائمة الحلقات للتصدير الجماعي ──
+function rptFillBulkCircles(){
+  const sel=document.getElementById('rep-st-bulk-circle'); if(!sel||!window.RPT) return;
+  const cur=sel.value;
+  const opts=['<option value="">كل الطلاب (جميع الحلقات)</option>'];
+  (window.RPT.circles||[]).slice()
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'))
+    .forEach(c=>{ const n=(c.students||[]).length; opts.push(`<option value="${c.id}">${c.name}${c.teacher_name&&c.teacher_name!==c.name?(' — '+c.teacher_name):''} (${rptAr(n)} طالب)</option>`); });
+  sel.innerHTML=opts.join('');
+  if(cur) sel.value=cur;
+}
+
+// ── بناء HTML تقرير طالب واحد (يستعمله التصدير الجماعي) ──
+async function rptBuildStudentReportHTML(s, rg){
+  let att=[], mem=[];
+  try{
+    const a = await db.from('attendance').select('date,status').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    att = a.data||[];
+    const m = await db.from('memorization').select('date,type,grade,surah_from,surah_to,ayah_from,ayah_to,notes').eq('student_id',s.id).gte('date',rg.from).lte('date',rg.to);
+    mem = m.data||[];
+  }catch(e){ return '<div class="empty" style="padding:22px;"><span class="empty-icon">⚠️</span>تعذّر تحميل بيانات '+(s.name||'')+'</div>'; }
+
+  const byDate = {};
+  att.forEach(a=>{ (byDate[a.date]=byDate[a.date]||{}).att=a.status; });
+  let newCnt=0, revCnt=0, ptsSum=0, gradeN=0, hifzAyat=0, revAyat=0, hifzFaces=0, revFaces=0;
+  mem.forEach(r=>{
+    const d=(byDate[r.date]=byDate[r.date]||{});
+    const ay = rptAyahCount(r.ayah_from, r.ayah_to);
+    const fc = (typeof madaniFaces==='function') ? madaniFaces(r.surah_from, r.ayah_from, r.surah_to, r.ayah_to) : 0;
+    if(r.type==='review'){ d.rev=r.grade; d.revFaces=(d.revFaces||0)+fc; revCnt++; revAyat+=ay; revFaces+=fc; }
+    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; d.newFaces=(d.newFaces||0)+fc; newCnt++; hifzAyat+=ay; hifzFaces+=fc; }
+    if(r.notes) d.notes=(d.notes?d.notes+' / ':'')+r.notes;
+    if(RPT_GRADE_PT[r.grade]!=null){ ptsSum+=RPT_GRADE_PT[r.grade]; gradeN++; }
+  });
+  const present=att.filter(a=>a.status==='present').length;
+  const late=att.filter(a=>a.status==='late').length;
+  const avgPt = gradeN ? Math.round(ptsSum/gradeN*10)/10 : 0;
+  const dates = Object.keys(byDate).sort();
+
+  const head = rptHeaderCard('تقرير الطالب: '+s.name,
+    'الفترة من '+rptFmtDate(rg.from)+' إلى '+rptFmtDate(rg.to),
+    [['الحلقة',s.circle_name],['المعلم',s.teacher_name],['الشعبة',s.branch_name||'—'],['عدد الأيام المسجّلة',rptAr(dates.length)]]);
+
+  const stats = `<div class="stats-row" style="margin-bottom:16px;">
+    ${rptStatCard('green','✅',rptAr(present),'حاضر',(late?('+ '+rptAr(late)+' متأخر'):''))}
+    ${rptStatCard('blue','📖',rptAr(hifzAyat),'عدد آيات الحفظ',rptAr(newCnt)+' جلسة • '+rptAr(hifzFaces)+' وجه')}
+    ${rptStatCard('gold','🔁',rptAr(revAyat),'عدد آيات المراجعة',rptAr(revCnt)+' جلسة • '+rptAr(revFaces)+' وجه')}
+    ${rptStatCard('purple','⭐',rptAr(avgPt),'متوسط الدرجة','من ١٥')}
+  </div>`;
+
+  let rows;
+  if(!dates.length){
+    rows = '<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد سجلات في هذه الفترة</div>';
+  } else {
+    const trs = dates.map(d=>{
+      const x=byDate[d];
+      const ayat = (x.af!=null&&x.af!=='') ? (rptAr(x.af)+(x.at?(' - '+rptAr(x.at)):'')) : '—';
+      const surah = x.surah || (x.mem?'—':'');
+      return `<tr>
+        <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${rptFmtDate(d)}</td>
+        <td>${rptDayName(d)}</td>
+        <td>${rptAttBadge(x.att)}</td>
+        <td>${surah||'—'}</td>
+        <td>${ayat}</td>
+        <td>${((x.newFaces||0)+(x.revFaces||0))?rptAr((x.newFaces||0)+(x.revFaces||0)):'—'}</td>
+        <td>${rptGradeBadge(x.mem)}</td>
+        <td>${rptGradeBadge(x.rev)}</td>
+        <td style="font-size:.74rem;color:var(--light);max-width:160px;">${x.notes||'—'}</td>
+      </tr>`;
+    }).join('');
+    rows = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي بالتواريخ</div></div>
+      <div style="overflow-x:auto;"><table class="rpt-table" style="min-width:760px;">
+      <thead><tr><th>التاريخ</th><th>اليوم</th><th>الحضور</th><th>السورة</th><th>الآيات</th><th>الأوجه</th><th>الحفظ الجديد</th><th>المراجعة</th><th>ملاحظات</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+  return '<div style="background:#fff;">'+head + stats + rows+'</div>';
+}
+
+// ── تصدير تقارير جميع الطلاب PDF (كل طالب في صفحة) ──
+async function rptExportAllStudents(){
+  await rptInitIndex();
+  const R = window.RPT;
+  if(!R || !(R.students||[]).length){ showToast('⚠️ لا يوجد طلاب في نطاقك'); return; }
+  const rg = rptValidRange('rep-st-from','rep-st-to'); if(!rg) return;
+  const cid = (document.getElementById('rep-st-bulk-circle')||{}).value || '';
+  let list = R.students.slice();
+  if(cid) list = list.filter(s=>s.circle_id===cid);
+  list.sort((a,b)=> (a.circle_name||'').localeCompare(b.circle_name||'','ar') || a.name.localeCompare(b.name,'ar'));
+  if(!list.length){ showToast('⚠️ لا يوجد طلاب في هذا النطاق'); return; }
+  const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if(!window.html2canvas || !JsPDF){ showToast('⚠️ أدوات PDF غير متاحة — تحقّق من الاتصال'); return; }
+
+  const btn=document.getElementById('rep-st-bulk-btn');
+  const prog=document.getElementById('rep-st-bulk-prog');
+  const setProg=(html)=>{ if(prog){ prog.style.display='block'; prog.innerHTML=html; } };
+  if(btn) btn.disabled=true;
+
+  let host=document.getElementById('rep-st-bulk-host');
+  if(!host){ host=document.createElement('div'); host.id='rep-st-bulk-host';
+    host.style.cssText='position:fixed;left:-99999px;top:0;width:820px;background:#fff;padding:16px;box-sizing:border-box;font-family:Tajawal;direction:rtl;'; document.body.appendChild(host); }
+
+  const pdf=new JsPDF('p','mm','a4');
+  const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight(), iw=pw-12;
+  let first=true;
+  try{
+    for(let i=0;i<list.length;i++){
+      const st=list[i];
+      setProg(`<div style="display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:700;color:var(--emerald);">
+        <span>⏳ جاري تجهيز التقرير ${rptAr(i+1)} من ${rptAr(list.length)} — ${st.name}</span></div>
+        <div style="height:7px;background:var(--pale);border-radius:99px;overflow:hidden;margin-top:8px;">
+        <div style="height:100%;width:${Math.round((i)/list.length*100)}%;background:linear-gradient(90deg,var(--jade),var(--mint));"></div></div>`);
+      const html = await rptBuildStudentReportHTML(st, rg);
+      host.innerHTML = html;
+      await new Promise(r=>setTimeout(r,20));
+      const SCALE=2;
+      const canvas = await html2canvas(host, {scale:SCALE, backgroundColor:'#ffffff', useCORS:true, logging:false, windowWidth:900});
+      const cw=canvas.width, chH=canvas.height;
+      const M=6, iwB=pw-M*2, pxPerMm=cw/iwB, pageHpx=Math.floor((ph-M*2)*pxPerMm);
+      const hTop=host.getBoundingClientRect().top;
+      const breaks=[];
+      host.querySelectorAll('tr, .stat-card, .card, .empty').forEach(n=>breaks.push((n.getBoundingClientRect().bottom-hTop)*SCALE));
+      breaks.sort((a,b)=>a-b);
+      let start=0, guard=0;
+      if(!first) pdf.addPage();
+      first=false;
+      while(start<chH-1 && guard++<200){
+        let end=start+pageHpx;
+        if(end<chH){ let safe=0; for(const b of breaks){ if(b>start+60 && b<=end) safe=b; } if(safe>start+60) end=safe; }
+        else end=chH;
+        const sliceH=Math.max(1,Math.round(end-start));
+        const sc=document.createElement('canvas'); sc.width=cw; sc.height=sliceH;
+        sc.getContext('2d').drawImage(canvas,0,start,cw,sliceH,0,0,cw,sliceH);
+        if(start>0) pdf.addPage();
+        pdf.addImage(sc.toDataURL('image/jpeg',0.9),'JPEG',M,M,iwB,sliceH/pxPerMm);
+        start=end;
+      }
+    }
+    const fn = cid ? ('تقارير-'+(list[0].circle_name||'حلقة')) : 'تقارير-جميع-الطلاب';
+    pdf.save(fn+'.pdf');
+    setProg(`<div style="color:var(--emerald);font-weight:800;font-size:.86rem;">✅ تم تصدير ${rptAr(list.length)} تقرير في ملف واحد — كل طالب في صفحة.</div>`);
+  }catch(e){ console.warn('bulk pdf:', e); showToast('⚠️ حدث خطأ أثناء التصدير الجماعي'); setProg(''); }
+  finally{ if(btn) btn.disabled=false; if(host) host.innerHTML=''; }
 }
 
 // ── شارة درجة / حضور ──
@@ -15396,7 +15612,7 @@ function lpSheetHtml(r){
   if(!d.stages && (d.objectives || d.intro || d.rows)){
     const block=(t,v)=>'<div style="margin-bottom:8px;"><div style="font-weight:700;color:var(--jade);font-size:.8rem;">'+t+'</div><div style="white-space:pre-wrap;font-size:.82rem;color:var(--ink);">'+esc(v)+'</div></div>';
     return '<div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--forest);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><b style="font-family:Amiri,serif;color:var(--forest);">تحضير الدرس: '+esc(r.title)+'</b><span style="font-size:.78rem;color:var(--light);">'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+' • '+(r.date||'')+' <span class="badge bg-gray" style="font-size:.66rem;">نموذج قديم</span></span></div>'
-      + block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure);
+      + block('الأهداف الدرسية',d.objectives)+block('المقدمة',d.intro)+block('التمهيد',d.preface)+block('عرض الدرس',d.present)+block('الغلق',d.closure)+imgBlock;
   }
 
   const rows = STAGES.map(([k,lbl])=>{
@@ -15421,7 +15637,7 @@ function lpSheetHtml(r){
     + '<th style="width:13%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الطريقة / الأسلوب</th>'
     + '<th style="width:7%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">الزمن</th>'
     + '<th style="width:14%;border:1px solid var(--forest);padding:6px 3px;font-size:.74rem;color:var(--forest);">التقويم</th>'
-    + '</tr></thead><tbody>'+rows+'</tbody></table>';
+    + '</tr></thead><tbody>'+rows+'</tbody></table>'+imgBlock;
 }
 
 function openPrepReview(id){

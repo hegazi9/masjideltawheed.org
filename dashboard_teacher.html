@@ -955,7 +955,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <div id="tsk-progress" style="margin-top:16px;"></div>
       <div id="tsk-done-msg" style="display:none;margin-top:16px;padding:16px 18px;background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;border-radius:var(--r);text-align:center;font-weight:800;font-size:1rem;font-family:Amiri,serif;">
         🎉 جزاكم الله خيرًا — لقد أنهيت مهامك اليومية بنجاح<br>
-        <span style="font-size:.86rem;font-weight:600;font-family:Tajawal;opacity:.92;">أُضيفت ٢٠ نقطة إلى رصيدك الإجمالي</span>
+        <span id="tsk-done-pts" style="font-size:.86rem;font-weight:600;font-family:Tajawal;opacity:.92;">أُضيفت ٢٠ نقطة إلى رصيدك الإجمالي</span>
       </div>
     </div>
   </div>
@@ -985,6 +985,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-primary btn-sm" onclick="saveLessonPrep()">💾 حفظ المسودة</button>
       <button class="btn btn-gold btn-sm" onclick="exportLessonPdf()">📄 تصدير PDF</button>
+      <button class="btn btn-outline btn-sm" id="lp-img-btn" onclick="document.getElementById('lp-img-input').click()" style="border-color:var(--purple);color:var(--purple);">📷 إضافة صورة التحضير</button>
+      <input type="file" id="lp-img-input" accept="image/*" style="display:none;" onchange="lpUploadImage(this)">
       <button class="btn btn-outline btn-sm" id="lp-submit-btn" onclick="submitLessonPrep()" style="border-color:var(--blue);color:var(--blue);">📤 إرسال نموذج التحضير للمشرف</button>
       <span id="lp-save-state" style="font-size:.78rem;font-weight:700;"></span>
       <button class="btn btn-ghost btn-sm" style="margin-right:auto;color:var(--purple);border:1.5px solid var(--purple);" onclick="navPage('strategies')">🎬 استراتيجيات التعلم النشط</button>
@@ -994,6 +996,9 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <!-- ملاحظة المشرف عند الإرجاع -->
   <div id="lp-sup-note" style="display:none;margin-bottom:16px;padding:13px 16px;background:var(--red-pale);border:1.5px solid var(--red);border-radius:var(--r);color:var(--red);font-size:.86rem;font-weight:600;"></div>
   <div id="lp-approved" style="display:none;margin-bottom:16px;padding:13px 16px;background:var(--pale);border:1.5px solid var(--mint);border-radius:var(--r);color:var(--emerald);font-size:.9rem;font-weight:800;text-align:center;">✅ تمت الموافقة على هذا التحضير من المشرف — أُضيفت ٥٠ نقطة لرصيدك</div>
+
+  <!-- صورة التحضير المرفقة (بديل عن الكتابة — تصل للمشرف) -->
+  <div id="lp-img-preview" style="display:none;margin-bottom:16px;"></div>
 
   <!-- ورقة التحضير (تُصدَّر PDF) -->
   <div class="card" style="padding:0;">
@@ -1179,6 +1184,46 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="card" style="cursor:pointer;" onclick="printDailyReport()"><div class="card-body" style="text-align:center;"><div style="font-size:2.4rem;">📈</div><div class="section-title" style="justify-content:center;margin-top:8px;">تقرير الإنجاز اليومي</div><div style="font-size:.8rem;color:var(--light);">حضور + تسميع طلاب الحلقة اليوم</div></div></div>
     <div class="card" style="cursor:pointer;" onclick="printStudentsReport()"><div class="card-body" style="text-align:center;"><div style="font-size:2.4rem;">👨‍🎓</div><div class="section-title" style="justify-content:center;margin-top:8px;">كشف طلاب الحلقة</div><div style="font-size:.8rem;color:var(--light);">بيانات + الحفظ + النقاط</div></div></div>
     <div class="card" style="cursor:pointer;" onclick="printPointsReport()"><div class="card-body" style="text-align:center;"><div style="font-size:2.4rem;">🏆</div><div class="section-title" style="justify-content:center;margin-top:8px;">تقرير النقاط</div><div style="font-size:.8rem;color:var(--light);">ترتيب الطلاب بالنقاط</div></div></div>
+  </div>
+
+  <!-- تقرير طالب مفصّل -->
+  <div class="card" style="margin-top:18px;">
+    <div class="card-head"><div class="card-title">📋 تقرير طالب مفصّل</div>
+      <span style="font-size:.75rem;color:var(--light);">حضور وحفظ ومراجعة طالب من حلقتك في فترة محددة</span></div>
+    <div class="card-body">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <div style="flex:1;min-width:200px;">
+          <label style="font-size:.76rem;font-weight:700;color:var(--forest);display:block;margin-bottom:5px;">الطالب</label>
+          <select id="mr-st-sel" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.85rem;background:#fff;"><option value="">— اختر طالباً —</option></select>
+        </div>
+        <div style="min-width:140px;"><label style="font-size:.76rem;font-weight:700;color:var(--forest);display:block;margin-bottom:5px;">من تاريخ</label><input id="mr-st-from" type="date" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.82rem;"></div>
+        <div style="min-width:140px;"><label style="font-size:.76rem;font-weight:700;color:var(--forest);display:block;margin-bottom:5px;">إلى تاريخ</label><input id="mr-st-to" type="date" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.82rem;"></div>
+        <button class="btn btn-primary" onclick="mrRunStudent()" style="height:40px;">📊 عرض التقرير</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);">
+        <div style="min-width:200px;flex:1;">
+          <label style="font-size:.76rem;font-weight:700;color:var(--forest);display:block;margin-bottom:5px;">تصدير جماعي — الحلقة</label>
+          <select id="mr-bulk-circle" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.85rem;background:#fff;"><option value="">كل طلابي (جميع حلقاتي)</option></select>
+        </div>
+        <button class="btn btn-gold" id="mr-bulk-btn" onclick="mrExportAllStudents()" style="height:40px;">📄 تصدير تقارير الطلاب PDF</button>
+        <div style="font-size:.72rem;color:var(--light);flex-basis:100%;">كل طالب في صفحة مستقلة — يستخدم نفس الفترة بالأعلى.</div>
+      </div>
+      <div id="mr-bulk-prog" style="display:none;margin-top:12px;"></div>
+      <div id="mr-st-out" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- تقريري الشخصي -->
+  <div class="card" style="margin-top:18px;">
+    <div class="card-head"><div class="card-title">🧑‍🏫 تقريري الشخصي</div>
+      <span style="font-size:.75rem;color:var(--light);">الجلسات الإشرافية والتنبيهات — دون ملاحظات المشرف</span></div>
+    <div class="card-body">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-primary btn-sm mr-ptab" data-t="sessions" onclick="mrShowPersonalTab('sessions',this)">🗓️ الجلسات الإشرافية</button>
+        <button class="btn btn-outline btn-sm mr-ptab" data-t="alerts" onclick="mrShowPersonalTab('alerts',this)">🔔 التنبيهات الأسبوعية</button>
+      </div>
+      <div id="mr-personal-out"></div>
+    </div>
   </div>
 </div>
 
@@ -1989,6 +2034,7 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='recitation') renderRecitation();
   if(pageId==='points') renderPoints();
   if(pageId==='files') renderFiles();
+  if(pageId==='reports') mrInitReports();
   if(pageId==='training') loadTraining();
   if(pageId==='library') loadLibraryBooks();
   if(pageId==='messages') initMessages();
@@ -2209,10 +2255,14 @@ async function renderTasks(){
 function updateTaskProgress(){
   const done=TASK_STATE.done.filter(Boolean).length, all=DAILY_TASKS.length;
   const pct=Math.round(done/all*100);
+  const pts=(TASK_STATE.awarded!=null && TASK_STATE.awarded!=='')?TASK_STATE.awarded:(done*2);
   document.getElementById('tsk-progress').innerHTML=`
-    <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:6px;"><span>الإنجاز</span><span>${toAr(done)} / ${toAr(all)}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:6px;"><span>الإنجاز</span><span>${toAr(done)} / ${toAr(all)} مهمة • <span style="color:var(--gold);">${toAr(pts)} نقطة</span></span></div>
     <div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--jade),var(--mint));transition:width .3s;"></div></div>`;
-  document.getElementById('tsk-done-msg').style.display=(done===all)?'block':'none';
+  const msg=document.getElementById('tsk-done-msg');
+  const sub=document.getElementById('tsk-done-pts');
+  if(sub) sub.textContent='أُضيفت '+toAr(pts)+' نقطة إلى رصيدك الإجمالي';
+  msg.style.display=(done===all)?'block':'none';
 }
 async function toggleTask(i,checked){
   const prev=TASK_STATE.done[i];
@@ -2231,7 +2281,7 @@ async function toggleTask(i,checked){
     const cb=document.querySelector('#tsk-lbl-'+i+' input[type=checkbox]'); if(cb) cb.checked=prev;
     return;
   }
-  if(allDone && !TASK_STATE.awarded){ await awardTaskPoints(); }
+  await awardTaskPoints();   // نقاط نسبية على قدر المهام المنجزة (تُعدَّل مع كل بند)
 }
 
 // مؤشّر حالة الحفظ
@@ -2280,17 +2330,19 @@ async function saveTasks(completed){
   }
 }
 async function awardTaskPoints(){
-  // منح ٢٠ نقطة لرصيد المعلم مرة واحدة لكل حلقة/يوم — عبر RPC آمنة (تمنع التكرار)
+  // نقاط نسبية: كل مهمة منجزة = نقطتان (١٠ مهام = ٢٠). الـ RPC تُعدِّل الرصيد بالفرق فقط
   try{
     const c=activeCircle(); if(!c) return;
     const {data,error}=await db.rpc('award_daily_tasks_points',{ p_circle_id:c.id, p_date:D() });
     if(error) throw error;
-    if(data===0){ TASK_STATE.awarded=20; return; }   // كانت متصرفة قبل كده
-    TASK_STATE.awarded=20; TASK_STATE.completed=true;
+    const pts=Number(data)||0, prev=TASK_STATE.awarded||0;
+    TASK_STATE.awarded=pts;
+    TASK_STATE.completed=(TASK_STATE.done.filter(Boolean).length===DAILY_TASKS.length);
+    updateTaskProgress();
     if(typeof refreshMyPoints==='function') refreshMyPoints();
-    showToast('🎉 جزاكم الله خيرًا — أُضيفت ٢٠ نقطة لرصيدك');
+    if(pts>prev) showToast('🎉 جزاكم الله خيرًا — رصيد مهام اليوم '+toAr(pts)+' نقطة');
   }catch(e){
-    showToast('⚠️ المهام محفوظة — تعذّر إضافة النقاط: '+recFriendlyErr(e));
+    showToast('⚠️ المهام محفوظة — تعذّر تحديث النقاط: '+recFriendlyErr(e));
   }
 }
 
@@ -2362,6 +2414,7 @@ async function loadLessonPrep(){
   let row=null;
   try{ const {data}=await db.from('lesson_preps').select('*').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle(); row=data||null; }catch(e){}
   LP_STATE={ id:row?row.id:null, status:row?(row.status||'draft'):'draft', points_awarded:row?(row.points_awarded||0):0 };
+  LP_IMAGE_URL=(row&&row.image_url)?row.image_url:null; lpRenderImage();
   const d=(row&&row.data)||{};
   document.getElementById('lp-title').value = (row&&row.title) || autoTitle;
   document.getElementById('lp-course').value = d.course || (subject==='tajweed'?'التجويد':'المنهج المصاحب');
@@ -2405,6 +2458,7 @@ async function lpUpsert(extra){
     data:lpCollect(), updated_at:new Date().toISOString(),
   }, extra||{});
   delete body.points_awarded;   // النقاط ملك الـ RPC بس
+  if(LP_IMAGE_URL!==undefined && !('image_url' in body)) body.image_url=LP_IMAGE_URL;  // صورة التحضير (لو رُفعت)
   if(!LP_STATE.id){
     const {data}=await db.from('lesson_preps').select('id').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle();
     if(data) LP_STATE.id=data.id;
@@ -2424,6 +2478,53 @@ async function lpUpsert(extra){
   if(!chk) throw new Error('الإضافة مرفوضة من RLS');
   LP_STATE.id=chk.id; LP_STATE.status=chk.status; LP_STATE.points_awarded=chk.points_awarded;
   return chk;
+}
+
+// ── صورة التحضير: رفع/حذف/عرض ──
+let LP_IMAGE_URL=undefined;   // undefined=لم يُقرأ بعد ، null=لا صورة ، نص=رابط الصورة
+function lpRenderImage(){
+  const box=document.getElementById('lp-img-preview'); if(!box) return;
+  const locked=(LP_STATE.status==='submitted'||LP_STATE.status==='approved');
+  if(LP_IMAGE_URL){
+    box.style.display='block';
+    box.innerHTML='<div style="border:1.5px solid var(--purple);border-radius:var(--r);padding:12px 14px;background:var(--purple-pale);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'
+      +'<span style="font-weight:800;color:var(--purple);font-size:.86rem;">📷 صورة التحضير المرفقة — ستصل للمشرف</span>'
+      +(locked?'':'<button class="btn btn-danger btn-xs" onclick="lpRemoveImage()">🗑️ حذف الصورة</button>')
+      +'</div>'
+      +'<a href="'+LP_IMAGE_URL+'" target="_blank" rel="noopener"><img src="'+LP_IMAGE_URL+'" style="max-width:100%;border-radius:10px;border:1px solid var(--border);cursor:zoom-in;" alt="صورة التحضير"></a>'
+      +'</div>';
+  } else { box.style.display='none'; box.innerHTML=''; }
+}
+async function lpUploadImage(inp){
+  const f=inp.files&&inp.files[0]; inp.value='';
+  if(!f) return;
+  if(!f.type.startsWith('image/')){ showToast('⚠️ اختر ملف صورة'); return; }
+  if(f.size>5*1024*1024){ showToast('⚠️ حجم الصورة أكبر من ٥ ميجا'); return; }
+  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'){ showToast('⏳ التحضير مُرسل/معتمَد — لا يمكن التعديل'); return; }
+  lpSaveState('saving');
+  try{
+    if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); lpSaveState('error'); return; }
+    const date=document.getElementById('lp-date').value||D();
+    const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=cu.id+'/'+date+'_'+lpSubject()+'_'+Date.now()+'.'+ext;
+    const up=await db.storage.from('lesson-preps').upload(path,f,{contentType:f.type,upsert:true});
+    if(up.error) throw up.error;
+    const {data:pub}=db.storage.from('lesson-preps').getPublicUrl(path);
+    LP_IMAGE_URL=pub.publicUrl;
+    await lpUpsert({ status:(LP_STATE.status==='approved'?'approved':'draft') });
+    lpRenderImage(); lpSaveState('saved'); showToast('✅ تم رفع صورة التحضير');
+  }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر رفع الصورة: '+recFriendlyErr(e)); }
+}
+async function lpRemoveImage(){
+  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'){ showToast('⏳ لا يمكن التعديل بعد الإرسال'); return; }
+  if(!confirm('حذف صورة التحضير المرفقة؟')) return;
+  lpSaveState('saving');
+  try{
+    LP_IMAGE_URL=null;
+    await lpUpsert({ status:(LP_STATE.status==='approved'?'approved':'draft'), image_url:null });
+    lpRenderImage(); lpSaveState('saved'); showToast('🗑️ حُذفت صورة التحضير');
+  }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الحذف: '+recFriendlyErr(e)); }
 }
 
 async function saveLessonPrep(){
@@ -2941,7 +3042,7 @@ function collectReport(c,list){
   const rows=list.map(s=>{
     const st=REC_STATE[s.id]||{};
     return {
-      student_id: (s._static||s._guest)?null:s.id, name:s.name,
+      student_id: (s._static || (s._guest && String(s.id).startsWith('guest_')))?null:s.id, name:s.name,
       is_guest: !!s._guest, guest_teacher: s._guest?(s.teacher||null):null, guest_branch: s._guest?(s.branch||null):null,
       attendance: st.att||null, late_minutes: st.late_minutes||null,
       mem_grade: st.new?st.new.grade:null, mem_plan: st.new?!!st.new.plan_done:null,
@@ -2978,7 +3079,7 @@ async function renderGuestResults(q){
   let res=[];
   try{
     const { data } = await db.rpc('search_students', { q });
-    res=(data||[]).map(s=>({ name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
+    res=(data||[]).map(s=>({ id:s.id, name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
       .filter(s=>!existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
   }catch(e){ res=[]; }
   if(!res.length){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">لا توجد نتائج</div>'; return; }
@@ -2998,22 +3099,38 @@ function pickGuest(i){
   document.getElementById('guest-selected').style.display='block';
   document.getElementById('gs-confirm').style.display='inline-flex';
 }
-function confirmGuest(){
+async function confirmGuest(){
   if(!_guestPick){ showToast('⚠️ اختر طالباً أولاً'); return; }
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
   if(GUEST_STUDENTS[key].some(g=>g.name===_guestPick.name)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
-  const gid='guest_'+Date.now();
+  const gid=_guestPick.id || ('guest_'+Date.now());   // معرّف الطالب الحقيقي (users.id)
   GUEST_STUDENTS[key].push({ id:gid, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
   REC_STATE[gid]={};
+  // اكتب الزائر في circle_guests ليظهر عند المشرف (تقرير آخر التسميع + المتابعة الأسبوعية)
+  if(_guestPick.id){
+    try{
+      const {data:exist}=await db.from('circle_guests').select('id')
+        .eq('added_by',cu.id).eq('guest_date',D()).eq('student_id',_guestPick.id).maybeSingle();
+      if(!exist){
+        await db.from('circle_guests').insert([{
+          student_id:_guestPick.id, student_name:_guestPick.name,
+          student_teacher:_guestPick.teacher||null, added_by:cu.id, guest_date:D()
+        }]);
+      }
+    }catch(e){ /* الإضافة المحلية تعمل حتى لو تعذّر السيرفر */ }
+  }
   closeModal('modal-guest');
   renderStudents();
   showToast('✅ تمت إضافة الطالب الضيف لهذا اليوم');
 }
-function removeGuest(gid){
+async function removeGuest(gid){
   const c=activeCircle(); const key=guestKey(c);
   if(GUEST_STUDENTS[key]) GUEST_STUDENTS[key]=GUEST_STUDENTS[key].filter(g=>g.id!==gid);
   delete REC_STATE[gid];
+  if(gid && !String(gid).startsWith('guest_')){
+    try{ await db.from('circle_guests').delete().eq('added_by',cu.id).eq('guest_date',D()).eq('student_id',gid); }catch(e){}
+  }
   renderStudents();
   showToast('🗑️ أُزيل الطالب الضيف');
 }
@@ -3147,14 +3264,16 @@ async function saveEval(){
   };
   const prev=(REC_STATE[sid]&&REC_STATE[sid][type])||null;
   const delta = pts - (prev?prev.points:0);
-  // حفظ في قاعدة البيانات
-  if(!s._static && !s._guest){
+  // حفظ في قاعدة البيانات — الزائر بمعرّف حقيقي يُسجَّل تسميعه ليظهر عند المشرف
+  const guestReal = s._guest && sid && !String(sid).startsWith('guest_');
+  if((!s._static && !s._guest) || guestReal){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
     try{ await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}); }
     catch(e){ try{ const {error}=await db.from('memorization').insert([{student_id:sid,date:D(),type,grade,errors,points:pts,notes:rec.notes,recorded_by:cu.id}]); if(error) throw error; }catch(e2){ showToast('❌ خطأ في الحفظ'); return; } }
-    s.points+=delta; try{ await db.from('students').update({total_points:s.points}).eq('id',sid); }catch(e){}
+    s.points+=delta;
+    if(!s._guest){ try{ await db.from('students').update({total_points:s.points}).eq('id',sid); }catch(e){} }  // نقاط الزائر لا تُحدَّث في ملفه الأصلي
   } else { s.points+=delta; }
   // تحديث الحالة المحلية والجدول
   REC_STATE[sid]=REC_STATE[sid]||{}; REC_STATE[sid][type]=rec;
@@ -4755,6 +4874,282 @@ function printPointsReport(){
   const list=[...studentsOf(c)].sort((a,b)=>b.points-a.points);
   const rows=list.map((s,i)=>`<tr><td>${i+1}<\/td><td>${s.name}<\/td><td>${s.points} نقطة<\/td><\/tr>`).join('');
   openReport(reportHead('تقرير النقاط','الحلقة: '+c.name+' — مرتّب تنازلياً')+`<table><thead><tr><th>الترتيب<\/th><th>الطالب<\/th><th>النقاط<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table>`);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  تقاريري — تقارير طلاب الحلقة + تقريري الشخصي (بدون ملاحظات المشرف)
+// ═══════════════════════════════════════════════════════════
+const MR_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const MR_GRADE_AR={excellent:'ممتاز',very_good:'جيد جداً',good:'جيد',retry:'إعادة'};
+const MR_GRADE_PT={excellent:15,very_good:10,good:5,retry:0};
+const MR_GRADE_BG={excellent:'bg-green',very_good:'bg-blue',good:'bg-gold',retry:'bg-red'};
+const MR_ATT_AR={present:'حاضر',late:'متأخر',absent:'غائب',excused:'معذور'};
+const MR_ATT_BG={present:'bg-green',late:'bg-gold',absent:'bg-red',excused:'bg-blue'};
+function mrAr(n){ return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function mrArToInt(v){ return parseInt(String(v==null?'':v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)))||0; }
+function mrFmtDate(iso){ if(!iso)return '—'; const a=String(iso).split('-'); if(a.length<3)return iso; return mrAr(parseInt(a[2]))+' '+MR_MONTHS[parseInt(a[1])-1]+' '+mrAr(a[0]); }
+function mrDayName(iso){ const d=new Date(iso+'T00:00:00'); return isNaN(d)?'—':DAYS_AR[d.getDay()]; }
+function mrToday(){ return new Date().toISOString().slice(0,10); }
+function mrDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+function mrAyahCount(af,at){ const a=parseInt(af),b=parseInt(at); if(isNaN(a))return 0; if(isNaN(b))return 1; return Math.abs(b-a)+1; }
+function mrGradeBadge(g){ if(!g||g==='—')return '<span style="color:var(--light);">—</span>'; return `<span class="badge ${MR_GRADE_BG[g]||'bg-gray'}" style="font-size:.68rem;">${MR_GRADE_AR[g]||g}</span>`; }
+function mrAttBadge(x){ if(!x||x==='—')return '<span style="color:var(--light);">—</span>'; return `<span class="badge ${MR_ATT_BG[x]||'bg-gray'}" style="font-size:.68rem;">${MR_ATT_AR[x]||x}</span>`; }
+function mrStatCard(cls,icon,val,lbl,sub){ return `<div class="stat-card ${cls}"><span class="stat-icon">${icon}</span><div class="stat-val">${val}</div><div class="stat-lbl">${lbl}</div><div class="stat-sub">${sub||''}</div></div>`; }
+function mrHeaderCard(title,sub,rows){
+  const meta=rows.map(r=>`<div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:.68rem;color:var(--light);">${r[0]}</span><span style="font-size:.92rem;font-weight:800;color:var(--forest);">${r[1]}</span></div>`).join('');
+  return `<div class="card" style="margin-bottom:16px;border-top:3px solid var(--jade);"><div style="padding:18px 20px;"><div style="font-size:1.12rem;font-weight:900;color:var(--forest);">${title}</div><div style="font-size:.78rem;color:var(--light);margin-top:3px;margin-bottom:14px;">${sub}</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;">${meta}</div></div></div>`;
+}
+const MR_TBL='width:100%;border-collapse:collapse;font-size:.8rem;';
+const MR_TH='padding:9px 8px;background:var(--pale);color:var(--forest);font-weight:800;font-size:.72rem;border:1px solid var(--border);white-space:nowrap;';
+const MR_TD='padding:8px;border:1px solid var(--border);text-align:center;';
+
+function mrInitReports(){
+  mrFillStudentSel(); mrFillBulkCircles();
+  const f=document.getElementById('mr-st-from'), t=document.getElementById('mr-st-to');
+  if(f&&!f.value) f.value=mrDaysAgo(30);
+  if(t&&!t.value) t.value=mrToday();
+  mrShowPersonalTab('sessions');   // ابدأ دائماً على تبويب الجلسات عند فتح الصفحة
+}
+function mrStudentsList(){
+  const cName={}; MY_CIRCLES.forEach(c=>cName[c.id]=c.name);
+  return MY_STUDENTS.map(s=>({id:s.id,name:s.name,circle_id:s.circle_id,circle_name:cName[s.circle_id]||'—',branch:s.branch}))
+    .sort((a,b)=>(a.circle_name||'').localeCompare(b.circle_name||'','ar')||a.name.localeCompare(b.name,'ar'));
+}
+function mrFillStudentSel(){
+  const sel=document.getElementById('mr-st-sel'); if(!sel)return;
+  const cur=sel.value, list=mrStudentsList(), multi=MY_CIRCLES.length>1;
+  sel.innerHTML='<option value="">— اختر طالباً —</option>'+list.map(s=>`<option value="${s.id}">${s.name}${multi?(' ('+s.circle_name+')'):''}</option>`).join('');
+  if(cur) sel.value=cur;
+}
+function mrFillBulkCircles(){
+  const sel=document.getElementById('mr-bulk-circle'); if(!sel)return;
+  const cur=sel.value, opts=['<option value="">كل طلابي (جميع حلقاتي)</option>'];
+  MY_CIRCLES.forEach(c=>{ const n=MY_STUDENTS.filter(s=>s.circle_id===c.id).length; opts.push(`<option value="${c.id}">${c.name} (${mrAr(n)} طالب)</option>`); });
+  sel.innerHTML=opts.join(''); if(cur) sel.value=cur;
+}
+
+async function mrFetchStudent(sid,from,to){
+  let att=[],mem=[];
+  try{
+    const a=await db.from('attendance').select('date,status').eq('student_id',sid).gte('date',from).lte('date',to);
+    att=a.data||[];
+    const m=await db.from('memorization').select('date,type,grade,surah_from,surah_to,ayah_from,ayah_to,notes').eq('student_id',sid).gte('date',from).lte('date',to);
+    mem=m.data||[];
+  }catch(e){}
+  return {att,mem};
+}
+function mrStudentHtml(stu,from,to,att,mem){
+  const byDate={};
+  att.forEach(a=>{ (byDate[a.date]=byDate[a.date]||{}).att=a.status; });
+  let newCnt=0,revCnt=0,ptsSum=0,gradeN=0,hifzAyat=0,revAyat=0,hifzFaces=0,revFaces=0;
+  mem.forEach(r=>{
+    const d=(byDate[r.date]=byDate[r.date]||{});
+    const ay=mrAyahCount(r.ayah_from,r.ayah_to);
+    const fc=(typeof madaniFaces==='function')?madaniFaces(r.surah_from,r.ayah_from,r.surah_to,r.ayah_to):0;
+    if(r.type==='review'){ d.rev=r.grade; d.revFaces=(d.revFaces||0)+fc; revCnt++; revAyat+=ay; revFaces+=fc; }
+    else { d.mem=r.grade; d.surah=r.surah_from; d.af=r.ayah_from; d.at=r.ayah_to; d.newFaces=(d.newFaces||0)+fc; newCnt++; hifzAyat+=ay; hifzFaces+=fc; }
+    if(r.notes) d.notes=(d.notes?d.notes+' / ':'')+r.notes;
+    if(MR_GRADE_PT[r.grade]!=null){ ptsSum+=MR_GRADE_PT[r.grade]; gradeN++; }
+  });
+  const present=att.filter(a=>a.status==='present').length;
+  const late=att.filter(a=>a.status==='late').length;
+  const avgPt=gradeN?Math.round(ptsSum/gradeN*10)/10:0;
+  const dates=Object.keys(byDate).sort();
+  const head=mrHeaderCard('تقرير الطالب: '+stu.name,'الفترة من '+mrFmtDate(from)+' إلى '+mrFmtDate(to),
+    [['الحلقة',stu.circle_name||'—'],['المعلم',cu.full_name||'—'],['الشعبة',stu.branch||'—'],['أيام مسجّلة',mrAr(dates.length)]]);
+  const stats=`<div class="stats-row" style="margin-bottom:16px;">
+    ${mrStatCard('green','✅',mrAr(present),'حاضر',(late?('+ '+mrAr(late)+' متأخر'):''))}
+    ${mrStatCard('blue','📖',mrAr(hifzAyat),'آيات الحفظ',mrAr(newCnt)+' جلسة • '+mrAr(hifzFaces)+' وجه')}
+    ${mrStatCard('gold','🔁',mrAr(revAyat),'آيات المراجعة',mrAr(revCnt)+' جلسة • '+mrAr(revFaces)+' وجه')}
+    ${mrStatCard('purple','⭐',mrAr(avgPt),'متوسط الدرجة','من ١٥')}
+  </div>`;
+  let rows;
+  if(!dates.length){ rows='<div class="empty" style="padding:26px;"><span class="empty-icon">📭</span>لا توجد سجلات في هذه الفترة</div>'; }
+  else {
+    const trs=dates.map(d=>{ const x=byDate[d];
+      const ayat=(x.af!=null&&x.af!=='')?(mrAr(x.af)+(x.at?(' - '+mrAr(x.at)):'')):'—';
+      const surah=x.surah||(x.mem?'—':'');
+      return `<tr><td style="${MR_TD}white-space:nowrap;font-weight:700;color:var(--forest);">${mrFmtDate(d)}</td>
+        <td style="${MR_TD}">${mrDayName(d)}</td><td style="${MR_TD}">${mrAttBadge(x.att)}</td>
+        <td style="${MR_TD}">${surah||'—'}</td><td style="${MR_TD}">${ayat}</td>
+        <td style="${MR_TD}">${((x.newFaces||0)+(x.revFaces||0))?mrAr((x.newFaces||0)+(x.revFaces||0)):'—'}</td>
+        <td style="${MR_TD}">${mrGradeBadge(x.mem)}</td><td style="${MR_TD}">${mrGradeBadge(x.rev)}</td>
+        <td style="${MR_TD}font-size:.72rem;color:var(--light);max-width:150px;">${x.notes||'—'}</td></tr>`;
+    }).join('');
+    rows=`<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي</div></div>
+      <div style="overflow-x:auto;"><table style="${MR_TBL}min-width:740px;">
+      <thead><tr><th style="${MR_TH}">التاريخ</th><th style="${MR_TH}">اليوم</th><th style="${MR_TH}">الحضور</th><th style="${MR_TH}">السورة</th><th style="${MR_TH}">الآيات</th><th style="${MR_TH}">الأوجه</th><th style="${MR_TH}">الحفظ</th><th style="${MR_TH}">المراجعة</th><th style="${MR_TH}">ملاحظات</th></tr></thead>
+      <tbody>${trs}</tbody></table></div></div>`;
+  }
+  return '<div style="background:#fff;">'+head+stats+rows+'</div>';
+}
+
+async function mrRunStudent(){
+  const sid=(document.getElementById('mr-st-sel')||{}).value;
+  const out=document.getElementById('mr-st-out');
+  if(!sid){ showToast('⚠️ اختر طالباً'); return; }
+  const from=document.getElementById('mr-st-from').value, to=document.getElementById('mr-st-to').value;
+  if(!from||!to){ showToast('⚠️ اختر الفترة'); return; }
+  if(from>to){ showToast('⚠️ تاريخ البداية بعد النهاية'); return; }
+  const stu=mrStudentsList().find(s=>s.id===sid); if(!stu){ showToast('⚠️ طالب غير معروف'); return; }
+  out.innerHTML='<div class="empty" style="padding:26px;"><span class="empty-icon">⏳</span>جاري تجهيز التقرير...</div>';
+  const {att,mem}=await mrFetchStudent(sid,from,to);
+  out.innerHTML=mrStudentHtml(stu,from,to,att,mem)+
+    `<div style="margin-top:12px;"><button class="btn btn-outline btn-sm" onclick="mrExportPdf('mr-st-out','تقرير-${stu.name}')">📄 تصدير PDF</button></div>`;
+}
+
+async function mrExportPdf(elId,fname){
+  const el=document.getElementById(elId); if(!el)return;
+  const JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!window.html2canvas||!JsPDF){ window.print(); return; }
+  showToast('⏳ جاري تجهيز PDF...');
+  try{
+    const canvas=await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const img=canvas.toDataURL('image/jpeg',0.92);
+    const pdf=new JsPDF('p','mm','a4');
+    const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight(), iw=pw-12;
+    const ih=canvas.height*iw/canvas.width;
+    let left=ih,pos=6;
+    pdf.addImage(img,'JPEG',6,pos,iw,ih); left-=(ph-12);
+    while(left>0){ pos=left-ih+6; pdf.addPage(); pdf.addImage(img,'JPEG',6,pos,iw,ih); left-=(ph-12); }
+    pdf.save((fname||'تقرير')+'.pdf');
+  }catch(e){ window.print(); }
+}
+
+async function mrExportAllStudents(){
+  const cid=(document.getElementById('mr-bulk-circle')||{}).value||'';
+  const from=document.getElementById('mr-st-from').value, to=document.getElementById('mr-st-to').value;
+  if(!from||!to){ showToast('⚠️ اختر الفترة (من/إلى) بالأعلى'); return; }
+  if(from>to){ showToast('⚠️ تاريخ البداية بعد النهاية'); return; }
+  let list=mrStudentsList(); if(cid) list=list.filter(s=>s.circle_id===cid);
+  if(!list.length){ showToast('⚠️ لا يوجد طلاب في هذا النطاق'); return; }
+  const JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!window.html2canvas||!JsPDF){ showToast('⚠️ أدوات PDF غير متاحة'); return; }
+  const btn=document.getElementById('mr-bulk-btn'); if(btn) btn.disabled=true;
+  const prog=document.getElementById('mr-bulk-prog');
+  const setP=h=>{ if(prog){ prog.style.display='block'; prog.innerHTML=h; } };
+  let host=document.getElementById('mr-bulk-host');
+  if(!host){ host=document.createElement('div'); host.id='mr-bulk-host'; host.style.cssText='position:fixed;left:-99999px;top:0;width:820px;background:#fff;padding:16px;box-sizing:border-box;font-family:Tajawal;direction:rtl;'; document.body.appendChild(host); }
+  const pdf=new JsPDF('p','mm','a4');
+  const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight(), iw=pw-12;
+  let first=true;
+  try{
+    for(let i=0;i<list.length;i++){
+      const st=list[i];
+      setP(`<div style="font-size:.82rem;font-weight:700;color:var(--emerald);">⏳ ${mrAr(i+1)} من ${mrAr(list.length)} — ${st.name}</div><div style="height:7px;background:var(--pale);border-radius:99px;overflow:hidden;margin-top:8px;"><div style="height:100%;width:${Math.round(i/list.length*100)}%;background:linear-gradient(90deg,var(--jade),var(--mint));"></div></div>`);
+      const {att,mem}=await mrFetchStudent(st.id,from,to);
+      host.innerHTML=mrStudentHtml(st,from,to,att,mem);
+      await new Promise(r=>setTimeout(r,20));
+      const canvas=await html2canvas(host,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+      const img=canvas.toDataURL('image/jpeg',0.9);
+      const ih=canvas.height*iw/canvas.width;
+      if(!first) pdf.addPage(); first=false;
+      if(ih<=ph-12){ pdf.addImage(img,'JPEG',6,6,iw,ih); }
+      else { let left=ih,pos=6; pdf.addImage(img,'JPEG',6,pos,iw,ih); left-=(ph-12); while(left>0){ pos=left-ih+6; pdf.addPage(); pdf.addImage(img,'JPEG',6,pos,iw,ih); left-=(ph-12); } }
+    }
+    const fn=cid?('تقارير-'+(list[0].circle_name||'حلقة')):'تقارير-طلابي';
+    pdf.save(fn+'.pdf');
+    setP(`<div style="color:var(--emerald);font-weight:800;font-size:.84rem;">✅ تم تصدير ${mrAr(list.length)} تقرير — كل طالب في صفحة.</div>`);
+  }catch(e){ console.warn('mr bulk:',e); showToast('⚠️ خطأ أثناء التصدير'); setP(''); }
+  finally{ if(btn) btn.disabled=false; if(host) host.innerHTML=''; }
+}
+
+// ── تقريري الشخصي ──
+function mrShowPersonalTab(t,el){
+  document.querySelectorAll('.mr-ptab').forEach(b=>{ b.classList.remove('btn-primary'); b.classList.add('btn-outline'); });
+  const active=el||document.querySelector('.mr-ptab[data-t="'+t+'"]');
+  if(active){ active.classList.remove('btn-outline'); active.classList.add('btn-primary'); }
+  if(t==='sessions') mrLoadSessions(); else mrLoadAlerts();
+}
+const MR_PILLAR_NAMES={ hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة' };
+function mrPillarBadges(pil){
+  const keys=Object.keys(pil||{}).filter(k=>pil[k]);
+  if(!keys.length) return '<span style="color:var(--light);font-size:.72rem;">—</span>';
+  return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${MR_PILLAR_NAMES[k]||k}</span>`).join('');
+}
+async function mrLoadSessions(){
+  const out=document.getElementById('mr-personal-out');
+  out.innerHTML='<div class="empty" style="padding:22px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>';
+  let sess=[];
+  try{
+    const {data}=await db.from('supervisory_sessions').select('session_date,attendance,late_min,pillars,done,branch')
+      .eq('teacher_name',cu.full_name||'').order('session_date',{ascending:false});
+    sess=data||[];
+  }catch(e){ sess=[]; }
+  if(!sess.length){ out.innerHTML='<div class="empty" style="padding:26px;"><span class="empty-icon">🗓️</span>لا توجد جلسات إشرافية مسجّلة</div>'; return; }
+  const attBg={ 'حاضر':'bg-green','متأخر':'bg-gold','غائب':'bg-red' };
+  const rows=sess.map(s=>{
+    const att=s.attendance||'—', lm=mrArToInt(s.late_min);
+    return `<tr><td style="${MR_TD}white-space:nowrap;font-weight:700;color:var(--forest);">${mrFmtDate(s.session_date)}</td>
+      <td style="${MR_TD}">${mrDayName(s.session_date)}</td>
+      <td style="${MR_TD}"><span class="badge ${attBg[att]||'bg-gray'}" style="font-size:.68rem;">${att}</span></td>
+      <td style="${MR_TD}">${lm?mrAr(lm)+' دقيقة':'—'}</td>
+      <td style="${MR_TD}text-align:right;">${mrPillarBadges(s.pillars)}</td></tr>`;
+  }).join('');
+  const totalAbs=sess.filter(s=>s.attendance==='غائب').length;
+  const totalLate=sess.reduce((a,s)=>a+mrArToInt(s.late_min),0);
+  out.innerHTML=`<div class="stats-row" style="margin-bottom:14px;">
+    ${mrStatCard('green','🗓️',mrAr(sess.length),'عدد الجلسات','مسجّلة')}
+    ${mrStatCard('gold','⏱️',mrAr(totalLate),'دقائق التأخير','إجمالي')}
+    ${mrStatCard('blue','⛔',mrAr(totalAbs),'أيام الغياب','')}
+  </div>
+  <div style="background:var(--blue-pale);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:.76rem;color:var(--mid);margin-bottom:12px;">ℹ️ تُعرض بيانات الحضور والأركان المُقيَّمة فقط — ملاحظات المشرف الخاصة لا تظهر هنا.</div>
+  <div style="overflow-x:auto;"><table style="${MR_TBL}min-width:640px;">
+    <thead><tr><th style="${MR_TH}">التاريخ</th><th style="${MR_TH}">اليوم</th><th style="${MR_TH}">حضوري</th><th style="${MR_TH}">تأخير</th><th style="${MR_TH}">الأركان المُقيَّمة</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function mrMaxStreak(arr,fn){ let mx=0,c=0; arr.forEach(v=>{ if(fn(v)){c++; if(c>mx)mx=c;} else c=0; }); return mx; }
+async function mrLoadAlerts(){
+  const out=document.getElementById('mr-personal-out');
+  out.innerHTML='<div class="empty" style="padding:22px;"><span class="empty-icon">⏳</span>جاري تحليل بيانات طلابك...</div>';
+  const from=mrDaysAgo(34), to=mrToday(), weekFrom=mrDaysAgo(7);
+  const stu=mrStudentsList(), ids=stu.map(s=>s.id), id2={}; stu.forEach(s=>id2[s.id]=s);
+  let att=[],mem=[],sess=[];
+  try{
+    if(ids.length){
+      const a=await db.from('attendance').select('student_id,date,status,late_minutes').in('student_id',ids).gte('date',from).lte('date',to).order('date',{ascending:true});
+      att=a.data||[];
+      const m=await db.from('memorization').select('student_id,date,type,grade').in('student_id',ids).gte('date',from).lte('date',to).order('date',{ascending:true});
+      mem=m.data||[];
+    }
+    const sv=await db.from('supervisory_sessions').select('session_date,attendance,late_min').eq('teacher_name',cu.full_name||'').gte('session_date',from).lte('session_date',to).order('session_date',{ascending:true});
+    sess=sv.data||[];
+  }catch(e){}
+  const attBy={},memBy={};
+  att.forEach(a=>{ (attBy[a.student_id]=attBy[a.student_id]||[]).push(a); });
+  mem.forEach(m=>{ (memBy[m.student_id]=memBy[m.student_id]||[]).push(m); });
+  const alerts=[];
+  ids.forEach(sid=>{
+    const nm=id2[sid].name;
+    const aL=attBy[sid]||[], mAll=memBy[sid]||[];
+    const memL=mAll.filter(m=>m.type!=='review'), revL=mAll.filter(m=>m.type==='review');
+    const absStreak=mrMaxStreak(aL.map(a=>a.status),s=>s==='absent');
+    if(absStreak>=3) alerts.push({t:'red',i:'🚫',txt:`${nm} — غياب ${mrAr(absStreak)} مرات متتالية`});
+    const absTot=aL.filter(a=>a.status==='absent').length;
+    if(absTot>=6) alerts.push({t:'red',i:'📛',txt:`${nm} — غياب ${mrAr(absTot)} مرات متقطعة خلال الشهر`});
+    const mg=mrMaxStreak(memL.map(m=>m.grade),g=>g==='good');
+    if(mg>=3) alerts.push({t:'blue',i:'📖',txt:`${nm} — تقدير "جيد" في الحفظ ${mrAr(mg)} مرات متتالية`});
+    const rgood=mrMaxStreak(revL.map(m=>m.grade),g=>g==='good');
+    if(rgood>=3) alerts.push({t:'blue',i:'🔁',txt:`${nm} — تقدير "جيد" في المراجعة ${mrAr(rgood)} مرات متتالية`});
+    const mret=mrMaxStreak(memL.map(m=>m.grade),g=>g==='retry');
+    if(mret>=3) alerts.push({t:'gold',i:'📕',txt:`${nm} — تقدير "إعادة" في الحفظ ${mrAr(mret)} مرات متتالية`});
+    const rret=mrMaxStreak(revL.map(m=>m.grade),g=>g==='retry');
+    if(rret>=3) alerts.push({t:'gold',i:'🔂',txt:`${nm} — تقدير "إعادة" في المراجعة ${mrAr(rret)} مرات متتالية`});
+    let lateW=0; aL.forEach(a=>{ if(a.date>=weekFrom && a.status==='late') lateW+=(a.late_minutes||0); });
+    if(lateW>=100) alerts.push({t:'gold',i:'⏰',txt:`${nm} — تأخير ${mrAr(lateW)} دقيقة خلال الأسبوع`});
+  });
+  const tAbs=mrMaxStreak(sess.map(s=>s.attendance),a=>a==='غائب');
+  if(tAbs>=3) alerts.push({t:'red',i:'⛔',txt:`أنت — غياب ${mrAr(tAbs)} مرات متتالية خلال الشهر`});
+  let tLate=0; sess.forEach(s=>{ tLate+=mrArToInt(s.late_min); });
+  if(tLate>=100) alerts.push({t:'gold',i:'⏱️',txt:`أنت — تأخير ${mrAr(tLate)} دقيقة مجمّعة خلال الشهر`});
+
+  const bg={red:'var(--red-pale)',gold:'var(--gold-pale)',blue:'var(--blue-pale)'};
+  const bc={red:'var(--red)',gold:'var(--gold)',blue:'var(--blue)'};
+  let body;
+  if(!alerts.length){ body='<div class="empty" style="padding:26px;"><span class="empty-icon">✅</span>لا توجد تنبيهات — كل شيء على ما يُرام</div>'; }
+  else { body=alerts.map(a=>`<div style="display:flex;align-items:center;gap:10px;background:${bg[a.t]};border:1px solid ${bc[a.t]};border-radius:10px;padding:10px 13px;margin-bottom:8px;"><span style="font-size:1.2rem;">${a.i}</span><span style="font-size:.84rem;font-weight:700;color:var(--forest);">${a.txt}</span></div>`).join(''); }
+  out.innerHTML=`<div style="background:var(--blue-pale);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:.76rem;color:var(--mid);margin-bottom:12px;">ℹ️ تنبيهات محسوبة من بيانات طلابك خلال آخر شهر — للمتابعة والتحسين. لا تظهر ملاحظات المشرف.</div>${body}`;
 }
 
 // ══ INIT ══
