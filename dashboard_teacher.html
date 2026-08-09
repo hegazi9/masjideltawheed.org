@@ -1279,9 +1279,10 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 <!-- ══ نافذة اختبار نهاية الدورة ══ -->
 <div class="overlay" id="modal-tr-exam">
   <div class="modal" style="max-width:720px;width:95%;">
-    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" onclick="closeQuiz()">×</button></div>
+    <div class="modal-head"><div class="modal-title" id="qz-title" style="font-size:.94rem;">🎯 الاختبار</div><button class="modal-close" id="qz-close-btn" onclick="closeQuiz()" style="display:none;">×</button></div>
     <div class="modal-body">
       <div id="qz-quiz">
+        <div id="qz-warn" style="display:none;background:var(--red-pale);border:1px solid var(--red);color:var(--red);font-size:.78rem;font-weight:700;padding:8px 12px;border-radius:9px;margin-bottom:12px;line-height:1.6;">⚠️ بمجرد بدء الاختبار لا يمكن الخروج منه حتى نهايته — ضماناً للشفافية وتكافؤ الفرص.</div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
           <span id="qz-progress-txt" style="font-size:.82rem;font-weight:800;color:var(--emerald);">سؤال ١ من ٢٥</span>
           <span id="qz-timer" style="font-size:.92rem;font-weight:800;color:var(--emerald);background:var(--pale);border:1px solid var(--border);border-radius:99px;padding:4px 15px;">⏱️ ٣٠:٠٠</span>
@@ -2281,7 +2282,10 @@ async function toggleTask(i,checked){
     const cb=document.querySelector('#tsk-lbl-'+i+' input[type=checkbox]'); if(cb) cb.checked=prev;
     return;
   }
-  await awardTaskPoints();   // نقاط نسبية على قدر المهام المنجزة (تُعدَّل مع كل بند)
+  // ★ النقاط تُضاف مرة واحدة فقط للحلقة/اليوم — عند اكتمال المهام العشرة، ولا تتكرر بعدها
+  if(TASK_STATE.done.every(Boolean) && (TASK_STATE.awarded||0) < 20){
+    await awardTaskPoints();
+  }
 }
 
 // مؤشّر حالة الحفظ
@@ -2716,7 +2720,7 @@ function renderStudents(){
   if(!c){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--light);padding:36px;">🔒 لا توجد حلقة اليوم — تظهر طلاب الحلقة في مواعيدها المحددة فقط</td></tr>'; return; }
   const q=(document.getElementById('st-search')?.value||'').trim();
   let list=studentsOf(c); if(q) list=list.filter(s=>s.name.includes(q));
-  // ── وضع الاختبار (الجمعة للأبطال/الرواد • السبت 8أغسطس و12سبتمبر للبنات) ──
+  // ── وضع الاختبار (الجمعة للأبطال/الرواد • السبت 15أغسطس و12سبتمبر للبنات) ──
   const exam=examConfig(c);
   const nw=document.getElementById('st-normal-wrap'), ew=document.getElementById('st-exam-wrap');
   if(exam){ if(nw)nw.style.display='none'; if(ew)ew.style.display='block'; renderExamTable(c,list,exam); return; }
@@ -2778,7 +2782,7 @@ function examConfig(c){
   }
   // الملكات والأميرات — اختبار الشهر الثاني والربع سنوي فقط
   if(b==='الملكات'||b==='الأميرات'){
-    if(date==='2026-08-08') return { kind:'اختبار الشهر الثاني', total:55,
+    if(date==='2026-08-15') return { kind:'اختبار الشهر الثاني', total:55,
       cols:[['quran','درجة القرآن',25],['manhaj','درجة المنهج المصاحب',15],['tajweed','درجة التجويد',15]] };
     if(date==='2026-09-12') return { kind:'الاختبار الربع سنوي', total:100,
       cols:[['hifz','درجة الحفظ',25],['review','درجة المراجعة',25],['manhaj','درجة المنهج المصاحب',25],['tajweed','درجة التجويد',25]] };
@@ -3644,6 +3648,8 @@ async function openQuiz(cid){
     const {data}=await db.from('teacher_exam_results').select('percent,points').eq('teacher_id',cu.id).eq('exam_id',cid).maybeSingle();
     if(data){ TR_EXAM_DONE[cid]={percent:data.percent,points:data.points}; renderTrCourses(); showToast('🔒 تم أداء هذا الاختبار مسبقاً'); return; }
   }catch(e){}
+  // ★ تنبيه قبل البدء: لا خروج حتى نهاية الاختبار
+  if(!confirm('⚠️ تنبيه هام:\n\nبمجرد بدء الاختبار لا يمكنك الخروج منه أو الرجوع للأسئلة حتى تسليمه، وذلك ضماناً للشفافية وتكافؤ الفرص بين المعلمين.\n\nهل أنت مستعد للبدء الآن؟')) return;
   // جلب الأسئلة من القاعدة — بدون الإجابات الصحيحة إطلاقاً
   let ex;
   try{
@@ -3656,6 +3662,8 @@ async function openQuiz(cid){
   document.getElementById('qz-result').style.display='none';
   document.getElementById('qz-quiz').style.display='';
   openModal('modal-tr-exam');
+  const _cb=document.getElementById('qz-close-btn'); if(_cb) _cb.style.display='none';   // ★ لا خروج أثناء الاختبار
+  const _wn=document.getElementById('qz-warn'); if(_wn) _wn.style.display='';
   qzStartTimer(ex.mins||trExamMins(cid));
   renderQzQ();
 }
@@ -3697,6 +3705,8 @@ function qzSubmit(){
 async function qzShowResult(){
   const s=_qzState; if(!s) return;
   clearQzTimer();
+  const _cb=document.getElementById('qz-close-btn'); if(_cb) _cb.style.display='';   // بعد التسليم يُسمح بالإغلاق
+  const _wn=document.getElementById('qz-warn'); if(_wn) _wn.style.display='none';
   const cid=s.cid, total=s.qs.length;
   const answers=s.answers.map(a=>(a==null?-1:a));
   // حالة انتظار أثناء التصحيح في القاعدة
@@ -3739,7 +3749,9 @@ async function qzShowResult(){
   _qzState=null;
 }
 function closeQuiz(){ clearQzTimer(); closeModal('modal-tr-exam'); _qzState=null; renderTrCourses(); }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElementById('modal-tr-exam') && document.getElementById('modal-tr-exam').classList.contains('open')){ if(_qzState && !confirm('إغلاق الاختبار سيُلغي إجاباتك الحالية. متأكد؟')) return; closeQuiz(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElementById('modal-tr-exam') && document.getElementById('modal-tr-exam').classList.contains('open')){ if(_qzState){ e.preventDefault(); showToast('🔒 لا يمكن الخروج من الاختبار حتى تسليمه'); return; } closeQuiz(); } });
+// ★ تحذير عند محاولة إغلاق/تحديث الصفحة أثناء اختبار جارٍ
+window.addEventListener('beforeunload',e=>{ if(_qzState){ e.preventDefault(); e.returnValue=''; return ''; } });
 
 
 let TR_WATCHED = new Set();

@@ -11232,6 +11232,18 @@ async function svFetchCircleLive(branchName, teacherName){
       id: g.student_id, name: g.student_name || 'طالب', _guest: true, guestTeacher: g.student_teacher || ''
     }));
   } catch(e){}
+  // 3.ج) ضمان ظهور الزائر: ادمج زوّار تقرير اليوم المرفوع (لو التوقيت اختلف أو الصف اتسجّل في التقرير مش في الجداول)
+  try {
+    const { data: rRep } = await db.from('circle_reports')
+      .select('data').eq('teacher_id', teacherId).eq('report_date', date).limit(1);
+    const rd = (rRep && rRep[0] && Array.isArray(rRep[0].data)) ? rRep[0].data : [];
+    rd.forEach(row => {
+      if(!row || !row.is_guest) return;
+      const gid = row.student_id || ('rg_'+(row.name||'ضيف'));
+      if(ids.includes(gid) || guests.some(g=>g.id===gid)) return;
+      guests.push({ id:gid, name: row.name || 'طالب', _guest:true, guestTeacher: row.guest_teacher || '', _rep: row });
+    });
+  } catch(e){}
   const allStudents = students.concat(guests);
   const allIds = allStudents.map(s => s.id);
 
@@ -11268,11 +11280,12 @@ async function svFetchCircleLive(branchName, teacherName){
   } catch(e){}
 
   const rows = allStudents.map(s => {
-    const attRaw = attMap[s.id];
+    let attRaw = attMap[s.id];
+    let memG = memMap[s.id], revG = revMap[s.id];
+    if(s._rep){ if(attRaw==null) attRaw = s._rep.attendance; if(memG==null) memG = s._rep.mem_grade; if(revG==null) revG = s._rep.rev_grade; }   // fallback من التقرير المرفوع
     let att;
-    if(attRaw==='late'){ const mn=lateMap[s.id]||0; att = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
+    if(attRaw==='late'){ const mn=lateMap[s.id]||(s._rep&&s._rep.late_minutes)||0; att = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
     else att = attRaw ? (attAr[attRaw]||attRaw) : 'لم يُسجَّل';
-    const memG = memMap[s.id], revG = revMap[s.id];
     const mem = (att==='غائب') ? '—' : (memG ? (gradeAr[memG]||memG) : '—');
     const rev = (att==='غائب') ? '—' : (revG ? (gradeAr[revG]||revG) : '—');
     return { name:s.name, att, mem, rev, pts: ptsMap[s.id]||0,
@@ -11856,6 +11869,8 @@ function waMonthRange(weekIdx){
 async function waLoadAnalysis(weekIdx){
   if(window.WA_ANALYSIS[weekIdx]) return window.WA_ANALYSIS[weekIdx];
   const mr = waMonthRange(weekIdx);
+  window.WA_MONTH_CACHE = window.WA_MONTH_CACHE || {};
+  if(window.WA_MONTH_CACHE[mr.from]){ window.WA_ANALYSIS[weekIdx] = window.WA_MONTH_CACHE[mr.from]; return window.WA_ANALYSIS[weekIdx]; }
   const A = { month: mr, attByStu:{}, memByStu:{}, sessByTB:{}, stuName:{}, stuCircle:{} };
 
   const circleIds = [];
@@ -11901,6 +11916,7 @@ async function waLoadAnalysis(weekIdx){
     (sess||[]).forEach(s=>{ const k=(s.teacher_name||'')+'||'+(s.branch||''); (A.sessByTB[k]=A.sessByTB[k]||[]).push(s); });
   }catch(e){ console.log('wa sess:', e); }
 
+  window.WA_MONTH_CACHE[mr.from] = A;
   window.WA_ANALYSIS[weekIdx] = A;
   return A;
 }
@@ -11994,6 +12010,24 @@ function waAnalyzeBranch(branchName, weekIdx){
     return a;
   };
   alerts.forEach(stamp); warnings.forEach(stamp);
+  return { alerts, warnings };
+}
+
+// ══ تجميع تنبيهات كل الأسابيع (٠..الأسبوع المعروض) بالـ id الثابت ══
+// النتيجة: التنبيه اللي لم يُتخذ فيه إجراء يتكرر كل أسبوع تالٍ لحد ما يُتخذ معه إجراء.
+// اللي مش موجود في تحليل الأسبوع الحالي يُعلَّم _carried (مُرحَّل من أسبوع سابق).
+async function waAccumulate(branch, uptoWeek){
+  const byId = {};
+  for(let w=0; w<=uptoWeek; w++){
+    try{ await waLoadAnalysis(w); }catch(e){}
+    const r = waAnalyzeBranch(branch, w);
+    r.warnings.forEach(a=>{ byId[a.id]=Object.assign({}, a, {_kind:'warning'}); });   // الأحدث يكتب فوق (نص محدّث)
+    r.alerts  .forEach(a=>{ byId[a.id]=Object.assign({}, a, {_kind:'alert'  }); });
+  }
+  const cur = waAnalyzeBranch(branch, uptoWeek);
+  const curIds = new Set([...cur.warnings, ...cur.alerts].map(a=>a.id));
+  const warnings=[], alerts=[];
+  Object.values(byId).forEach(a=>{ a._carried = !curIds.has(a.id); (a._kind==='warning'?warnings:alerts).push(a); });
   return { alerts, warnings };
 }
 
@@ -12255,28 +12289,28 @@ function waCurrentWeekIndex(){
 // وتعكس الإجراءات المتخذة (أخضر) وترتّبها أسفل القائمة.
 function waSyncDashboard(){
   const wk = waCurrentWeekIndex();
-  Promise.all([ waLoadAnalysis(wk), waFetchActions(true) ]).then(()=>{
+  waFetchActions(true).then(async ()=>{
     window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
 
-    svGetMyBranches().forEach(b=>{
-      const r = waAnalyzeBranch(b, wk);
+    for(const b of svGetMyBranches()){
+      const r = await waAccumulate(b, wk);   // ★ يشمل التنبيهات المُرحَّلة اللي ملهاش إجراء
       waMigrateLegacyActions(wk, b, [...r.warnings, ...r.alerts]);   // منع إعادة ظهور تنبيه اتُّخذ فيه إجراء
       const auto = [...r.warnings, ...r.alerts];   // الإنذارات أولاً
 
       // احتفظ بالتنبيهات اليدوية فقط (اللي مش جاية من النظام الأسبوعي)
       const existing = (window.DB_BRANCH_ALERTS[b] || []).filter(a => !a.auto);
 
-      // ★ تعديل ١: اللي اتخذ فيه إجراء يختفي خالص من لوحة القيادة — عشان ما يتكررش
+      // ★ اللي اتخذ فيه إجراء يختفي خالص من لوحة القيادة — عشان ما يتكررش
       const autoItems = auto.filter(a => !waHasAction(a.id)).map(a=>({
         id: a.id, type: a.type, icon: a.icon, text: a.text,
         action: '', done: false,
-        time: 'الأسبوع ' + (WK_AR_NUM[wk] || wkAr(wk+1)),
+        time: (a._carried ? '🔁 مُرحَّل • ' : '') + 'الأسبوع ' + (WK_AR_NUM[wk] || wkAr(wk+1)),
         branch: b, auto: true
       }));
 
       window.DB_BRANCH_ALERTS[b] = [...autoItems, ...existing];
       svRenderBranchAlerts(b);
-    });
+    }
   });
 }
 
@@ -12310,7 +12344,7 @@ async function renderWAlerts(){
   WA_DATA = {};
   let totAlerts=0, totWarn=0, totOpen=0, totDone=0;
   for(const b of branches){
-    const r = waAnalyzeBranch(b); WA_DATA[b]=r;
+    const r = await waAccumulate(b, WA_CURRENT); WA_DATA[b]=r;
     await waMigrateLegacyActions(WA_CURRENT, b, [...r.alerts, ...r.warnings]);   // ترحيل قبل حساب النِّسب
     totAlerts += r.alerts.length; totWarn += r.warnings.length;
     [...r.alerts, ...r.warnings].forEach(a=>{ waHasAction(a.id) ? totDone++ : totOpen++; });
@@ -12388,7 +12422,7 @@ async function renderWAlerts(){
       return `<div style="display:flex;flex-direction:column;padding:11px 13px;background:${bg};border:1.5px solid ${bd};border-radius:var(--r-sm);margin-bottom:8px;">
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1.1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
-          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}${(a._carried&&!done)?' <span class="badge bg-gray" style="font-size:.6rem;font-weight:800;">🔁 مُكرّر</span>':''}</div>
           ${actionBtn(a.id,'warning',a.text,b)}
         </div>
         ${actionLine(a.id)}
@@ -12403,7 +12437,7 @@ async function renderWAlerts(){
       return `<div style="display:flex;flex-direction:column;padding:10px 13px;background:${bg};border-right:3px solid ${bd};border-radius:var(--r-sm);margin-bottom:7px;">
         <div style="display:flex;align-items:flex-start;gap:9px;">
           <span style="font-size:1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
-          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}</div>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${a.text}${(a._carried&&!done)?' <span class="badge bg-gray" style="font-size:.6rem;font-weight:800;">🔁 مُكرّر</span>':''}</div>
           ${actionBtn(a.id,'alert',a.text,b)}
         </div>
         ${actionLine(a.id)}

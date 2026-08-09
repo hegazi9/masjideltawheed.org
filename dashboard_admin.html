@@ -277,7 +277,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   font-size:.9rem;color:#fff;font-weight:700;
 }
 .sb-uname{font-size:.82rem;font-weight:700;color:#fff;}
-.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);}
+.sb-urole{font-size:.68rem;color:rgba(255,255,255,.4);background:none!important;background-image:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;padding:0!important;border:none!important;border-radius:0!important;}
 .sb-online{width:7px;height:7px;background:#52c77c;border-radius:50%;margin-right:auto;flex-shrink:0;}
 
 .sb-nav{flex:1;overflow-y:auto;padding:8px 12px;}
@@ -1075,124 +1075,73 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
   </div>
 
-  <!-- ══ MAIN ICON GRID ══ -->
-  <div class="icon-grid">
-
-    <!-- 1 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('students')">
-      <div class="ig-icon-wrap"><span class="ig-icon">👨‍🎓</span></div>
-      <div class="ig-label">الطلاب</div>
-    </div>
-
-    <!-- 2 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('teachers')">
-      <div class="ig-icon-wrap"><span class="ig-icon">👨‍🏫</span></div>
-      <div class="ig-label">المعلمون</div>
-    </div>
-
-    <!-- 3 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('supervisors')">
-      <div class="ig-icon-wrap">
-        <svg width="30" height="30" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="6.5" r="4" fill="white"/><path d="M2 22c0-4.4 3.6-8 8-8 1.3 0 2.5.3 3.6.8" fill="white"/><circle cx="20" cy="19.5" r="2.5" stroke="white" stroke-width="1.8" fill="none"/><path d="M20 14.5v1.5M20 24.5v-1.5M25 19.5h-1.5M15 19.5h1.5M23.5 16l-1.1 1.1M17.6 21.9l-1.1 1.1M23.5 23l-1.1-1.1M17.6 17.1l-1.1-1.1" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <!-- ══ عدّادات أداء الحلقات الأسبوعية ══ -->
+  <style>
+  .dg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px;}
+  .dg-week{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:99px;padding:5px 8px;box-shadow:var(--shadow);}
+  .dg-week button{border:none;background:var(--pale);color:var(--emerald);width:32px;height:32px;border-radius:50%;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;line-height:1;}
+  .dg-week button:hover:not(:disabled){background:var(--mint);color:#fff;}
+  .dg-week button:disabled{opacity:.35;cursor:not-allowed;}
+  .dg-week-lbl{font-size:.86rem;font-weight:800;color:var(--forest);min-width:150px;text-align:center;}
+  .dg-week-sub{font-size:.68rem;color:var(--light);font-weight:600;}
+  .dg-branch{margin-bottom:20px;}
+  .dg-branch-h{display:flex;align-items:center;gap:9px;font-family:'Amiri',serif;font-size:1.06rem;font-weight:900;color:var(--forest);margin:0 0 12px;padding-bottom:7px;border-bottom:2px solid var(--pale);}
+  .dg-branch-h .dg-count{font-family:'Tajawal',sans-serif;font-size:.72rem;font-weight:800;color:var(--emerald);background:var(--pale);border-radius:99px;padding:2px 10px;}
+  .dg-grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:13px;}
+  .dg-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px 12px;text-align:center;cursor:pointer;transition:all .17s;box-shadow:var(--shadow);}
+  .dg-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--mint);}
+  .dg-gauge-svg{width:130px;height:80px;display:block;margin:0 auto;}
+  .dg-card-name{font-size:.9rem;font-weight:800;color:var(--forest);margin-top:2px;line-height:1.35;}
+  .dg-card-teacher{font-size:.74rem;color:var(--mid);font-weight:600;margin-top:2px;}
+  .dg-card-sub{font-size:.68rem;color:var(--light);font-weight:700;margin-top:6px;border-top:1px dashed var(--border);padding-top:6px;}
+  .dg-empty{text-align:center;color:var(--light);padding:38px 16px;font-weight:700;}
+  .dg-empty .ei{font-size:2rem;display:block;margin-bottom:8px;}
+  .dgm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .dgm-stat{background:var(--pale);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 8px;text-align:center;}
+  .dgm-stat .v{font-size:1.5rem;font-weight:900;}
+  .dgm-stat .l{font-size:.7rem;color:var(--mid);font-weight:700;margin-top:2px;}
+  .dgm-sec{margin-bottom:16px;}
+  .dgm-sec-h{font-size:.9rem;font-weight:800;color:var(--emerald);margin:0 0 9px;display:flex;align-items:center;gap:7px;}
+  .dgm-tbl{width:100%;border-collapse:collapse;font-size:.78rem;}
+  .dgm-tbl th{background:var(--pale);color:var(--forest);font-weight:800;padding:6px 8px;text-align:center;border:1px solid var(--border);font-size:.72rem;}
+  .dgm-tbl td{padding:5px 8px;text-align:center;border:1px solid var(--border);color:var(--ink);}
+  .dgm-tbl td.nm{text-align:right;font-weight:700;color:var(--forest);}
+  .dgm-pill{display:inline-block;font-size:.68rem;font-weight:800;border-radius:99px;padding:1px 8px;}
+  .dgm-guest{font-size:.6rem;font-weight:800;color:var(--gold);background:var(--gold-pale);border:1px solid var(--gold-l);border-radius:99px;padding:1px 6px;margin-right:4px;}
+  .dgm-rep{border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:9px;overflow:hidden;}
+  .dgm-rep-h{background:var(--pale);padding:8px 11px;font-size:.78rem;font-weight:800;color:var(--forest);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;cursor:pointer;}
+  .dgm-alert{display:flex;align-items:flex-start;gap:8px;background:var(--red-pale);border:1px solid var(--red);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-size:.78rem;color:var(--red);font-weight:700;}
+  .dgm-ok{background:var(--pale);border:1px dashed var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:.8rem;color:var(--mid);font-weight:700;text-align:center;}
+  .dgm-act{display:flex;align-items:flex-start;gap:8px;background:var(--blue-pale);border:1px solid var(--blue);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-size:.76rem;color:var(--blue);font-weight:600;}
+  </style>
+  <div class="dg-head">
+    <div style="font-size:1.14rem;font-weight:900;color:var(--forest);font-family:'Amiri',serif;">📊 أداء الحلقات الأسبوعي</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="dg-week">
+        <button id="dg-prev" onclick="dgGoWeek(-1)" title="الأسبوع السابق">›</button>
+        <div style="text-align:center;"><div class="dg-week-lbl" id="dg-week-lbl">—</div><div class="dg-week-sub" id="dg-week-sub"></div></div>
+        <button id="dg-next" onclick="dgGoWeek(1)" title="الأسبوع التالي">‹</button>
       </div>
-      <div class="ig-label">المشرفون</div>
+      <button class="btn btn-outline btn-sm" onclick="dgLoad()" title="تحديث">🔄</button>
     </div>
-
-    <!-- 4 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('admins')">
-      <div class="ig-icon-wrap">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="7" r="4.5" fill="white" opacity="0.95"/>
-          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        </svg>
-      </div>
-      <div class="ig-label">المديرون</div>
-    </div>
-
-    <!-- 5 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('parents')">
-      <div class="ig-icon-wrap"><span class="ig-icon">👨‍👦</span></div>
-      <div class="ig-label">أولياء الأمور</div>
-    </div>
-
-    <!-- 6 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('employees')">
-      <div class="ig-icon-wrap"><span class="ig-icon">👔</span></div>
-      <div class="ig-label">الموظفون</div>
-    </div>
-
-    <!-- 7 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('circles')">
-      <div class="ig-icon-wrap"><svg width="30" height="30" viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="16" cy="4.5" r="3.2"/>
-  <path d="M16 9.5c-1.4 0-2.6.7-3.2 1.8L9.5 16h13l-3.3-4.7c-.6-1.1-1.8-1.8-3.2-1.8z"/>
-  <path d="M8 18c.5 1.5 1.8 3 3.5 4.2L9.5 27h13l-2-4.8C22.2 21 23.5 19.5 24 18H8z"/>
-  <line x1="7" y1="19.5" x2="10.5" y2="20.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-  <line x1="25" y1="19.5" x2="21.5" y2="20.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-  <path d="M11.5 17.5c-1.2.4-2.8.6-3.8.2M20.5 17.5c1.2.4 2.8.6 3.8.2" stroke="white" stroke-width="1" stroke-linecap="round" fill="none"/>
-</svg></div>
-      <div class="ig-label">الحلقات</div>
-    </div>
-
-    <!-- 8 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('reports')">
-      <div class="ig-icon-wrap"><span class="ig-icon">📄</span></div>
-      <div class="ig-label">التقارير</div>
-    </div>
-
-    <!-- 9 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('stats')">
-      <div class="ig-icon-wrap"><span class="ig-icon">📊</span></div>
-      <div class="ig-label">الإحصاءات</div>
-    </div>
-
-    <!-- 10 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('schedule')">
-      <div class="ig-icon-wrap"><span class="ig-icon">📖</span></div>
-      <div class="ig-label">الخطط والمقررات</div>
-    </div>
-
-    <!-- 11 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('media')">
-      <div class="ig-icon-wrap"><span class="ig-icon">🎬</span></div>
-      <div class="ig-label">المرئيات</div>
-    </div>
-
-    <!-- 12 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('messages')" style="position:relative;">
-      <div class="ig-icon-wrap"><span class="ig-icon">✉️</span></div>
-      <div class="ig-label">الرسائل</div>
-      <span id="ig-msg-badge" style="display:none;position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:.65rem;font-weight:800;border-radius:99px;padding:2px 8px;min-width:20px;text-align:center;line-height:1.6;box-shadow:0 2px 8px rgba(192,57,43,.4);"></span>
-    </div>
-
-    <!-- 13 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('announcements')">
-      <div class="ig-icon-wrap"><span class="ig-icon">📢</span></div>
-      <div class="ig-label">الإعلانات</div>
-    </div>
-
-    <!-- 14 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('library')">
-      <div class="ig-icon-wrap"><span class="ig-icon">📚</span></div>
-      <div class="ig-label">المكتبة</div>
-    </div>
-
-    <!-- 15 أخضر -->
-    <div class="ig-btn ig-green" onclick="navPage('finance')">
-      <div class="ig-icon-wrap"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
-      <div class="ig-label">الشؤون المالية</div>
-    </div>
-
-    <!-- 16 ذهبي -->
-    <div class="ig-btn ig-gold" onclick="navPage('settings')">
-      <div class="ig-icon-wrap"><span class="ig-icon">⚙️</span></div>
-      <div class="ig-label">الإعدادات</div>
-    </div>
-
+  </div>
+  <div id="dg-grid">
+    <div class="dg-empty"><span class="ei">⏳</span>جارٍ التحميل…</div>
   </div>
 
-
 </div><!-- /dashboard -->
+
+<!-- ══ MODAL: تفاصيل الحلقة الأسبوعية ══ -->
+<div class="overlay" id="modal-dash-circle">
+  <div class="modal" style="max-width:760px;width:96%;">
+    <div class="modal-head">
+      <div class="modal-title" id="dgm-title" style="font-size:.98rem;">تفاصيل الحلقة</div>
+      <button class="modal-close" onclick="closeModal('modal-dash-circle')">×</button>
+    </div>
+    <div class="modal-body" id="dgm-body" style="max-height:74vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
 
 <!-- ══════════════════════════════════════════════════════
      PAGE: STUDENTS
@@ -8828,6 +8777,7 @@ async function init(){
   loadUnreadMsgCount();
   showToast('✅ تم تحميل البيانات!');
   enableFeminizeAdmin();   // تأنيث صفوف شعب البنات (الملكات/الأميرات)
+  if(typeof dgInit==='function') dgInit();
 }
 
 async function loadDashboardCounts(){
@@ -10531,6 +10481,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'schedule') { closeCourse(); loadCurriculum(); }
   if (pageId === 'tadmin') tadminInit();
   if (pageId === 'media') renderMediaPage();
+  if (pageId === 'dashboard' && typeof dgOnShow==='function') dgOnShow();
   if (pageId === 'admins') {
     if (!SUPERVISORS || !SUPERVISORS.length) {
       loadSupervisors().then(() => loadAdminsStats());
@@ -18600,6 +18551,269 @@ function tadminEditQ(examId,id){
 async function tadminDelQ(id){ if(!confirm('حذف هذا السؤال؟')) return;
   try{ const {error}=await db.rpc('admin_delete_question',{p_id:id}); if(error)throw error; showToast('🗑️ حُذف'); await tadminReload(); }catch(e){ showToast('⚠️ '+(e.message||e.code)); } }
 
+</script>
+
+
+<script>
+/* ══════════ لوحة القيادة: عدّادات أداء الحلقات الأسبوعية ══════════
+   البيانات كلها حيّة من Supabase (attendance / memorization / circle_reports /
+   circle_guests / weekly_alert_actions). لا أرقام ثابتة. */
+const DG = { week:0, circles:[], byId:{}, loading:false, loaded:false };
+const DG_GS   = { excellent:100, very_good:80, good:60, retry:25 };
+const DG_GAR  = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'إعادة' };
+const DG_GBG  = { excellent:['#1a7a4a','#e8f5ee'], very_good:['#1d6fa4','#e8f2fb'], good:['#c8920a','#fdf3dc'], retry:['#c0392b','#fdf0ef'] };
+const DG_ATAR = { present:'حاضر', absent:'غائب', late:'متأخر', excused:'بعذر' };
+const DG_BORDER = ['الأبطال','الرواد','الملكات','الأميرات'];
+
+function dgISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dgSundayOf(d){ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; } // getDay: 0=الأحد
+function dgWeekRange(offset){
+  const base=dgSundayOf(new Date()); base.setDate(base.getDate()+offset*7);
+  const from=new Date(base), to=new Date(base); to.setDate(to.getDate()+6);
+  return { from:dgISO(from), to:dgISO(to), fromD:from, toD:to };
+}
+function dgColor(p){ if(p==null) return 'var(--light)'; if(p>=80) return 'var(--jade)'; if(p>=60) return 'var(--gold)'; if(p>=40) return '#e67e22'; return 'var(--red)'; }
+function dgGauge(pct){
+  const L=Math.PI*50; const col=dgColor(pct);
+  const fill = pct==null ? 0 : Math.max(0,Math.min(100,pct))/100*L;
+  const txt = pct==null ? '—' : (toAr(pct)+'٪');
+  return '<svg class="dg-gauge-svg" viewBox="0 0 120 78">'
+    +'<path d="M10,64 A50,50 0 0 1 110,64" fill="none" stroke="var(--pale)" stroke-width="12" stroke-linecap="round"/>'
+    +'<path d="M10,64 A50,50 0 0 1 110,64" fill="none" stroke="'+col+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+fill+' 999"/>'
+    +'<text x="60" y="56" text-anchor="middle" font-size="23" font-weight="800" fill="'+col+'" font-family="Tajawal,sans-serif">'+txt+'</text>'
+    +'</svg>';
+}
+
+async function dgLoad(){
+  if(DG.loading) return;
+  DG.loading=true;
+  const host=document.getElementById('dg-grid');
+  if(host) host.innerHTML='<div class="dg-empty"><span class="ei">⏳</span>جارٍ تحميل بيانات الأسبوع…</div>';
+  try{
+    const allow = window.ADMIN_ALLOWED_BRANCH_IDS || null;
+    const rg = dgWeekRange(DG.week);
+
+    const { data:brs } = await db.from('branches').select('id,name');
+    const brName={}; (brs||[]).forEach(b=>brName[b.id]=b.name);
+    const { data:us } = await db.from('users').select('id,full_name');
+    const uName={}; (us||[]).forEach(u=>uName[u.id]=u.full_name);
+    const isUuid=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
+
+    const { data:circles } = await db.from('circles').select('id,name,name_ar,teacher_id,teachers,branch_id,schedule');
+    let clist=(circles||[]).filter(c=>{ if(allow && !allow.has(c.branch_id)) return false; return true; }).map(c=>{
+      let tName=(c.teachers||[])[0]; if(isUuid(tName)) tName=uName[tName]||tName;
+      if(!tName && c.teacher_id) tName=uName[c.teacher_id]||null;
+      return { id:c.id, name:c.name_ar||c.name||'حلقة', teacher:tName||'—', teacherId:c.teacher_id||null,
+               branch:brName[c.branch_id]||'', branchId:c.branch_id, schedule:c.schedule||[] };
+    }).filter(c=>DG_BORDER.indexOf(c.branch)>=0);
+
+    const { data:studs } = await db.from('students').select('id,circle_id,users!students_user_id_fkey(full_name)').eq('is_active',true);
+    const cStud={}, sName={};
+    (studs||[]).forEach(s=>{ if(!s.circle_id) return; (cStud[s.circle_id]=cStud[s.circle_id]||[]).push(s.id); sName[s.id]=(s.users&&s.users.full_name)||'طالب'; });
+    clist.forEach(c=>{ c.studentIds=cStud[c.id]||[]; });
+
+    const allIds=[...new Set(clist.flatMap(c=>c.studentIds))];
+    const att={}, mem={};
+    for(let i=0;i<allIds.length;i+=80){
+      const chunk=allIds.slice(i,i+80);
+      const { data:a } = await db.from('attendance').select('student_id,status,late_minutes,date').in('student_id',chunk).gte('date',rg.from).lte('date',rg.to);
+      (a||[]).forEach(r=>{ (att[r.student_id]=att[r.student_id]||[]).push(r); });
+      const { data:m } = await db.from('memorization').select('student_id,type,grade,date').in('student_id',chunk).gte('date',rg.from).lte('date',rg.to);
+      (m||[]).forEach(r=>{ (mem[r.student_id]=mem[r.student_id]||[]).push(r); });
+    }
+
+    let reps=[]; try{ const { data:r } = await db.from('circle_reports').select('*').gte('report_date',rg.from).lte('report_date',rg.to); reps=r||[]; }catch(e){}
+    const repByCircle={}, repByTeacher={};
+    reps.forEach(r=>{ if(r.circle_id)(repByCircle[r.circle_id]=repByCircle[r.circle_id]||[]).push(r); if(r.teacher_id)(repByTeacher[r.teacher_id]=repByTeacher[r.teacher_id]||[]).push(r); });
+
+    let guestsByTeacher={};
+    try{ const { data:g } = await db.from('circle_guests').select('student_id,student_name,student_teacher,added_by,guest_date').gte('guest_date',rg.from).lte('guest_date',rg.to);
+      (g||[]).forEach(x=>{ (guestsByTeacher[x.added_by]=guestsByTeacher[x.added_by]||[]).push(x); }); }catch(e){}
+
+    let waActs=[]; try{ const { data:w } = await db.from('weekly_alert_actions').select('*'); waActs=w||[]; }catch(e){}
+
+    clist.forEach(c=>{
+      let present=0,late=0,absent=0,excused=0, msum=0,mcount=0,retry=0;
+      const gd={excellent:0,very_good:0,good:0,retry:0}; const actDates=new Set(); const perStu={};
+      c.studentIds.forEach(sid=>{
+        const ar=att[sid]||[], mr=mem[sid]||[];
+        let p=0,ab=0,lt=0,ex=0;
+        ar.forEach(r=>{ if(r.date)actDates.add(r.date);
+          if(r.status==='present')p++; else if(r.status==='late')lt++; else if(r.status==='absent')ab++; else if(r.status==='excused')ex++; });
+        let sms=0,smc=0,srt=0;
+        mr.forEach(r=>{ if(r.date)actDates.add(r.date);
+          if(r.grade&&DG_GS[r.grade]!=null){ sms+=DG_GS[r.grade]; smc++; gd[r.grade]=(gd[r.grade]||0)+1; if(r.grade==='retry')srt++; } });
+        present+=p; late+=lt; absent+=ab; excused+=ex; msum+=sms; mcount+=smc; retry+=srt;
+        perStu[sid]={ name:sName[sid]||'طالب', present:p,absent:ab,late:lt,excused:ex, memCount:smc, retry:srt, memAvg:smc?Math.round(sms/smc):null };
+      });
+      (repByCircle[c.id]||[]).forEach(r=>{ if(r.report_date)actDates.add(r.report_date); });
+      const attended=present+late, marked=present+late+absent+excused;
+      const attPct = marked?Math.round(attended/marked*100):null;
+      const memPct = mcount?Math.round(msum/mcount):null;
+      let comp=null; if(attPct!=null&&memPct!=null)comp=Math.round((attPct+memPct)/2); else if(attPct!=null)comp=attPct; else if(memPct!=null)comp=memPct;
+
+      // تقارير الحلقة: بالـ circle_id، وإلا تقارير المعلم بدون circle_id (توافق قديم)
+      let rlist=(repByCircle[c.id]||[]).slice();
+      if(c.teacherId) (repByTeacher[c.teacherId]||[]).forEach(r=>{ if(!r.circle_id) rlist.push(r); });
+      const seen=new Set(); rlist=rlist.filter(r=>{ if(seen.has(r.report_date))return false; seen.add(r.report_date); return true; }).sort((a,b)=>a.report_date<b.report_date?-1:1);
+
+      c.metrics={ attPct, memPct, comp, present,late,absent,excused, mcount, retry, marked, gradeDist:gd };
+      c.perStu=perStu;
+      c.reports=rlist;
+      c.actDates=[...actDates].sort();
+      c.guests=(c.teacherId?guestsByTeacher[c.teacherId]:[])||[];
+      c.wa=waActs.filter(w=> w.branch===c.branch && w.updated_at && String(w.updated_at).slice(0,10)>=rg.from && String(w.updated_at).slice(0,10)<=rg.to);
+    });
+
+    DG.circles=clist; DG.byId={}; clist.forEach(c=>DG.byId[c.id]=c); DG.loaded=true;
+    dgRender(rg);
+  }catch(e){
+    if(host) host.innerHTML='<div class="dg-empty"><span class="ei">⚠️</span>تعذّر تحميل البيانات: '+((e&&(e.message||e.code))||'')+'</div>';
+  }finally{ DG.loading=false; }
+}
+
+function dgRender(rg){
+  // شريط الأسبوع
+  const lbl = DG.week===0 ? 'هذا الأسبوع' : (DG.week===-1 ? 'الأسبوع الماضي' : 'أسبوع سابق');
+  const fmt=d=>d.toLocaleDateString('ar-EG',{day:'numeric',month:'long'});
+  const L=document.getElementById('dg-week-lbl'), S=document.getElementById('dg-week-sub'), NX=document.getElementById('dg-next');
+  if(L) L.textContent=lbl;
+  if(S) S.textContent=fmt(rg.fromD)+' – '+fmt(rg.toD);
+  if(NX) NX.disabled = DG.week>=0;
+
+  const host=document.getElementById('dg-grid'); if(!host) return;
+  if(!DG.circles.length){ host.innerHTML='<div class="dg-empty"><span class="ei">🕌</span>لا توجد حلقات ضمن نطاقك</div>'; return; }
+
+  let html='';
+  DG_BORDER.forEach(bn=>{
+    const arr=DG.circles.filter(c=>c.branch===bn);
+    if(!arr.length) return;
+    html+='<div class="dg-branch"><div class="dg-branch-h">🕌 '+bn+' <span class="dg-count">'+toAr(arr.length)+' حلقة</span></div><div class="dg-grid-cards">';
+    arr.forEach(c=>{
+      const m=c.metrics;
+      const attTxt=m.attPct==null?'—':toAr(m.attPct)+'٪';
+      const memTxt=m.memPct==null?'—':toAr(m.memPct)+'٪';
+      html+='<div class="dg-card" onclick="dgOpenCircle(\''+c.id+'\')">'
+        + dgGauge(m.comp)
+        + '<div class="dg-card-name">'+c.name+'</div>'
+        + '<div class="dg-card-teacher">👤 '+c.teacher+'</div>'
+        + '<div class="dg-card-sub">حضور '+attTxt+' • تسميع '+memTxt+'</div>'
+        + '</div>';
+    });
+    html+='</div></div>';
+  });
+  host.innerHTML=html;
+}
+
+function dgGoWeek(delta){ let w=DG.week+delta; if(w>0)w=0; DG.week=w; dgLoad(); }
+function dgInit(){ DG.week=0; dgLoad(); }
+function dgOnShow(){ if(!DG.loaded && !DG.loading) dgLoad(); }
+
+function dgOpenCircle(id){
+  const c=DG.byId[id]; if(!c) return;
+  const rg=dgWeekRange(DG.week);
+  const m=c.metrics;
+  document.getElementById('dgm-title').innerHTML='🕌 '+c.name+' <span style="font-weight:600;color:var(--light);font-size:.82rem;">— '+c.branch+'</span>';
+  let h='';
+
+  // معلومات أساسية
+  h+='<div style="font-size:.82rem;color:var(--mid);font-weight:700;margin-bottom:14px;">👤 المعلم: <b style="color:var(--forest);">'+c.teacher+'</b> &nbsp;•&nbsp; 👨‍🎓 '+toAr(c.studentIds.length)+' طالب &nbsp;•&nbsp; 📅 '+rg.fromD.toLocaleDateString('ar-EG',{day:'numeric',month:'long'})+' – '+rg.toD.toLocaleDateString('ar-EG',{day:'numeric',month:'long'})+'</div>';
+
+  // العدّادات
+  const cell=(v,l,col)=>'<div class="dgm-stat"><div class="v" style="color:'+col+';">'+(v==null?'—':toAr(v)+'٪')+'</div><div class="l">'+l+'</div></div>';
+  h+='<div class="dgm-stats">'
+    + cell(m.comp,'المؤشّر المركّب',dgColor(m.comp))
+    + cell(m.attPct,'نسبة الحضور',dgColor(m.attPct))
+    + cell(m.memPct,'جودة التسميع',dgColor(m.memPct))
+    + '</div>';
+
+  // التنبيهات الأسبوعية (مشتقّة من بيانات الأسبوع + إجراءات مسجّلة)
+  h+='<div class="dgm-sec"><div class="dgm-sec-h">🔔 التنبيهات الأسبوعية</div>';
+  const alerts=[];
+  Object.values(c.perStu).forEach(st=>{
+    if(st.absent>=2) alerts.push('غياب متكرر: <b>'+st.name+'</b> ('+toAr(st.absent)+' مرات)');
+    if(st.retry>=1)  alerts.push('تسميع يحتاج إعادة: <b>'+st.name+'</b> ('+toAr(st.retry)+')');
+    if((st.present+st.late)>0 && st.memCount===0) alerts.push('حضر بدون تسميع: <b>'+st.name+'</b>');
+  });
+  if(alerts.length){ alerts.slice(0,20).forEach(a=>{ h+='<div class="dgm-alert">⚠️ <span>'+a+'</span></div>'; }); }
+  else h+='<div class="dgm-ok">✅ لا توجد تنبيهات هذا الأسبوع</div>';
+  (c.wa||[]).slice(0,10).forEach(w=>{
+    h+='<div class="dgm-act">🛡️ <span><b>'+(w.alert_text||'تنبيه')+'</b> — إجراء: '+(w.action_text||'—')+'<br><span style="color:var(--light);font-weight:600;">'+(w.taken_by_name||'')+' • '+String(w.updated_at||'').slice(0,10)+'</span></span></div>';
+  });
+  h+='</div>';
+
+  // حضور المعلم (أيام النشاط المسجّل)
+  h+='<div class="dgm-sec"><div class="dgm-sec-h">👨‍🏫 حضور المعلم</div>';
+  if(c.actDates.length){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:7px;">'+c.actDates.map(d=>{
+      const dt=new Date(d+'T00:00:00');
+      return '<span class="dgm-pill" style="color:#1a7a4a;background:#e8f5ee;">✓ '+dt.toLocaleDateString('ar-EG',{weekday:'short',day:'numeric'})+'</span>';
+    }).join('')+'</div>';
+  } else h+='<div class="dgm-ok">لا يوجد نشاط مسجّل هذا الأسبوع</div>';
+  h+='</div>';
+
+  // حضور الطلاب
+  h+='<div class="dgm-sec"><div class="dgm-sec-h">🧑‍🎓 حضور الطلاب</div><div style="overflow-x:auto;"><table class="dgm-tbl"><thead><tr><th>الطالب</th><th>حاضر</th><th>متأخر</th><th>غائب</th><th>بعذر</th></tr></thead><tbody>';
+  const stu=Object.values(c.perStu);
+  if(stu.length){ stu.forEach(st=>{ h+='<tr><td class="nm">'+st.name+'</td><td>'+toAr(st.present)+'</td><td>'+toAr(st.late)+'</td><td style="color:'+(st.absent?'var(--red)':'inherit')+';font-weight:'+(st.absent?800:400)+';">'+toAr(st.absent)+'</td><td>'+toAr(st.excused)+'</td></tr>'; }); }
+  else h+='<tr><td colspan="5" style="color:var(--light);">لا يوجد طلاب</td></tr>';
+  h+='</tbody></table></div></div>';
+
+  // الدرجات
+  const gd=m.gradeDist||{};
+  h+='<div class="dgm-sec"><div class="dgm-sec-h">📝 الدرجات (تسميع الأسبوع)</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">'
+    +['excellent','very_good','good','retry'].map(g=>{ const bg=DG_GBG[g]; return '<span class="dgm-pill" style="color:'+bg[0]+';background:'+bg[1]+';padding:4px 12px;font-size:.74rem;">'+DG_GAR[g]+': '+toAr(gd[g]||0)+'</span>'; }).join('')
+    +'</div>';
+  const stuG=stu.filter(st=>st.memCount>0);
+  if(stuG.length){
+    h+='<div style="overflow-x:auto;"><table class="dgm-tbl"><thead><tr><th>الطالب</th><th>عدد التسميعات</th><th>متوسط الجودة</th><th>إعادات</th></tr></thead><tbody>';
+    stuG.forEach(st=>{ h+='<tr><td class="nm">'+st.name+'</td><td>'+toAr(st.memCount)+'</td><td style="color:'+dgColor(st.memAvg)+';font-weight:800;">'+(st.memAvg==null?'—':toAr(st.memAvg)+'٪')+'</td><td style="color:'+(st.retry?'var(--red)':'inherit')+';">'+toAr(st.retry)+'</td></tr>'; });
+    h+='</tbody></table></div>';
+  } else h+='<div class="dgm-ok">لا توجد تسميعات مسجّلة هذا الأسبوع</div>';
+  h+='</div>';
+
+  // الطلاب الزائرون (خارج الحلقة)
+  if((c.guests||[]).length){
+    h+='<div class="dgm-sec"><div class="dgm-sec-h">➕ طلاب زائرون (خارج الحلقة)</div>';
+    c.guests.forEach(g=>{ h+='<div class="dgm-act" style="background:var(--gold-pale);border-color:var(--gold-l);color:var(--gold);">👤 <span><b>'+(g.student_name||'طالب')+'</b>'+(g.student_teacher?' — معلمه: '+g.student_teacher:'')+' <span style="color:var(--light);font-weight:600;">• '+String(g.guest_date||'').slice(0,10)+'</span></span></div>'; });
+    h+='</div>';
+  }
+
+  // تقارير الحلقة المرفوعة
+  h+='<div class="dgm-sec"><div class="dgm-sec-h">📤 تقارير الحلقة المرفوعة</div>';
+  if((c.reports||[]).length){
+    c.reports.forEach((r,ri)=>{
+      const dt=new Date((r.report_date||'')+'T00:00:00');
+      const rows=(r.data||[]);
+      h+='<div class="dgm-rep"><div class="dgm-rep-h" onclick="dgToggleRep(\''+c.id+'\','+ri+')">'
+        +'<span>📄 '+ (isNaN(dt)?'—':dt.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})) +'</span>'
+        +'<span style="color:var(--emerald);">حضور '+toAr(r.present_count!=null?r.present_count:'—')+'/'+toAr(r.students_count!=null?r.students_count:rows.length)+' &nbsp;▾</span></div>'
+        +'<div id="dgm-rep-'+c.id+'-'+ri+'" style="display:none;padding:8px 10px;">';
+      if(rows.length){
+        h+='<div style="overflow-x:auto;"><table class="dgm-tbl"><thead><tr><th>الطالب</th><th>الحضور</th><th>الحفظ</th><th>المراجعة</th></tr></thead><tbody>';
+        rows.forEach(rr=>{
+          const gtag=rr.is_guest?'<span class="dgm-guest">ضيف'+(rr.guest_teacher?' · '+rr.guest_teacher:'')+'</span>':'';
+          const at=rr.attendance?(DG_ATAR[rr.attendance]||rr.attendance):'—';
+          const mg=rr.mem_grade?(DG_GAR[rr.mem_grade]||rr.mem_grade):'—';
+          const rv=rr.rev_grade?(DG_GAR[rr.rev_grade]||rr.rev_grade):'—';
+          h+='<tr><td class="nm">'+gtag+(rr.name||'طالب')+'</td><td>'+at+'</td><td>'+mg+'</td><td>'+rv+'</td></tr>';
+        });
+        h+='</tbody></table></div>';
+      } else h+='<div style="color:var(--light);font-size:.78rem;">لا تفاصيل</div>';
+      h+='</div></div>';
+    });
+  } else h+='<div class="dgm-ok">لم يرفع المعلم أي تقرير هذا الأسبوع</div>';
+  h+='</div>';
+
+  document.getElementById('dgm-body').innerHTML=h;
+  openModal('modal-dash-circle');
+}
+
+function dgToggleRep(cid,ri){
+  const el=document.getElementById('dgm-rep-'+cid+'-'+ri);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
 </script>
 
 <script src="messages.js"></script>
