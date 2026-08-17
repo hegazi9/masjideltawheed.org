@@ -2563,6 +2563,8 @@ async function submitLessonPrep(){
 
 // إشعار المشرف المتابع للحلقة (رسالة في صندوقه — والإشعار نفسه بيجي من تريجر lesson_preps)
 async function lpNotifySupervisor(title){
+  // ★ اتشالت رسالة التحضير المكررة — الإشعار بييجي من تريجر lesson_preps فقط (notif_push)
+  return;
   try{
     const c=activeCircle()||MY_CIRCLES[0]; if(!c) return;
     const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();

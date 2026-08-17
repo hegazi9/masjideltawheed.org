@@ -10732,7 +10732,7 @@ async function svSaveSessionData(date, teacher, obj, branch){
     if(selErr){ console.log('sess sel:', selErr.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
     let target = (rows||[]).find(r=> String(r.branch||'').trim()===String(b||'').trim());
     if(!target)   target = (rows||[]).find(r=> !r.branch);   // صف قديم بلا شعبة → رقّيه لهذه الشعبة
-    if(!target && (rows||[]).length===1) target = rows[0];   // صف وحيد لنفس المعلم/التاريخ → حدّثه بدل تكراره
+    // ★ ما نلمسش صف شعبة تانية: المعلم اللي بيدرّس في أكتر من شعبة له صف مستقل لكل شعبة
     let error;
     if(target){
       ({ error } = await db.from('supervisory_sessions').update(row).eq('id', target.id));
@@ -11922,7 +11922,7 @@ async function waLoadAnalysis(weekIdx){
 }
 
 // عتبات التنبيهات
-const WA_TH = { absStreak:3, absScatter:6, tAbsStreak:3, tLateMonth:100, gradeStreak:3, stuLateWeek:100 };
+const WA_TH = { absStreak:3, absScatter:4, tAbsStreak:3, tLateMonth:100, gradeStreak:3, stuLateWeek:100 };
 
 // تحليل شعبة — يقرأ من الكاش (متزامن)
 function waAnalyzeBranch(branchName, weekIdx){
@@ -15638,6 +15638,9 @@ async function loadLessonReviews(){
 function lpSheetHtml(r){
   const d = r.data || {};
   const esc = v => String(v==null||v===''?'—':v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const imgBlock = (Array.isArray(d.images) && d.images.length)
+    ? '<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">'+d.images.map(u=>'<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" style="max-width:150px;max-height:150px;border:1px solid var(--border);border-radius:8px;"></a>').join('')+'</div>'
+    : '';
   const STAGES = [['intro','المقدمة'],['preface','التمهيد'],['present','عرض الدرس'],['closure','الغلق']];
   const st = d.stages || {};
   const cell = v => '<td style="border:1px solid var(--border);padding:6px 8px;font-size:.76rem;vertical-align:top;white-space:pre-wrap;line-height:1.6;">'+esc(v)+'</td>';
