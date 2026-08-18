@@ -941,6 +941,121 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   .main{margin:0!important;}
   .page{padding:0!important;}
 }
+
+/* ══════════════════════════════════════════════════════
+   📱 الشاشات الصغيرة — الجوال واللوحي
+══════════════════════════════════════════════════════ */
+.tb-burger{display:none;}
+#sb-backdrop{display:none;}
+
+@media(max-width:1024px){
+  html,body{overflow-x:hidden;}
+
+  /* ── زر الثلاث شرطات ── */
+  .tb-burger{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    width:40px;height:40px;flex-shrink:0;padding:0;
+    background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);
+    cursor:pointer;transition:background .18s,border-color .18s;
+  }
+  .tb-burger:active{background:var(--pale);border-color:var(--jade);}
+  .tb-burger i{display:block;width:18px;height:2px;border-radius:2px;background:var(--forest);transition:transform .25s,opacity .18s;}
+  body.sb-open .tb-burger i:nth-child(1){transform:translateY(6px) rotate(-45deg);}
+  body.sb-open .tb-burger i:nth-child(2){opacity:0;}
+  body.sb-open .tb-burger i:nth-child(3){transform:translateY(-6px) rotate(45deg);}
+
+  /* ── السايدبار: درج منزلق من اليمين ── */
+  .sidebar{
+    width:272px;max-width:86vw;z-index:300;
+    transform:translateX(calc(100% + 40px));
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  body.sb-open .sidebar{transform:translateX(0);}
+  #sb-backdrop{
+    display:block;position:fixed;inset:0;z-index:290;
+    background:rgba(10,25,17,.5);
+    opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+  }
+  body.sb-open #sb-backdrop{opacity:1;visibility:visible;}
+  body.sb-open{overflow:hidden;}
+  .sb-logo{padding:18px 16px 15px;}
+  .sb-user{margin:12px 10px;}
+  .sb-nav{padding:6px 10px;}
+  .sb-item{padding:11px 12px;font-size:.88rem;}
+  .sb-footer{padding:12px 14px;}
+
+  /* ── المحتوى الرئيسي ── */
+  .main{margin-right:0;}
+  .topbar{padding:0 12px;height:56px;gap:8px;}
+  .tb-left{gap:10px;min-width:0;flex:1;}
+  .tb-left>div{min-width:0;}
+  .tb-title{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tb-breadcrumb{display:none;}
+  .tb-right{gap:6px;flex-shrink:0;}
+  .tb-search,.tb-date{display:none;}
+  .page{padding:14px 12px;}
+
+  /* ── الشبكات ── */
+  .stats-row,.qs-row,.icon-grid,.rep-kpi,.crc-kpis{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .charts-row,.grid-2,.grid-3,.grid-1-2,.grid-2-1,.form-grid-2,.form-grid-3{grid-template-columns:1fr;gap:12px;}
+  .crc-grid{grid-template-columns:1fr;}
+  .rep-sign{grid-template-columns:1fr;gap:18px;}
+  .fin-hmonths{grid-template-columns:repeat(3,1fr);}
+
+  /* ── لافتة الترحيب ── */
+  .welcome-banner{padding:18px 16px;margin-bottom:16px;}
+  .wb-content{flex-direction:column;align-items:flex-start;gap:10px;}
+  .wb-title{font-size:1.15rem;line-height:1.5;}
+  .wb-sub{font-size:.79rem;}
+  .wb-icon-wrap{display:none;}
+
+  /* ── البطاقات ── */
+  .card{margin-bottom:14px;}
+  .card-head{flex-wrap:wrap;gap:9px;padding:13px 14px;}
+  .card-body{padding:14px;}
+  .stat-card,.qs-card{padding:14px 12px;}
+  .qs-val{font-size:1.35rem;}
+  .qs-icon{font-size:1.3rem;}
+  .ig-btn{min-height:92px;padding:16px 8px;gap:9px;}
+  .ig-icon-wrap{width:44px;height:44px;}
+  .ig-icon{font-size:1.5rem;}
+  .ig-label{font-size:.82rem;}
+  .cc-stat-val{font-size:1.6rem;}
+
+  /* ── الجداول: تمرير أفقي ── */
+  .card-body-0{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .card-body-0>.tbl{min-width:620px;}
+  .tbl th,.tbl td{padding:10px 11px;}
+  .sched-grid{min-width:600px;}
+  .rep-sheet{padding:16px 13px;}
+  .rep-head{flex-direction:column;}
+  .rep-meta{text-align:right;}
+
+  /* ── المودالات: ورقة سفلية ── */
+  .overlay{align-items:flex-end;}
+  .modal{width:100%;max-width:100%;max-height:92vh;border-radius:var(--r) var(--r) 0 0;}
+  .modal-head{padding:15px 17px;border-radius:var(--r) var(--r) 0 0;}
+  .modal-body{padding:16px 15px;}
+  .modal-foot{padding:12px 15px;flex-wrap:wrap;}
+
+  /* ── متفرقات ── */
+  .notif-dropdown{width:min(340px,calc(100vw - 24px));}
+  .toast{right:12px;left:12px;bottom:16px;justify-content:center;}
+  .crc-bar{padding:10px 12px;gap:10px;}
+  .crc-search{min-width:100%;}
+  .btn{padding:8px 14px;font-size:.8rem;}
+  .section-title{font-size:.9rem;}
+}
+
+@media(max-width:520px){
+  .qs-row,.rep-kpi,.crc-kpis{grid-template-columns:1fr;}
+  .stats-row,.icon-grid{grid-template-columns:repeat(2,1fr);gap:9px;}
+  .tb-title{font-size:.88rem;}
+  .page{padding:12px 10px;}
+  .stat-val{font-size:1.5rem;}
+  .fin-hmonths{grid-template-columns:repeat(2,1fr);}
+  .crc-d-stats{grid-template-columns:repeat(3,1fr);gap:7px;}
+}
 </style>
 </head>
 <body>
@@ -1032,12 +1147,15 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </aside>
 
+<div id="sb-backdrop" onclick="closeSidebar()"></div>
+
 <!-- ══════════════════════════════════════
      TOPBAR
 ══════════════════════════════════════ -->
 <div class="main">
 <div class="topbar">
   <div class="tb-left">
+    <button class="tb-burger" type="button" onclick="toggleSidebar()" aria-label="فتح القائمة"><i></i><i></i><i></i></button>
     <div>
       <div class="tb-title" id="tb-title">🏠 لوحة القيادة</div>
       <div class="tb-breadcrumb">مدرسة التوحيد القرآنية</div>
@@ -18814,6 +18932,29 @@ function dgToggleRep(cid,ri){
   const el=document.getElementById('dgm-rep-'+cid+'-'+ri);
   if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
 }
+
+/* ══════════════════════════════════════
+   📱 درج القائمة الجانبية (الجوال)
+══════════════════════════════════════ */
+function isMobileNav(){ return window.matchMedia('(max-width:1024px)').matches; }
+function openSidebar(){ document.body.classList.add('sb-open'); }
+function closeSidebar(){ document.body.classList.remove('sb-open'); }
+function toggleSidebar(){ document.body.classList.toggle('sb-open'); }
+
+document.addEventListener('click', function(e){
+  if(!document.body.classList.contains('sb-open')) return;
+  if(!isMobileNav()) return;
+  var t = e.target;
+  if(t && t.closest && t.closest('.sb-item')) closeSidebar();
+}, true);
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeSidebar();
+});
+
+window.addEventListener('resize', function(){
+  if(!isMobileNav()) closeSidebar();
+});
 </script>
 
 <script src="messages.js"></script>
