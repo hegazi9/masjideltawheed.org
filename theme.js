@@ -232,8 +232,13 @@ function _applyDarkSidebar(theme) {
   }
   document.querySelectorAll('.sb-uname').forEach(el => el.style.color = '#ffffff');
   document.querySelectorAll('.sb-urole').forEach(el => {
-    el.style.color      = 'rgba(255,255,255,.65)';
-    el.style.background = 'rgba(255,255,255,.15)';
+    el.style.color       = 'rgba(255,255,255,.65)';
+    el.style.background  = 'none';
+    el.style.boxShadow   = 'none';
+    el.style.textShadow  = 'none';
+    el.style.padding     = '0';
+    el.style.border      = 'none';
+    el.style.borderRadius= '0';
   });
 
   // nav items
@@ -274,8 +279,13 @@ function _applyLightSidebar(theme) {
   }
   document.querySelectorAll('.sb-uname').forEach(el => el.style.color = theme.vars['--primary-d']);
   document.querySelectorAll('.sb-urole').forEach(el => {
-    el.style.color      = '#ffffff';
-    el.style.background = theme.vars['--primary'];
+    el.style.color       = theme.vars['--primary'];
+    el.style.background  = 'none';
+    el.style.boxShadow   = 'none';
+    el.style.textShadow  = 'none';
+    el.style.padding     = '0';
+    el.style.border      = 'none';
+    el.style.borderRadius= '0';
   });
 
   document.querySelectorAll('.sb-item').forEach(el => {

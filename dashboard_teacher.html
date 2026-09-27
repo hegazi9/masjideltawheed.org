@@ -28,7 +28,28 @@
 <script>
   const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
   const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08';
-  window.db = supabase.createClient(_SB_URL, _SB_KEY);
+  // ── طبقة أمان: تنظيف الأسماء الراجعة من القاعدة من رموز HTML/JS الخطرة (حماية مركزية من XSS) ──
+  const _NAME_KEYS = {full_name:1,name:1,name_ar:1,student_name:1,teacher_name:1,sender_name:1,to_name:1,student_teacher:1,taken_by_name:1,circle_name:1};
+  function _cleanNames(o){
+    if(Array.isArray(o)){ for(const x of o) _cleanNames(x); return; }
+    if(o && typeof o==='object'){ for(const k in o){ const v=o[k];
+      if(typeof v==='string'){ if(_NAME_KEYS[k]) o[k]=v.replace(/[<>"'`&\\]/g,''); }
+      else if(v && typeof v==='object') _cleanNames(v); } }
+  }
+  async function _safeFetch(input, init){
+    const res = await fetch(input, init);
+    try{
+      const url = typeof input==='string' ? input : (input && input.url) || '';
+      const ct = res.headers.get('content-type') || '';
+      if(url.indexOf('/rest/v1/')<0 || ct.indexOf('json')<0) return res;
+      const txt = await res.text();
+      if(!txt) return new Response(txt,{status:res.status,statusText:res.statusText,headers:res.headers});
+      let j; try{ j=JSON.parse(txt); }catch(e){ return new Response(txt,{status:res.status,statusText:res.statusText,headers:res.headers}); }
+      _cleanNames(j);
+      return new Response(JSON.stringify(j),{status:res.status,statusText:res.statusText,headers:res.headers});
+    }catch(e){ return res; }
+  }
+  window.db = supabase.createClient(_SB_URL, _SB_KEY, { global: { fetch: _safeFetch } });
 </script>
 <script src="theme.js"></script>
 <script src="mushaf_madani.js"></script>
@@ -797,6 +818,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
     <div class="sb-section">حلقاتي</div>
     <div class="sb-item" onclick="nav(this,'circles')"><span class="sb-icon">🕌</span> حلقاتي</div>
+    <div class="sb-item" onclick="nav(this,'splans')"><span class="sb-icon">🎯</span> خطة الطالب</div>
+    <div class="sb-item" onclick="nav(this,'prayers')"><span class="sb-icon">🕌</span> تقرير الصلوات</div>
 
     <div class="sb-section">المتابعة</div>
     <div class="sb-item" onclick="nav(this,'reports')"><span class="sb-icon">📄</span> تقاريري</div>
@@ -880,7 +903,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <!-- ══ الخطط والمقررات (عرض فقط) ══ -->
   <div class="card" id="tcp-section" style="display:none;">
     <div class="card-head">
-      <div class="card-title">📖 الخطط والمقررات — الدورة الصيفية 2026 م</div>
+      <div class="card-title">📖 الخطط والمقررات — <span id="tcp-term-name">الدورة الحالية</span></div>
       <span style="font-size:.74rem;color:var(--light);">اضغط على اليوم لعرض خطته</span>
     </div>
     <div class="card-body">
@@ -1175,6 +1198,22 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <div class="card">
     <div class="card-head"><div class="card-title">📁 ملفات طلاب: <span id="fl-circle-name" style="color:var(--jade);">—</span></div></div>
     <div class="card-body"><div class="grid-3" id="files-grid"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════ 🎯 خطة الطالب ══════════════ -->
+<div id="page-splans" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;"><div class="card-title">🎯 خطة الطالب</div><div id="spt-ctrl" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
+    <div class="card-body" id="spt-wrap"></div>
+  </div>
+</div>
+
+<!-- ══════════════ 🕌 تقرير الصلوات ══════════════ -->
+<div id="page-prayers" class="page">
+  <div class="card">
+    <div class="card-head" style="flex-wrap:wrap;gap:10px;"><div class="card-title">🕌 تقرير الصلوات</div><div id="prt-ctrl" style="display:flex;gap:8px;flex-wrap:wrap;"></div></div>
+    <div class="card-body" id="prt-wrap"></div>
   </div>
 </div>
 
@@ -1612,16 +1651,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <div class="modal" style="max-width:480px;">
     <div class="modal-head"><div class="modal-title" id="ex-title">📝 الدرجة</div><button class="modal-close" onclick="closeModal('modal-exam')">×</button></div>
     <div class="modal-body">
-      <div id="ex-rec-wrap" style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;">
-        <div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:8px;">🎙️ التسجيل الصوتي</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
-          <button class="btn btn-xs" style="background:var(--red);color:#fff;" onclick="exRecStart()">🔴 تسجيل</button>
-          <button class="btn btn-xs btn-outline" onclick="exRecPause()">⏸️ إيقاف مؤقت</button>
-          <button class="btn btn-xs btn-outline" onclick="exRecStop()">⏹️ إيقاف</button>
-          <span id="ex-rec-state" style="font-size:.76rem;font-weight:700;color:var(--mid);"></span>
-        </div>
-        <audio id="ex-audio" controls style="display:none;width:100%;margin-top:10px;"></audio>
-      </div>
       <div class="fg"><label>عدد الأخطاء الظاهرة</label>
         <input type="number" min="0" id="ex-errors" placeholder="اكتب عدد الأخطاء" oninput="exCalc()">
         <div style="font-size:.72rem;color:var(--light);margin-top:4px;">يُخصم كل خطأ درجة واحدة من الدرجة الكاملة</div>
@@ -1766,13 +1795,7 @@ const GRADE_PTS = { excellent:15, very_good:10, good:5, retry:0 };
 const GRADE_COLOR = { excellent:'#1a7a4a', very_good:'var(--blue)', good:'var(--gold)', retry:'var(--red)' };
 const SURAHS=[["الفاتحة",7],["البقرة",286],["آل عمران",200],["النساء",176],["المائدة",120],["الأنعام",165],["الأعراف",206],["الأنفال",75],["التوبة",129],["يونس",109],["هود",123],["يوسف",111],["الرعد",43],["إبراهيم",52],["الحجر",99],["النحل",128],["الإسراء",111],["الكهف",110],["مريم",98],["طه",135],["الأنبياء",112],["الحج",78],["المؤمنون",118],["النور",64],["الفرقان",77],["الشعراء",227],["النمل",93],["القصص",88],["العنكبوت",69],["الروم",60],["لقمان",34],["السجدة",30],["الأحزاب",73],["سبأ",54],["فاطر",45],["يس",83],["الصافات",182],["ص",88],["الزمر",75],["غافر",85],["فصلت",54],["الشورى",53],["الزخرف",89],["الدخان",59],["الجاثية",37],["الأحقاف",35],["محمد",38],["الفتح",29],["الحجرات",18],["ق",45],["الذاريات",60],["الطور",49],["النجم",62],["القمر",55],["الرحمن",78],["الواقعة",96],["الحديد",29],["المجادلة",22],["الحشر",24],["الممتحنة",13],["الصف",14],["الجمعة",11],["المنافقون",11],["التغابن",18],["الطلاق",12],["التحريم",12],["الملك",30],["القلم",52],["الحاقة",52],["المعارج",44],["نوح",28],["الجن",28],["المزمل",20],["المدثر",56],["القيامة",40],["الإنسان",31],["المرسلات",50],["النبأ",40],["النازعات",46],["عبس",42],["التكوير",29],["الانفطار",19],["المطففين",36],["الانشقاق",25],["البروج",22],["الطارق",17],["الأعلى",19],["الغاشية",26],["الفجر",30],["البلد",20],["الشمس",15],["الليل",21],["الضحى",11],["الشرح",8],["التين",8],["العلق",19],["القدر",5],["البينة",8],["الزلزلة",8],["العاديات",11],["القارعة",11],["التكاثر",8],["العصر",3],["الهمزة",9],["الفيل",5],["قريش",4],["الماعون",7],["الكوثر",3],["الكافرون",6],["النصر",3],["المسد",5],["الإخلاص",4],["الفلق",5],["الناس",6]];
 
-// ── جدول مواعيد الشعب (لتحديد حلقة اليوم) ──
-const SCHED_MAP = {
-  'الأبطال':[{day:'الأحد'},{day:'الاثنين'},{day:'الأربعاء'},{day:'الخميس'},{day:'الجمعة'}],
-  'الرواد':[{day:'الأحد'},{day:'الاثنين'},{day:'الأربعاء'},{day:'الخميس'},{day:'الجمعة'}],
-  'الملكات':[{day:'السبت'},{day:'الثلاثاء'}],
-  'الأميرات':[{day:'السبت'},{day:'الثلاثاء'}],
-};
+// ── مواعيد الشعب (لتحديد حلقة اليوم) — من جدول الدورات (terms) للدورة الحالية ──
 function genderOf(branch){ return (branch==='الملكات'||branch==='الأميرات')?'إناث':'ذكور'; }
 // مجموعة الشعبة لبحث الطالب الزائر: شباب (أبطال+رواد) / بنات (ملكات+أميرات)
 function branchGroup(b){
@@ -1788,17 +1811,17 @@ function isUuidV(v){ return typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/i.
 function normG(g){ return (g==='إناث'||g==='أنثى'||g==='انثى'||g==='بنات')?'إناث':'ذكور'; }
 async function buildGenderIndex(){
   for(const id in BRANCH_MAP){ BR_GENDER[id]=genderOf(BRANCH_MAP[id]); }
-  try{ const {data}=await db.from('students').select('user_id,branch_id'); (data||[]).forEach(s=>{ if(s.user_id) USER_GENDER[String(s.user_id)]=BR_GENDER[s.branch_id]||'ذكور'; }); }catch(e){}
+  try{ const {data}=await db.from('students').select('user_id,branch_id'); (data||[]).forEach(s=>{ if(s.user_id) USER_GENDER[String(s.user_id)]=BR_GENDER[s.branch_id]||'ذكور'; }); }catch(e){ loadWarn(e); }
   try{ const {data}=await db.from('circles').select('teachers,supervisor_id,branch_id,gender');
     (data||[]).forEach(c=>{ const g=c.gender?normG(c.gender):(BR_GENDER[c.branch_id]||'ذكور');
       (c.teachers||[]).forEach(t=>{ const k=String(t).trim(); if(isUuidV(k)) USER_GENDER[k]=g; else NAME_GENDER[k]=g; });
       if(c.supervisor_id) USER_GENDER[String(c.supervisor_id)]=g; });
-  }catch(e){}
-  try{ const {data}=await db.from('users').select('id,full_name,branch_id'); (data||[]).forEach(u=>{ if(u.branch_id){ const g=BR_GENDER[u.branch_id]; if(g){ USER_GENDER[String(u.id)]=g; if(u.full_name) NAME_GENDER[u.full_name.trim()]=g; } } }); }catch(e){}
+  }catch(e){ loadWarn(e); }
+  try{ const {data}=await db.from('users').select('id,full_name,branch_id'); (data||[]).forEach(u=>{ if(u.branch_id){ const g=BR_GENDER[u.branch_id]; if(g){ USER_GENDER[String(u.id)]=g; if(u.full_name) NAME_GENDER[u.full_name.trim()]=g; } } }); }catch(e){ loadWarn(e); }
 }
 function genderOfUser(u){ if(!u) return null; if(u.role==='admin') return null;
   return USER_GENDER[String(u.id)]||NAME_GENDER[(u.name||u.full_name||'').trim()]||null; }
-function sameSection(u){ const g=genderOfUser(u); return !g || g===MY_GENDER; }
+function sameSection(u){ if(u&&u.role==='admin') return true; const g=genderOfUser(u); return g===MY_GENDER; }   // fail-closed
 
 
 // ── حالة التسميع/المراجعة لكل طالب ──
@@ -1806,8 +1829,709 @@ let REC_STATE = {};
 let REC_CTX = { sid:null, type:'new' };
 
 // ── تاريخ موعد الحلقة = اليوم فقط (إجباري، بيان ظاهر، لا يُختار) ──
-let REPORT_DATE = new Date().toISOString().split('T')[0];
-function D(){ return new Date().toISOString().split('T')[0]; }
+function localISO(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+let REPORT_DATE = localISO();
+// ══ أدوات مشتركة (أمان) ══
+function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+// للأسماء اللي بتتحط في HTML و onclick مع بعض: نشيل الرموز الخطرة نهائياً
+function cleanName(v){ return String(v==null?'':v).replace(/[<>"'`&\\]/g,'').trim(); }
+// رقم عشوائي آمن (لتوليد كلمات المرور)
+function _rnd(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
+// جلب كل الصفوف على صفحات (سقف Supabase الافتراضي ١٠٠٠ صف)
+async function selectAll(q, page){ page=page||1000; let out=[], from=0;
+  for(let i=0;i<50;i++){ const {data,error}=await q.range(from, from+page-1); if(error) return {data:null,error};
+    out=out.concat(data||[]); if(!data || data.length<page) break; from+=page; }
+  return {data:out,error:null}; }
+// خروج حقيقي: يلغي جلسة Supabase + يمسح البيانات المحلية
+async function secureLogout(){
+  try{ if(window.db && db.auth) await db.auth.signOut(); }catch(e){ console.warn('signOut',e); }
+  try{ localStorage.removeItem('currentUser'); }catch(e){}
+  window.location.href='login.html';
+}
+// التحقق من المستخدم من القاعدة (مش من localStorage) — يرجّع صف users أو null
+async function verifyMe(allowedRoles){
+  try{
+    const { data:{ session } } = await db.auth.getSession();
+    if(!session){ await secureLogout(); return null; }
+    const { data:me, error } = await db.from('users').select('*').eq('auth_id', session.user.id).eq('is_active', true).maybeSingle();
+    if(error) throw error;
+    if(!me || (allowedRoles && !allowedRoles.includes(me.role))){ await secureLogout(); return null; }
+    try{ const safe=Object.assign({},me); ['id_number','id_type','dob','address','marital','licenses','notes','password_plain'].forEach(k=>delete safe[k]); localStorage.setItem('currentUser', JSON.stringify(safe)); }catch(e){}
+    return me;
+  }catch(e){
+    if(typeof showToast==='function') showToast('⚠️ تعذّر التحقق من الحساب — تأكد من الاتصال');
+    return null;
+  }
+}
+// تنبيه موحّد لفشل تحميل البيانات (بدل catch الفاضية)
+function loadWarn(e){
+  try{ console.warn('[load]',e); }catch(_){}
+  if(window._lwT) return; window._lwT=1;
+  if(typeof showToast==='function') showToast('⚠️ بعض البيانات ما اتحمّلتش — تأكد من الاتصال واعمل تحديث');
+  setTimeout(()=>{ window._lwT=0; },6000);
+}
+// ══ الدورات (جدول terms) — المواعيد + الأسابيع + الأرشيف ══
+// المصدر: جدول terms في القاعدة. النسخة الاحتياطية تحت بس لو الجدول ما اتحمّلش.
+let TERMS=[], CUR_TERM=null, VIEW_TERM=null;
+const TERM_GIRLS=['البنات','الملكات','الأميرات'];
+const TERM_DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
+function termIsGirls(b){ return TERM_GIRLS.includes(b); }
+function _termD(iso){ const d=new Date(String(iso).slice(0,10)+'T00:00:00'); d.setHours(0,0,0,0); return d; }
+async function loadTerms(){
+  let rows=null;
+  try{ const {data,error}=await db.from('terms').select('*').order('start_date'); if(error) throw error; rows=data; }
+  catch(e){ console.warn('[terms]',e); }
+  if(!rows||!rows.length){ rows=TERMS_FALLBACK; loadWarn('terms'); }
+  TERMS=rows.map(t=>Object.assign({},t,{ schedule:t.schedule||{}, settings:t.settings||{}, week_base:t.week_base||{} }));
+  const today=localISO();
+  CUR_TERM=TERMS.find(t=>t.start_date<=today&&today<=t.end_date) || TERMS.filter(t=>t.start_date<=today).pop() || TERMS[0] || null;
+  let saved=null; try{ saved=sessionStorage.getItem('viewTerm'); }catch(e){}
+  VIEW_TERM=TERMS.find(t=>t.id===saved) || CUR_TERM;
+  return TERMS;
+}
+function termOf(iso){ iso=String(iso||'').slice(0,10); return TERMS.find(t=>t.start_date<=iso&&iso<=t.end_date)||null; }
+function termIsLegacy(t){ return !!(t&&t.settings&&t.settings.legacy); }
+function termIsArchive(t){ return !!(t&&CUR_TERM&&t.id!==CUR_TERM.id); }
+function termSched(t,b){
+  if(!t) return [];
+  const s=t.schedule||{}; let a=s[b];
+  if(!a&&termIsGirls(b)) a=s['الملكات']||s['الأميرات']||s['البنات'];
+  return Array.isArray(a)?a:[];
+}
+// أول يوم في الأسبوع الأول (b: اسم الشعبة أو '*' للكل)
+function termBase(t,b){
+  const wb=(t&&t.week_base)||{};
+  const iso=(b==='*')?(wb.all||wb.boys):(termIsGirls(b)?(wb.girls||wb.all):(wb.boys||wb.all));
+  return _termD(iso||(t?t.start_date:localISO()));
+}
+function termStartDow(t,b){ return termBase(t,b).getDay(); }
+// أيام الحلقة (getDay) مرتّبة حسب ترتيبها في الأسبوع
+function termDays(t,b){ const sd=termStartDow(t,b); return termSched(t,b).map(x=>x.d).sort((a,c)=>((a-sd+7)%7)-((c-sd+7)%7)); }
+function termDayNames(t,b){ return termDays(t,b).map(d=>TERM_DAYS_AR[d]); }
+function termDaysAt(iso,b){ return termDays(termOf(iso),b); }
+function termWeeks(t,b){ if(!t) return 1; const base=termBase(t,b||'*'), end=_termD(t.end_date); return Math.max(1, Math.floor((end-base)/(7*86400000))+1); }
+// تواريخ أسبوع — مفهرسة بـ getDay (0=أحد..6=سبت)
+function termWeekDates(t,w,b){ const base=termBase(t,b||'*'), sd=base.getDay(), arr=[]; for(let g=0;g<7;g++){ const d=new Date(base); d.setDate(base.getDate()+w*7+((g-sd+7)%7)); arr.push(d); } return arr; }
+function termWeekFirst(t,w,b){ const a=termWeekDates(t,w,b); return a[termStartDow(t,b||'*')]; }
+function termWeekLast(t,w,b){ const a=termWeekDates(t,w,b); return a[(termStartDow(t,b||'*')+6)%7]; }
+function termWeekIndex(t,b,date){ const base=termBase(t,b||'*'); const x=new Date(date||new Date()); x.setHours(0,0,0,0); const i=Math.floor((x-base)/(7*86400000)); return Math.max(0,Math.min(termWeeks(t,b)-1,i)); }
+function termWindow(t,b,dow){ const s=termSched(t,b).find(x=>x.d===dow); return s?{start:+s.s,end:+s.e,label:s.label||'',exam:!!s.exam}:null; }
+function termHourAr(h){ h=+h||0; const hh=Math.floor(h), mm=Math.round((h-hh)*60); const h12=((hh+11)%12)+1; const ar=n=>String(n).replace(/[0-9]/g,x=>'٠١٢٣٤٥٦٧٨٩'[x]); return ar(h12)+(mm?':'+ar(String(mm).padStart(2,'0')):'')+(hh<12?' ص':(hh===12?' ظ':' م')); }
+function termSchedText(t,b){ const sd=termStartDow(t,b); return termSched(t,b).slice().sort((a,c)=>((a.d-sd+7)%7)-((c.d-sd+7)%7)).map(x=>TERM_DAYS_AR[x.d]+' '+termHourAr(x.s)+'–'+termHourAr(x.e)).join(' • '); }
+// خطة الحفظ/المراجعة: plan_days = null → في كل حلقة
+function termPlanAllowed(t,b,dow){
+  const p=t&&t.settings&&t.settings.plan_days; if(!p) return true;
+  const a=p[b]||(termIsGirls(b)?(p['الملكات']||p['البنات']):null);
+  return Array.isArray(a)?a.includes(dow):true;
+}
+// إعداد الاختبار ليوم معيّن (المحدّد بتاريخ يسبق الأسبوعي) — null = يوم عادي
+function termExam(t,b,iso){
+  const ex=(t&&t.settings&&t.settings.exams)||{}; const dow=_termD(iso).getDay();
+  const inB=e=>!Array.isArray(e.branches)||e.branches.includes(b);
+  const d=(ex.dated||[]).find(e=>e.date===iso&&inB(e)); if(d) return d;
+  return (ex.weekly||[]).find(e=>+e.d===dow&&inB(e))||null;
+}
+// ملف الطالب: التقييم السلوكي (٣ شهور) خاص بكل دورة
+function termBh(d,t){ if(!d) return {}; if(!t||termIsLegacy(t)) return d.behavior||{}; return ((d.behavior_t||{})[t.id])||{}; }
+function termBhPack(prev,obj,t){
+  if(!obj||!('behavior' in obj)||!t||termIsLegacy(t)) return obj;
+  const bt=Object.assign({}, (prev&&prev.behavior_t)||{}); bt[t.id]=obj.behavior;
+  const o=Object.assign({},obj,{behavior_t:bt}); delete o.behavior; return o;
+}
+// الدورة القديمة (قبل جدول terms) = الصفوف اللي مالهاش term_id
+function termLegacyId(){ const t=TERMS.find(termIsLegacy); return t?t.id:null; }
+function termRowMatch(r,t){ t=t||VIEW_TERM; if(!t) return true; return (r.term_id||termLegacyId())===t.id; }
+
+
+// ══════════════════════════════════════════════════════════════
+// 🎯 خطة الطالب (جدول student_plans) — مشتركة بين المعلم والمشرف والمدير
+// خطة لكل فترة: من بداية الدورة/بعد الاختبار الشهري → لحد الاختبار الشهري الجاي
+// الهدف لكل حلقة (إلى سورة/آية) للحفظ والمراجعة — والنسبة بعدد الآيات المُسمَّعة فعلاً
+// ══════════════════════════════════════════════════════════════
+const SP_SURAH=[["الفاتحة",7],["البقرة",286],["آل عمران",200],["النساء",176],["المائدة",120],["الأنعام",165],["الأعراف",206],["الأنفال",75],["التوبة",129],["يونس",109],["هود",123],["يوسف",111],["الرعد",43],["إبراهيم",52],["الحجر",99],["النحل",128],["الإسراء",111],["الكهف",110],["مريم",98],["طه",135],["الأنبياء",112],["الحج",78],["المؤمنون",118],["النور",64],["الفرقان",77],["الشعراء",227],["النمل",93],["القصص",88],["العنكبوت",69],["الروم",60],["لقمان",34],["السجدة",30],["الأحزاب",73],["سبأ",54],["فاطر",45],["يس",83],["الصافات",182],["ص",88],["الزمر",75],["غافر",85],["فصلت",54],["الشورى",53],["الزخرف",89],["الدخان",59],["الجاثية",37],["الأحقاف",35],["محمد",38],["الفتح",29],["الحجرات",18],["ق",45],["الذاريات",60],["الطور",49],["النجم",62],["القمر",55],["الرحمن",78],["الواقعة",96],["الحديد",29],["المجادلة",22],["الحشر",24],["الممتحنة",13],["الصف",14],["الجمعة",11],["المنافقون",11],["التغابن",18],["الطلاق",12],["التحريم",12],["الملك",30],["القلم",52],["الحاقة",52],["المعارج",44],["نوح",28],["الجن",28],["المزمل",20],["المدثر",56],["القيامة",40],["الإنسان",31],["المرسلات",50],["النبأ",40],["النازعات",46],["عبس",42],["التكوير",29],["الانفطار",19],["المطففين",36],["الانشقاق",25],["البروج",22],["الطارق",17],["الأعلى",19],["الغاشية",26],["الفجر",30],["البلد",20],["الشمس",15],["الليل",21],["الضحى",11],["الشرح",8],["التين",8],["العلق",19],["القدر",5],["البينة",8],["الزلزلة",8],["العاديات",11],["القارعة",11],["التكاثر",8],["العصر",3],["الهمزة",9],["الفيل",5],["قريش",4],["الماعون",7],["الكوثر",3],["الكافرون",6],["النصر",3],["المسد",5],["الإخلاص",4],["الفلق",5],["الناس",6]];
+const SP_CUM=[0], SP_CUMB=new Array(116).fill(0);
+for(let i=0;i<114;i++) SP_CUM.push(SP_CUM[i]+SP_SURAH[i][1]);
+for(let s=113;s>=1;s--) SP_CUMB[s]=SP_CUMB[s+1]+SP_SURAH[s][1];   // مجموع آيات السور بعد s (للحفظ العكسي)
+const SP_DIR_AR={ forward:'من أول المصحف لآخره', backward:'من آخر المصحف (الناس ← الفاتحة)' };
+function spAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function spNum(s){
+  if(s==null||s==='') return 0;
+  if(typeof s==='number') return s;
+  const n=parseInt(s); if(!isNaN(n)&&String(n)===String(s).trim()) return n;
+  const i=SP_SURAH.findIndex(x=>x[0]===String(s).trim()); return i+1;
+}
+function spName(s){ const n=spNum(s); return n?SP_SURAH[n-1][0]:''; }
+function spPos(dir,s,a){
+  s=spNum(s); if(!s) return 0; a=Math.max(1,Math.min(+a||1, SP_SURAH[s-1][1]));
+  return dir==='backward' ? SP_CUMB[s]+a : SP_CUM[s-1]+a;
+}
+function spLbl(p){ return (p&&p.s)?(spName(p.s)+' '+spAr(p.a||1)):'—'; }
+function spAddDays(iso,n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return localISO(d); }
+function spFmt(iso){ const d=new Date(iso+'T00:00:00'); return TERM_DAYS_AR[d.getDay()]+' '+spAr(d.getDate())+'/'+spAr(d.getMonth()+1); }
+// مدى تسجيل تسميع واحد (مواضع بالترتيب حسب اتجاه الطالب)
+function spSpan(dir,r){
+  const sf=spNum(r.surah_from); if(!sf) return null;
+  const st=spNum(r.surah_to)||sf;
+  const af=+r.ayah_from||1, at=(r.ayah_to!=null&&r.ayah_to!=='')?(+r.ayah_to):af;
+  let a=spPos(dir,sf,af), b=spPos(dir,st,at); if(b<a){ const t=a; a=b; b=t; }
+  return [a,b];
+}
+// ── فترات الخطة من اختبارات الدورة: بداية الدورة ← الاختبار الشهري ١ ← ... ──
+function spPeriods(t,branch){
+  if(!t) return [];
+  const ex=(((t.settings||{}).exams||{}).dated||[]).filter(e=>!e.of&&Array.isArray(e.branches)&&e.branches.includes(branch)).map(e=>e.date).sort();
+  const out=[]; let from=t.start_date;
+  ex.forEach((d,i)=>{ if(d>=from){ out.push({no:i+1, from, to:d, exam:d}); from=spAddDays(d,1); } });
+  if(!out.length) out.push({no:1, from:t.start_date, to:t.end_date, exam:null});
+  return out;
+}
+function spPeriodOf(periods,iso){
+  return periods.find(p=>p.from<=iso&&iso<=p.to) || periods.find(p=>p.from>iso) || periods[periods.length-1] || null;
+}
+// أيام الحلقات جوه الفترة (من غير يوم الاختبار)
+function spSessionDates(t,branch,from,to){
+  const days=termDays(t,branch); if(!days.length) return [];
+  const exd=new Set((((t.settings||{}).exams||{}).dated||[]).filter(e=>Array.isArray(e.branches)&&e.branches.includes(branch)).map(e=>e.date));
+  const out=[]; let d=from;
+  while(d<=to){ const dow=new Date(d+'T00:00:00').getDay(); if(days.includes(dow)&&!exd.has(d)) out.push(d); d=spAddDays(d,1); }
+  return out;
+}
+// ── حساب الإنجاز لمسار (حفظ h / مراجعة r) ──
+function spTrack(plan,key,recs,asOf){
+  const D_=plan.data||{}, tr=D_[key==='h'?'hifz':'rev']||{}, dir=plan.direction||'forward';
+  if(!tr.start||!tr.start.s) return null;
+  const p0=spPos(dir,tr.start.s,tr.start.a);
+  const ses=(D_.sessions||[]).filter(x=>x[key]&&x[key].s).map(x=>({date:x.date, tgt:x[key], p:spPos(dir,x[key].s,x[key].a)})).sort((a,b)=>a.date<b.date?-1:1);
+  if(!ses.length) return null;
+  const pEnd=Math.max(...ses.map(x=>x.p)); if(pEnd<p0) return null;
+  const typ=key==='h'?'new':'review';
+  const rs=(recs||[]).filter(r=>r.type===typ&&r.grade!=='retry'&&r.date>=plan.period_from&&r.date<=plan.period_to).map(r=>({date:r.date, sp:spSpan(dir,r), r})).filter(x=>x.sp).sort((a,b)=>a.date<b.date?-1:1);
+  const covUpTo=(dLim,pLim)=>{ const c=new Set(); rs.forEach(x=>{ if(x.date>dLim) return; for(let p=Math.max(x.sp[0],p0);p<=Math.min(x.sp[1],pLim);p++) c.add(p); }); return c.size; };
+  const due=ses.filter(x=>x.date<=asOf);
+  const dueP=due.length?Math.max(...due.map(x=>x.p)):p0-1;
+  const planned=Math.max(0,dueP-p0+1), plannedAll=pEnd-p0+1;
+  const doneAll=covUpTo(asOf,pEnd);
+  const rows=ses.map(x=>{
+    const need=x.p-p0+1, got=covUpTo(x.date,x.p);
+    const day=rs.filter(y=>y.date===x.date).map(y=>spName(y.r.surah_to||y.r.surah_from)+' '+spAr(y.r.ayah_to||y.r.ayah_from||'')).join(' ، ');
+    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day };
+  });
+  return { lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
+           pct: planned?Math.min(100,Math.round(doneAll/planned*100)):null,
+           pctAll: plannedAll?Math.min(100,Math.round(doneAll/plannedAll*100)):0, rows };
+}
+function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'var(--gold)':'var(--red)')); }
+function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
+function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
+// ── HTML ملخّص الإنجاز لخطة واحدة ──
+function spProgressHtml(plan,recs,asOf){
+  const H=spTrack(plan,'h',recs,asOf), R=spTrack(plan,'r',recs,asOf);
+  const card=(ttl,T,col)=>'<div style="flex:1;min-width:200px;border:1.5px solid var(--border);border-top:3px solid '+col+';border-radius:var(--r-sm);padding:12px 14px;background:var(--white);">'
+    +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
+    +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
+      +'<div style="font-size:.72rem;color:var(--light);">لحد النهارده • '+spAr(T.done)+' من '+spAr(T.planned)+' آية</div></div>'+spBar(T.pct)
+      +'<div style="font-size:.7rem;color:var(--mid);margin-top:6px;">الفترة كلها: '+spAr(T.pctAll)+'٪ ('+spAr(T.plannedAll)+' آية)'+(T.lines?(' • '+spAr(T.lines)+' سطر/حلقة'):'')+' • البداية: '+spLbl(T.start)+'</div>')
+     :'<div style="font-size:.76rem;color:var(--light);margin-top:8px;">مفيش خطة</div>')+'</div>';
+  const map={}; (H?H.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).h=r; }); (R?R.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).r=r; });
+  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
+    return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
+  const dates=Object.keys(map).sort();
+  const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th><th>هدف المراجعة</th><th>الإنجاز</th></tr></thead><tbody>'
+    +dates.map(d=>'<tr><td style="white-space:nowrap;font-weight:700;">'+spFmt(d)+'</td>'+cell(map[d].h)+cell(map[d].r)+'</tr>').join('')+'</tbody></table></div>'):'';
+  return '<div style="display:flex;gap:12px;flex-wrap:wrap;">'+card('📖 خطة الحفظ',H,'var(--jade)')+card('🔁 خطة المراجعة',R,'var(--blue)')+'</div>'+tbl
+    +(plan.data&&plan.data.notes?'<div style="font-size:.76rem;color:var(--mid);margin-top:10px;">📝 '+esc(plan.data.notes)+'</div>':'');
+}
+// ── تحميل ──
+async function spLoadPlans(ids){
+  const out=[];
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await selectAll(db.from('student_plans').select('*').in('student_id',ids.slice(i,i+150)).order('period_from').order('id'));
+    if(error) throw error; (data||[]).forEach(r=>out.push(r));
+  }
+  return out;
+}
+async function spLoadRecs(ids,from,to){
+  let out=[];
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await selectAll(db.from('memorization').select('student_id,date,type,grade,surah_from,ayah_from,surah_to,ayah_to').in('student_id',ids.slice(i,i+150)).gte('date',from).lte('date',to).order('date').order('student_id').order('type'));
+    if(error) throw error; out=out.concat(data||[]);
+  }
+  return out;
+}
+// نسبة إجمالية لطالب على مجموعة خطط (للإحصاءات)
+function spAggPct(plans,recs,key,asOf){
+  let d=0,p=0; plans.forEach(pl=>{ const T=spTrack(pl,key,recs.filter(r=>String(r.student_id)===String(pl.student_id)),asOf); if(T){ d+=Math.min(T.done,T.planned); p+=T.planned; } });
+  return p?Math.round(d/p*100):null;
+}
+// ══ المحرّر (مودال واحد بيتبني مرة) ══
+let SP_CTX=null;
+function spEnsureUI(){
+  if(document.getElementById('modal-splan')) return;
+  const st=document.createElement('style');
+  st.textContent='.sp-tbl{width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;}'
+    +'.sp-tbl th{background:var(--pale);color:var(--forest);padding:7px 8px;border:1px solid var(--border);font-weight:800;white-space:nowrap;}'
+    +'.sp-tbl td{padding:6px 8px;border:1px solid var(--border);text-align:center;vertical-align:middle;}'
+    +'.sp-in{font-family:Tajawal,sans-serif;font-size:.8rem;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--ink);}'
+    +'.sp-box{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px;flex:1;min-width:240px;}'
+    +'.sp-box h4{font-size:.86rem;color:var(--forest);margin-bottom:8px;}'
+    +'.sp-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:.78rem;color:var(--mid);}';
+  document.head.appendChild(st);
+  const ov=document.createElement('div');
+  ov.className='overlay'; ov.id='modal-splan';
+  ov.innerHTML='<div class="modal" style="max-width:940px;width:96%;">'
+    +'<div class="modal-head"><div class="modal-title" id="sp-title">🎯 خطة الطالب</div><button class="modal-close" onclick="closeModal(\'modal-splan\')">×</button></div>'
+    +'<div class="modal-body" id="sp-body" style="max-height:74vh;overflow-y:auto;"></div>'
+    +'<div class="modal-foot" id="sp-foot" style="padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;">'
+    +'<button class="btn btn-primary" id="sp-save-btn" onclick="spSave()">💾 حفظ الخطة</button>'
+    +'<button class="btn btn-ghost" onclick="closeModal(\'modal-splan\')">إغلاق</button></div></div>';
+  document.body.appendChild(ov);
+}
+function spSurahOpts(sel){ return '<option value="">— السورة —</option>'+SP_SURAH.map((s,i)=>'<option value="'+(i+1)+'"'+(+sel===i+1?' selected':'')+'>'+spAr(i+1)+'. '+s[0]+'</option>').join(''); }
+function spPosInputs(id,p){
+  return '<select class="sp-in" id="'+id+'-s" style="max-width:150px;">'+spSurahOpts(p&&p.s)+'</select>'
+    +'<input class="sp-in" id="'+id+'-a" type="number" min="1" placeholder="آية" style="width:66px;" value="'+((p&&p.a)||'')+'">';
+}
+function spReadPos(id){ const s=+(document.getElementById(id+'-s')||{}).value||0; if(!s) return null; const a=Math.max(1,Math.min(+(document.getElementById(id+'-a')||{}).value||1, SP_SURAH[s-1][1])); return {s,a}; }
+// فتح المحرّر: st = {id, name, branch} • term = الدورة
+async function spOpen(st,term,periodNo){
+  spEnsureUI();
+  if(!term){ showToast('⚠️ مفيش دورة محددة'); return; }
+  const periods=spPeriods(term,st.branch);
+  if(!periods.length){ showToast('⚠️ مفيش فترات للدورة دي'); return; }
+  const cur=periodNo?periods.find(p=>p.no===+periodNo):spPeriodOf(periods,localISO());
+  SP_CTX={ st, term, periods, period:cur||periods[0], plan:null, recs:[], loadFailed:false };
+  document.getElementById('sp-title').textContent='🎯 خطة الطالب — '+st.name;
+  document.getElementById('sp-body').innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  openModal('modal-splan');
+  await spLoadCtx();
+}
+async function spLoadCtx(){
+  const C=SP_CTX, P=C.period;
+  try{
+    const {data,error}=await db.from('student_plans').select('*').eq('student_id',C.st.id).eq('term_id',C.term.id).eq('period_no',P.no).maybeSingle();
+    if(error) throw error; C.plan=data||null;
+    C.recs=await spLoadRecs([C.st.id],P.from,P.to); C.loadFailed=false;
+  }catch(e){ C.loadFailed=true; C.plan=null; C.recs=[]; }
+  spRender();
+}
+function spRender(){
+  const C=SP_CTX, P=C.period, pl=C.plan, d=(pl&&pl.data)||{};
+  const dates=spSessionDates(C.term,C.st.branch,P.from,P.to);
+  const ses={}; (d.sessions||[]).forEach(x=>ses[x.date]=x);
+  const btn=document.getElementById('sp-save-btn');
+  if(C.loadFailed){
+    document.getElementById('sp-body').innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>الخطة ما اتحمّلتش — الحفظ مقفول. اقفل وافتح تاني.</div>';
+    if(btn) btn.disabled=true; return;
+  }
+  if(btn) btn.disabled=false;
+  const perOpts=C.periods.map(p=>'<option value="'+p.no+'"'+(p.no===P.no?' selected':'')+'>الفترة '+spAr(p.no)+': '+spFmt(p.from)+' ← '+spFmt(p.to)+(p.exam?' (اختبار)':'')+'</option>').join('');
+  const dir=(pl&&pl.direction)||'forward';
+  const rowsHtml=dates.length?dates.map((dt,i)=>{ const x=ses[dt]||{};
+    return '<tr><td style="white-space:nowrap;font-weight:700;">'+spAr(i+1)+'. '+spFmt(dt)+'</td>'
+      +'<td><div style="display:flex;gap:6px;justify-content:center;">'+spPosInputs('sp-h-'+dt,x.h)+'</div></td>'
+      +'<td><div style="display:flex;gap:6px;justify-content:center;">'+spPosInputs('sp-r-'+dt,x.r)+'</div></td></tr>'; }).join('')
+    :'<tr><td colspan="3" style="color:var(--light);padding:16px;">مفيش حلقات في الفترة دي</td></tr>';
+  const asOf=localISO();
+  document.getElementById('sp-body').innerHTML=
+    '<div class="sp-row"><b style="color:var(--forest);">'+esc(C.term.name)+'</b> • '+esc(C.st.branch||'')+'</div>'
+    +'<div class="sp-row"><select class="sp-in" id="sp-period" onchange="spChangePeriod(this.value)">'+perOpts+'</select>'
+    +'<span>اتجاه الحفظ:</span><select class="sp-in" id="sp-dir">'
+    +'<option value="forward"'+(dir==='forward'?' selected':'')+'>'+SP_DIR_AR.forward+'</option>'
+    +'<option value="backward"'+(dir==='backward'?' selected':'')+'>'+SP_DIR_AR.backward+'</option></select></div>'
+    +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'
+    +'<div class="sp-box"><h4>📖 الحفظ الجديد</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-h-lines" type="number" min="1" style="width:70px;" value="'+(((d.hifz||{}).lines)||'')+'"></div>'
+    +'<div class="sp-row">البداية من '+spPosInputs('sp-h-start',(d.hifz||{}).start)+'</div></div>'
+    +'<div class="sp-box"><h4>🔁 المراجعة</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-r-lines" type="number" min="1" style="width:70px;" value="'+(((d.rev||{}).lines)||'')+'"></div>'
+    +'<div class="sp-row">البداية من '+spPosInputs('sp-r-start',(d.rev||{}).start)+'</div></div></div>'
+    +'<div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;">الهدف في كل حلقة: <b>إلى</b> سورة / آية</div>'
+    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>الحفظ إلى</th><th>المراجعة إلى</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'
+    +'<div class="sp-row" style="margin-top:10px;">ملاحظات <input class="sp-in" id="sp-notes" style="flex:1;min-width:200px;" value="'+esc(d.notes||'')+'"></div>'
+    +(pl?('<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);"><div style="font-weight:800;color:var(--forest);margin-bottom:8px;">📊 الإنجاز</div>'+spProgressHtml(pl,C.recs,asOf)+'</div>'):'')
+    +(pl&&pl.updated_by_name?'<div style="font-size:.68rem;color:var(--light);margin-top:10px;">آخر تعديل: '+esc(pl.updated_by_name)+'</div>':'');
+}
+async function spChangePeriod(no){
+  const C=SP_CTX; C.period=C.periods.find(p=>p.no===+no)||C.period;
+  document.getElementById('sp-body').innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  await spLoadCtx();
+}
+async function spSave(){
+  const C=SP_CTX; if(!C||C.loadFailed) return;
+  const P=C.period, dates=spSessionDates(C.term,C.st.branch,P.from,P.to);
+  const hs=spReadPos('sp-h-start'), rs=spReadPos('sp-r-start');
+  const sessions=dates.map(dt=>({date:dt, h:spReadPos('sp-h-'+dt), r:spReadPos('sp-r-'+dt)})).filter(x=>x.h||x.r);
+  if(!hs&&!rs){ showToast('⚠️ اكتب بداية الحفظ أو المراجعة'); return; }
+  if(!sessions.length){ showToast('⚠️ اكتب هدف حلقة واحدة على الأقل'); return; }
+  const dir=document.getElementById('sp-dir').value==='backward'?'backward':'forward';
+  // تحقق: الهدف لازم ييجي بعد البداية
+  for(const x of sessions){
+    if(x.h&&hs&&spPos(dir,x.h.s,x.h.a)<spPos(dir,hs.s,hs.a)){ showToast('⚠️ هدف الحفظ يوم '+spFmt(x.date)+' قبل البداية — راجع الاتجاه'); return; }
+    if(x.r&&rs&&spPos(dir,x.r.s,x.r.a)<spPos(dir,rs.s,rs.a)){ showToast('⚠️ هدف المراجعة يوم '+spFmt(x.date)+' قبل البداية — راجع الاتجاه'); return; }
+  }
+  let me={}; try{ me=JSON.parse(localStorage.getItem('currentUser')||'{}')||{}; }catch(e){}
+  const row={ student_id:C.st.id, term_id:C.term.id, period_no:P.no, period_from:P.from, period_to:P.to, direction:dir,
+    data:{ hifz:{lines:+document.getElementById('sp-h-lines').value||null, start:hs}, rev:{lines:+document.getElementById('sp-r-lines').value||null, start:rs},
+           sessions, notes:document.getElementById('sp-notes').value.trim() },
+    updated_by:me.id||null, updated_by_name:me.full_name||null, updated_at:new Date().toISOString() };
+  const btn=document.getElementById('sp-save-btn'); if(btn) btn.disabled=true;
+  try{
+    const {data,error}=await db.from('student_plans').upsert([row],{onConflict:'student_id,term_id,period_no'}).select('*');
+    if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
+    C.plan=data[0]; spRender(); showToast('✅ اتحفظت الخطة');
+    if(typeof spOnSaved==='function') spOnSaved(C.st.id);
+  }catch(e){ showToast('❌ الخطة ما اتحفظتش — '+(e.message||e.code||'')); }
+  finally{ if(btn) btn.disabled=false; }
+}
+// ── قسم «خطة الطالب» في تقرير الطالب (المدير/المشرف) ──
+async function spAppendReport(out,s,rg){
+  const box=document.createElement('div'); box.className='card'; box.style.marginTop='16px';
+  box.innerHTML='<div class="card-head"><div class="card-title">🎯 خطة الطالب</div></div><div class="card-body" id="sp-rep-body"><div style="color:var(--light);">جاري التحميل…</div></div>';
+  out.appendChild(box);
+  const body=box.querySelector('#sp-rep-body');
+  const branch=s.branch_name||'';
+  const t=termOf(rg.to)||VIEW_TERM||CUR_TERM;
+  const edit=t&&!termIsLegacy(t)?'<button class="btn btn-outline btn-sm rpt-noprint" onclick=\'spOpen('+JSON.stringify({id:s.id,name:cleanName(s.name),branch:cleanName(branch)})+',TERMS.find(x=>x.id==="'+t.id+'"))\'>✏️ الخطة</button>':'';
+  box.querySelector('.card-head').insertAdjacentHTML('beforeend',edit);
+  try{
+    const plans=(await spLoadPlans([s.id])).filter(p=>p.period_from<=rg.to&&p.period_to>=rg.from);
+    if(!plans.length){ body.innerHTML='<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>مفيش خطة مسجّلة في الفترة دي</div>'; return; }
+    const from=plans.reduce((m,p)=>p.period_from<m?p.period_from:m,plans[0].period_from), to=plans.reduce((m,p)=>p.period_to>m?p.period_to:m,plans[0].period_to);
+    const recs=await spLoadRecs([s.id],from,to);
+    const asOf=rg.to<localISO()?rg.to:localISO();
+    body.innerHTML=plans.map(p=>'<div style="margin-bottom:16px;"><div style="font-weight:800;color:var(--forest);margin-bottom:8px;">الفترة '+spAr(p.period_no)+' • '+spFmt(p.period_from)+' ← '+spFmt(p.period_to)+' <span style="font-size:.72rem;color:var(--light);font-weight:600;">('+SP_DIR_AR[p.direction]+')</span></div>'+spProgressHtml(p,recs,asOf)+'</div>').join('');
+  }catch(e){ body.innerHTML='<div style="color:var(--red);">⚠️ الخطة ما اتحمّلتش</div>'; }
+}
+
+// ══ 🎯 صفحة «خطة الطالب» (المعلم) ══
+function spTeacherTerm(){
+  const t=termOf(D())||CUR_TERM;
+  if(t&&!termIsLegacy(t)) return t;
+  return TERMS.find(x=>!termIsLegacy(x)&&x.start_date>D()) || t;   // قبل بداية الدورة: جهّز خطط الدورة الجاية
+}
+let SPT_CIRCLE=null, SPT_PERIOD=null;
+function spNextPos(dir,p){
+  const s=p.s, a=p.a||1, n=SP_SURAH[s-1][1];
+  if(a<n) return {s, a:a+1};
+  const ns=dir==='backward'?s-1:s+1;
+  return (ns>=1&&ns<=114)?{s:ns,a:1}:{s,a};
+}
+async function renderStudentPlans(){
+  const wrap=document.getElementById('spt-wrap'), ctrl=document.getElementById('spt-ctrl');
+  const t=spTeacherTerm();
+  if(!t||!MY_CIRCLES.length){ wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>مفيش حلقات</div>'; ctrl.innerHTML=''; return; }
+  if(!SPT_CIRCLE||!MY_CIRCLES.find(c=>c.id===SPT_CIRCLE)) SPT_CIRCLE=((activeCircle()||MY_CIRCLES[0])||{}).id;
+  const c=MY_CIRCLES.find(x=>x.id===SPT_CIRCLE);
+  const periods=spPeriods(t,c.branch);
+  if(!SPT_PERIOD||!periods.find(p=>p.no===SPT_PERIOD)) SPT_PERIOD=(spPeriodOf(periods,D())||periods[0]||{}).no;
+  const P=periods.find(p=>p.no===SPT_PERIOD);
+  ctrl.innerHTML='<select class="sp-in" onchange="SPT_CIRCLE=this.value;SPT_PERIOD=null;renderStudentPlans()">'
+      +MY_CIRCLES.map(x=>'<option value="'+x.id+'"'+(x.id===c.id?' selected':'')+'>'+esc(x.name)+' — '+esc(x.branch)+'</option>').join('')+'</select>'
+    +'<select class="sp-in" onchange="SPT_PERIOD=+this.value;renderStudentPlans()">'
+      +periods.map(p=>'<option value="'+p.no+'"'+(p.no===SPT_PERIOD?' selected':'')+'>الفترة '+spAr(p.no)+': '+spFmt(p.from)+' ← '+spFmt(p.to)+'</option>').join('')+'</select>';
+  spEnsureUI();
+  const list=studentsOf(c).filter(s=>!s._static&&!s._guest);
+  if(!list.length||!P){ wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا يوجد طلاب</div>'; return; }
+  wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let plans=[], recs=[];
+  try{
+    const ids=list.map(s=>s.id);
+    plans=(await spLoadPlans(ids)).filter(p=>p.term_id===t.id&&p.period_no===P.no);
+    recs=await spLoadRecs(ids,P.from,P.to);
+  }catch(e){ wrap.innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>الخطط ما اتحمّلتش — اعمل تحديث</div>'; return; }
+  const asOf=D();
+  const byS={}; plans.forEach(p=>byS[p.student_id]=p);
+  wrap.innerHTML='<div style="font-size:.78rem;color:var(--mid);margin-bottom:10px;">'+esc(t.name)+' • الخطة بتتعمل أول الفترة (بداية الدورة / الحلقة اللي بعد الاختبار الشهري) • النسبة = الآيات المُسمَّعة ÷ المطلوبة لحد النهارده</div>'
+    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th style="text-align:right;">الطالب</th><th>خطة الحفظ</th><th>خطة المراجعة</th><th></th></tr></thead><tbody>'
+    +list.map(s=>{ const pl=byS[s.id]; const rc=recs.filter(r=>String(r.student_id)===String(s.id));
+      const H=pl?spTrack(pl,'h',rc,asOf):null, R=pl?spTrack(pl,'r',rc,asOf):null;
+      const arg=JSON.stringify({id:s.id,name:cleanName(s.name),branch:cleanName(c.branch)}).replace(/"/g,'&quot;');
+      return '<tr><td style="text-align:right;font-weight:700;color:var(--forest);">'+esc(s.name)+'</td>'
+        +'<td>'+(H?spBadge(H.pct)+'<div style="font-size:.66rem;color:var(--light);">'+spAr(H.done)+'/'+spAr(H.planned)+' آية</div>':'—')+'</td>'
+        +'<td>'+(R?spBadge(R.pct)+'<div style="font-size:.66rem;color:var(--light);">'+spAr(R.done)+'/'+spAr(R.planned)+' آية</div>':'—')+'</td>'
+        +'<td><button class="btn '+(pl?'btn-outline':'btn-primary')+' btn-xs" onclick="spOpen('+arg+',TERMS.find(x=>x.id===\''+t.id+'\'),'+P.no+')">'+(pl?'✏️ الخطة':'➕ عمل خطة')+'</button></td></tr>'; }).join('')
+    +'</tbody></table></div>';
+}
+function spOnSaved(){ const pg=document.getElementById('page-splans'); if(pg&&pg.classList.contains('active')) renderStudentPlans(); }
+// ── تلميح هدف النهارده في مودال التسميع + ملء المدى تلقائياً + «تم/لم يتم» تلقائي ──
+let SP_EVAL=null;   // {sid,type,plan,key,recs} لو فيه هدف للنهارده
+function spPlanManualUI(show, msg){
+  const y=document.getElementById('ev-plan-yes'), n=document.getElementById('ev-plan-no');
+  const row=y&&y.parentNode; if(row) row.style.display=show?'flex':'none';
+  let a=document.getElementById('ev-plan-auto');
+  if(!a&&row){ a=document.createElement('div'); a.id='ev-plan-auto'; a.style.cssText='font-size:.78rem;padding:7px 10px;border-radius:8px;background:var(--pale);color:var(--emerald);font-weight:700;'; row.parentNode.appendChild(a); }
+  if(a){ a.style.display=show?'none':''; if(msg) a.textContent=msg; }
+}
+async function spEvalHint(sid,type){
+  SP_EVAL=null; spPlanManualUI(true);
+  let box=document.getElementById('ev-sp-hint');
+  if(!box){ const h=document.getElementById('ev-scale-hint'); if(!h) return; box=document.createElement('div'); box.id='ev-sp-hint';
+    box.style.cssText='font-size:.78rem;margin:0 0 8px;padding:7px 10px;border-radius:8px;background:var(--gold-pale);color:#7a5200;font-weight:700;display:none;';
+    h.parentNode.insertBefore(box,h); }
+  box.style.display='none';
+  const s=findStu(sid); if(!s||s._static||s._guest) return;
+  const t=termOf(D())||CUR_TERM; if(!t||termIsLegacy(t)) return;
+  try{
+    const {data,error}=await db.from('student_plans').select('*').eq('student_id',sid).eq('term_id',t.id).lte('period_from',D()).gte('period_to',D()).maybeSingle();
+    if(error||!data) return;
+    if(!REC_CTX||REC_CTX.sid!==sid||REC_CTX.type!==type) return;
+    const key=type==='new'?'h':'r', tr=(data.data||{})[type==='new'?'hifz':'rev']||{}, dir=data.direction||'forward';
+    const ses=((data.data||{}).sessions||[]).filter(x=>x[key]&&x[key].s).sort((a,b)=>a.date<b.date?-1:1);
+    const today=ses.find(x=>x.date===D());
+    if(!today){ box.textContent='🎯 مفيش هدف '+(type==='new'?'حفظ':'مراجعة')+' محدد للنهارده في الخطة'; box.style.display=''; return; }
+    const prev=ses.filter(x=>x.date<D()).pop();
+    const from=prev?spNextPos(dir,prev[key]):(tr.start||null);
+    box.textContent='🎯 هدف النهارده: من '+(from?spLbl(from):'—')+' إلى '+spLbl(today[key])+(tr.lines?(' • '+spAr(tr.lines)+' سطر'):'');
+    box.style.display='';
+    // تسميع الفترة (من غير النهارده) — عشان «تم/لم يتم» يتحسب لحظة الحفظ
+    const recs=(await spLoadRecs([sid],data.period_from,data.period_to)).filter(r=>r.date!==D());
+    if(!REC_CTX||REC_CTX.sid!==sid||REC_CTX.type!==type) return;
+    SP_EVAL={sid,type,plan:data,key,recs};
+    spPlanManualUI(false,'🤖 «تم / لم يتم» تلقائي: هيتحسب من المدى المُسمَّع مقارنةً بهدف النهارده ('+spLbl(today[key])+')');
+    const st=(REC_STATE[sid]||{})[type]||{};
+    if(!st.grade&&from){
+      const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v; };
+      set('ev-sfrom',from.s-1); ayahMax('ev-sfrom','ev-afrom'); set('ev-afrom',from.a);
+      set('ev-sto',today[key].s-1); ayahMax('ev-sto','ev-ato'); set('ev-ato',today[key].a);
+      if(typeof evAutoFaces==='function') evAutoFaces();
+    }
+  }catch(e){ SP_EVAL=null; spPlanManualUI(true); }
+}
+// لحظة الحفظ: لو فيه هدف للنهارده → تم = وصل للهدف (والدرجة مش «إعادة»)
+function spAutoPlanDone(sid,type,grade){
+  const E=SP_EVAL; if(!E||E.sid!==sid||E.type!==type) return null;
+  const v=id=>document.getElementById(id).value;
+  const sf=+v('ev-sfrom'), stt=+v('ev-sto');
+  const rec={ date:D(), type:(type==='new'?'new':'review'), grade,
+    surah_from:SP_SURAH[sf]?SP_SURAH[sf][0]:'', ayah_from:+v('ev-afrom')||null,
+    surah_to:SP_SURAH[stt]?SP_SURAH[stt][0]:'', ayah_to:+v('ev-ato')||null };
+  const T=spTrack(E.plan,E.key,E.recs.concat([rec]),D());
+  const row=T&&T.rows.find(r=>r.date===D()); if(!row) return null;
+  const done=grade!=='retry'&&row.got>=row.need;
+  setPlan(done);
+  return done;
+}
+// ── بعد حفظ التسميع: نسبة الوصول للهدف ──
+async function spAfterRecitation(sid,type){
+  try{
+    const t=termOf(D())||CUR_TERM; if(!t||termIsLegacy(t)) return;
+    const {data}=await db.from('student_plans').select('*').eq('student_id',sid).eq('term_id',t.id).lte('period_from',D()).gte('period_to',D()).maybeSingle();
+    if(!data) return;
+    const recs=await spLoadRecs([sid],data.period_from,data.period_to);
+    const T=spTrack(data,type==='new'?'h':'r',recs,D());
+    if(T&&T.pct!=null){ const tr=T.rows.find(r=>r.date===D()); setTimeout(()=>showToast('🎯 '+(type==='new'?'خطة الحفظ':'خطة المراجعة')+': '+spAr(T.pct)+'٪ من المطلوب لحد النهارده'+(tr?(tr.got>=tr.need?' • ✅ وصل لهدف النهارده':' • ❌ ما وصلش لهدف النهارده'):'')),1800); }
+  }catch(e){}
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// 🕌 تقرير الصلوات (student_prayers) + نقاط التحفيز الأسبوعية (prayer_points)
+// ولي الأمر بيسجّل من لوحته • المعلم/المشرف/المدير يشوفوا التقرير ويدّوا نقاط يدوي
+// الأبطال: في المسجد / في البيت / لم يصلِّ • الرواد والبنات: صلّى / لم يصلِّ
+// ══════════════════════════════════════════════════════════════
+const PR_KEYS=[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء'],['duha','الضحى'],['qiyam','قيام الليل']];
+const PR_FARD=['fajr','dhuhr','asr','maghrib','isha'];
+function prAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function prIsAbtal(b){ return b==='الأبطال'; }
+function prAddDays(iso,n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return localISO(d); }
+function prFmt(iso){ const d=new Date(iso+'T00:00:00'); return TERM_DAYS_AR[d.getDay()]+' '+prAr(d.getDate())+'/'+prAr(d.getMonth()+1); }
+// بداية أسبوع التاريخ (نفس أسابيع الدورة — وبرّه الدورة: الأحد)
+function prWeekStart(branch,iso){
+  const t=termOf(iso);
+  if(t){ const w=termWeekIndex(t,branch,new Date(iso+'T00:00:00')); const f=localISO(termWeekFirst(t,w,branch)); if(f<=iso&&iso<=prAddDays(f,6)) return f; }
+  const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()-d.getDay()); return localISO(d);
+}
+function prWeekDays(ws){ const a=[]; for(let i=0;i<7;i++) a.push(prAddDays(ws,i)); return a; }
+function prCell(v,girls){
+  const m={ mosque:['🕌','في المسجد','var(--jade)','var(--pale)'], home:['🏠','في البيت','var(--blue)','var(--blue-pale)'],
+            prayed:['✅',girls?'صلّت':'صلّى','var(--jade)','var(--pale)'], missed:['❌',girls?'لم تصلِّ':'لم يصلِّ','var(--red)','var(--red-pale)'] }[v];
+  if(!m) return '<span style="color:var(--light);" title="لم يُسجَّل">—</span>';
+  return '<span title="'+m[1]+'" style="display:inline-block;min-width:30px;padding:2px 6px;border-radius:7px;background:'+m[3]+';color:'+m[2]+';font-size:.8rem;">'+m[0]+'</span>';
+}
+// ملخّص أسبوع لطالب
+function prSummary(rows){
+  const s={ fard:0, fardRec:0, mosque:0, home:0, duha:0, duhaRec:0, qiyam:0, qiyamRec:0, days:rows.length };
+  rows.forEach(r=>{
+    PR_FARD.forEach(k=>{ const v=r[k]; if(!v) return; s.fardRec++; if(v!=='missed') s.fard++; if(v==='mosque') s.mosque++; if(v==='home') s.home++; });
+    if(r.duha){ s.duhaRec++; if(r.duha!=='missed') s.duha++; }
+    if(r.qiyam){ s.qiyamRec++; if(r.qiyam!=='missed') s.qiyam++; }
+  });
+  s.pct=s.fardRec?Math.round(s.fard/s.fardRec*100):null;
+  return s;
+}
+async function prLoad(ids,from,to){
+  let out=[];
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await selectAll(db.from('student_prayers').select('*').in('student_id',ids.slice(i,i+150)).gte('date',from).lte('date',to).order('date').order('student_id'));
+    if(error) throw error; out=out.concat(data||[]);
+  }
+  return out;
+}
+async function prLoadPts(ids,fromWs,toWs){
+  let out=[];
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await selectAll(db.from('prayer_points').select('*').in('student_id',ids.slice(i,i+150)).gte('week_start',fromWs).lte('week_start',toWs).order('week_start').order('student_id'));
+    if(error) throw error; out=out.concat(data||[]);
+  }
+  return out;
+}
+function prSumHtml(S,branch){
+  const girls=termIsGirls(branch);
+  const box=(ttl,val,sub,col)=>'<div style="flex:1;min-width:120px;border:1.5px solid var(--border);border-top:3px solid '+col+';border-radius:var(--r-sm);padding:10px 12px;background:var(--white);">'
+    +'<div style="font-size:.74rem;color:var(--mid);font-weight:700;">'+ttl+'</div><div style="font-size:1.25rem;font-weight:900;color:'+col+';margin-top:4px;">'+val+'</div>'
+    +'<div style="font-size:.66rem;color:var(--light);margin-top:2px;">'+sub+'</div></div>';
+  return '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+    +box('الصلوات الخمس',prAr(S.fard)+' / '+prAr(S.fardRec),S.pct==null?'لم يُسجَّل':(prAr(S.pct)+'٪ من المسجّل'),'var(--jade)')
+    +(prIsAbtal(branch)?box('في المسجد',prAr(S.mosque),'🏠 في البيت: '+prAr(S.home),'var(--emerald)'):'')
+    +box('الضحى',prAr(S.duha)+' / '+prAr(S.duhaRec),girls?'صلّت':'صلّى','var(--gold)')
+    +box('قيام الليل',prAr(S.qiyam)+' / '+prAr(S.qiyamRec),'أيام مسجّلة: '+prAr(S.days)+' / ٧','var(--purple)')
+    +'</div>';
+}
+// ══ المودال ══
+let PR_CTX=null;
+function prEnsureUI(){
+  if(document.getElementById('modal-prayer')) return;
+  const st=document.createElement('style');
+  st.textContent='.pr-tbl{width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;}'
+    +'.pr-tbl th{background:var(--pale);color:var(--forest);padding:7px 6px;border:1px solid var(--border);font-weight:800;white-space:nowrap;}'
+    +'.pr-tbl td{padding:6px;border:1px solid var(--border);text-align:center;}'
+    +'.pr-in{font-family:Tajawal,sans-serif;font-size:.82rem;padding:7px 9px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--ink);}';
+  document.head.appendChild(st);
+  const ov=document.createElement('div'); ov.className='overlay'; ov.id='modal-prayer';
+  ov.innerHTML='<div class="modal" style="max-width:820px;width:96%;">'
+    +'<div class="modal-head"><div class="modal-title" id="pr-title">🕌 تقرير الصلوات</div><button class="modal-close" onclick="closeModal(\'modal-prayer\')">×</button></div>'
+    +'<div class="modal-body" id="pr-body" style="max-height:76vh;overflow-y:auto;"></div></div>';
+  document.body.appendChild(ov);
+}
+async function prOpen(st,ws){
+  prEnsureUI();
+  PR_CTX={ st, ws: ws||prWeekStart(st.branch,localISO()) };
+  document.getElementById('pr-title').textContent='🕌 تقرير الصلوات — '+st.name;
+  openModal('modal-prayer');
+  await prRender();
+}
+function prShift(n){ if(!PR_CTX) return; PR_CTX.ws=prWeekStart(PR_CTX.st.branch, prAddDays(PR_CTX.ws, 7*n)); prRender(); }
+async function prRender(){
+  const C=PR_CTX, body=document.getElementById('pr-body'), days=prWeekDays(C.ws), girls=termIsGirls(C.st.branch);
+  body.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let rows=[], pts=null, fail=false;
+  try{ rows=await prLoad([C.st.id],days[0],days[6]); pts=(await prLoadPts([C.st.id],C.ws,C.ws))[0]||null; }catch(e){ fail=true; }
+  C.pts=pts; C.fail=fail;
+  if(fail){ body.innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>التقرير ما اتحمّلش — اعمل تحديث</div>'; return; }
+  const byD={}; rows.forEach(r=>byD[r.date]=r);
+  const S=prSummary(rows);
+  const tbl='<div style="overflow-x:auto;"><table class="pr-tbl"><thead><tr><th>اليوم</th>'+PR_KEYS.map(k=>'<th>'+k[1]+'</th>').join('')+'</tr></thead><tbody>'
+    +days.map(d=>{ const r=byD[d]||{}; return '<tr'+(d===localISO()?' style="background:var(--gold-pale);"':'')+'><td style="white-space:nowrap;font-weight:700;">'+prFmt(d)+'</td>'+PR_KEYS.map(k=>'<td>'+prCell(r[k[0]],girls)+'</td>').join('')+'</tr>'; }).join('')
+    +'</tbody></table></div>';
+  const legend='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">'+(prIsAbtal(C.st.branch)?'🕌 في المسجد • 🏠 في البيت • ':'✅ '+(girls?'صلّت':'صلّى')+' • ')+'❌ '+(girls?'لم تصلِّ':'لم يصلِّ')+' • — لم يُسجَّل من ولي الأمر</div>';
+  const ptsHtml='<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">'
+    +'<div style="font-weight:800;color:var(--forest);margin-bottom:8px;">⭐ نقاط التحفيز للأسبوع ده</div>'
+    +(pts?'<div style="font-size:.8rem;color:var(--mid);margin-bottom:8px;">المسجّل: <b style="color:var(--gold);">'+prAr(pts.points)+' نقطة</b>'+(pts.awarded_by_name?' — بواسطة '+esc(pts.awarded_by_name):'')+(pts.note?' — '+esc(pts.note):'')+'</div>':'<div style="font-size:.78rem;color:var(--light);margin-bottom:8px;">لسه ما اتدّاش نقاط الأسبوع ده</div>')
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+    +'<input class="pr-in" id="pr-pts" type="number" min="1" max="500" placeholder="عدد النقاط" style="width:110px;" value="'+(pts?pts.points:'')+'">'
+    +'<input class="pr-in" id="pr-note" placeholder="ملاحظة (اختياري)" style="flex:1;min-width:180px;" value="'+esc(pts&&pts.note||'')+'">'
+    +'<button class="btn btn-gold btn-sm" id="pr-save" onclick="prSavePts()">'+(pts?'💾 تعديل النقاط':'⭐ إضافة النقاط')+'</button>'
+    +(pts?'<button class="btn btn-danger btn-sm" onclick="prDelPts()">🗑️ إلغاء</button>':'')
+    +'</div><div style="font-size:.68rem;color:var(--light);margin-top:6px;">النقاط بتتضاف لرصيد الطالب (مكافأة) — ولو اتعدّلت أو اتلغت الرصيد بيتظبط لوحده.</div></div>';
+  body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap;">'
+      +'<button class="btn btn-ghost btn-sm" onclick="prShift(-1)">→ الأسبوع اللي فات</button>'
+      +'<div style="font-weight:800;color:var(--forest);">'+prFmt(days[0])+' ← '+prFmt(days[6])+'</div>'
+      +'<button class="btn btn-ghost btn-sm" onclick="prShift(1)">الأسبوع الجاي ←</button></div>'
+    +prSumHtml(S,C.st.branch)+'<div style="margin-top:12px;">'+tbl+legend+'</div>'+ptsHtml;
+}
+async function prSavePts(){
+  const C=PR_CTX; if(!C||C.fail) return;
+  const n=parseInt(document.getElementById('pr-pts').value);
+  if(!n||n<1||n>500){ showToast('⚠️ اكتب عدد نقاط من ١ لـ ٥٠٠'); return; }
+  const note=document.getElementById('pr-note').value.trim()||null;
+  const btn=document.getElementById('pr-save'); if(btn) btn.disabled=true;
+  try{
+    const {data,error}=await db.from('prayer_points').upsert([{student_id:C.st.id, week_start:C.ws, points:n, note}],{onConflict:'student_id,week_start'}).select('id');
+    if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
+    showToast('⭐ اتسجّلت '+prAr(n)+' نقطة للطالب');
+    if(typeof prOnSaved==='function') prOnSaved(C.st.id);
+    await prRender();
+  }catch(e){ showToast('❌ النقاط ما اتسجّلتش — '+(e.message||e.code||'')); if(btn) btn.disabled=false; }
+}
+async function prDelPts(){
+  const C=PR_CTX; if(!C||!C.pts) return;
+  if(!confirm('إلغاء نقاط الأسبوع ده؟ هتتخصم من رصيد الطالب.')) return;
+  try{
+    const {data,error}=await db.from('prayer_points').delete().eq('id',C.pts.id).select('id');
+    if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
+    showToast('🗑️ اتلغت النقاط');
+    if(typeof prOnSaved==='function') prOnSaved(C.st.id);
+    await prRender();
+  }catch(e){ showToast('❌ ما اتلغتش — '+(e.message||e.code||'')); }
+}
+// ── قسم «تقرير الصلوات» في تقرير الطالب (المدير/المشرف) ──
+async function prAppendReport(out,s,rg){
+  prEnsureUI();
+  const branch=s.branch_name||'';
+  const box=document.createElement('div'); box.className='card'; box.style.marginTop='16px';
+  const arg=JSON.stringify({id:s.id,name:cleanName(s.name),branch:cleanName(branch)}).replace(/'/g,'');
+  box.innerHTML='<div class="card-head"><div class="card-title">🕌 تقرير الصلوات</div>'
+    +'<button class="btn btn-outline btn-sm rpt-noprint" onclick=\'prOpen('+arg+')\'>📅 التفاصيل والنقاط</button></div>'
+    +'<div class="card-body"><div style="color:var(--light);">جاري التحميل…</div></div>';
+  out.appendChild(box);
+  const body=box.querySelector('.card-body');
+  try{
+    const weeks=[]; let ws=prWeekStart(branch,rg.from);
+    while(ws<=rg.to&&weeks.length<26){ weeks.push(ws); ws=prWeekStart(branch,prAddDays(ws,7)); if(weeks.includes(ws)) break; }
+    const rows=await prLoad([s.id],weeks[0],prAddDays(weeks[weeks.length-1],6));
+    const pts=await prLoadPts([s.id],weeks[0],weeks[weeks.length-1]);
+    if(!rows.length&&!pts.length){ body.innerHTML='<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>ولي الأمر لسه ما سجّلش صلوات في الفترة دي</div>'; return; }
+    const tot=prSummary(rows), ptsSum=pts.reduce((a,p)=>a+(+p.points||0),0);
+    const ab=prIsAbtal(branch);
+    body.innerHTML=prSumHtml(tot,branch)
+      +'<div style="font-size:.8rem;color:var(--mid);margin:10px 0;">⭐ نقاط التحفيز في الفترة: <b style="color:var(--gold);">'+prAr(ptsSum)+'</b></div>'
+      +'<div style="overflow-x:auto;"><table class="pr-tbl"><thead><tr><th>الأسبوع</th><th>الخمس</th>'+(ab?'<th>في المسجد</th>':'')+'<th>الضحى</th><th>القيام</th><th>أيام مسجّلة</th><th>النقاط</th><th></th></tr></thead><tbody>'
+      +weeks.map(w=>{ const days=prWeekDays(w); const S=prSummary(rows.filter(r=>r.date>=days[0]&&r.date<=days[6])); const p=pts.find(x=>x.week_start===w);
+        return '<tr><td style="white-space:nowrap;font-weight:700;">'+prFmt(days[0])+'</td><td>'+prAr(S.fard)+'/'+prAr(S.fardRec)+'</td>'+(ab?'<td>'+prAr(S.mosque)+'</td>':'')
+          +'<td>'+prAr(S.duha)+'</td><td>'+prAr(S.qiyam)+'</td><td>'+prAr(S.days)+'</td><td>'+(p?'<b style="color:var(--gold);">'+prAr(p.points)+'</b>':'—')+'</td>'
+          +'<td class="rpt-noprint"><button class="btn btn-ghost btn-xs" onclick=\'prOpen('+arg+',"'+w+'")\'>عرض</button></td></tr>'; }).join('')
+      +'</tbody></table></div>';
+  }catch(e){ body.innerHTML='<div style="color:var(--red);">⚠️ تقرير الصلوات ما اتحمّلش</div>'; }
+}
+
+// ══ 🕌 صفحة «تقرير الصلوات» (المعلم) ══
+let PRT_CIRCLE=null, PRT_WS=null;
+async function renderPrayers(){
+  const wrap=document.getElementById('prt-wrap'), ctrl=document.getElementById('prt-ctrl');
+  prEnsureUI();
+  if(!MY_CIRCLES.length){ wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>مفيش حلقات</div>'; ctrl.innerHTML=''; return; }
+  if(!PRT_CIRCLE||!MY_CIRCLES.find(c=>c.id===PRT_CIRCLE)) PRT_CIRCLE=((activeCircle()||MY_CIRCLES[0])||{}).id;
+  const c=MY_CIRCLES.find(x=>x.id===PRT_CIRCLE);
+  if(!PRT_WS) PRT_WS=prWeekStart(c.branch,D());
+  PRT_WS=prWeekStart(c.branch,PRT_WS);
+  const days=prWeekDays(PRT_WS), girls=termIsGirls(c.branch), ab=prIsAbtal(c.branch);
+  ctrl.innerHTML='<select class="pr-in" onchange="PRT_CIRCLE=this.value;renderPrayers()">'
+      +MY_CIRCLES.map(x=>'<option value="'+x.id+'"'+(x.id===c.id?' selected':'')+'>'+esc(x.name)+' — '+esc(x.branch)+'</option>').join('')+'</select>'
+    +'<button class="btn btn-ghost btn-sm" onclick="PRT_WS=prAddDays(PRT_WS,-7);renderPrayers()">→</button>'
+    +'<span style="font-weight:800;color:var(--forest);font-size:.84rem;align-self:center;">'+prFmt(days[0])+' ← '+prFmt(days[6])+'</span>'
+    +'<button class="btn btn-ghost btn-sm" onclick="PRT_WS=prAddDays(PRT_WS,7);renderPrayers()">←</button>';
+  const list=studentsOf(c).filter(s=>!s._static&&!s._guest);
+  if(!list.length){ wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا يوجد طلاب</div>'; return; }
+  wrap.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  let rows=[], pts=[];
+  try{ const ids=list.map(s=>s.id); rows=await prLoad(ids,days[0],days[6]); pts=await prLoadPts(ids,PRT_WS,PRT_WS); }
+  catch(e){ wrap.innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>التقرير ما اتحمّلش — اعمل تحديث</div>'; return; }
+  wrap.innerHTML='<div style="font-size:.78rem;color:var(--mid);margin-bottom:10px;">ولي الأمر بيسجّل صلوات '+(girls?'الطالبة':'الطالب')+' من لوحته • اضغط «تفاصيل» لعرض الأسبوع وإضافة نقاط تحفيز</div>'
+    +'<div style="overflow-x:auto;"><table class="pr-tbl"><thead><tr><th style="text-align:right;">'+(girls?'الطالبة':'الطالب')+'</th><th>الخمس</th>'+(ab?'<th>في المسجد</th>':'')+'<th>الضحى</th><th>القيام</th><th>أيام مسجّلة</th><th>النقاط</th><th></th></tr></thead><tbody>'
+    +list.map(s=>{ const S=prSummary(rows.filter(r=>String(r.student_id)===String(s.id))); const p=pts.find(x=>String(x.student_id)===String(s.id));
+      const arg=JSON.stringify({id:s.id,name:cleanName(s.name),branch:cleanName(c.branch)}).replace(/"/g,'&quot;');
+      return '<tr><td style="text-align:right;font-weight:700;color:var(--forest);">'+esc(s.name)+'</td>'
+        +'<td>'+(S.fardRec?prAr(S.fard)+'/'+prAr(S.fardRec):'<span style="color:var(--light);">—</span>')+'</td>'+(ab?'<td>'+prAr(S.mosque)+'</td>':'')
+        +'<td>'+prAr(S.duha)+'</td><td>'+prAr(S.qiyam)+'</td><td>'+prAr(S.days)+' / ٧</td>'
+        +'<td>'+(p?'<b style="color:var(--gold);">'+prAr(p.points)+'</b>':'—')+'</td>'
+        +'<td><button class="btn btn-outline btn-xs" onclick="prOpen('+arg+',\''+PRT_WS+'\')">تفاصيل</button></td></tr>'; }).join('')
+    +'</tbody></table></div>';
+}
+async function prOnSaved(sid){
+  const s=findStu(sid); if(s) await refreshStudentPoints(s);
+  const pg=document.getElementById('page-prayers'); if(pg&&pg.classList.contains('active')) renderPrayers();
+}
+
+function D(){ return localISO(); }
 function reflectReportDay(){
   REPORT_DATE = D();
   const d=new Date(REPORT_DATE+'T00:00:00'); const dayName=DAYS_AR[d.getDay()];
@@ -1816,17 +2540,14 @@ function reflectReportDay(){
   const lbl=document.getElementById('report-day-lbl'); if(lbl) lbl.textContent='يوم '+dayName;
   const warn=document.getElementById('report-day-warn'); if(warn) warn.textContent='';
 }
-// خطة الحفظ/المراجعة تظهر فقط: الخميس (الأبطال/الرواد) • الثلاثاء (الملكات/الأميرات)
+// خطة الحفظ/المراجعة — حسب إعداد الدورة (الدورة الجديدة: في كل حلقة)
 function planAllowed(){
   const c=activeCircle(); if(!c) return false;
-  const day=DAYS_AR[new Date(D()+'T00:00:00').getDay()]; const b=c.branch;
-  if(b==='الأبطال'||b==='الرواد') return day==='الخميس';
-  if(b==='الملكات'||b==='الأميرات') return day==='الثلاثاء';
-  return false;
+  const iso=D(); return termPlanAllowed(termOf(iso)||CUR_TERM, c.branch, new Date(iso+'T00:00:00').getDay());
 }
 
 
-const PAGE_TITLES = {
+const PAGE_TITLES = { splans:'🎯 خطة الطالب', prayers:'🕌 تقرير الصلوات',
   dashboard:'🏠 لوحة القيادة', circles:'🕌 حلقاتي', students:'👨‍🎓 طلاب الحلقة',
   attendance:'📅 الحضور', recitation:'🎙️ التسميع والتقييم', points:'🏆 النقاط والكروت',
   files:'📁 ملفات الطلاب', reports:'📄 تقاريري', training:'🎓 تأهيل المعلمين',
@@ -1838,7 +2559,7 @@ const PAGE_TITLES = {
 // ── helpers ──
 function toAr(n){ if(n===''||n==null) return ''; return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]); }
 function errorsToGrade(n){ if(n<=2) return 'excellent'; if(n<=4) return 'very_good'; if(n<=6) return 'good'; return 'retry'; }
-function todayISO(){ return new Date().toISOString().split('T')[0]; }
+function todayISO(){ return localISO(); }
 function gradeBadge(g){ return `<span style="font-weight:800;color:${GRADE_COLOR[g]};">${GRADE_AR[g]} (${GRADE_PTS[g]})</span>`; }
 function activeCircle(){ const t=circlesToday(); return t.find(c=>c.id===ACTIVE_CIRCLE_ID) || t[0] || null; }
 
@@ -2035,6 +2756,8 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='recitation') renderRecitation();
   if(pageId==='points') renderPoints();
   if(pageId==='files') renderFiles();
+  if(pageId==='splans') renderStudentPlans();
+  if(pageId==='prayers') renderPrayers();
   if(pageId==='reports') mrInitReports();
   if(pageId==='training') loadTraining();
   if(pageId==='library') loadLibraryBooks();
@@ -2051,18 +2774,19 @@ function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); });
-function confirmLogout(){ if(confirm('هل تريد تسجيل الخروج؟')){ localStorage.removeItem('currentUser'); window.location.href='login.html'; } }
+function confirmLogout(){ if(confirm('هل تريد تسجيل الخروج؟')) secureLogout(); }
 function toggleSidebar(){ document.querySelector('.sidebar').classList.toggle('open'); document.getElementById('sb-overlay').classList.toggle('show'); }
 function closeSidebar(){ document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sb-overlay').classList.remove('show'); }
 
 // ══ BOOT ══
 async function boot(){
   cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
-  if(!cu.id || (cu.role!=='teacher' && cu.role!=='admin' && cu.role!=='supervisor')){ window.location.href='login.html'; return; }
-
-  // ── تأكد أن جلسة Supabase جاهزة قبل أي قراءة (وإلا تُقرأ كـ anon فتظهر فارغة) ──
-  const { data: { session: _sess } } = await db.auth.getSession();
-  if(!_sess){ localStorage.removeItem('currentUser'); window.location.href='login.html'; return; }
+  if(!cu.id){ window.location.href='login.html'; return; }
+  // ── الجلسة + الدور من القاعدة (مش من localStorage) ──
+  const _me = await verifyMe(['teacher','admin','supervisor']);
+  if(!_me) return;
+  cu = _me;
+  await loadTerms();   // الدورة الحالية: المواعيد/الاختبارات/الخطة
 
   // مشرف يدرّس حلقة (مثل عبدالله هاني): أظهر زرار الرجوع للإشراف
   if(cu.role==='supervisor'){ const bb=document.getElementById('sb-back-sup'); if(bb) bb.style.display='block'; }
@@ -2076,13 +2800,14 @@ async function boot(){
   if(typeof loadUserTheme==='function') loadUserTheme();
 
   // الشعب (branches)
-  try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BRANCH_MAP[b.id]=b.name); }catch(e){}
+  try{ const {data}=await db.from('branches').select('id,name'); (data||[]).forEach(b=>BRANCH_MAP[b.id]=b.name); }catch(e){ loadWarn(e); }
 
   // حلقاتي
   try{
     const {data}=await db.from('circles').select('*');
-    MY_CIRCLES=(data||[]).filter(c=> c.teacher_id===cu.id || (c.teachers||[]).includes(cu.id) || (c.teachers||[]).includes(fn)).map(c=>({
-      id:c.id, key:c.name_ar||c.name||'حلقة', name:c.name_ar||c.name||'حلقة', branch:BRANCH_MAP[c.branch_id]||c.branch||'—', gender:c.gender||'—',
+    // الملكية بـ teacher_id — المطابقة بالاسم فقط للحلقات القديمة اللي مالهاش teacher_id
+    MY_CIRCLES=(data||[]).filter(c=> c.teacher_id===cu.id || (!c.teacher_id && ((c.teachers||[]).includes(cu.id) || (c.teachers||[]).includes(fn)))).map(c=>({
+      id:c.id, key:cleanName(c.name_ar||c.name||'حلقة'), name:cleanName(c.name_ar||c.name||'حلقة'), branch:BRANCH_MAP[c.branch_id]||'—', gender:c.gender||'—',
       type:c.type||'—', schedule:c.schedule||[], students_count:c.students_count||0, _static:false
     }));
   }catch(e){ MY_CIRCLES=[]; }
@@ -2097,7 +2822,7 @@ async function boot(){
     q = myCids.length ? q.in('circle_id',myCids) : q.eq('teacher_id',cu.id);
     const {data}=await q;
     MY_STUDENTS=(data||[]).map(s=>({
-      id:s.id, name:s.users?.full_name||'طالب', phone:s.users?.phone||'—',
+      id:s.id, name:cleanName(s.users?.full_name||'طالب'), phone:cleanName(s.users?.phone||'—'),
       mem:s.memorized_parts||0, points:s.total_points||0, notes:s.notes||'', branch:BRANCH_MAP[s.branch_id]||'—', circle_id:s.circle_id||null
     }));
   }catch(e){ MY_STUDENTS=[]; }
@@ -2117,12 +2842,13 @@ async function boot(){
     const uName={}; (us||[]).forEach(u=>uName[u.id]=u.full_name);
     const cTea={}; (cs||[]).forEach(c=>{ let t=(c.teachers||[])[0]; if(t&&isUuidV(t)) t=uName[t]||t; cTea[c.id]=t||null; });
     _ALL_STUDENTS_CACHE=(ss||[]).map(s=>({
-      name:s.users?.full_name||'طالب',
+      name:cleanName(s.users?.full_name||'طالب'),
       branch:BRANCH_MAP[s.branch_id]||'—',
       teacher:(s.circle_id && cTea[s.circle_id]) ? cTea[s.circle_id] : 'بدون حلقة'
     })).filter(s=>genderOf(s.branch)===MY_GENDER);   // شعبة الجنس نفسه فقط
   }catch(e){ _ALL_STUDENTS_CACHE=[]; }
   document.getElementById('sb-circles-count').textContent=MY_CIRCLES.length+' حلقة';
+  await loadTodayGuests();
   loadUnreadMsgCount();
   loadTraining();
   renderDashboard();
@@ -2143,11 +2869,14 @@ function setCircle(id){ ACTIVE_CIRCLE_ID=id; const cur=document.querySelector('.
 
 function circleDays(c){
   if(!c) return [];
-  let sch=(Array.isArray(c.schedule)&&c.schedule.length)?c.schedule:(SCHED_MAP[c.branch]||[]);
+  // المواعيد الفعلية من الدورة الحالية — مواعيد الحلقة نفسها احتياطي بس
+  const t=termOf(D())||CUR_TERM, td=termDayNames(t, c.branch);
+  if(td.length) return td;
+  const sch=Array.isArray(c.schedule)?c.schedule:[];
   return sch.filter(s=>(typeof s==='object'&&s)?s.active!==false:true)
             .map(s=>typeof s==='string'?s:(s&&s.day)).filter(Boolean);
 }
-function circleMeetsToday(c){ return circleDays(c).includes(DAYS_AR[new Date().getDay()]); }
+function circleMeetsToday(c){ if(circleDays(c).includes(DAYS_AR[new Date().getDay()])) return true; const t=termOf(D())||CUR_TERM; return !!(c&&termExam(t,c.branch,D())&&((t.settings.exams||{}).dated||[]).some(e=>e.date===D())); }
 function circlesToday(){ return MY_CIRCLES.filter(circleMeetsToday); }
 
 // ══ DASHBOARD ══
@@ -2175,8 +2904,9 @@ async function loadTeacherCurriculum(){
   sec.style.display='block';
   const cal=document.getElementById('tcp-cal');
   try{
+    const _t=termOf(D())||CUR_TERM, _n=document.getElementById('tcp-term-name'); if(_n&&_t) _n.textContent=_t.name;
     const {data,error}=await db.from('curriculum_plan')
-      .select('*').eq('course','الدورة الصيفية 2026 م').order('sort_order',{ascending:true});
+      .select('*').eq('course',_t?_t.name:'').order('sort_order',{ascending:true});
     if(error) throw error;
     TCP_ROWS=data||[];
   }catch(e){ TCP_ROWS=[]; }
@@ -2203,7 +2933,7 @@ function showTcpDay(i){
   const row=function(label,icon,val){
     return '<div style="display:flex;gap:10px;padding:12px 14px;background:var(--pale);border-radius:var(--r-sm);border-right:3px solid var(--jade);">'
       +'<span style="font-size:.8rem;color:var(--mid);font-weight:700;min-width:170px;">'+icon+' '+label+'</span>'
-      +'<span style="font-size:.84rem;color:var(--ink);flex:1;white-space:pre-wrap;">'+((val&&String(val).trim())?val:'<span style=\"color:var(--light);\">لا يوجد</span>')+'</span>'
+      +'<span style="font-size:.84rem;color:var(--ink);flex:1;white-space:pre-wrap;">'+((val&&String(val).trim())?esc(val):'<span style=\"color:var(--light);\">لا يوجد</span>')+'</span>'
       +'</div>';
   };
   box.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
@@ -2242,10 +2972,15 @@ async function renderTasks(){
   // حمّل الحالة المحفوظة
   TASK_STATE={done:new Array(DAILY_TASKS.length).fill(false),completed:false,awarded:0,_row:null};
   try{
-    const {data}=await db.from('teacher_daily_tasks').select('*').eq('teacher_id',cu.id).eq('circle_id',c.id).eq('date',D()).maybeSingle();
+    const {data,error}=await db.from('teacher_daily_tasks').select('*').eq('teacher_id',cu.id).eq('circle_id',c.id).eq('date',D()).maybeSingle();
+    if(error) throw error;
     if(data){ TASK_STATE._row=data.id; TASK_STATE.awarded=data.points_awarded||0; TASK_STATE.completed=!!data.completed;
       (data.done_items||[]).forEach((v,i)=>{ if(i<DAILY_TASKS.length) TASK_STATE.done[i]=!!v; }); }
-  }catch(e){}
+  }catch(e){
+    // ★ لو التحميل فشل ما نعرضش قايمة فاضية ممكن تتحفظ فوق المحفوظ
+    listEl.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>تعذّر تحميل المهام — '+esc(recFriendlyErr(e))+'<br><button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="renderTasks()">🔄 إعادة المحاولة</button></div>';
+    document.getElementById('tsk-progress').innerHTML=''; return;
+  }
   listEl.innerHTML=DAILY_TASKS.map((t,i)=>`
     <label style="display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:${TASK_STATE.done[i]?'var(--pale)':'var(--bg)'};border:1.5px solid ${TASK_STATE.done[i]?'var(--mint)':'var(--border)'};border-radius:var(--r-sm);cursor:pointer;transition:all .15s;" id="tsk-lbl-${i}">
       <input type="checkbox" ${TASK_STATE.done[i]?'checked':''} onchange="toggleTask(${i},this.checked)" style="width:19px;height:19px;margin-top:2px;flex-shrink:0;">
@@ -2256,16 +2991,19 @@ async function renderTasks(){
 function updateTaskProgress(){
   const done=TASK_STATE.done.filter(Boolean).length, all=DAILY_TASKS.length;
   const pct=Math.round(done/all*100);
-  const pts=(TASK_STATE.awarded!=null && TASK_STATE.awarded!=='')?TASK_STATE.awarded:(done*2);
+  const pts=TASK_STATE.awarded||0;
   document.getElementById('tsk-progress').innerHTML=`
     <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:700;color:var(--mid);margin-bottom:6px;"><span>الإنجاز</span><span>${toAr(done)} / ${toAr(all)} مهمة • <span style="color:var(--gold);">${toAr(pts)} نقطة</span></span></div>
     <div style="height:12px;background:var(--border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--jade),var(--mint));transition:width .3s;"></div></div>`;
   const msg=document.getElementById('tsk-done-msg');
   const sub=document.getElementById('tsk-done-pts');
-  if(sub) sub.textContent='أُضيفت '+toAr(pts)+' نقطة إلى رصيدك الإجمالي';
+  if(sub) sub.textContent= pts>0 ? ('أُضيفت '+toAr(pts)+' نقطة إلى رصيدك الإجمالي') : 'اكتملت المهام — جارٍ إضافة النقاط…';
   msg.style.display=(done===all)?'block':'none';
 }
-async function toggleTask(i,checked){
+// الحفظ بالتسلسل — عشان الضغطات السريعة ما توصلش بترتيب غلط
+let _tskChain=Promise.resolve();
+function toggleTask(i,checked){ _tskChain=_tskChain.then(()=>_toggleTask(i,checked)).catch(()=>{}); return _tskChain; }
+async function _toggleTask(i,checked){
   const prev=TASK_STATE.done[i];
   TASK_STATE.done[i]=checked;
   const paint=v=>{ const lbl=document.getElementById('tsk-lbl-'+i);
@@ -2412,12 +3150,15 @@ async function loadLessonPrep(){
   const subject=lpSubject();
   // خطة اليوم (عنوان الدرس والمقرر تلقائياً)
   let plan=null;
-  try{ const {data}=await db.from('curriculum_plan').select('*').eq('date',date).maybeSingle(); plan=data||null; }catch(e){}
+  try{ const {data}=await db.from('curriculum_plan').select('*').eq('date',date).maybeSingle(); plan=data||null; }catch(e){ loadWarn(e); }
   const autoTitle=(plan && plan[LP_PLAN_FIELD[subject]] && String(plan[LP_PLAN_FIELD[subject]]).trim()) || '';
   // التحضير المحفوظ
   let row=null;
-  try{ const {data}=await db.from('lesson_preps').select('*').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle(); row=data||null; }catch(e){}
-  LP_STATE={ id:row?row.id:null, status:row?(row.status||'draft'):'draft', points_awarded:row?(row.points_awarded||0):0 };
+  let _lpLoadErr=null;
+  try{ const {data,error}=await db.from('lesson_preps').select('*').eq('teacher_id',cu.id).eq('date',date).eq('subject',subject).maybeSingle(); if(error) throw error; row=data||null; }
+  catch(e){ _lpLoadErr=e; }
+  LP_STATE={ id:row?row.id:null, status:row?(row.status||'draft'):'draft', points_awarded:row?(row.points_awarded||0):0, loadFailed:!!_lpLoadErr };
+  if(_lpLoadErr) showToast('⚠️ تعذّر تحميل التحضير — الحفظ مقفول لحد ما تعمل تحديث للصفحة ('+recFriendlyErr(_lpLoadErr)+')');
   LP_IMAGE_URL=(row&&row.image_url)?row.image_url:null; lpRenderImage();
   const d=(row&&row.data)||{};
   document.getElementById('lp-title').value = (row&&row.title) || autoTitle;
@@ -2437,7 +3178,7 @@ async function loadLessonPrep(){
   else note.style.display='none';
   appr.style.display=(LP_STATE.status==='approved')?'block':'none';
   // قفل التحرير لو مُرسل أو معتمَد
-  const locked=(LP_STATE.status==='submitted'||LP_STATE.status==='approved');
+  const locked=(LP_STATE.status==='submitted'||LP_STATE.status==='approved'||LP_STATE.loadFailed);
   document.querySelectorAll('#lp-sheet textarea, #lp-sheet input').forEach(el=>{ el.readOnly=locked; el.style.background=locked?'#fafbfa':'transparent'; });
 }
 
@@ -2505,7 +3246,7 @@ async function lpUploadImage(inp){
   if(!f) return;
   if(!f.type.startsWith('image/')){ showToast('⚠️ اختر ملف صورة'); return; }
   if(f.size>5*1024*1024){ showToast('⚠️ حجم الصورة أكبر من ٥ ميجا'); return; }
-  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'){ showToast('⏳ التحضير مُرسل/معتمَد — لا يمكن التعديل'); return; }
+  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'||LP_STATE.loadFailed){ showToast('⏳ التحضير مُرسل/معتمَد — لا يمكن التعديل'); return; }
   lpSaveState('saving');
   try{
     if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); lpSaveState('error'); return; }
@@ -2516,26 +3257,28 @@ async function lpUploadImage(inp){
     if(up.error) throw up.error;
     const {data:pub}=db.storage.from('lesson-preps').getPublicUrl(path);
     LP_IMAGE_URL=pub.publicUrl;
-    await lpUpsert({ status:(LP_STATE.status==='approved'?'approved':'draft') });
+    await lpUpsert({ status:'draft' });
     lpRenderImage(); lpSaveState('saved'); showToast('✅ تم رفع صورة التحضير');
   }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر رفع الصورة: '+recFriendlyErr(e)); }
 }
 async function lpRemoveImage(){
-  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'){ showToast('⏳ لا يمكن التعديل بعد الإرسال'); return; }
+  if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'||LP_STATE.loadFailed){ showToast('⏳ لا يمكن التعديل بعد الإرسال'); return; }
   if(!confirm('حذف صورة التحضير المرفقة؟')) return;
   lpSaveState('saving');
   try{
     LP_IMAGE_URL=null;
-    await lpUpsert({ status:(LP_STATE.status==='approved'?'approved':'draft'), image_url:null });
+    await lpUpsert({ status:'draft', image_url:null });
     lpRenderImage(); lpSaveState('saved'); showToast('🗑️ حُذفت صورة التحضير');
   }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الحذف: '+recFriendlyErr(e)); }
 }
 
 async function saveLessonPrep(){
+  if(LP_STATE.loadFailed){ showToast('⚠️ التحضير ما اتحمّلش صح — اعمل تحديث للصفحة قبل الحفظ'); return; }
   if(LP_STATE.status==='submitted'){ showToast('⏳ التحضير مُرسل للمشرف — استنى المراجعة'); return; }
+  if(LP_STATE.status==='approved'){ showToast('✅ التحضير معتمَد — لا يمكن تعديله'); return; }
   lpSaveState('saving');
   try{
-    await lpUpsert({status:(LP_STATE.status==='approved'?'approved':'draft')});
+    await lpUpsert({status:'draft'});
     lpSetStatusBadge(LP_STATE.status); lpSaveState('saved'); showToast('✅ تم حفظ المسودة');
   }catch(e){ lpSaveState('error',recFriendlyErr(e)); showToast('❌ تعذّر الحفظ: '+recFriendlyErr(e)); }
 }
@@ -2563,8 +3306,6 @@ async function submitLessonPrep(){
 
 // إشعار المشرف المتابع للحلقة (رسالة في صندوقه — والإشعار نفسه بيجي من تريجر lesson_preps)
 async function lpNotifySupervisor(title){
-  // ★ اتشالت رسالة التحضير المكررة — الإشعار بييجي من تريجر lesson_preps فقط (notif_push)
-  return;
   try{
     const c=activeCircle()||MY_CIRCLES[0]; if(!c) return;
     const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
@@ -2573,7 +3314,7 @@ async function lpNotifySupervisor(title){
     try{
       const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle();
       if(su&&su.full_name) supName=su.full_name;
-    }catch(e){}
+    }catch(e){ loadWarn(e); }
     const date=document.getElementById('lp-date').value||D();
     const {data,error}=await db.from('messages').insert({
       sender_id:cu.id, sender_name:cu.full_name||'معلم', sender_role:'teacher',
@@ -2771,26 +3512,8 @@ function noteCellBtn(sid){
 // يُرجع إعداد الاختبار لهذا اليوم أو null إذا كان يوماً عادياً
 function examConfig(c){
   if(!c) return null;
-  const b=c.branch, date=D(), day=DAYS_AR[new Date(date+'T00:00:00').getDay()];
-  // الأبطال والرواد — كل جمعة اختبار
-  if(b==='الأبطال'||b==='الرواد'){
-    if(day!=='الجمعة') return null;
-    if(date==='2026-08-07') return { kind:'اختبار الشهر الثاني', total:65,
-      cols:[['quran','درجة القرآن',25],['manhaj','درجة المنهج المصاحب',15],['tajweed','درجة التجويد',10],['activity','درجة النشاط التربوي',15]] };
-    if(date==='2026-09-11') return { kind:'الاختبار الربع سنوي', total:105,
-      cols:[['quran','درجة القرآن',40],['manhaj','درجة المنهج المصاحب',25],['tajweed','درجة التجويد',15],['activity','درجة النشاط التربوي',25]] };
-    return { kind:'الاختبار الأسبوعي', total:40,
-      cols:[['quran','درجة القرآن',15],['manhaj','درجة المنهج المصاحب',10],['tajweed','درجة التجويد',5],['activity','درجة النشاط التربوي',10]] };
-  }
-  // الملكات والأميرات — اختبار الشهر الثاني والربع سنوي فقط
-  if(b==='الملكات'||b==='الأميرات'){
-    if(date==='2026-08-15') return { kind:'اختبار الشهر الثاني', total:55,
-      cols:[['quran','درجة القرآن',25],['manhaj','درجة المنهج المصاحب',15],['tajweed','درجة التجويد',15]] };
-    if(date==='2026-09-12') return { kind:'الاختبار الربع سنوي', total:100,
-      cols:[['hifz','درجة الحفظ',25],['review','درجة المراجعة',25],['manhaj','درجة المنهج المصاحب',25],['tajweed','درجة التجويد',25]] };
-    return null;
-  }
-  return null;
+  const date=D(), e=termExam(termOf(date)||CUR_TERM, c.branch, date);
+  return e ? { kind:e.kind, total:+e.total||0, date:(e.of||date), cols:(e.cols||[]).map(x=>[x[0],x[1],+x[2]||0]) } : null;
 }
 
 // كاش درجات الاختبار لليوم الحالي: EXAM_GR[sid] = { col:{errors,score,max,audio_url} }
@@ -2866,7 +3589,7 @@ function renderExamTable(c,list,exam){
 }
 async function loadExamGrades(list){
   const real=list.filter(s=>!s._static&&!s._guest); if(!real.length) return;
-  const ids=real.map(s=>s.id), date=D();
+  const ids=real.map(s=>s.id), date=(EXAM_CFG&&EXAM_CFG.date)||D();
   try{
     const {data}=await db.from('student_files').select('student_id,data').in('student_id',ids);
     (data||[]).forEach(row=>{
@@ -2874,7 +3597,7 @@ async function loadExamGrades(list){
       if(ex){ EXAM_GR[row.student_id]=ex; }
     });
     real.forEach(s=>reflectExamRow(s.id));
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
 }
 function reflectExamRow(sid){
   if(!EXAM_CFG) return;
@@ -2884,7 +3607,6 @@ function reflectExamRow(sid){
 
 // ── مودال درجة الاختبار + مسجّل صوت مستقل ──
 let EX_CTX={sid:null,col:null,max:0,lbl:''};
-let _exMediaRec=null,_exChunks=[],_exBlob=null,_exState='idle';
 function openExamGrade(sid,col){
   if(!EXAM_CFG) return;
   const cfg=EXAM_CFG.cols.find(x=>x[0]===col); if(!cfg) return;
@@ -2893,8 +3615,6 @@ function openExamGrade(sid,col){
   document.getElementById('ex-title').textContent='📝 '+lbl+' — '+(s?s.name:'');
   const g=examScoreOf(sid,col);
   document.getElementById('ex-errors').value=(g&&g.errors!=null)?g.errors:'';
-  exResetRecorder();
-  if(g&&g.audio_url){ const a=document.getElementById('ex-audio'); a.src=g.audio_url; a.style.display='block'; }
   exCalc();
   openModal('modal-exam');
 }
@@ -2905,52 +3625,28 @@ function exCalc(){
   const sc=Math.max(0,mx-e);
   box.innerHTML='النتيجة: <span style="color:var(--emerald);">'+toAr(sc)+' / '+toAr(mx)+'</span>';
 }
-async function exRecStart(){
-  if(_exState==='paused'){ _exMediaRec.resume(); _exState='recording'; exRecUI(); return; }
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
-    _exChunks=[]; const _mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    _exMediaRec=new MediaRecorder(stream,{mimeType:_mime,audioBitsPerSecond:24000});
-    _exMediaRec.ondataavailable=e=>{ if(e.data.size) _exChunks.push(e.data); };
-    _exMediaRec.onstop=()=>{ _exBlob=new Blob(_exChunks,{type:'audio/webm'}); const a=document.getElementById('ex-audio'); a.src=URL.createObjectURL(_exBlob); a.style.display='block'; stream.getTracks().forEach(t=>t.stop()); };
-    _exMediaRec.start(); _exState='recording'; exRecUI();
-  }catch(e){ showToast('🎙️ تعذّر الوصول للميكروفون'); }
-}
-function exRecPause(){ if(_exMediaRec&&_exState==='recording'){ _exMediaRec.pause(); _exState='paused'; exRecUI(); } }
-function exRecStop(){ if(_exMediaRec&&_exState!=='idle'){ _exMediaRec.stop(); _exState='stopped'; exRecUI(); } }
-function exRecUI(){ document.getElementById('ex-rec-state').textContent=_exState==='recording'?'🔴 جارٍ التسجيل...':_exState==='paused'?'⏸️ متوقف مؤقتاً':_exState==='stopped'?'✅ تم التسجيل':''; }
-function exResetRecorder(){ _exMediaRec=null; _exChunks=[]; _exBlob=null; _exState='idle'; const a=document.getElementById('ex-audio'); a.src=''; a.style.display='none'; document.getElementById('ex-rec-state').textContent=''; }
-function exEnsureStopped(){ return new Promise(res=>{ if(!_exMediaRec&&!_exBlob){ res(); return; } const wait=()=>{ let n=0; const t=setInterval(()=>{ if(_exBlob||++n>40){ clearInterval(t); res(); } },40); }; if(_exState==='recording'||_exState==='paused'){ _exMediaRec.addEventListener('stop',wait,{once:true}); try{ _exMediaRec.stop(); }catch(e){ wait(); } _exState='stopped'; exRecUI(); } else { wait(); } }); }
 async function saveExamGrade(){
   const {sid,col,max,lbl}=EX_CTX; const s=findStu(sid); if(!s) return;
   const e=parseInt(document.getElementById('ex-errors').value);
   if(isNaN(e)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
-  const score=Math.max(0,max-e), date=D();
-  // رفع الصوت إن وُجد
-  await exEnsureStopped();
-  let audioUrl=(examScoreOf(sid,col)||{}).audio_url||null, audioMsg='';
-  if(_exBlob&&_exBlob.size>0&&!s._static&&!s._guest){
-    try{
-      const p='exam_'+sid+'_'+col+'_'+Date.now()+'.webm';
-      const up=await db.storage.from('recitations').upload(p,_exBlob,{contentType:'audio/webm',upsert:true});
-      if(!up.error){ const {data}=db.storage.from('recitations').getPublicUrl(p); audioUrl=data.publicUrl; audioMsg=' • 🎧 صوت محفوظ'; }
-      else audioMsg=' • ⚠️ الصوت لم يُرفع';
-    }catch(e2){ audioMsg=' • ⚠️ خطأ Storage'; }
-  }
+  const score=Math.max(0,max-e), date=(EXAM_CFG&&EXAM_CFG.date)||D();
+  const audioUrl=null, audioMsg='';   // التسجيل الصوتي اتلغى نهائياً
   // حدّث الكاش
   EXAM_GR[sid]=EXAM_GR[sid]||{};
   EXAM_GR[sid][col]={ errors:e, score, max, audio_url:audioUrl };
   // احفظ في ملف الطالب (دمج غير متلف لباقي البيانات)
   if(!s._static&&!s._guest){
     try{
-      const {data:row}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+      const {data:row,error:rErr}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+      if(rErr) throw rErr;   // لو القراية فشلت ما نكتبش فوق الملف
       const d=(row&&row.data)||{}; d.exams=d.exams||{}; d.exams[date]=d.exams[date]||{};
       d.exams[date][col]={ errors:e, score, max, label:lbl, kind:EXAM_CFG.kind, audio_url:audioUrl };
       d.exams[date]._meta={ kind:EXAM_CFG.kind, total:EXAM_CFG.total };
       let err;
-      if(row&&row.id){ ({error:err}=await db.from('student_files').update({data:d}).eq('student_id',sid)); }
-      else { ({error:err}=await db.from('student_files').insert({student_id:sid,data:d})); }
-      if(err) throw err;
+      let res;
+      if(row&&row.id){ ({data:res,error:err}=await db.from('student_files').update({data:d}).eq('student_id',sid).select('id')); }
+      else { ({data:res,error:err}=await db.from('student_files').insert({student_id:sid,data:d}).select('id')); }
+      if(err) throw err; if(!res||!res.length) throw new Error('RLS');
     }catch(e3){ showToast('❌ تعذّر الحفظ في ملف الطالب: '+(e3.message||e3.code||'')); return; }
   }
   reflectExamRow(sid);
@@ -2969,7 +3665,7 @@ async function renderAttendance(){
   if(!list.length){ cont.innerHTML='<div class="empty"><span class="empty-icon">📅</span>لا يوجد طلاب</div>'; return; }
   // اجلب حضور اليوم المسجّل
   let saved={};
-  try{ const {data}=await db.from('attendance').select('student_id,status').in('student_id',list.map(s=>s.id)).eq('date',D()); (data||[]).forEach(a=>saved[a.student_id]=a.status); }catch(e){}
+  try{ const {data}=await db.from('attendance').select('student_id,status').in('student_id',list.map(s=>s.id)).eq('date',D()); (data||[]).forEach(a=>saved[a.student_id]=a.status); }catch(e){ loadWarn(e); }
   cont.innerHTML='<table class="tbl"><thead><tr><th>الطالب</th><th style="text-align:center;">الحالة</th></tr></thead><tbody>'+
     list.map((s,i)=>{ attState[i]=saved[s.id]||null; return `<tr>
       <td><strong>${s.name}</strong></td>
@@ -2980,15 +3676,16 @@ async function renderAttendance(){
       </div></td></tr>`; }).join('')+'</tbody></table>';
   list.forEach((s,i)=>{ if(attState[i]) paintAtt(i); });
 }
-function attBtn(i,val,txt,col){ return `<button class="btn btn-outline btn-xs" data-v="${val}" onclick="setAtt(${i},'${val}')" style="--c:${col};">${txt}</button>`; }
-function setAtt(i,val){ attState[i]=val; paintAtt(i); }
+function attBtn(i,val,txt,col){ return `<button class="btn btn-outline btn-xs" data-v="${val}" onclick="setAttPage(${i},'${val}')" style="--c:${col};">${txt}</button>`; }
+function setAttPage(i,val){ attState[i]=val; paintAtt(i); }
 function paintAtt(i){ document.querySelectorAll(`#att-btns-${i} button`).forEach(b=>{ const on=b.dataset.v===attState[i]; b.style.background=on?b.style.getPropertyValue('--c'):'transparent'; b.style.color=on?'#fff':'var(--mid)'; b.style.borderColor=on?b.style.getPropertyValue('--c'):'var(--border)'; }); }
 async function saveAttendance(){
   const c=activeCircle(); const list=studentsOf(c); const recs=[];
   list.forEach((s,i)=>{ if(attState[i]) recs.push({student_id:s.id,date:D(),status:attState[i],recorded_by:cu.id}); });
   if(!recs.length){ showToast('⚠️ لم تسجّل أي حضور'); return; }
-  try{ const {error}=await db.from('attendance').upsert(recs,{onConflict:'student_id,date'}); if(error) throw error; showToast('✅ تم حفظ الحضور ('+recs.length+' طالب)'); }
-  catch(e){ showToast('❌ خطأ في الحفظ'); }
+  try{ const {data,error}=await db.from('attendance').upsert(recs,{onConflict:'student_id,date'}).select('student_id'); if(error) throw error; if(!data||!data.length) throw new Error('RLS');
+    showToast('✅ تم حفظ الحضور ('+data.length+' طالب)'); }
+  catch(e){ showToast('❌ لم يُحفظ الحضور — '+recFriendlyErr(e)); }
 }
 
 // ══ RECITATION (جدول المتابعة + مودال التسميع) ══
@@ -3085,9 +3782,9 @@ async function renderGuestResults(q){
   let res=[];
   try{
     const { data } = await db.rpc('search_students', { q });
-    res=(data||[]).map(s=>({ id:s.id, name:s.full_name, branch:s.branch||'—', teacher:s.teacher||'بدون حلقة' }))
+    res=(data||[]).map(s=>({ id:s.id, rawName:s.full_name, name:cleanName(s.full_name), branch:cleanName(s.branch||'—'), teacher:cleanName(s.teacher||'بدون حلقة') }))
       .filter(s=>!existing.has(s.name) && branchGroup(s.branch)===MY_GROUP).slice(0,30);
-  }catch(e){ res=[]; }
+  }catch(e){ res=[]; showToast('⚠️ تعذّر البحث — '+recFriendlyErr(e)); }
   if(!res.length){ box.innerHTML='<div style="padding:14px;text-align:center;color:var(--light);font-size:.82rem;">لا توجد نتائج</div>'; return; }
   box.innerHTML=res.map((s,i)=>`<div onclick="pickGuest(${i})" data-i="${i}" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background='#fff'">
     <div class="avatar" style="width:30px;height:30px;font-size:.76rem;">${s.name[0]}</div>
@@ -3119,23 +3816,37 @@ async function confirmGuest(){
       const {data:exist}=await db.from('circle_guests').select('id')
         .eq('added_by',cu.id).eq('guest_date',D()).eq('student_id',_guestPick.id).maybeSingle();
       if(!exist){
-        await db.from('circle_guests').insert([{
-          student_id:_guestPick.id, student_name:_guestPick.name,
+        const {error}=await db.from('circle_guests').insert([{
+          student_id:_guestPick.id, student_name:_guestPick.rawName||_guestPick.name,
           student_teacher:_guestPick.teacher||null, added_by:cu.id, guest_date:D()
         }]);
+        if(error) throw error;
       }
-    }catch(e){ /* الإضافة المحلية تعمل حتى لو تعذّر السيرفر */ }
+    }catch(e){ showToast('⚠️ الضيف اتضاف هنا بس ما اتسجّلش عند المشرف — '+recFriendlyErr(e)); }
   }
   closeModal('modal-guest');
   renderStudents();
   showToast('✅ تمت إضافة الطالب الضيف لهذا اليوم');
+}
+// استرجاع ضيوف اليوم من القاعدة (عشان ما يضيعوش مع الريفريش)
+async function loadTodayGuests(){
+  const c=activeCircle(); if(!c) return;
+  try{
+    const {data,error}=await db.from('circle_guests').select('student_id,student_name,student_teacher').eq('added_by',cu.id).eq('guest_date',D());
+    if(error) throw error;
+    const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
+    (data||[]).forEach(g=>{ if(!g.student_id || GUEST_STUDENTS[key].some(x=>x.id===g.student_id)) return;
+      GUEST_STUDENTS[key].push({ id:g.student_id, name:cleanName(g.student_name||'طالب'), branch:'—', teacher:cleanName(g.student_teacher||'—'), mem:0, points:0, notes:'', _guest:true });
+      REC_STATE[g.student_id]=REC_STATE[g.student_id]||{}; });
+  }catch(e){ showToast('⚠️ تعذّر تحميل ضيوف اليوم'); }
 }
 async function removeGuest(gid){
   const c=activeCircle(); const key=guestKey(c);
   if(GUEST_STUDENTS[key]) GUEST_STUDENTS[key]=GUEST_STUDENTS[key].filter(g=>g.id!==gid);
   delete REC_STATE[gid];
   if(gid && !String(gid).startsWith('guest_')){
-    try{ await db.from('circle_guests').delete().eq('added_by',cu.id).eq('guest_date',D()).eq('student_id',gid); }catch(e){}
+    try{ const {error}=await db.from('circle_guests').delete().eq('added_by',cu.id).eq('guest_date',D()).eq('student_id',gid); if(error) throw error; }
+    catch(e){ showToast('⚠️ تعذّر حذف الضيف من السيرفر — '+recFriendlyErr(e)); }
   }
   renderStudents();
   showToast('🗑️ أُزيل الطالب الضيف');
@@ -3166,8 +3877,10 @@ function setAtt(sid,val){
 function setLate(sid){ const m=parseInt(document.getElementById('latemin-'+sid).value)||null; REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
 async function saveAtt(sid,status,mins){
   const s=findStu(sid); if(s&&(s._static||s._guest)){ showToast('📌 سُجّل محلياً'); return; }
-  try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}); }
-  catch(e){ try{ await db.from('attendance').upsert([{student_id:sid,date:D(),status,recorded_by:cu.id}],{onConflict:'student_id,date'}); }catch(e2){} }
+  try{
+    const {data,error}=await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}).select('student_id');
+    if(error) throw error; if(!data||!data.length) throw new Error('RLS');
+  }catch(e){ showToast('⚠️ لم يُحفظ حضور الطالب — '+recFriendlyErr(e)); }
 }
 
 // ── فتح مودال التسميع/المراجعة ──
@@ -3200,6 +3913,7 @@ function openEval(sid,type){
   const pw=document.getElementById('ev-plan-wrap'); if(pw) pw.style.display=planAllowed()?'':'none';
   setPlan(st.plan_done!==undefined?st.plan_done:true);
   openModal('modal-eval');
+  spEvalHint(sid,type);   // 🎯 هدف النهارده من خطة الطالب
 }
 // ── المراجعة: حساب قديم على إجمالي الأخطاء (بدون أوجه) | الحفظ: متوسط الأخطاء في الوجه ──
 function evIsReview(){ return !!(REC_CTX && REC_CTX.type==='review'); }
@@ -3257,12 +3971,15 @@ function recFriendlyErr(e){
 
 
 // ── حفظ التسميع ──
+let _evSaving=false;
 async function saveEval(){
+  if(_evSaving) return;
   const {sid,type}=REC_CTX; const s=findStu(sid); if(!s) return;
   const errors=parseInt(document.getElementById('ev-errors').value);
   if(isNaN(errors)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
   const faces=(type==='review')?1:Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
   const grade=errorsToGrade(errors/faces), pts=GRADE_PTS[grade];
+  spAutoPlanDone(sid,type,grade);   // 🤖 «تم/لم يتم» تلقائي من خطة الطالب
   const rec={
     surah_from:+document.getElementById('ev-sfrom').value, ayah_from:+document.getElementById('ev-afrom').value||null,
     surah_to:+document.getElementById('ev-sto').value, ayah_to:+document.getElementById('ev-ato').value||null,
@@ -3276,10 +3993,15 @@ async function saveEval(){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
       notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
-    try{ await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}); }
-    catch(e){ try{ const {error}=await db.from('memorization').insert([{student_id:sid,date:D(),type,grade,errors,points:pts,notes:rec.notes,recorded_by:cu.id}]); if(error) throw error; }catch(e2){ showToast('❌ خطأ في الحفظ'); return; } }
-    s.points+=delta;
-    if(!s._guest){ try{ await db.from('students').update({total_points:s.points}).eq('id',sid); }catch(e){} }  // نقاط الزائر لا تُحدَّث في ملفه الأصلي
+    // النقاط الكلية (students.total_points) بتتحدّث في القاعدة بتريجر على memorization — العميل مش بيكتبها
+    const btn=document.getElementById('ev-save-btn'); _evSaving=true; if(btn) btn.disabled=true;
+    try{
+      if(!(await ensureFreshSession())) throw new Error('JWT expired');
+      const {data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id');
+      if(error) throw error; if(!data||!data.length) throw new Error('RLS');
+    }catch(e){ showToast('❌ لم يُحفظ التسميع — '+recFriendlyErr(e)); return; }
+    finally{ _evSaving=false; if(btn) btn.disabled=false; }
+    await refreshStudentPoints(s);
   } else { s.points+=delta; }
   // تحديث الحالة المحلية والجدول
   REC_STATE[sid]=REC_STATE[sid]||{}; REC_STATE[sid][type]=rec;
@@ -3287,6 +4009,7 @@ async function saveEval(){
   reflectRow(sid);
   closeModal('modal-eval');
   showToast('✅ '+(type==='new'?'حُفظ التسميع':'حُفظت المراجعة')+' — '+GRADE_AR[grade]+' (+'+pts+' نقطة)');
+  if((!s._static && !s._guest)) spAfterRecitation(sid,type);   // 🎯 نسبة الخطة
 }
 
 // ── تحميل تسميع اليوم المسجّل مسبقاً (مزامنة) ──
@@ -3296,12 +4019,15 @@ async function loadTodayRecitation(list){
   try{
     const {data}=await db.from('attendance').select('student_id,status,late_minutes').in('student_id',ids).eq('date',D());
     (data||[]).forEach(a=>{ REC_STATE[a.student_id]=REC_STATE[a.student_id]||{}; setAttUI(a.student_id,a.status,a.late_minutes); });
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
   try{
-    const {data}=await db.from('memorization').select('student_id,type,grade,errors,points,plan_done,notes').in('student_id',ids).eq('date',D());
-    (data||[]).forEach(m=>{ REC_STATE[m.student_id]=REC_STATE[m.student_id]||{}; REC_STATE[m.student_id][m.type]={grade:m.grade,errors:m.errors,points:m.points,plan_done:m.plan_done!==false&&m.grade!=='retry',notes:m.notes||''}; });
+    const {data,error}=await db.from('memorization').select('student_id,type,grade,errors,points,plan_done,notes,surah_from,ayah_from,surah_to,ayah_to').in('student_id',ids).eq('date',D());
+    if(error) throw error;
+    const sIdx=n=>{ const i=SURAHS.findIndex(x=>x[0]===n); return i<0?0:i; };
+    (data||[]).forEach(m=>{ REC_STATE[m.student_id]=REC_STATE[m.student_id]||{}; REC_STATE[m.student_id][m.type]={grade:m.grade,errors:m.errors,points:m.points,plan_done:m.plan_done!==false&&m.grade!=='retry',notes:m.notes||'',
+      surah_from:sIdx(m.surah_from),ayah_from:m.ayah_from,surah_to:sIdx(m.surah_to),ayah_to:m.ayah_to}; });
     real.forEach(s=>reflectRow(s.id));
-  }catch(e){}
+  }catch(e){ showToast('⚠️ تعذّر تحميل تسميع اليوم — '+recFriendlyErr(e)); }
 }
 function setAttUI(sid,status,mins){
   const wrap=document.getElementById('att-'+sid); if(!wrap) return;
@@ -3335,12 +4061,30 @@ function renderPoints(){
     <td><div style="display:flex;gap:5px;flex-wrap:wrap;">${CARDS.map(([t,l,p,col])=>`<button class="btn btn-xs" style="background:${col};color:#fff;" onclick="grantCard('${s.id}','${t}',${p})">${l}</button>`).join('')}</div></td>
   </tr>`).join('');
 }
+let _gcBusy=false;
 async function grantCard(id,type,pts){
-  const s=MY_STUDENTS.find(x=>x.id===id); if(!s) return;
-  try{ await db.from('points_cards').insert({student_id:id,card_type:type,points:pts,date:D(),recorded_by:cu.id}); }catch(e){}
-  s.points+=pts; try{ await db.from('students').update({total_points:s.points}).eq('id',id); }catch(e){}
+  const s=MY_STUDENTS.find(x=>x.id===id); if(!s||_gcBusy) return;
+  // الكروت الصغيرة = تسليم نقاط التسميع نفسها (مش بتزوّد الرصيد) • الكبيرة: مكافأة (تزوّد) أو تبديل (ما تزوّدش)
+  const big=['silver','gold','diamond'].includes(type);
+  let isEx=false;
+  if(big){
+    isEx=!confirm('الكارت ده «مكافأة إضافية»؟\n\nموافق = مكافأة (هيتضاف '+pts+' نقطة للرصيد)\nإلغاء = تبديل كروت صغيرة (مش هيزوّد الرصيد)');
+  }
+  _gcBusy=true;
+  try{
+    const {data,error}=await db.from('points_cards').insert({student_id:id,card_type:type,points:pts,is_exchange:isEx,date:D(),recorded_by:cu.id}).select('id');
+    if(error) throw error; if(!data||!data.length) throw new Error('RLS');
+  }catch(e){ showToast('❌ لم يُمنح الكرت — '+recFriendlyErr(e)); return; }
+  finally{ _gcBusy=false; }
+  await refreshStudentPoints(s);   // total_points بيتحدّث بتريجر على points_cards
   const bal=document.getElementById('pt-bal-'+id); if(bal) bal.textContent='⭐ '+s.points;
-  showToast('🏆 تم منح كرت ('+pts+' نقطة) لـ '+s.name);
+  showToast(big&&!isEx ? ('🏆 مكافأة '+pts+' نقطة لـ '+s.name) : ('🎴 اتسجّل تسليم الكارت لـ '+s.name));
+}
+// قراءة رصيد الطالب الحقيقي من القاعدة بعد أي حفظ
+async function refreshStudentPoints(s){
+  if(!s || s._guest || s._static) return;
+  try{ const {data,error}=await db.from('students').select('total_points').eq('id',s.id).maybeSingle(); if(error) throw error; if(data) s.points=data.total_points||0; }
+  catch(e){ showToast('⚠️ تعذّر تحديث الرصيد'); }
 }
 
 // ══ FILES ══
@@ -3366,7 +4110,7 @@ async function openFile(id){
       ${fileRow('رقم ولي الأمر',s.phone)}${fileRow('الحلقة',activeCircle()?.name||'—')}
     </div>
     <div class="fg" style="margin-top:14px;"><label>ملاحظات المعلم</label>
-      <textarea id="file-notes" rows="3">${s.notes||''}</textarea></div>
+      <textarea id="file-notes" rows="3">${esc(s.notes||'')}</textarea></div>
     <button class="btn btn-primary btn-sm" onclick="saveNotes('${id}')">💾 حفظ الملاحظات</button>
     <div id="file-records" style="margin-top:14px;font-size:.82rem;color:var(--light);">⏳ جاري تحميل سجل التسميع...</div>`;
   openModal('modal-file');
@@ -3461,7 +4205,7 @@ function buildQuranPane(d){
         <td style="padding:6px 8px;border:1px solid var(--border);">${stfSurahRange(r)}</td>
         <td style="padding:6px 8px;border:1px solid var(--border);white-space:nowrap;">${r.grade?gradeBadge(r.grade):'—'}${(r.errors!=null&&r.errors!=='')?` <span style="color:var(--light);font-size:.72rem;">(${r.errors} خطأ)</span>`:''}</td>
         <td style="padding:4px 6px;border:1px solid var(--border);text-align:center;">${au?`<button class="btn btn-xs" style="background:var(--jade);color:#fff;" onclick="playRec('${au}')">▶️ تشغيل</button>`:'<span style="color:var(--light);">—</span>'}</td>
-        <td style="padding:6px 8px;border:1px solid var(--border);color:var(--mid);">${r.notes||'—'}</td>
+        <td style="padding:6px 8px;border:1px solid var(--border);color:var(--mid);">${esc(r.notes||'—')}</td>
       </tr>`;
     }).join('');
     return `<div id="stf-qm-${i}" style="display:${i===0?'block':'none'};overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal;min-width:640px;">
@@ -3506,7 +4250,7 @@ function buildTajweedPane(d){
       </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function buildBehaviorPane(d){
-  const bh=d.behavior||{};
+  const bh=termBh(d, termOf(D())||CUR_TERM);
   let html=`<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📊 التقييم الأخلاقي والسلوكي</div>`;
   STF_MONTHS.forEach(([mo,molbl])=>{
     let rows='';
@@ -3541,10 +4285,10 @@ async function openStudentFile(sid){
   document.getElementById('stf-header-name').textContent=s.name;
   let d={}, memo=[], am={};
   if(!s._guest){
-    try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){}
+    try{ const {data}=await db.from('student_files').select('data').eq('student_id',sid).maybeSingle(); if(data&&data.data) d=data.data; }catch(e){ loadWarn(e); }
     if(!s._static){
-      try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){}
-      try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){}
+      try{ const {data:m}=await db.from('memorization').select('*').eq('student_id',sid).order('date',{ascending:true}); memo=m||[]; }catch(e){ loadWarn(e); }
+      try{ const {data:r}=await db.from('recitation_records').select('*').eq('student_id',sid).order('date',{ascending:true}); (r||[]).forEach(x=>{ if(x.audio_url) am[x.date+'_'+x.type]=x.audio_url; }); }catch(e){ loadWarn(e); }
     }
   }
   // دمج تسميع اليوم المسجّل محلياً (static/guest + اللي لسه اتسجّل قبل ما يتحفظ)
@@ -3577,22 +4321,22 @@ async function doStfSave(){
   if(s&&(s._static||s._guest)){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
   const d=collectStf();
   try{
-    const {data:ex}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+    const {data:ex,error:rErr}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
+    if(rErr) throw rErr;   // ما نكتبش فوق الملف لو القراية فشلت
     // دمج: نحافظ على درجات الاختبار (exams) وأي مفاتيح أخرى غير المُدارة هنا
-    const merged=Object.assign({}, (ex&&ex.data)||{}, d);
-    let error;
-    if(ex&&ex.id){ ({error}=await db.from('student_files').update({data:merged}).eq('student_id',sid)); }
-    else { ({error}=await db.from('student_files').insert({student_id:sid,data:merged})); }
-    if(error) throw error;
+    const merged=Object.assign({}, (ex&&ex.data)||{}, termBhPack((ex&&ex.data)||{}, d, termOf(D())||CUR_TERM));
+    let error, res;
+    if(ex&&ex.id){ ({data:res,error}=await db.from('student_files').update({data:merged}).eq('student_id',sid).select('id')); }
+    else { ({data:res,error}=await db.from('student_files').insert({student_id:sid,data:merged}).select('id')); }
+    if(error) throw error; if(!res||!res.length) throw new Error('RLS');
     closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('✅ تم حفظ ملف الطالب');
-  }catch(e){ showToast('❌ student_files: '+(e.message||e.code||JSON.stringify(e))); }
+  }catch(e){ showToast('❌ لم يُحفظ ملف الطالب — '+recFriendlyErr(e)); }
 }
 function openParentNote(){ document.getElementById('pnote-text').value=''; openModal('modal-pnote'); }
 async function sendParentNote(){
   const txt=document.getElementById('pnote-text').value.trim(); if(!txt){ showToast('⚠️ اكتب الملاحظة'); return; }
-  const s=MY_STUDENTS.find(x=>x.id===_fileStudentId);
-  try{ await db.from('messages').insert({subject:'ملاحظة بخصوص الطالب '+(s?s.name:''),body:txt,sender_id:cu.id,sender_name:cu.full_name,sender_role:'teacher',to_role:'parent',to_name:'ولي أمر '+(s?s.name:''),is_read:false,created_at:new Date().toISOString()}); showToast('📩 أُرسلت الملاحظة لولي الأمر'); closeModal('modal-pnote'); }
-  catch(e){ showToast('❌ تعذّر الإرسال'); }
+  // حسابات أولياء الأمور لسه مش مفعّلة — ما نوهمش المعلم إن الرسالة وصلت
+  showToast('🚧 مراسلة أولياء الأمور هتتفعّل مع لوحة ولي الأمر — الملاحظة ما اتبعتتش');
 }
 
 // ══ TRAINING ══
@@ -3649,7 +4393,7 @@ async function openQuiz(cid){
   try{
     const {data}=await db.from('teacher_exam_results').select('percent,points').eq('teacher_id',cu.id).eq('exam_id',cid).maybeSingle();
     if(data){ TR_EXAM_DONE[cid]={percent:data.percent,points:data.points}; renderTrCourses(); showToast('🔒 تم أداء هذا الاختبار مسبقاً'); return; }
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
   // ★ تنبيه قبل البدء: لا خروج حتى نهاية الاختبار
   if(!confirm('⚠️ تنبيه هام:\n\nبمجرد بدء الاختبار لا يمكنك الخروج منه أو الرجوع للأسئلة حتى تسليمه، وذلك ضماناً للشفافية وتكافؤ الفرص بين المعلمين.\n\nهل أنت مستعد للبدء الآن؟')) return;
   // جلب الأسئلة من القاعدة — بدون الإجابات الصحيحة إطلاقاً
@@ -4166,7 +4910,7 @@ async function csNotifySupervisor(courseName){
     const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
     const sup=cir&&cir.supervisor_id; if(!sup) return;
     let supName='المشرف';
-    try{ const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle(); if(su&&su.full_name) supName=su.full_name; }catch(e){}
+    try{ const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle(); if(su&&su.full_name) supName=su.full_name; }catch(e){ loadWarn(e); }
     await db.from('messages').insert({
       sender_id:cu.id, sender_name:cu.full_name||'معلم', sender_role:'teacher',
       to_id:String(sup), to_name:supName, to_role:'supervisor',
@@ -4182,7 +4926,7 @@ async function refreshMyPoints(){
   try{
     const {data}=await db.from('users').select('points').eq('id',cu.id).maybeSingle();
     const p=(data&&data.points)||0; const el=document.getElementById('sb-points-val'); if(el) el.textContent=toAr(p);
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
 }
 
 
@@ -4343,7 +5087,7 @@ function renderMessages() {
         <div class="msg-row-top">
           <span class="msg-row-sender">${senderDisp}</span>
           ${urgentBadge}
-          <span class="msg-row-subject">${m.subject}</span>
+          <span class="msg-row-subject">${esc(m.subject||'')}</span>
         </div>
         <div class="msg-row-preview">${m.body.replace(/<[^>]+>/g,'').substring(0,90)}${m.body.length>90?'...':''}</div>
       </div>
@@ -4661,13 +5405,13 @@ function formatMsgTimeFull(iso) {
 
 // ── قاعدة البيانات helpers ──
 async function markMsgReadInDB(id) {
-  try { await db.from('messages').update({ is_read: true }).eq('id', id); } catch(e){}
+  try { await db.from('messages').update({ is_read: true }).eq('id', id); } catch(e){ loadWarn(e); }
 }
 async function updateMsgStarInDB(id, starred) {
-  try { await db.from('messages').update({ starred }).eq('id', id); } catch(e){}
+  try { await db.from('messages').update({ starred }).eq('id', id); } catch(e){ loadWarn(e); }
 }
 async function deleteMsgInDB(id) {
-  try { await db.from('messages').update({ deleted: true }).eq('id', id); } catch(e){}
+  try { await db.from('messages').update({ deleted: true }).eq('id', id); } catch(e){ loadWarn(e); }
 }
 
 // ══ COMPOSE ══
@@ -4845,7 +5589,7 @@ async function loadAnnouncements(){
     const {data}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false});
     if(!data||!data.length){ box.innerHTML='<div class="empty"><span class="empty-icon">📢</span>لا توجد إعلانات</div>'; return; }
     box.innerHTML=data.map(a=>`<div class="alert-strip alert-ok" style="flex-direction:column;align-items:flex-start;">
-      <div style="font-weight:700;">📢 ${a.body||''}</div>
+      <div style="font-weight:700;">📢 ${esc(a.body||'')}</div>
       <div style="font-size:.72rem;color:var(--light);margin-top:4px;">${a.created_at?new Date(a.created_at).toLocaleDateString('ar-EG'):''}</div></div>`).join('');
   }catch(e){ box.innerHTML='<div class="empty"><span class="empty-icon">📢</span>تعذّر التحميل</div>'; }
 }
@@ -4871,8 +5615,8 @@ async function printDailyReport(){
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const list=studentsOf(c); const ids=list.map(s=>s.id);
   let att={},mem={},rev={};
-  try{ const {data}=await db.from('attendance').select('student_id,status').in('student_id',ids).eq('date',todayISO()); (data||[]).forEach(a=>att[a.student_id]=a.status); }catch(e){}
-  try{ const {data}=await db.from('memorization').select('student_id,type,grade').in('student_id',ids).eq('date',todayISO()); (data||[]).forEach(m=>{ if(m.type==='review') rev[m.student_id]=m.grade; else mem[m.student_id]=m.grade; }); }catch(e){}
+  try{ const {data}=await db.from('attendance').select('student_id,status').in('student_id',ids).eq('date',todayISO()); (data||[]).forEach(a=>att[a.student_id]=a.status); }catch(e){ loadWarn(e); }
+  try{ const {data}=await db.from('memorization').select('student_id,type,grade').in('student_id',ids).eq('date',todayISO()); (data||[]).forEach(m=>{ if(m.type==='review') rev[m.student_id]=m.grade; else mem[m.student_id]=m.grade; }); }catch(e){ loadWarn(e); }
   const attAr={present:'حاضر',late:'متأخر',absent:'غائب'};
   const rows=list.map((s,i)=>`<tr><td>${i+1}<\/td><td>${s.name}<\/td><td>${att[s.id]?attAr[att[s.id]]:'—'}<\/td><td>${mem[s.id]?GRADE_AR[mem[s.id]]:'—'}<\/td><td>${rev[s.id]?GRADE_AR[rev[s.id]]:'—'}<\/td><\/tr>`).join('');
   openReport(reportHead('تقرير الإنجاز اليومي','الحلقة: '+c.name+' — '+c.branch+' — '+list.length+' طالب')+`<table><thead><tr><th>#<\/th><th>الطالب<\/th><th>الحضور<\/th><th>الحفظ<\/th><th>المراجعة<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table>`);
@@ -4903,8 +5647,8 @@ function mrAr(n){ return String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]
 function mrArToInt(v){ return parseInt(String(v==null?'':v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)))||0; }
 function mrFmtDate(iso){ if(!iso)return '—'; const a=String(iso).split('-'); if(a.length<3)return iso; return mrAr(parseInt(a[2]))+' '+MR_MONTHS[parseInt(a[1])-1]+' '+mrAr(a[0]); }
 function mrDayName(iso){ const d=new Date(iso+'T00:00:00'); return isNaN(d)?'—':DAYS_AR[d.getDay()]; }
-function mrToday(){ return new Date().toISOString().slice(0,10); }
-function mrDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+function mrToday(){ return localISO(); }
+function mrDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return localISO(d); }
 function mrAyahCount(af,at){ const a=parseInt(af),b=parseInt(at); if(isNaN(a))return 0; if(isNaN(b))return 1; return Math.abs(b-a)+1; }
 function mrGradeBadge(g){ if(!g||g==='—')return '<span style="color:var(--light);">—</span>'; return `<span class="badge ${MR_GRADE_BG[g]||'bg-gray'}" style="font-size:.68rem;">${MR_GRADE_AR[g]||g}</span>`; }
 function mrAttBadge(x){ if(!x||x==='—')return '<span style="color:var(--light);">—</span>'; return `<span class="badge ${MR_ATT_BG[x]||'bg-gray'}" style="font-size:.68rem;">${MR_ATT_AR[x]||x}</span>`; }
@@ -4932,7 +5676,7 @@ function mrStudentsList(){
 function mrFillStudentSel(){
   const sel=document.getElementById('mr-st-sel'); if(!sel)return;
   const cur=sel.value, list=mrStudentsList(), multi=MY_CIRCLES.length>1;
-  sel.innerHTML='<option value="">— اختر طالباً —</option>'+list.map(s=>`<option value="${s.id}">${s.name}${multi?(' ('+s.circle_name+')'):''}</option>`).join('');
+  sel.innerHTML='<option value="">— اختر طالباً —</option>'+list.map(s=>`<option value="${s.id}">${s.name}${multi?(' ('+esc(s.circle_name)+')'):''}</option>`).join('');
   if(cur) sel.value=cur;
 }
 function mrFillBulkCircles(){
@@ -4949,7 +5693,7 @@ async function mrFetchStudent(sid,from,to){
     att=a.data||[];
     const m=await db.from('memorization').select('date,type,grade,surah_from,surah_to,ayah_from,ayah_to,notes').eq('student_id',sid).gte('date',from).lte('date',to);
     mem=m.data||[];
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
   return {att,mem};
 }
 function mrStudentHtml(stu,from,to,att,mem){
@@ -4988,7 +5732,7 @@ function mrStudentHtml(stu,from,to,att,mem){
         <td style="${MR_TD}">${surah||'—'}</td><td style="${MR_TD}">${ayat}</td>
         <td style="${MR_TD}">${((x.newFaces||0)+(x.revFaces||0))?mrAr((x.newFaces||0)+(x.revFaces||0)):'—'}</td>
         <td style="${MR_TD}">${mrGradeBadge(x.mem)}</td><td style="${MR_TD}">${mrGradeBadge(x.rev)}</td>
-        <td style="${MR_TD}font-size:.72rem;color:var(--light);max-width:150px;">${x.notes||'—'}</td></tr>`;
+        <td style="${MR_TD}font-size:.72rem;color:var(--light);max-width:150px;">${esc(x.notes||'—')}</td></tr>`;
     }).join('');
     rows=`<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">📋 البيان التفصيلي</div></div>
       <div style="overflow-x:auto;"><table style="${MR_TBL}min-width:740px;">
@@ -5117,7 +5861,7 @@ function mrMaxStreak(arr,fn){ let mx=0,c=0; arr.forEach(v=>{ if(fn(v)){c++; if(c
 async function mrLoadAlerts(){
   const out=document.getElementById('mr-personal-out');
   out.innerHTML='<div class="empty" style="padding:22px;"><span class="empty-icon">⏳</span>جاري تحليل بيانات طلابك...</div>';
-  const from=mrDaysAgo(34), to=mrToday(), weekFrom=mrDaysAgo(7);
+  const from=mrDaysAgo(34), to=mrToday(), weekFrom=(()=>{ const d=new Date(); d.setDate(d.getDate()-d.getDay()); return localISO(d); })();   // بداية الأسبوع = الأحد
   const stu=mrStudentsList(), ids=stu.map(s=>s.id), id2={}; stu.forEach(s=>id2[s.id]=s);
   let att=[],mem=[],sess=[];
   try{
@@ -5129,7 +5873,7 @@ async function mrLoadAlerts(){
     }
     const sv=await db.from('supervisory_sessions').select('session_date,attendance,late_min').eq('teacher_name',cu.full_name||'').gte('session_date',from).lte('session_date',to).order('session_date',{ascending:true});
     sess=sv.data||[];
-  }catch(e){}
+  }catch(e){ loadWarn(e); }
   const attBy={},memBy={};
   att.forEach(a=>{ (attBy[a.student_id]=attBy[a.student_id]||[]).push(a); });
   mem.forEach(m=>{ (memBy[m.student_id]=memBy[m.student_id]||[]).push(m); });
