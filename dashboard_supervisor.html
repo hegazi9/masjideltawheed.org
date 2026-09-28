@@ -1583,9 +1583,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div class="sb-item" onclick="nav(this,'admins')" style="display:none;">
       <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><rect x="3" y="10" width="18" height="12" rx="2" fill="currentColor" opacity="0.18" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="7" r="4" fill="currentColor" opacity="0.85"/><circle cx="12" cy="16" r="1.4" fill="currentColor"/><line x1="12" y1="17.4" x2="12" y2="19.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span> المديرون
     </div>
-    <div class="sb-item" onclick="nav(this,'parents')" style="display:none;">
-      <span class="sb-icon">👨‍👦</span> أولياء الأمور
-    </div>
     <div class="sb-item" onclick="nav(this,'circles')">
       <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="5" r="3.5"/><path d="M16 10c-1.5 0-2.8.8-3.5 2L9 17h14l-3.5-5c-.7-1.2-2-2-3.5-2z"/><path d="M7 19c0 0 2.5 3 4.5 4.5L9 28h14l-2.5-4.5C22.5 22 25 19 25 19H7z"/><path d="M10 21l-3 1.5M22 21l3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M12 18.5c-1 .5-3 1-4 .5M20 18.5c1 .5 3 1 4 .5" stroke="currentColor" stroke-width="1" fill="none"/></svg></span> الحلقات
     </div>
@@ -2466,144 +2463,12 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 <!-- ══════════════════════════════════════════════════════
      PAGE: PARENTS
 ══════════════════════════════════════════════════════ -->
-<div id="page-parents" class="page">
-
-  <!-- Breadcrumb -->
-  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
-    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'dashboard')">الصفحة الرئيسية</span>
-    <span style="margin:0 8px;">/ </span>
-    <span>أولياء الأمور</span>
-  </div>
-
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div class="section-title" style="margin-bottom:4px;">👨‍👦 أولياء الأمور</div>
-      <div style="font-size:.8rem;color:var(--light);">اختر الشعبة لعرض أولياء الأمور بها</div>
-    </div>
-    <button class="btn btn-primary" onclick="openAddParent()" style="display:none">➕ إضافة ولي أمر</button>
-  </div>
-
-  <!-- 4 Branch Cards -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
-
-    <!-- الأبطال -->
-    <div class="card" data-branch-key="abtal" onclick="openParentBranch('الأبطال')" style="cursor:pointer;border:2px solid transparent;transition:all .25s;overflow:hidden;"
-         onmouseover="this.style.borderColor='var(--jade)';this.style.transform='translateY(-4px)'"
-         onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-      <div style="background:linear-gradient(135deg,var(--jade),var(--forest));border-radius:var(--r-sm) var(--r-sm) 0 0;padding:20px 20px 16px;color:#fff;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-        <div style="font-size:2rem;margin-bottom:6px;">🦁</div>
-        <div style="font-size:1.2rem;font-weight:800;font-family:'Amiri',serif;">الأبطال</div>
-        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">١١–١٤ سنة • ذكور</div>
-      </div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد المعلمين</span>
-          <span style="font-weight:800;font-size:1.1rem;color:var(--jade);" id="pb-count-abtal-teachers">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد الطلاب</span>
-          <span style="font-weight:800;font-size:1.1rem;color:var(--jade);" id="pb-count-abtal-students">—</span>
-        </div>
-        <div style="margin-top:4px;">
-          <button class="btn btn-primary" style="width:100%;font-size:.82rem;" onclick="event.stopPropagation();openParentBranch('الأبطال')">👨‍👦 عرض أولياء الأمور</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- الرواد -->
-    <div class="card" data-branch-key="rowad" onclick="openParentBranch('الرواد')" style="cursor:pointer;border:2px solid transparent;transition:all .25s;overflow:hidden;"
-         onmouseover="this.style.borderColor='#2196a3';this.style.transform='translateY(-4px)'"
-         onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-      <div style="background:linear-gradient(135deg,#2196a3,#15616d);border-radius:var(--r-sm) var(--r-sm) 0 0;padding:20px 20px 16px;color:#fff;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-        <div style="font-size:2rem;margin-bottom:6px;">🚀</div>
-        <div style="font-size:1.2rem;font-weight:800;font-family:'Amiri',serif;">الرواد</div>
-        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">٧–١٠ سنة • ذكور</div>
-      </div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد المعلمين</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#2196a3;" id="pb-count-rowad-teachers">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد الطلاب</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#2196a3;" id="pb-count-rowad-students">—</span>
-        </div>
-        <div style="margin-top:4px;">
-          <button class="btn btn-primary" style="width:100%;font-size:.82rem;background:linear-gradient(135deg,#2196a3,#15616d);border:none;" onclick="event.stopPropagation();openParentBranch('الرواد')">👨‍👦 عرض أولياء الأمور</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- الملكات -->
-    <div class="card" data-branch-key="banat" onclick="openParentBranch('الملكات')" style="cursor:pointer;border:2px solid transparent;transition:all .25s;overflow:hidden;"
-         onmouseover="this.style.borderColor='#9b59b6';this.style.transform='translateY(-4px)'"
-         onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-      <div style="background:linear-gradient(135deg,#9b59b6,#6c3483);border-radius:var(--r-sm) var(--r-sm) 0 0;padding:20px 20px 16px;color:#fff;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-        <div style="font-size:2rem;margin-bottom:6px;">👑</div>
-        <div style="font-size:1.2rem;font-weight:800;font-family:'Amiri',serif;">الملكات</div>
-        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">١١–١٤ سنة • إناث</div>
-      </div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد المعلمات</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#9b59b6;" id="pb-count-malakat-teachers">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد الطالبات</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#9b59b6;" id="pb-count-malakat-students">—</span>
-        </div>
-        <div style="margin-top:4px;">
-          <button class="btn btn-primary" style="width:100%;font-size:.82rem;background:linear-gradient(135deg,#9b59b6,#6c3483);border:none;" onclick="event.stopPropagation();openParentBranch('الملكات')">👨‍👦 عرض أولياء الأمور</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- الأميرات -->
-    <div class="card" data-branch-key="banat" onclick="openParentBranch('الأميرات')" style="cursor:pointer;border:2px solid transparent;transition:all .25s;overflow:hidden;"
-         onmouseover="this.style.borderColor='#e84393';this.style.transform='translateY(-4px)'"
-         onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'">
-      <div style="background:linear-gradient(135deg,#e84393,#b5006d);border-radius:var(--r-sm) var(--r-sm) 0 0;padding:20px 20px 16px;color:#fff;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
-        <div style="font-size:2rem;margin-bottom:6px;">🌸</div>
-        <div style="font-size:1.2rem;font-weight:800;font-family:'Amiri',serif;">الأميرات</div>
-        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">٧–١٠ سنة • إناث</div>
-      </div>
-      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد المعلمات</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#e84393;" id="pb-count-amerat-teachers">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);">
-          <span style="font-size:.82rem;color:var(--light);">عدد الطالبات</span>
-          <span style="font-weight:800;font-size:1.1rem;color:#e84393;" id="pb-count-amerat-students">—</span>
-        </div>
-        <div style="margin-top:4px;">
-          <button class="btn btn-primary" style="width:100%;font-size:.82rem;background:linear-gradient(135deg,#e84393,#b5006d);border:none;" onclick="event.stopPropagation();openParentBranch('الأميرات')">👨‍👦 عرض أولياء الأمور</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-</div><!-- /parents -->
+<!-- /parents -->
 
 <!-- ══════════════════════════════════════════════════════
      PAGE: PARENTS BRANCH DETAIL
 ══════════════════════════════════════════════════════ -->
-<div id="page-parents-branch" class="page">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-outline btn-sm" onclick="navPage('parents')" style="font-size:.8rem;">← رجوع</button>
-      <div id="pb-branch-badge" style="padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:700;color:#fff;"></div>
-    </div>
-    <button class="btn btn-primary btn-sm" onclick="openAddParent()" style="display:none">➕ إضافة ولي أمر</button>
-  </div>
-  <div id="pb-circles-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;"></div>
-</div>
+
 
 <!-- ══ PARENT CONTEXT MENU ══ -->
 <div id="pb-ctx-menu" style="display:none;position:fixed;z-index:9000;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1px solid var(--border);min-width:180px;overflow:hidden;">
@@ -3759,32 +3624,11 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
   </div>
 </div>
-<!-- ══ PAGE: ATT_STUDENTS ══ -->
-<div id="page-att_students" class="page">
-  <div class="section-title">📅 حضور الطلاب</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">📅</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
 
-<!-- ══ PAGE: ATT_TEACHERS ══ -->
-<div id="page-att_teachers" class="page">
-  <div class="section-title">📅 حضور المعلمين</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">📅</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
 
-<!-- ══ PAGE: ATT_EMPLOYEES ══ -->
-<div id="page-att_employees" class="page">
-  <div class="section-title">📅 حضور الموظفين</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">📅</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
+
+
+
 
 <!-- ══ PAGE: CIRCLES ══ -->
 <div id="page-circles" class="page">
@@ -4294,32 +4138,11 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div></div>
 </div>
 
-<!-- ══ PAGE: GOLDEN ══ -->
-<div id="page-golden" class="page">
-  <div class="section-title">🏅 السجل الذهبي</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">🏅</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
 
-<!-- ══ PAGE: CARDS ══ -->
-<div id="page-cards" class="page">
-  <div class="section-title">🪪 بطاقات الطلاب</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">🪪</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
 
-<!-- ══ PAGE: READING ══ -->
-<div id="page-reading" class="page">
-  <div class="section-title">🎥 المقرأة الإلكترونية</div>
-  <div class="card"><div class="card-body" style="text-align:center;padding:40px;">
-    <div style="font-size:3rem;margin-bottom:12px;">🎥</div>
-    <div style="font-size:1rem;color:var(--mid);">سيتم بناء هذا القسم قريباً</div>
-  </div></div>
-</div>
+
+
+
 
 <!-- ══ PAGE: LIBRARY ══ -->
 <!-- ══ PAGE: LIBRARY (معرض الكتب — قراءة) ══ -->
@@ -5868,20 +5691,6 @@ function buildCircleCard(teacher, students, color, isFemale) {
 // ── Edit Student Modal ──
 let _editKey = '', _editSafeId = '';
 
-function openEditStudent(key, name, safeId) {
-  _editKey = key;
-  _editSafeId = safeId;
-  const d = getStudentData(key);
-  document.getElementById('es-name').textContent = name;
-  document.getElementById('es-age').value  = d.age || '';
-  document.getElementById('es-mem').value  = d.mem || '';
-  document.getElementById('es-dad').value  = d.dad || '';
-  document.getElementById('es-mom').value  = d.mom || '';
-  document.getElementById('es-dob').value  = d.dob || '';
-  document.getElementById('es-pts').value  = d.pts || '';
-  document.getElementById('es-lvl').value  = d.lvl || '';
-  document.getElementById('overlay-edit-student').style.display = 'flex';
-}
 
 function closeEditStudent() {
   document.getElementById('overlay-edit-student').style.display = 'none';
@@ -5972,94 +5781,7 @@ function openBranch(branchName) {
 // ══════════════════════════════════════
 // PARENTS BRANCH — OPEN & BUILD
 // ══════════════════════════════════════
-function openParentBranch(branchName) {
-  nav(null, 'parents-branch');
 
-  const branchConfig = {
-    'الأبطال':  { emoji: '🦁', label: 'الأبطال — ١١–١٤ سنة — ذكور',   bg: 'linear-gradient(135deg,var(--jade),var(--forest))', key: 'الأبطال' },
-    'الرواد':   { emoji: '🚀', label: 'الرواد — ٧–١٠ سنة — ذكور',      bg: 'linear-gradient(135deg,#2196a3,#15616d)',           key: 'الرواد' },
-    'الملكات':  { emoji: '👑', label: 'الملكات — ١١–١٤ سنة — إناث',    bg: 'linear-gradient(135deg,#9b59b6,#6c3483)',           key: 'البنات', sub: 'الملكات' },
-    'الأميرات': { emoji: '🌸', label: 'الأميرات — ٧–١٠ سنة — إناث',   bg: 'linear-gradient(135deg,#e84393,#b5006d)',           key: 'البنات', sub: 'الأميرات' },
-  };
-
-  const cfg = branchConfig[branchName];
-  if (!cfg) return;
-
-  // Set badge
-  const badge = document.getElementById('pb-branch-badge');
-  if (badge) {
-    badge.textContent = cfg.emoji + ' ' + cfg.label;
-    badge.style.background = cfg.bg;
-  }
-
-  // Build circles
-  const grid = document.getElementById('pb-circles-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  let circles = BRANCH_DATA[cfg.key] || [];
-  // فلتر حسب sub (للملكات والأميرات)
-  if (cfg.sub) circles = circles.filter(c => c.sub === cfg.sub);
-  // فلتر معلمي المشرف لهذه الشعبة تحديداً
-  if (window.SUPERVISOR_BRANCH_TEACHERS) {
-    const bList = window.SUPERVISOR_BRANCH_TEACHERS[cfg.key];
-    if (bList && bList.length) circles = circles.filter(c => bList.includes(c.teacher));
-    else if (Object.keys(window.SUPERVISOR_BRANCH_TEACHERS).length > 0) circles = [];
-  } else if (window.SUPERVISOR_TEACHER_LIST && window.SUPERVISOR_TEACHER_LIST.length) {
-    circles = circles.filter(c => window.SUPERVISOR_TEACHER_LIST.includes(c.teacher));
-  }
-
-  if (circles.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--light);font-size:.9rem;">لا توجد بيانات</div>`;
-    return;
-  }
-
-  const isFemale = !!cfg.sub;
-  grid.innerHTML = circles.map(c => buildParentCircleCard(c.teacher, c.students, c.color || cfg.bg, isFemale, branchName)).join('');
-}
-
-function buildParentCircleCard(teacher, students, color, isFemale, branchName) {
-  const safeId = 'pb_' + teacher.replace(/\s+/g,'_');
-  const teacherLabel = isFemale ? `👩‍🏫 المعلمة: ${teacher}` : `👨‍🏫 المعلم: ${teacher}`;
-  const studentWord  = isFemale ? 'طالبة' : 'طالب';
-
-  const rows = students.map((s, i) => {
-    const key = safeId + '_' + i;
-    const d = getStudentData(key);
-    const sEsc = s.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    const dadPhone = d.dad || '—';
-    const momPhone = d.mom || '—';
-    return `<tr style="border-bottom:1px solid var(--border);cursor:pointer;"
-      onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''"
-      oncontextmenu="showParentMenu(event,'${sEsc}','${branchName ? branchName.replace(/'/g,"\\'") : ''}');return false;"
-      ontouchstart="startParentLongPress(event,'${sEsc}','${branchName ? branchName.replace(/'/g,"\\'") : ''}')"
-      ontouchend="clearParentLongPress()" ontouchmove="clearParentLongPress()">
-      <td style="padding:6px 8px;color:var(--light);font-size:.75rem;text-align:center;width:32px;">${i+1}</td>
-      <td style="padding:6px 10px;font-weight:600;">${s}</td>
-      <td style="padding:6px 10px;text-align:center;direction:ltr;font-size:.82rem;">${dadPhone}</td>
-      <td style="padding:6px 10px;text-align:center;direction:ltr;font-size:.82rem;">${momPhone}</td>
-    </tr>`;
-  }).join('');
-
-  return `
-  <div class="card" style="overflow:hidden;">
-    <div style="background:${color};color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div style="font-weight:700;font-size:.95rem;">${teacherLabel}</div>
-      <span style="background:rgba(255,255,255,.2);padding:2px 12px;border-radius:10px;font-size:.75rem;">${students.length} ${studentWord}</span>
-    </div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
-        <thead><tr style="background:var(--pale);color:var(--forest);">
-          <th style="padding:8px 6px;text-align:center;width:32px;">#</th>
-          <th style="padding:8px 10px;text-align:right;">اسم الطالب</th>
-          <th style="padding:8px 10px;text-align:center;">📞 ولي الأمر (أب)</th>
-          <th style="padding:8px 10px;text-align:center;">📞 ولي الأمر (أم)</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
 
 function initParentBranchCounts() {
   const svBT = window.SUPERVISOR_BRANCH_TEACHERS || null;
@@ -6103,36 +5825,12 @@ let _pbCtxStudent = '';
 let _pbCtxBranch  = '';
 let _pbLongPressTimer = null;
 
-function showParentMenu(e, studentName, branchName) {
-  _pbCtxStudent = studentName;
-  _pbCtxBranch  = branchName;
-  const menu = document.getElementById('pb-ctx-menu');
-  document.getElementById('pb-ctx-name').textContent = studentName;
-  menu.style.display = 'block';
-  // position
-  let x = e.clientX, y = e.clientY;
-  const mw = 200, mh = 130;
-  if (x + mw > window.innerWidth)  x = window.innerWidth  - mw - 8;
-  if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
-  menu.style.left = x + 'px';
-  menu.style.top  = y + 'px';
-  // close on outside click
-  setTimeout(() => document.addEventListener('click', closeParentMenuOnce, { once: true }), 0);
-}
 
 function closeParentMenu() {
   const m = document.getElementById('pb-ctx-menu');
   if (m) m.style.display = 'none';
 }
-function closeParentMenuOnce() { closeParentMenu(); }
 
-function startParentLongPress(e, studentName, branchName) {
-  _pbLongPressTimer = setTimeout(() => {
-    const touch = e.touches[0];
-    showParentMenu({ clientX: touch.clientX, clientY: touch.clientY }, studentName, branchName);
-  }, 600);
-}
-function clearParentLongPress() { clearTimeout(_pbLongPressTimer); }
 
 // ── 1. إرسال رسالة ──
 function pbCtxSendMsg() {
@@ -6739,39 +6437,7 @@ function confirmSaveCardEdit() {
 }
 
 // ── تحديث BRANCH_DATA فورياً في الذاكرة ──
-function updateTeacherInBranchData(oldName, newName, newPhone, newActive, newAge, newDob) {
-  Object.keys(BRANCH_DATA).forEach(branchKey => {
-    BRANCH_DATA[branchKey].forEach(item => {
-      if (item.teacher === oldName) {
-        item.teacher = newName;
-        if (newPhone  !== undefined) item.phone  = newPhone;
-        if (newActive !== undefined) item.active = newActive;
-        if (newAge    !== undefined) item.age    = newAge;
-        if (newDob    !== undefined) item.dob    = newDob;
-      }
-    });
-  });
-  TEACHERS.forEach(t => {
-    if (t.full_name === oldName || t.id === _ctxTeacherId) {
-      t.full_name = newName;
-      t.name      = newName.split(' ')[0];
-      t.lname     = newName.split(' ').slice(1).join(' ');
-      if (newPhone  !== undefined && newPhone !== '') t.phone     = newPhone;
-      if (newActive !== undefined) { t.is_active = newActive; t.status = newActive ? 'نشط' : 'موقوف'; }
-      if (newAge    !== undefined) t.age = newAge;
-      if (newDob    !== undefined) t.dob = newDob;
-    }
-  });
-}
 
-function deleteTeacherFromBranchData(tName) {
-  Object.keys(BRANCH_DATA).forEach(branchKey => {
-    const idx = BRANCH_DATA[branchKey].findIndex(item => item.teacher === tName);
-    if (idx !== -1) BRANCH_DATA[branchKey].splice(idx, 1);
-  });
-  const ti = TEACHERS.findIndex(t => t.full_name === tName || t.id === _ctxTeacherId);
-  if (ti !== -1) TEACHERS.splice(ti, 1);
-}
 
 function doSaveCardEdit() {
   if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
@@ -6855,11 +6521,6 @@ function updateTeacherPagination(total) {
 
 function tGoPage(p) { tCurrentPage = p; filterTeachers(); }
 
-function changeTeacherRows(val) {
-  tRowsPerPage = parseInt(val);
-  tCurrentPage = 1;
-  filterTeachers();
-}
 
 function selectTeacherRow(id, row) {
   document.querySelectorAll('#teachers-tbody tr').forEach(r => r.style.background = '');
@@ -6890,10 +6551,6 @@ function updateTeacherActionBtns() {
   if (dupBtn) dupBtn.disabled = checked !== 1;
 }
 
-function toggleAllTeachers(cb) {
-  document.querySelectorAll('.t-row-check').forEach(c => c.checked = cb.checked);
-  onTeacherCheck();
-}
 
 // Filter & sort
 function filterTeachers() {
@@ -6918,11 +6575,6 @@ function filterTeachers() {
   if (tbody && tbody.style.display !== 'none') renderTeachersList(filtered);
 }
 
-function sortTeachers(col) {
-  if (tSortCol === col) tSortAsc = !tSortAsc;
-  else { tSortCol = col; tSortAsc = true; }
-  filterTeachers();
-}
 
 // ══════════ USERNAME / PASSWORD AUTO-GEN ══════════
 function autoGenTeacherUser() {
@@ -7004,55 +6656,9 @@ function viewTeacherImg(id) {
 }
 
 // View teacher profile
-function viewTeacher(id) {
-  const t = TEACHERS.find(t => t.id === id);
-  if (!t) return;
-  document.getElementById('view-teacher-body').innerHTML = `
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="avatar" style="margin:0 auto 12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));width:64px;height:64px;font-size:1.5rem;">${(t.name||'م')[0]}</div>
-      <div style="font-size:1.1rem;font-weight:800;color:var(--forest);">${t.full_name}</div>
-      <div style="font-size:.82rem;color:var(--light);margin-top:4px;">${t.circle}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${[
-        ['الجنس', t.gender],
-        ['الحلقة / الشعبة', t.circle],
-        ['رقم الهاتف', t.phone],
-        ['البريد الإلكتروني', t.email],
-        ['نوع الهوية', t.id_type],
-        ['رقم الهوية', t.id_number],
-        ['اسم المستخدم', `<span style="font-family:monospace;">${t.username}</span>`],
-        ['الحالة', `<span class="badge ${t.status === 'نشط' ? 'bg-green' : 'bg-red'}">${t.status}</span>`],
-      ].map(([k, v]) => `
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;">
-          <span style="color:var(--light);">${k}</span><span style="font-weight:700;">${v}</span>
-        </div>`).join('')}
-    </div>`;
-  openModal('modal-view-teacher');
-}
 
 // Edit teacher (selected)
-function editTeacherSelected() {
-  if (!selectedTeacherId) { showToast('⚠️ اختار معلماً أولاً'); return; }
-  editTeacher(selectedTeacherId);
-}
 
-function editTeacher(id) {
-  const t = TEACHERS.find(t => t.id === id);
-  if (!t) return;
-  document.getElementById('edit-t-id').value = t.id;
-  document.getElementById('edit-t-fname').value = t.name;
-  document.getElementById('edit-t-lname').value = t.lname;
-  document.getElementById('edit-t-phone').value = t.phone === '—' ? '' : t.phone;
-  document.getElementById('edit-t-email').value = t.email === '—' ? '' : t.email;
-  document.getElementById('edit-t-specialty').value = t.specialty || '';
-  document.getElementById('edit-t-gender').value = t.gender === '—' ? 'ذكر' : t.gender;
-  document.getElementById('edit-t-id-type').value = t.id_type === '—' ? '' : t.id_type;
-  document.getElementById('edit-t-id-num').value = t.id_number === '—' ? '' : t.id_number;
-  document.getElementById('edit-t-branch').value = t.circle === '—' ? 'الأبطال' : t.circle;
-  document.getElementById('edit-t-status').value = String(t.is_active);
-  openModal('modal-edit-teacher');
-}
 
 function saveEditTeacher() {
   if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
@@ -7060,72 +6666,13 @@ function saveEditTeacher() {
 }
 
 // Duplicate teacher
-function dupTeacher() {
-  if (!selectedTeacherId) { showToast('⚠️ اختار معلماً أولاً'); return; }
-  const t = TEACHERS.find(t => t.id === selectedTeacherId);
-  if (!t) return;
-  openModal('modal-add-teacher');
-  setTimeout(() => {
-    document.getElementById('t-fname').value = t.name;
-    document.getElementById('t-lname').value = t.lname;
-    document.getElementById('t-phone').value = t.phone === '—' ? '' : t.phone;
-    generateTeacherPassword();
-    generateTeacherUsername();
-    showToast('📋 تم نسخ بيانات المعلم — عدّل ما تحتاج');
-  }, 200);
-}
 
 // Delete teacher (selected or by id)
-function deleteTeacherSelected() {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
 
-function deleteTeacher(id) {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
 
 // Print teacher list
-function printTeacherList() {
-  const rows = TEACHERS.map((t, i) => `<tr>
-    <td style="text-align:center">${i + 1}</td>
-    <td>${t.name}</td><td>${t.lname}</td>
-    <td>${t.gender}</td><td>${t.circle}</td>
-    <td dir="ltr">${t.phone}</td>
-    <td dir="ltr">${t.id_type}</td>
-    <td dir="ltr">${t.id_number}</td>
-  </tr>`).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
-    <style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}
-    table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}
-    td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}
-    .hdr{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style>
-    <\/head><body>
-    <div class="hdr"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية<\/div>
-    <div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}<\/div><\/div>
-    <h2>قائمة المعلمين<\/h2>
-    <p style="text-align:center;color:#666;">إجمالي ${TEACHERS.length} معلم<\/p>
-    <table><thead><tr>
-      <th>#<\/th><th>الاسم<\/th><th>العائلة<\/th><th>الجنس<\/th><th>الحلقة<\/th><th>الهاتف<\/th><th>نوع الهوية<\/th><th>رقم الهوية<\/th>
-    <\/tr><\/thead><tbody>${rows}<\/tbody><\/table>
-    <\/body><\/html>`);
-  w.document.close(); w.print();
-}
 
 // Export to Excel (CSV)
-function exportTeachersExcel() {
-  const headers = ['الاسم','العائلة','الجنس','الحلقة','الهاتف','البريد','نوع الهوية','رقم الهوية','اسم المستخدم','الحالة'];
-  const rows = TEACHERS.map(t => [t.name, t.lname, t.gender, t.circle, t.phone, t.email, t.id_type, t.id_number, t.username, t.status]);
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'قائمة_المعلمين.csv';
-  a.click();
-  showToast('✅ تم تصدير ملف Excel');
-}
 
 // جيب الإعلانات من Supabase
 // ══════════════════════════════════════
@@ -7139,215 +6686,16 @@ let pSortCol = '';
 let pSortAsc = true;
 let pPhotoData = null;
 
-async function loadParents() {
-  let data, error;
-  ({ data, error } = await db
-    .from('users')
-    .select('id, full_name, phone, username, is_active, notes, created_at')
-    .eq('role', 'parent')
-    .order('created_at', { ascending: false }));
 
-  if (error) { console.error('parents error:', error); return; }
-  processParents(data);
-}
 
-function processParents(data) {
-  PARENTS = (data || []).map((p, i) => {
-    let extra = {};
-    try { if (p.notes) extra = JSON.parse(p.notes); } catch(e) {}
-    return {
-      id: p.id,
-      idx: i + 1,
-      name: (p.full_name || 'بدون اسم').split(' ')[0],
-      lname: (p.full_name || '').split(' ').slice(1).join(' '),
-      full_name: p.full_name || 'بدون اسم',
-      phone: p.phone || '—',
-      email: extra.email || '—',
-      relation: extra.relation || '—',
-      dob: extra.dob || '—',
-      job: extra.job || '—',
-      address: extra.address || '—',
-      children: extra.children || '—',
-      username: p.username || '—',
-      status: p.is_active ? 'نشط' : 'موقوف',
-      is_active: p.is_active,
-    };
-  });
-
-  const fathers = PARENTS.filter(p => p.relation === 'الأب').length;
-  const mothers = PARENTS.filter(p => p.relation === 'الأم').length;
-  const other = PARENTS.filter(p => p.relation !== 'الأب' && p.relation !== 'الأم').length;
-  const updates = {
-    'stat-parents': PARENTS.length,
-    'p-stat-total': PARENTS.length,
-    'p-stat-fathers': fathers,
-    'p-stat-mothers': mothers,
-    'p-stat-other': other,
-    'p-badge-total': 'الإجمالي: ' + PARENTS.length,
-  };
-  Object.entries(updates).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (el) el.textContent = val;
-  });
-
-  renderParentsList(PARENTS);
-}
-
-function renderParentsList(list) {
-  const tbody = document.getElementById('parents-tbody');
-  if (!tbody) return;
-
-  const start = (pCurrentPage - 1) * pRowsPerPage;
-  const paged = pRowsPerPage >= 999 ? list : list.slice(start, start + pRowsPerPage);
-
-  if (paged.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--light);">لا يوجد أولياء أمور</td></tr>`;
-    document.getElementById('p-page-info').textContent = '0 سجل';
-    document.getElementById('p-pagination').innerHTML = '';
-    return;
-  }
-
-  tbody.innerHTML = paged.map(p => `
-    <tr style="cursor:pointer;" onclick="viewParent('${p.id}')">
-      <td onclick="event.stopPropagation()">
-        <input type="checkbox" class="p-row-check" data-id="${p.id}"
-          onchange="onParentCheck(this)" style="cursor:pointer;">
-      </td>
-      <td><div style="display:flex;align-items:center;gap:9px;">
-        <div class="avatar" style="background:linear-gradient(135deg,var(--gold),var(--gold-l));width:32px;height:32px;font-size:.85rem;">${(p.name||'و')[0]}</div>
-        <strong>${p.name}</strong>
-      </div></td>
-      <td>${p.lname}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.children}</td>
-      <td dir="ltr">${p.phone}</td>
-      <td dir="ltr" style="font-size:.8rem;">${p.email}</td>
-      <td><code style="font-size:.78rem;background:var(--pale);padding:2px 6px;border-radius:4px;">${p.username}</code></td>
-      <td><span class="badge ${p.relation==='الأب'?'bg-blue':p.relation==='الأم'?'bg-purple':'bg-gold'}">${p.relation}</span></td>
-      <td style="font-size:.8rem;">${p.dob}</td>
-      <td style="font-size:.8rem;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.address}</td>
-    </tr>`).join('');
-
-  // Pagination info
-  const total = list.length;
-  const totalPages = pRowsPerPage >= 999 ? 1 : Math.ceil(total / pRowsPerPage);
-  document.getElementById('p-page-info').textContent =
-    `عرض ${start + 1}–${Math.min(start + pRowsPerPage, total)} من ${total}`;
-
-  const pag = document.getElementById('p-pagination');
-  pag.innerHTML = '';
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.style.cssText = `padding:4px 10px;border-radius:6px;border:1.5px solid ${i===pCurrentPage?'var(--jade)':'var(--border)'};
-      background:${i===pCurrentPage?'var(--jade)':'var(--white)'};color:${i===pCurrentPage?'#fff':'var(--mid)'};
-      cursor:pointer;font-family:Tajawal;font-size:.8rem;`;
-    btn.onclick = () => { pCurrentPage = i; renderParentsList(PARENTS_FILTERED || PARENTS); };
-    pag.appendChild(btn);
-  }
-}
 
 let PARENTS_FILTERED = null;
 
-function filterParents() {
-  const q = document.getElementById('parent-search')?.value?.toLowerCase() || '';
-  const rel = document.getElementById('parent-filter-relation')?.value || '';
-  PARENTS_FILTERED = PARENTS.filter(p => {
-    const matchQ = !q || p.full_name.toLowerCase().includes(q) || p.phone.includes(q) || p.username.toLowerCase().includes(q);
-    const matchRel = !rel || p.relation === rel;
-    return matchQ && matchRel;
-  });
-  pCurrentPage = 1;
-  renderParentsList(PARENTS_FILTERED);
-}
 
-function sortParents(col) {
-  if (pSortCol === col) { pSortAsc = !pSortAsc; } else { pSortCol = col; pSortAsc = true; }
-  const list = PARENTS_FILTERED || PARENTS;
-  list.sort((a, b) => {
-    const av = a[col] || ''; const bv = b[col] || '';
-    return pSortAsc ? av.localeCompare(bv,'ar') : bv.localeCompare(av,'ar');
-  });
-  renderParentsList(list);
-}
 
-function changeParentRows(val) {
-  pRowsPerPage = parseInt(val); pCurrentPage = 1;
-  renderParentsList(PARENTS_FILTERED || PARENTS);
-}
 
-function onParentCheck(cb) {
-  const checked = [...document.querySelectorAll('.p-row-check:checked')];
-  const n = checked.length;
-  selectedParentId = n === 1 ? checked[0].dataset.id : null;
-  const badge = document.getElementById('p-badge-selected');
-  badge.style.display = n > 0 ? 'inline-flex' : 'none';
-  badge.textContent = 'محدد: ' + n;
-  document.getElementById('p-btn-edit').disabled = n !== 1;
-  document.getElementById('p-btn-dup').disabled = n !== 1;
-  document.getElementById('p-btn-del').disabled = n === 0;
-}
 
-function toggleAllParents(cb) {
-  document.querySelectorAll('.p-row-check').forEach(c => { c.checked = cb.checked; });
-  onParentCheck(cb);
-}
 
-function openAddParent() {
-  // Reset fields
-  ['p-fname','p-lname','p-fname-en','p-lname-en','p-phone','p-email','p-job','p-address'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  pPhotoData = null;
-  // Reset photo UI
-  const avatar = document.getElementById('p-avatar-circle');
-  if (avatar) avatar.innerHTML = '👨‍👦';
-  const drop = document.getElementById('p-photo-drop');
-  if (drop) drop.textContent = '🗂️ أو اسحب وأفلت الصورة هنا';
-  const fname = document.getElementById('p-photo-filename');
-  if (fname) fname.textContent = '';
-
-  generateParentUsername();
-  generateParentPassword();
-
-  // ── جيب كل الأسماء من BRANCH_DATA ──
-  const allStudents = [];
-  const seen = new Set();
-  const branchOrder = ['الأبطال','الرواد','البنات'];
-  const subMap = { 'الملكات': 'الملكات', 'الأميرات': 'الأميرات' };
-
-  branchOrder.forEach(bKey => {
-    (BRANCH_DATA[bKey] || []).forEach(circle => {
-      // تحديد الشعبة الحقيقية للعرض
-      let displayBranch = bKey;
-      if (bKey === 'البنات' && circle.sub) displayBranch = circle.sub;
-      (circle.students || []).forEach(name => {
-        if (!seen.has(name)) {
-          seen.add(name);
-          allStudents.push({ name, branch: displayBranch });
-        }
-      });
-    });
-  });
-
-  // احفظ في variable عالمي عشان الفلتر
-  window._allParentChildren = allStudents;
-
-  renderChildrenTags('الكل');
-
-  // Reset branch filter buttons
-  document.querySelectorAll('.p-branch-btn').forEach(b => {
-    b.style.background = 'var(--bg)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color = 'var(--mid)';
-  });
-  const firstBtn = document.querySelector('.p-branch-btn');
-  if (firstBtn) {
-    firstBtn.style.background = 'var(--jade)';
-    firstBtn.style.borderColor = 'var(--jade)';
-    firstBtn.style.color = '#fff';
-  }
-
-  openModal('modal-add-parent');
-}
 
 function renderChildrenTags(branch) {
   const tagsDiv = document.getElementById('p-children-tags');
@@ -7425,20 +6773,20 @@ function autoGenParentUser() {
   const fname = document.getElementById('p-fname')?.value?.trim() || '';
   const lname = document.getElementById('p-lname')?.value?.trim() || '';
   if (!fname && !lname) return;
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
+  const rand = (_rnd(9000000) + 1000000);
   const uname = 'parent' + rand;
   document.getElementById('p-username').value = uname;
   document.getElementById('p-password').value = uname;
 }
 
 function generateParentUsername() {
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
+  const rand = (_rnd(9000000) + 1000000);
   const uname = 'parent' + rand;
   document.getElementById('p-username').value = uname;
 }
 
 function generateParentPassword() {
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
+  const rand = (_rnd(9000000) + 1000000);
   document.getElementById('p-password').value = 'parent' + rand;
 }
 
@@ -7463,43 +6811,12 @@ function addParent() {
   showToast('⛔ الإجراء ده من لوحة المدير بس');
 }
 
-function viewParent(id) {
-  const p = PARENTS.find(p => p.id === id);
-  if (!p) return;
-  document.getElementById('view-parent-body').innerHTML = `
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="avatar" style="margin:0 auto 12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));width:64px;height:64px;font-size:1.5rem;">${(p.name||'و')[0]}</div>
-      <div style="font-size:1.1rem;font-weight:800;color:var(--forest);">${p.full_name}</div>
-      <div style="font-size:.82rem;color:var(--light);margin-top:4px;">${p.relation}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${[
-        ['الأبناء', p.children],
-        ['صلة القرابة', p.relation],
-        ['رقم الهاتف', p.phone],
-        ['البريد الإلكتروني', p.email],
-        ['الوظيفة', p.job],
-        ['العنوان', p.address],
-        ['تاريخ الميلاد', p.dob],
-        ['اسم المستخدم', `<span style="font-family:monospace;">${p.username}</span>`],
-        ['الحالة', `<span class="badge ${p.is_active ? 'bg-green' : 'bg-red'}">${p.status}</span>`],
-      ].map(([k, v]) => `
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;">
-          <span style="color:var(--light);">${k}</span><span style="font-weight:700;">${v}</span>
-        </div>`).join('')}
-    </div>`;
-  openModal('modal-view-parent');
-}
 
 function editParentFromView() {
   closeModal('modal-view-parent');
   if (selectedParentId) editParent(selectedParentId);
 }
 
-function editParentSelected() {
-  if (!selectedParentId) { showToast('⚠️ اختار ولي أمر أولاً'); return; }
-  editParent(selectedParentId);
-}
 
 function editParent(id) {
   const p = PARENTS.find(p => p.id === id);
@@ -7521,63 +6838,9 @@ function saveEditParent() {
   showToast('⛔ الإجراء ده من لوحة المدير بس');
 }
 
-function dupParent() {
-  if (!selectedParentId) { showToast('⚠️ اختار ولي أمر أولاً'); return; }
-  const p = PARENTS.find(p => p.id === selectedParentId);
-  if (!p) return;
-  openAddParent();
-  setTimeout(() => {
-    document.getElementById('p-fname').value = p.name;
-    document.getElementById('p-lname').value = p.lname;
-    document.getElementById('p-phone').value = p.phone === '—' ? '' : p.phone;
-    generateParentPassword();
-    generateParentUsername();
-    showToast('📋 تم نسخ بيانات ولي الأمر — عدّل ما تحتاج');
-  }, 200);
-}
 
-function deleteParentSelected() {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
 
-function printParentList() {
-  const rows = PARENTS.map((p, i) => `<tr>
-    <td style="text-align:center">${i + 1}</td>
-    <td>${p.name}</td><td>${p.lname}</td>
-    <td>${p.relation}</td><td>${p.children}</td>
-    <td dir="ltr">${p.phone}</td>
-    <td dir="ltr">${p.email}</td>
-  </tr>`).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
-    <style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}
-    table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}
-    td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}
-    .hdr{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style>
-    <\/head><body>
-    <div class="hdr"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية<\/div>
-    <div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}<\/div><\/div>
-    <h2>قائمة أولياء الأمور<\/h2>
-    <p style="text-align:center;color:#666;">إجمالي ${PARENTS.length} ولي أمر<\/p>
-    <table><thead><tr>
-      <th>#<\/th><th>الاسم<\/th><th>العائلة<\/th><th>الصلة<\/th><th>الأبناء<\/th><th>الهاتف<\/th><th>البريد<\/th>
-    <\/tr><\/thead><tbody>${rows}<\/tbody><\/table>
-    <\/body><\/html>`);
-  w.document.close(); w.print();
-}
 
-function exportParentsExcel() {
-  const headers = ['الاسم','العائلة','صلة القرابة','الأبناء','الهاتف','البريد','الوظيفة','العنوان','اسم المستخدم'];
-  const rows = PARENTS.map(p => [p.name, p.lname, p.relation, p.children, p.phone, p.email, p.job, p.address, p.username]);
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'قائمة_أولياء_الأمور.csv';
-  a.click();
-  showToast('✅ تم تصدير ملف Excel');
-}
 async function loadAnnouncements() {
   const { data, error } = await db
     .from('announcements')
@@ -7599,35 +6862,8 @@ async function loadAnnouncements() {
 }
 
 // حفظ الحضور في Supabase
-async function saveAttendanceToDB() {
-  const today = localISO(new Date());
-  const records = [];
-
-  for (const [i, status] of Object.entries(attState)) {
-    const student = STUDENTS[parseInt(i)];
-    if (!student) continue;
-    records.push({
-      student_id: student.id,
-      date: today,
-      status: status === 'present' ? 'present' : status === 'absent' ? 'absent' : 'late',
-      recorded_by: JSON.parse(localStorage.getItem('currentUser'))?.id || null,
-    });
-  }
-
-  if (records.length === 0) { showToast('⚠️ لم تسجل أي حضور'); return; }
-
-  const { error } = await db.from('attendance').upsert(records, {
-    onConflict: 'student_id,date',
-    ignoreDuplicates: false,
-  });
-
-  if (error) { console.error(error); showToast('❌ حدث خطأ في الحفظ'); return; }
-  showToast('✅ تم حفظ الحضور في قاعدة البيانات!');
-}
 
 // إضافة طالب في Supabase
-function genSU(){document.getElementById('ns-username').value='student'+Date.now().toString().slice(-7);}
-function genSP(){const c='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';let p='';for(let i=0;i<8;i++)p+=c[_rnd(c.length)];document.getElementById('ns-password').value=p;}
 
 async function addStudentToDB() {
   const fullName = document.getElementById('ns-fullname')?.value?.trim();
@@ -7877,34 +7113,8 @@ function renderStudentsList(list) {
     </tr>`).join('');
 }
 
-function renderStudents() { renderStudentsList(STUDENTS); }
 
-function filterStudents() {
-  const search = (document.getElementById('student-search')?.value || '').toLowerCase();
-  const branch = document.getElementById('student-filter-branch')?.value || '';
-  const status = document.getElementById('student-filter-status')?.value || '';
-  renderStudentsList(STUDENTS.filter(s =>
-    (!search || s.name.includes(search) || s.teacher.includes(search)) &&
-    (!branch || s.circle === branch) &&
-    (!status || s.status === status)
-  ));
-}
 
-function updateSBranchLabel(radio) {
-  document.querySelectorAll('.s-branch-label').forEach(l => {
-    l.style.borderColor = 'var(--border)';
-    l.style.background = '';
-    l.style.color = '';
-    l.style.fontWeight = '';
-  });
-  const label = radio.closest('label');
-  if (label) {
-    label.style.borderColor = 'var(--jade)';
-    label.style.background = 'var(--pale)';
-    label.style.color = 'var(--emerald)';
-    label.style.fontWeight = '700';
-  }
-}
 
 function viewStudent(id) {
   const s = STUDENTS.find(s => s.id === id);
@@ -7958,14 +7168,12 @@ async function saveEditStudent() {
 
   if (!fname) { showToast('⚠️ اكتب اسم الطالب'); return; }
 
-  const { data: stuData, error: sErr } = await db.from('students').select('user_id').eq('id', id).single();
-  if (sErr || !stuData) { showToast('❌ تعذّر قراءة بيانات الطالب'); return; }
-  if (stuData.user_id) {
-    const { data: uRows, error: uErr } = await db.from('users').update({ full_name: (fname + ' ' + lname).trim(), phone: phone || null }).eq('id', stuData.user_id).select('id');
-    if (uErr || !uRows || !uRows.length) { showToast('❌ لم يُحفظ اسم/هاتف الطالب (صلاحيات)'); return; }
-  }
-  const { data: sRows, error } = await db.from('students').update({ memorized_parts: mem, is_active, notes: notes || null }).eq('id', id).select('id');
-  if (error || !sRows || !sRows.length) { showToast('❌ خطأ في التعديل — لم يُحفظ'); return; }
+  // RPC آمنة (المشرف مالوش UPDATE مباشر على users) — دفعة ١١
+  const { data: res, error } = await db.rpc('sv_update_student', {
+    p_student: id, p_full_name: (fname + ' ' + lname).trim(), p_phone: phone || null,
+    p_mem: isNaN(mem) ? 0 : mem, p_active: is_active, p_notes: notes || null
+  });
+  if (error || !res || !res.ok) { showToast('❌ لم يُحفظ: ' + ((error && error.message) || 'مرفوض')); return; }
 
   closeModal('modal-edit-student');
   showToast('✅ تم تعديل بيانات الطالب!');
@@ -8002,17 +7210,6 @@ function applyBranchFilter() {
 
 // ══ بيانات المشرفين (لتحديد شعبة كل مشرف) ══
 // ── مزامنة بيانات المشرفين من لوحة المدير ──
-function loadSupervisorsData() {
-  try {
-    const stored = localStorage.getItem('tawhed_supervisors');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch(e) { console.warn('localStorage read failed', e); }
-  // fallback: البيانات الثابتة
-  return SUPERVISORS_DATA_STATIC;
-}
 
 const SUPERVISORS_DATA_STATIC = []; // أُفرغ — البيانات تُبنى live من قاعدة البيانات
 
@@ -8382,7 +7579,6 @@ async function loadDashboardCounts(){
 // ══════════════════════════════════════
 // RENDER TEACHERS — alias
 // ══════════════════════════════════════
-function renderTeachers() { filterTeachers(); }
 
 // ══════════════════════════════════════
 // ATTENDANCE GRID
@@ -8462,11 +7658,6 @@ async function bulkDelAnn(){
   openModal('modal-del-ann');
 }
 
-function askDelAnn(id, title){
-  document.getElementById('del-ann-msg').innerHTML = `هل أنت متأكد من حذف إعلان<br><strong style="color:var(--forest);">(${title})</strong><br>من قائمة الإعلانات نهائياً؟`;
-  annToDelete = id;
-  openModal('modal-del-ann');
-}
 
 async function confirmDelAnn(){
   if(annToDelete === null){ closeModal('modal-del-ann'); return; }
@@ -8482,19 +7673,6 @@ async function confirmDelAnn(){
   await loadAnnouncements();
 }
 
-function openResendAnn(id){
-  const ann = ANNOUNCEMENTS.find(a => a.id === id);
-  if(!ann) return;
-  document.getElementById('resend-ann-title').value = ann.title;
-  document.getElementById('resend-ann-body').value = ann.body;
-  // clear checkboxes
-  ['teachers','supervisors','employees','students','parents'].forEach(r=>{
-    const el = document.getElementById('rs-chk-'+r);
-    if(el) el.checked = false;
-  });
-  document.getElementById('modal-resend-ann').dataset.annId = id;
-  openModal('modal-resend-ann');
-}
 
 async function doResendAnn(){
   const targets = [];
@@ -8655,15 +7833,6 @@ async function publishAnnToDB() {
 const DAYS_DATA=[{d:'سبت',v:88},{d:'أحد',v:92},{d:'اثن',v:85},{d:'ثلا',v:95},{d:'أرب',v:91}];
 const COLORS=['#2d7a50','#40916c','#52a876','#74c69d','#2d7a50'];
 
-function renderBarChart(){
-  const max=100;
-  document.getElementById('att-chart').innerHTML = DAYS_DATA.map((d,i)=>`
-    <div class="bar-col">
-      <div style="font-size:.68rem;color:var(--light);margin-bottom:2px;">${d.v}%</div>
-      <div class="bar-fill" style="height:${(d.v/max)*64}px;background:${COLORS[i]};border-radius:4px 4px 0 0;width:100%;"></div>
-      <div class="bar-lbl">${d.d}</div>
-    </div>`).join('');
-}
 
 // ══════════════════════════════════════
 // MODAL
@@ -8875,19 +8044,7 @@ async function confirmMoveStudent(){
   await refreshSupervisorData();
 }
 
-function printStudentList(){
-  const circle=document.getElementById('s-filter-circle')?.value||'جميع الطلاب';
-  const rows=STUDENTS.map((s,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${s.name.split(' ')[0]}</td><td>${s.name.split(' ').slice(1).join(' ')}</td><td style="text-align:center">${s.dob||'—'}</td></tr>`).join('');
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}.header{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style><\/head><body><div class="header"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية</div><div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}</div></div><h2>قائمة الطلاب</h2><p style="text-align:center;color:#666;">الشعبة: ${circle} — إجمالي ${STUDENTS.length} طالب</p><table><thead><tr><th>الرقم</th><th>الاسم</th><th>العائلة</th><th>تاريخ الميلاد</th></tr></thead><tbody>${rows}</tbody></table><\/body><\/html>`);
-  w.document.close();w.print();
-}
 
-function selectRow(row,id){
-  document.querySelectorAll('#students-body tr').forEach(r=>r.style.background='');
-  row.style.background='var(--pale)';
-  selectedStudentId=id;
-}
 
 
 // ══════════════════════════════════════
@@ -9099,14 +8256,6 @@ function addScheduleRowEdit() {
   if (cont) cont.insertAdjacentHTML('beforeend', buildScheduleRow());
 }
 
-function getScheduleFromRows(containerId) {
-  const rows = document.querySelectorAll('#' + containerId + ' .sched-row');
-  return Array.from(rows).map(r => {
-    const sel = r.querySelector('select');
-    const inputs = r.querySelectorAll('input[type=time]');
-    return { day: sel?.value || '', from: inputs[0]?.value || '', to: inputs[1]?.value || '', active: true };
-  }).filter(r => r.day);
-}
 
 function buildTeacherCheckboxes(containerId, selected = []) {
   const cont = document.getElementById(containerId);
@@ -9132,10 +8281,6 @@ function updateCTeacherLabel(cb) {
   label.style.fontWeight = cb.checked ? '700' : '';
 }
 
-function getSelectedTeachers(containerId) {
-  const vals = Array.from(document.querySelectorAll('#' + containerId + ' input[type=checkbox]:checked')).map(c => c.value);
-  return vals.length ? vals : [];
-}
 
 function saveCircle() {
   if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
@@ -9677,7 +8822,6 @@ function updateSupervisorStats() {
   });
 }
 
-function updateSupervisorBranchCards() { updateSupervisorStats(); }
 
 // ── Branch colours config ──
 const SV_BRANCH_CFG = {
@@ -9760,48 +8904,7 @@ function svRenderDetailCards(cfg, list) {
 // ── Transfer state ──
 let svTransferState = { fromId: null, teacherName: null, toId: null };
 
-function svShowTransferMenu(e, fromId, teacherName) {
-  e.stopPropagation();
-  // Close any open transfer menu
-  document.querySelectorAll('.sv-transfer-dropdown').forEach(d => d.remove());
 
-  const from = SUPERVISORS.find(s => s.id === fromId);
-  if (!from) return;
-
-  // Other supervisors in same branch
-  const others = SUPERVISORS.filter(s => s.branch === from.branch && s.id !== fromId);
-  if (!others.length) { showToast('لا يوجد مشرفون آخرون في هذه الشعبة', 'error'); return; }
-
-  const btn = e.currentTarget;
-  const rect = btn.getBoundingClientRect();
-  const menu = document.createElement('div');
-  menu.className = 'sv-transfer-dropdown';
-  menu.style.cssText = `position:fixed;z-index:950;background:var(--white);border-radius:var(--r-sm);
-    box-shadow:0 8px 28px rgba(0,0,0,.18);border:1px solid var(--border);min-width:170px;overflow:hidden;`;
-  menu.style.left = Math.max(4, rect.right - 170) + 'px';
-  menu.style.top  = (rect.bottom + 4) + 'px';
-
-  menu.innerHTML = `<div style="padding:7px 12px;font-size:.72rem;font-weight:700;color:var(--light);background:var(--pale);border-bottom:1px solid var(--border);">نقل إلى:</div>` +
-    others.map(sv => `<div onclick="svAskTransfer('${fromId}','${teacherName.replace(/'/g,"\\'")}','${sv.id}')" 
-      style="padding:10px 14px;font-size:.84rem;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:8px;"
-      onmouseenter="this.style.background='var(--pale)'" onmouseleave="this.style.background=''">
-      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--mint));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0;">${sv.name[0]}${sv.lname[0]}</div>
-      ${sv.name} ${sv.lname}
-    </div>`).join('');
-
-  document.body.appendChild(menu);
-  setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
-}
-
-function svAskTransfer(fromId, teacherName, toId) {
-  document.querySelectorAll('.sv-transfer-dropdown').forEach(d => d.remove());
-  const to = SUPERVISORS.find(s => s.id === toId);
-  if (!to) return;
-  svTransferState = { fromId, teacherName, toId };
-  const msg = document.getElementById('sv-transfer-msg');
-  if (msg) msg.textContent = 'هل أنت متأكد من نقل المعلم ' + teacherName + ' إلى المشرف ' + to.name + ' ' + to.lname + '؟';
-  openModal('modal-sv-confirm-transfer');
-}
 
 function svTransferYes() {
   const { fromId, teacherName, toId } = svTransferState;
@@ -9824,9 +8927,6 @@ function svTransferYes() {
   svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null);
 }
 
-function svTransferTeacher(fromId, teacherName, toId) {
-  svAskTransfer(fromId, teacherName, toId);
-}
 
 
 function svShowBranches(fromPopstate) {
@@ -9842,7 +8942,6 @@ function svShowBranches(fromPopstate) {
   if (!fromPopstate) history.pushState({ page: 'supervisors', svBranch: null }, '', '#supervisors');
 }
 
-function openSvBranchList(branch) { showToast('📋 ' + branch); }
 
 // ── Context menu & long press ──
 let svActiveId = null, svLongPressTimer = null;
@@ -9990,31 +9089,7 @@ function svDeleteYes() {
   if (bk) svRenderDetailCards(SV_BRANCH_CFG[bk], null);
 }
 
-function filterSupervisors() {
-  const q = (document.getElementById('supervisor-search')?.value || '').toLowerCase();
-  const branch = document.getElementById('supervisor-filter-branch')?.value || '';
-  const status = document.getElementById('supervisor-filter-status')?.value || '';
-  SUPERVISORS_FILTERED = SUPERVISORS.filter(s => {
-    const fullname = ((s.name || '') + ' ' + (s.lname || '')).toLowerCase();
-    return (!q || fullname.includes(q)) &&
-           (!branch || s.branch === branch) &&
-           (!status || (s.status || 'نشط') === status);
-  });
-  if (svSortField) {
-    SUPERVISORS_FILTERED.sort((a, b) => {
-      const av = (a[svSortField] || '').toString().toLowerCase();
-      const bv = (b[svSortField] || '').toString().toLowerCase();
-      return av < bv ? -svSortDir : av > bv ? svSortDir : 0;
-    });
-  }
-  svPage = 1;
-  renderSupervisors();
-}
 
-function sortSupervisors(field) {
-  if (svSortField === field) svSortDir *= -1; else { svSortField = field; svSortDir = 1; }
-  filterSupervisors();
-}
 
 function renderSupervisors() {
   const tbody = document.getElementById('supervisors-tbody');
@@ -10071,14 +9146,6 @@ function toggleSupervisorRow(cb, id) {
   renderSupervisors();
 }
 
-function toggleAllSupervisors(cb) {
-  const start = (svPage - 1) * svRowsPerPage;
-  SUPERVISORS_FILTERED.slice(start, start + svRowsPerPage).forEach(s => {
-    if (cb.checked) SV_SELECTED.add(s.id); else SV_SELECTED.delete(s.id);
-  });
-  updateSvSelectionUI();
-  renderSupervisors();
-}
 
 function updateSvSelectionUI() {
   const n = SV_SELECTED.size;
@@ -10090,34 +9157,7 @@ function updateSvSelectionUI() {
   });
 }
 
-function changeSupervisorRows(v) { svRowsPerPage = parseInt(v); svPage = 1; renderSupervisors(); }
 
-function openAddSupervisor() {
-  ['sv-fname','sv-lname','sv-fname-en','sv-lname-en','sv-phone','sv-email','sv-address','sv-qualification','sv-dob','sv-id-num','sv-username','sv-password'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  generateSupervisorUsername();
-  generateSupervisorPassword();
-
-  // Populate teachers picker from all branches
-  const picker = document.getElementById('sv-teachers-picker');
-  if (picker) {
-    const allTeachers = [];
-    Object.entries(BRANCH_DATA).forEach(([branch, items]) => {
-      items.forEach(item => allTeachers.push({ name: item.teacher, branch }));
-    });
-    picker.innerHTML = allTeachers.map(t => {
-      const tid = 'svt_' + t.name.replace(/\s+/g,'_');
-      return `<label style="display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
-        <input type="checkbox" id="${tid}" value="${t.name}" style="cursor:pointer;width:15px;height:15px;">
-        <span style="font-weight:600;">${t.name}</span>
-        <span style="font-size:.7rem;color:var(--light);margin-right:auto;">${t.branch}</span>
-      </label>`;
-    }).join('');
-  }
-  openModal('modal-add-supervisor');
-}
 
 function autoGenSupervisorUser() {
   const f = (document.getElementById('sv-fname')?.value || '').trim();
@@ -10132,7 +9172,7 @@ function autoGenSupervisorUser() {
 function generateSupervisorUsername() {
   const f = (document.getElementById('sv-fname')?.value || 'supervisor').trim();
   const u = document.getElementById('sv-username');
-  if (u) { u.value = f.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 900 + 100); u._manualEdit = false; }
+  if (u) { u.value = f.toLowerCase().replace(/\s+/g, '') + (_rnd(900) + 100); u._manualEdit = false; }
 }
 
 function generateSupervisorPassword() {
@@ -10178,10 +9218,6 @@ function editSupervisorFromView() {
   if (id) editSupervisor(id);
 }
 
-function editSupervisorSelected() {
-  if (SV_SELECTED.size !== 1) { showToast('⚠️ حدد مشرفاً واحداً فقط', 'error'); return; }
-  editSupervisor([...SV_SELECTED][0]);
-}
 
 function editSupervisor(id) {
   const s = SUPERVISORS.find(x => x.id === id);
@@ -10205,34 +9241,9 @@ function saveEditSupervisor() {
   showToast('⛔ الإجراء ده من لوحة المدير بس');
 }
 
-function deleteSupervisorSelected() {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
 
-function dupSupervisor() { showToast('⏳ سيتم تفعيل هذه الخاصية قريباً'); }
 
-function printSupervisorList() {
-  const rows = SUPERVISORS_FILTERED.map((s, i) =>
-    `<tr><td>${i+1}</td><td>${s.name||''} ${s.lname||''}</td><td>${s.gender||'—'}</td><td>${s.branch||'—'}</td><td>${s.phone||'—'}</td><td>${s.status||'نشط'}</td></tr>`
-  ).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}<\/style><\/head><body><h2>قائمة المشرفين — مدرسة التوحيد القرآنية<\/h2><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('ar-EG')} — إجمالي ${SUPERVISORS_FILTERED.length} مشرف<\/p><table><thead><tr><th>#<\/th><th>الاسم<\/th><th>الجنس<\/th><th>الشعبة<\/th><th>الهاتف<\/th><th>الحالة<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table><\/body><\/html>`);
-  w.document.close();
-  w.print();
-}
 
-function exportSupervisorsExcel() {
-  let csv = 'الاسم,العائلة,الجنس,الشعبة,الهاتف,البريد,الحالة\n';
-  SUPERVISORS_FILTERED.forEach(s => {
-    csv += `"${s.name||''}","${s.lname||''}","${s.gender||''}","${s.branch||''}","${s.phone||''}","${s.email||''}","${s.status||'نشط'}"\n`;
-  });
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'supervisors.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
 
 // ══════════════════════════════════════
 // EMPLOYEES JS
@@ -10377,7 +9388,7 @@ function autoGenEmployeeUser() {
 function generateEmployeeUsername() {
   const f = (document.getElementById('em-fname')?.value || 'staff').trim();
   const u = document.getElementById('em-username');
-  if (u) { u.value = 'staff' + f.toLowerCase().replace(/\s+/g,'') + Math.floor(Math.random()*9000+1000); u._manualEdit = false; }
+  if (u) { u.value = 'staff' + f.toLowerCase().replace(/\s+/g,'') + (_rnd(9000)+1000); u._manualEdit = false; }
 }
 function generateEmployeePassword() {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$';
@@ -10600,21 +9611,6 @@ function svCurrentCircleDate(branchName){
 }
 
 // ── هل هناك حلقة جارية الآن؟ نص توضيحي للحالة ──
-function svScheduleStatus(branchName){
-  const now = new Date();
-  const w = svDayWindow(branchName, now.getDay());
-  const hr = now.getHours();
-  if(w){
-    if(hr >= w.start && hr < w.end){
-      return {live:true, text:'🔴 حلقة جارية الآن' + (w.label?(' — '+w.label):''), date: localISO(now)};
-    }
-    if(hr < w.start){
-      return {live:false, text:`⏳ حلقة اليوم تبدأ ${termHourAr(w.start)}`, date: localISO(now)};
-    }
-    return {live:false, text:'✅ انتهت حلقة اليوم', date: localISO(now)};
-  }
-  return {live:false, text:'📅 لا توجد حلقة اليوم', date: svCurrentCircleDate(branchName)};
-}
 
 // ── تنبيهات لكل شعبة ──
 window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
@@ -10963,10 +9959,6 @@ async function svDoSaveSession(){
 }
 
 // ── أسبوع الشهر (1..4) ──
-function svWeekOfMonth(){
-  const d = new Date();
-  return Math.min(4, Math.floor((d.getDate()-1)/7)+1);
-}
 
 // الأركان الإشرافية (تتناوب على أيام الحلقات)
 const SV_SESS_PILLARS = [
@@ -11059,45 +10051,7 @@ function svFmtReportDate(iso){
 }
 
 // إزالة الجلسات المكررة لنفس (المعلم + التاريخ + الشعبة) مع الاحتفاظ بالأحدث
-function svDedupeSessions(rows){
-  const seen = {}, out = [];
-  (rows||[]).forEach(r=>{
-    const k = String(r.teacher_name||'').trim()+'|'+(r.session_date||'')+'|'+String(r.branch||'').trim();
-    const prev = seen[k];
-    if(!prev){ seen[k]=r; out.push(r); return; }
-    const t1 = new Date(prev.saved_at||prev.session_date||0).getTime();
-    const t2 = new Date(r.saved_at||r.session_date||0).getTime();
-    if(t2 >= t1){ const idx=out.indexOf(prev); if(idx>=0) out[idx]=r; seen[k]=r; }
-  });
-  return out;
-}
 
-async function loadReports(){
-  const body = document.getElementById('reports-body');
-  const cnt  = document.getElementById('reports-count');
-  if(!body) return;
-  body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>';
-  const cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
-  let rows = [];
-  try{
-    let q = db.from('supervisory_sessions').select('*').order('session_date',{ascending:false});
-    if(cu.role==='supervisor' && cu.id) q = q.eq('supervisor_id', String(cu.id));
-    const { data, error } = await selectAll(q);
-    if(error){ console.log('loadReports:', error.message); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل التقارير</div>'; return; }
-    rows = data || [];
-  }catch(e){ console.log('loadReports ex:', e); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر الاتصال بالخادم</div>'; return; }
-
-  // إزالة التكرار: صف واحد فقط لكل (معلم + تاريخ + شعبة) — نحتفظ بالأحدث
-  rows = svDedupeSessions(rows);
-
-  if(cnt) cnt.textContent = rows.length ? (rows.length + ' جلسة') : '—';
-  if(!rows.length){
-    body.innerHTML = '<div class="empty" style="padding:36px;"><span class="empty-icon">📭</span>لم تُسجَّل أي جلسات إشرافية بعد</div>';
-    return;
-  }
-  window.SV_REPORTS_CACHE = rows;
-  svRenderReportsTable(rows);
-}
 
 function svPillarBadges(pil){
   const keys = Object.keys(pil||{}).filter(k=>pil[k]);
@@ -11105,32 +10059,6 @@ function svPillarBadges(pil){
   return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${SV_PILLAR_NAMES[k]||k}</span>`).join('');
 }
 
-function svRenderReportsTable(rows){
-  const body = document.getElementById('reports-body');
-  const trs = rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);">
-    <td style="padding:10px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);white-space:nowrap;">${svFmtReportDate(r.session_date)}</td>
-    <td style="padding:10px;font-weight:700;color:var(--forest);">${esc(r.teacher_name||'—')}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${r.branch||'—'}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
-    <td style="padding:10px;text-align:center;">${svPillarBadges(r.pillars)}</td>
-    <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
-    <td style="padding:10px;text-align:center;"><button class="btn btn-outline btn-xs" onclick="svViewReport(${i})">👁️ عرض</button></td>
-  </tr>`).join('');
-  body.innerHTML = `<table style="width:100%;border-collapse:collapse;min-width:760px;">
-    <thead><tr style="background:var(--bg);">
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);width:40px;">م</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">تاريخ الجلسة</th>
-      <th style="padding:11px;text-align:right;font-size:.76rem;color:var(--mid);">المعلم</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الشعبة</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">المشرف</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الأركان المُقيَّمة</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الحضور</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">التفاصيل</th>
-    </tr></thead>
-    <tbody>${trs}</tbody>
-  </table>`;
-}
 
 function svViewReport(i){
   const r = (window.SV_REPORTS_CACHE||[])[i]; if(!r) return;
@@ -11161,15 +10089,8 @@ function svViewReport(i){
 }
 
 // ── فتح معلمي شعبة معينة فقط ──
-function svOpenBranchTeachers(branchName){
-  navPage('teachers');
-  setTimeout(()=>{ try{ openTeacherBranch(branchName); }catch(e){ console.log('openTeacherBranch:', e); } }, 70);
-}
 
 // ── فتح طلاب شعبة معينة فقط ──
-function svOpenBranchStudents(branchName){
-  try{ openBranch(branchName); }catch(e){ console.log('openBranch:', e); }
-}
 
 // ══════════════════════════════════════════════════════
 // مودال تفاصيل الحلقة — جدول طلاب المعلم
@@ -11178,138 +10099,8 @@ const SV_LEVELS = ['ممتاز','جيد جدًا','جيد','حاول مرة أخ
 function svLevelColor(lvl){
   return lvl==='ممتاز'?'#1a7a4a':lvl==='جيد جدًا'?'#1d6fa4':lvl==='جيد'?'#c8920a':'#c0392b';
 }
-async function svOpenCircleModal(branchName, teacherName){
-  const titleEl = document.getElementById('svc-title');
-  if(titleEl) titleEl.textContent = 'حلقة المعلم/ ' + teacherName;
-  const body = document.getElementById('svc-body');
-  body.innerHTML = '<div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري تحميل بيانات الحلقة...</div>';
-  openModal('modal-circle-detail');
-
-  // حاول جلب البيانات الحقيقية من قاعدة البيانات
-  let realData = null;
-  try {
-    realData = await svFetchCircleLive(branchName, teacherName);
-  } catch(e){ console.log('svFetchCircleLive:', e); }
-
-  if(realData && realData.rows.length){
-    svRenderCircleTable(realData.rows, realData.status, true, realData.dailyReport);
-    return;
-  }
-
-  // ── لا توجد بيانات حقيقية بعد: اعرض الطلاب بحالة "لم يُسجّل" بدل توليد أرقام وهمية ──
-  const circles = svBranchCircles(branchName);
-  const circle  = circles.find(c => c.teacher === teacherName) || (BRANCH_DATA[branchName]||[]).find(c=>c.teacher===teacherName);
-  const students = (circle && circle.students) ? circle.students : [];
-  if(!students.length){
-    body.innerHTML = '<div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا يوجد طلاب في هذه الحلقة</div>';
-    return;
-  }
-  const status = svScheduleStatus(branchName);
-  const rows = students.map((s) => ({
-    name: s, att: '—', mem: '—', rev: '—', memPlan: 'لم يتم', revPlan: 'لم يتم'
-  }));
-  svRenderCircleTable(rows, status, false);
-}
 
 // ── جلب بيانات الحلقة الحقيقية (حضور + تسميع) ليوم الحلقة الحالي ──
-async function svFetchCircleLive(branchName, teacherName){
-  // 1) Resolve teacher id via flexible name match (tolerates spaces/parentheses)
-  const clean = String(teacherName||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-  const norm  = x => String(x||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-  const { data: tAll } = await db.from('users').select('id, full_name');
-  if(!tAll || !tAll.length) return null;
-  let tRow = tAll.find(t => norm(t.full_name) === clean)
-          || tAll.find(t => norm(t.full_name).startsWith(clean) || clean.startsWith(norm(t.full_name)))
-          || tAll.find(t => clean && (norm(t.full_name).includes(clean) || clean.includes(norm(t.full_name))));
-  if(!tRow) return null;
-  const teacherId = tRow.id;
-  
-  // 2) طلاب المعلم
-  const { data: sData } = await db.from('students')
-    .select('id, users!students_user_id_fkey(full_name)')
-    .eq('teacher_id', teacherId).eq('is_active', true);
-  if(!sData || !sData.length) return null;
-  const students = sData.map(s => ({ id:s.id, name: s.users?.full_name || 'طالب' }));
-  const ids = students.map(s => s.id);
-
-  // 3) تاريخ الحلقة الحالي لهذه الشعبة
-  const status = svScheduleStatus(branchName);
-  const date = status.date;
-
-  // 3.ب) الطلاب الزائرون (خارج الحلقة) المضافون من المعلم لهذا اليوم — يظهرون مباشرة
-  let guests = [];
-  try {
-    const { data: gData } = await db.from('circle_guests')
-      .select('student_id, student_name, student_teacher')
-      .eq('added_by', teacherId).eq('guest_date', date);
-    guests = (gData||[]).filter(g => g.student_id && !ids.includes(g.student_id)).map(g => ({
-      id: g.student_id, name: g.student_name || 'طالب', _guest: true, guestTeacher: g.student_teacher || ''
-    }));
-  } catch(e){ loadWarn(e); }
-  // 3.ج) ضمان ظهور الزائر: ادمج زوّار تقرير اليوم المرفوع (لو التوقيت اختلف أو الصف اتسجّل في التقرير مش في الجداول)
-  try {
-    const { data: rRep } = await db.from('circle_reports')
-      .select('data').eq('teacher_id', teacherId).eq('report_date', date).limit(1);
-    const rd = (rRep && rRep[0] && Array.isArray(rRep[0].data)) ? rRep[0].data : [];
-    rd.forEach(row => {
-      if(!row || !row.is_guest) return;
-      const gid = row.student_id || ('rg_'+(row.name||'ضيف'));
-      if(ids.includes(gid) || guests.some(g=>g.id===gid)) return;
-      guests.push({ id:gid, name: row.name || 'طالب', _guest:true, guestTeacher: row.guest_teacher || '', _rep: row });
-    });
-  } catch(e){ loadWarn(e); }
-  const allStudents = students.concat(guests);
-  const allIds = allStudents.map(s => s.id);
-
-  // 4) الحضور لهذا اليوم
-  const { data: attData } = await selectAll(db.from('attendance')
-    .select('student_id, status, late_minutes').in('student_id', allIds).eq('date', date).order('date').order('student_id'));
-  const attMap = {}, lateMap = {};
-  (attData||[]).forEach(a => { attMap[a.student_id] = a.status; lateMap[a.student_id] = a.late_minutes||0; });
-
-  // 5) التسميع لهذا اليوم (حفظ + مراجعة)
-  const { data: memData } = await selectAll(db.from('memorization')
-    .select('student_id, type, grade').in('student_id', allIds).eq('date', date).order('date').order('student_id').order('type'));
-  const memMap = {}, revMap = {};
-  (memData||[]).forEach(m => {
-    if(m.type==='review') revMap[m.student_id] = m.grade;
-    else memMap[m.student_id] = m.grade;
-  });
-
-  const gradeAr = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'حاول مرة أخرى' };
-  const attAr   = { present:'حاضر', absent:'غائب' };
-
-  // 6) نقاط الطلاب (مجموع من points_cards)  [#3]
-  const ptsMap = {};
-  try {
-    const { data: pData } = await db.from('points_cards').select('student_id, points').in('student_id', allIds);
-    (pData||[]).forEach(p => { ptsMap[p.student_id] = (ptsMap[p.student_id]||0) + (Number(p.points)||0); });
-  } catch(e){ loadWarn(e); }
-
-  // 7) آخر تقرير يومي للحلقة من المعلم  [#2]
-  let dailyReport = null;
-  try {
-    const { data: rData } = await db.from('circle_reports').select('*').eq('teacher_id', teacherId).order('report_date',{ascending:false}).limit(1);
-    if(rData && rData.length) dailyReport = rData[0];
-  } catch(e){ loadWarn(e); }
-
-  const rows = allStudents.map(s => {
-    let attRaw = attMap[s.id];
-    let memG = memMap[s.id], revG = revMap[s.id];
-    if(s._rep){ if(attRaw==null) attRaw = s._rep.attendance; if(memG==null) memG = s._rep.mem_grade; if(revG==null) revG = s._rep.rev_grade; }   // fallback من التقرير المرفوع
-    let att;
-    if(attRaw==='late'){ const mn=lateMap[s.id]||(s._rep&&s._rep.late_minutes)||0; att = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
-    else att = attRaw ? (attAr[attRaw]||attRaw) : 'لم يُسجَّل';
-    const mem = (att==='غائب') ? '—' : (memG ? (gradeAr[memG]||memG) : '—');
-    const rev = (att==='غائب') ? '—' : (revG ? (gradeAr[revG]||revG) : '—');
-    return { name:s.name, att, mem, rev, pts: ptsMap[s.id]||0,
-      memPlan: memG ? (memG==='retry'?'لم يتم':'تم') : 'لم يتم',
-      revPlan: revG ? (revG==='retry'?'لم يتم':'تم') : 'لم يتم',
-      _guest: !!s._guest, guestTeacher: s.guestTeacher || '' };
-  });
-
-  return { rows, status, dailyReport };
-}
 
 // ── رسم جدول الحلقة (يُستخدم للحقيقي والتقديري) ──
 function svRenderCircleTable(rows, status, isLive, dailyReport){
@@ -11415,10 +10206,8 @@ function wkBranchDays(branchName, t){
 }
 
 // أحد الأسبوع الذي يقع فيه تاريخ معيّن (getDay: 0=أحد)
-function wkSundayOf(dt){ const x=new Date(dt); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
 
 // هل الشعبة إناث؟
-function wkIsGirls(branchName){ return termIsGirls(branchName); }
 
 // تواريخ الأسبوع السبعة — مفهرسة بـ getDay (0=أحد..6=سبت) — بداية الأسبوع من جدول الدورات
 function wkWeekDates(wIdx, branchName, t){
@@ -11834,7 +10623,6 @@ let   WA_CURRENT = 0;
 let   WA_DATA    = {};   // {branchName: {alerts:[], warnings:[]}}
 
 // تحويل الأرقام العربية لإنجليزي ثم استخراج رقم
-function waNum(str){ const m = String(str).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).match(/\d+/); return m?parseInt(m[0]):0; }
 
 function waPrevWeek(){ if(WA_CURRENT>0){ WA_CURRENT--; renderWAlerts(); } }
 function waNextWeek(){ if(WA_CURRENT<WK_TOTAL-1){ WA_CURRENT++; renderWAlerts(); } }
@@ -12669,18 +11457,6 @@ function deleteBranchAlert(branchName, id){
   else svRenderBranchAlerts(branchName);
 }
 
-function openAddAlertModal(branchName){
-  window._CURRENT_ALERT_BRANCH = branchName || (window.SUPERVISOR_BRANCH) || 'الأبطال';
-  const teachers = svBranchTeacherList(window._CURRENT_ALERT_BRANCH) || (window.SUPERVISOR_TEACHER_LIST || []);
-  const sel = document.getElementById('add-alert-teacher-sel');
-  if(sel){
-    sel.innerHTML = '<option value="">اختر معلم (اختياري)</option>' +
-      teachers.map(t=>`<option value="${t}">${t}</option>`).join('');
-  }
-  document.getElementById('add-alert-text').value = '';
-  document.getElementById('add-alert-type').value = 'gold';
-  openModal('modal-add-alert');
-}
 
 function saveNewAlert(){
   const text    = document.getElementById('add-alert-text').value.trim();
@@ -12698,39 +11474,6 @@ function saveNewAlert(){
 }
 
 // ── اشتراكات شعبة معينة ──
-async function svLoadBranchFees(branchName){
-  const cfg = SV_DB_BRANCH_CFG[branchName] || SV_DB_BRANCH_CFG['الأبطال'];
-  const key = cfg.key;
-  const circles = svBranchCircles(branchName);
-  let total = circles.reduce((s,c)=>s+((c.students||[]).length),0) || 0;
-  let paid  = 0;
-  try{
-    const tNames = circles.map(c=>c.teacher).filter(Boolean);
-    if(tNames.length){
-      const { data: stData } = await db.from('students').select('id,fees_paid,teacher_name').in('teacher_name', tNames);
-      if(stData && stData.length){
-        total = stData.length;
-        paid  = stData.filter(s=>s.fees_paid).length;
-      } else {
-        paid = Math.round(total * .90);
-      }
-    } else {
-      paid = Math.round(total * .90);
-    }
-  }catch(e){ paid = Math.round(total * .90); }
-
-  const unpaid = Math.max(0, total - paid);
-  const pct = total ? Math.round(paid/total*100) : 0;
-  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
-  set('db-fees-text-'+key, paid + ' / ' + total + ' طالب سدّد');
-  set('db-fees-pct-'+key, pct + '%');
-  const bar = document.getElementById('db-fees-bar-'+key);
-  if(bar) bar.style.width = pct + '%';
-  const badge = document.getElementById('db-fees-badge-'+key);
-  if(badge){ badge.textContent = pct + '%'; badge.className = 'badge ' + (pct>=90?'bg-green':pct>=70?'bg-gold':'bg-red'); }
-  const unpaidLbl = document.getElementById('db-fees-unpaid-'+key);
-  if(unpaidLbl) unpaidLbl.textContent = unpaid>0 ? ('⚠️ ' + unpaid + ' طالب لم يسدد بعد') : '';
-}
 
 
 // نبدأ بعد تحميل كل السكريبتات (عشان كل الدوال تكون متعرّفة)
@@ -12872,59 +11615,7 @@ function closeEditConfirm() {
 }
 
 // ── Add student for specific teacher ──
-function openAddStudentForTeacher(safeId, teacher) {
-  // reset all fields
-  ['ns-fname','ns-mname','ns-lname','ns-pob','ns-nationality','ns-id-num',
-   'ns-address','ns-username','ns-password','ns-phone','ns-email',
-   'ns-father-phone','ns-mother-phone'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = '';
-  });
-  const dob = document.getElementById('ns-dob'); if(dob) dob.value = '';
-  const sick = document.getElementById('ns-sick'); if(sick) sick.value = 'no';
-  const sickR = document.getElementById('ns-sick-reason'); if(sickR) sickR.value = '';
-  // store context for saving
-  window._addingForSafeId = safeId;
-  window._addingForTeacher = teacher;
-  // update modal title & button
-  const title = document.querySelector('#modal-add-student .modal-title');
-  if(title) title.innerHTML = '➕ إضافة طالب — ' + teacher;
-  const addBtn = document.querySelector('#modal-add-student .modal-foot .btn-primary');
-  if(addBtn) { addBtn.textContent = '➕ إضافة'; addBtn.onclick = () => addStudentToCircle(); }
-  openModal('modal-add-student');
-}
 
-function addStudentToCircle() {
-  const fname = document.getElementById('ns-fname')?.value.trim();
-  const mname = document.getElementById('ns-mname')?.value.trim() || '';
-  const lname = document.getElementById('ns-lname')?.value.trim();
-  if(!fname || !lname) { showToast('⚠️ الاسم والعائلة مطلوبان'); return; }
-  const fullName = [fname, mname, lname].filter(Boolean).join(' ');
-  const safeId = window._addingForSafeId;
-  // add to BRANCH_DATA
-  for(const [br, circles] of Object.entries(BRANCH_DATA)){
-    const circle = circles.find(c => c.teacher.replace(/\s+/g,'_') === safeId);
-    if(!circle) continue;
-    circle.students.push(fullName);
-    // save data to localStorage
-    const idx = circle.students.length - 1;
-    const key = safeId + '_' + idx;
-    saveStudentData(key, {
-      dob: document.getElementById('ns-dob')?.value || '',
-      dad: document.getElementById('ns-father-phone')?.value || '',
-      mom: document.getElementById('ns-mother-phone')?.value || '',
-      age: '', mem: '', pts: '', lvl: '',
-    });
-    refreshCircleCard(safeId);
-    break;
-  }
-  // restore modal
-  const title = document.querySelector('#modal-add-student .modal-title');
-  if(title) title.innerHTML = '👨‍🎓 إضافة طالب جديد';
-  const addBtn = document.querySelector('#modal-add-student .modal-foot .btn-primary');
-  if(addBtn) { addBtn.textContent = '➕ إضافة'; addBtn.onclick = () => addStudent(); }
-  closeModal('modal-add-student');
-  showToast('✅ تم إضافة الطالب: ' + fullName);
-}
 
 function confirmSaveEdit() {
   // save ALL editable fields from modal form
@@ -14201,32 +12892,19 @@ function confirmDeleteAdmin() {
 // ══════════════════════════════════════
 // ADMINS — ADD MODAL
 // ══════════════════════════════════════
-function openAddAdmin() {
-  ['adm-fname','adm-lname','adm-fname-en','adm-lname-en','adm-phone','adm-email',
-   'adm-address','adm-qualification','adm-id-num','adm-username','adm-password','adm-title'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.querySelectorAll('.adm-branch-check').forEach(cb => {
-    cb.checked = false;
-    svBranchCheckStyle(cb);
-  });
-  generateAdminUsername();
-  generateAdminPassword();
-  openModal('modal-add-admin');
-}
 
 function autoGenAdminUser() {
   const f = (document.getElementById('adm-fname')?.value || '').trim();
   const l = (document.getElementById('adm-lname')?.value || '').trim();
   if (f || l) {
     const u = document.getElementById('adm-username');
-    if (u && !u.dataset.manual) u.value = transliterateAr(f + l).toLowerCase().replace(/\s+/g,'') + Math.floor(Math.random()*99+1);
+    if (u && !u.dataset.manual) u.value = transliterateAr(f + l).toLowerCase().replace(/\s+/g,'') + (_rnd(99)+1);
   }
 }
 
 function generateAdminUsername() {
   const u = document.getElementById('adm-username');
-  if (u) { u.value = 'admin_' + Math.random().toString(36).slice(2,8); u.dataset.manual = ''; }
+  if (u) { u.value = 'admin_' + _rnd(2176782336).toString(36); u.dataset.manual = ''; }
 }
 
 function generateAdminPassword() {

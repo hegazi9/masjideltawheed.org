@@ -4037,17 +4037,37 @@ function setAttUI(sid,status,mins){
 }
 
 // أركان الحلقة (تلقين/كنوز/تجويد) — تُحفظ محلياً لليوم
-function renderArkan(c){
-  if(!c){ document.getElementById('arkan-checklist').innerHTML=''; return; }
-  const key='arkan_'+c.id+'_'+D();
-  const st=JSON.parse(localStorage.getItem(key)||'{}');
+// أركان الحلقة — في جدول circle_arkan (دفعة ١١) بدل localStorage
+let ARKAN={}, _arkChain=Promise.resolve();
+async function renderArkan(c){
+  const box=document.getElementById('arkan-checklist'); if(!box) return;
+  if(!c){ box.innerHTML=''; return; }
+  const cid=c.id, day=D(), key=cid+'_'+day;
+  box.innerHTML='<div style="color:var(--light);font-size:.8rem;">⏳ جارٍ التحميل…</div>';
+  let st={}, failed=false;
+  try{ const {data,error}=await db.from('circle_arkan').select('data').eq('circle_id',cid).eq('date',day).maybeSingle(); if(error) throw error; st=(data&&data.data)||{}; }
+  catch(e){ loadWarn(e); failed=true; }
+  if(!failed){ // نقل أي تسجيل قديم من الجهاز (مرة واحدة)
+    try{ const lk='arkan_'+cid+'_'+day, old=JSON.parse(localStorage.getItem(lk)||'null');
+      if(old&&Object.keys(old).length&&!Object.keys(st).length){ st=old; await arkSave(cid,day,st); }
+      localStorage.removeItem(lk); }catch(e){ console.warn(e); } }
+  ARKAN[key]=st;
+  const cur=activeCircle&&activeCircle(); if(cur&&cur.id!==cid) return;
   const items=[['talqeen','🔁 التلقين الجماعي'],['kunoz','💎 شرح الكنوز الأثرية'],['tajweed','📗 شرح التجويد']];
-  document.getElementById('arkan-checklist').innerHTML=items.map(([k,t])=>`
+  box.innerHTML=(failed?'<div style="color:var(--red);font-size:.8rem;">⚠️ الأركان ما اتحمّلتش — اعمل تحديث للصفحة</div>':'')+items.map(([k,t])=>`
     <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-size:.86rem;">
-      <input type="checkbox" ${st[k]?'checked':''} onchange="toggleArkan('${c.id}','${k}',this.checked)" style="width:18px;height:18px;"> ${t}
+      <input type="checkbox" ${st[k]?'checked':''} ${failed?'disabled':''} onchange="toggleArkan('${cid}','${k}',this)" style="width:18px;height:18px;"> ${t}
     </label>`).join('');
 }
-function toggleArkan(cid,k,v){ const key='arkan_'+cid+'_'+D(); const st=JSON.parse(localStorage.getItem(key)||'{}'); st[k]=v; localStorage.setItem(key,JSON.stringify(st)); }
+async function arkSave(cid,day,st){
+  const {data,error}=await db.from('circle_arkan').upsert([{circle_id:cid,date:day,data:st,updated_by:cu.id,updated_at:new Date().toISOString()}],{onConflict:'circle_id,date'}).select('circle_id');
+  if(error||!data||data.length!==1) throw (error||new Error('rls'));
+}
+function toggleArkan(cid,k,el){
+  const day=D(), key=cid+'_'+day, v=!!el.checked;
+  const st=Object.assign({},ARKAN[key]||{}); st[k]=v; ARKAN[key]=st;
+  _arkChain=_arkChain.then(()=>arkSave(cid,day,st)).catch(e=>{ console.warn(e); el.checked=!v; const s2=Object.assign({},ARKAN[key]||{}); s2[k]=!v; ARKAN[key]=s2; showToast('⚠️ الركن ما اتحفظش — جرّب تاني'); });
+}
 
 // ══ POINTS / CARDS ══
 const CARDS=[['excellent','أخضر ١٥',15,'#1a7a4a'],['very_good','أزرق ١٠',10,'var(--blue)'],['good','أصفر ٥',5,'var(--gold)'],['silver','فضي ٥٠',50,'#8a8f98'],['gold','ذهبي ١٠٠',100,'#c8920a'],['diamond','ماسي ٢٠٠',200,'#6b3fa0']];
@@ -5586,7 +5606,12 @@ document.addEventListener('click', function(e) {
 async function loadAnnouncements(){
   const box=document.getElementById('ann-list');
   try{
-    const {data}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false});
+    const {data:all}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false});
+    // اللي يخص المعلم بس: «للكل» أو فيه teacher أو مخصّص باسمه
+    const data=(all||[]).filter(a=>{ const t=String(a.target_role||'all').replace(/\s/g,'');
+      if(t==='all'||t==='') return true;
+      if(t.indexOf('custom:')===0) return t.slice(7).split(',').includes(String(cu.id));
+      return t.split(',').includes('teacher'); });
     if(!data||!data.length){ box.innerHTML='<div class="empty"><span class="empty-icon">📢</span>لا توجد إعلانات</div>'; return; }
     box.innerHTML=data.map(a=>`<div class="alert-strip alert-ok" style="flex-direction:column;align-items:flex-start;">
       <div style="font-weight:700;">📢 ${esc(a.body||'')}</div>

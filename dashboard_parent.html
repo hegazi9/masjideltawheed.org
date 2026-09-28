@@ -9,8 +9,8 @@
      │  home · prayers · attendance · recitation · plan · points
      │  exams · behavior · subs · inbox · settings
      └────────────────────────────────────────────────────────────
-     • البيانات: RLS (my_child_ids) + RPC: parent_children / parent_circle_board
-     • الصلوات: ولي الأمر يسجّل أي يوم في أسبوع الدورة الحالي (pr_parent_can_write)
+     • البيانات: RLS (my_child_ids) + RPC: parent_children / parent_circle_board / parent_set_phone
+     • الصلوات: ولي الأمر يسجّل أي يوم في أسبوع الدورة الحالي + يوم امبارح (pr_parent_can_write — دفعة ١١)
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -816,7 +816,8 @@ function liMem(r){
 // ══ الصلوات ══
 const PR={ws:null, rows:{}, sel:null, chain:Promise.resolve(), state:{}, loading:false, fail:false};
 function prCurWs(){ return prWeekStart(KID.branch,today()); }
-function prEditable(iso){ const td=today(); return iso<=td && iso>=prCurWs(); }
+// الأسبوع الحالي + امبارح دايماً (دفعة ١١ — نفس pr_parent_can_write)
+function prEditable(iso){ const td=today(); return iso<=td && (iso>=prCurWs() || iso===prAddDays(td,-1)); }
 function prOpts(key){
   const g=girls();
   if(PR_FARD.includes(key)&&prIsAbtal(KID.branch)) return [['mosque','في المسجد','mosque'],['home','في البيت','house'],['missed','لم يصلِّ','x']];
@@ -844,7 +845,7 @@ function prRender(){
   let h='<div class="wk"><button class="wk-b" onclick="prShift(-1)" title="الأسبوع اللي فات">'+ic('chevR')+'</button>'
     +'<div class="wk-t">'+(isCur?'الأسبوع الحالي':(t&&wi!=null?'الأسبوع '+AR(wi+1):'أسبوع سابق'))+'<small>'+fmtD(days[0])+' ← '+fmtD(days[6])+(t?' • '+esc(t.name):'')+'</small></div>'
     +'<button class="wk-b" onclick="prShift(1)" '+(isCur?'disabled':'')+' title="الأسبوع اللي بعده">'+ic('chevL')+'</button></div>';
-  if(!isCur) h+='<div class="lock-note">'+ic('lock','sm')+' الأسبوع ده للعرض بس — التسجيل متاح في أسبوع الدورة الحالي فقط</div>';
+  if(!isCur) h+='<div class="lock-note">'+ic('lock','sm')+' الأسبوع ده للعرض بس — التسجيل متاح في الأسبوع الحالي + يوم امبارح</div>';
   h+='<div class="stats">'
     +'<div class="st t-green"><div class="st-i">'+ic('check')+'</div><div class="st-v">'+(S.pct==null?'—':AR(S.pct)+'٪')+'</div><div class="st-l">الصلوات الخمس</div><div class="st-s">'+AR(S.fard)+' من '+AR(S.fardRec)+' مسجّلة</div></div>'
     +(prIsAbtal(k.branch)?'<div class="st t-blue"><div class="st-i">'+ic('mosque')+'</div><div class="st-v">'+AR(S.mosque)+'</div><div class="st-l">في المسجد</div><div class="st-s">في البيت: '+AR(S.home)+'</div></div>'
@@ -1115,12 +1116,26 @@ function rSettings(){
   pg('settings').innerHTML='<div class="grid2"><div class="card">'+cardH('user','بيانات الحساب')+'<div class="list">'
     +'<div class="li"><div class="li-m"><div class="li-t">الاسم</div></div><div class="li-e">'+esc(ME.full_name||'')+'</div></div>'
     +'<div class="li"><div class="li-m"><div class="li-t">كود الدخول</div></div><div class="li-e" style="direction:ltr;font-weight:800;">'+esc(String(ME.username||'').split('@')[0])+'</div></div>'
-    +'<div class="li"><div class="li-m"><div class="li-t">الأبناء</div></div><div class="li-e">'+KIDS.map(k=>esc(first(k.name))).join(' • ')+'</div></div></div></div>'
+    +'<div class="li"><div class="li-m"><div class="li-t">الأبناء</div></div><div class="li-e">'+KIDS.map(k=>esc(first(k.name))).join(' • ')+'</div></div></div>'
+    +'<div class="card-b" style="border-top:1px solid var(--border);">'
+    +'<div class="fg"><label>رقم الموبايل (واتساب)</label><input class="in" id="my-phone" inputmode="tel" maxlength="16" placeholder="01xxxxxxxxx" value="'+esc(ME.phone||'')+'" style="direction:ltr;text-align:right;"></div>'
+    +'<button class="btn btn-o" style="width:100%;" id="ph-btn" onclick="saveMyPhone()">'+ic('check','sm')+' حفظ الرقم</button>'
+    +'<div style="font-size:.7rem;color:var(--light);margin-top:6px;">الرقم بيوصل للإدارة بس — عشان التواصل معاك</div></div></div>'
     +'<div class="card">'+cardH('lock','تغيير كلمة المرور')+'<div class="card-b">'
     +'<div class="fg"><label>كلمة المرور الجديدة</label><input class="in" type="password" id="np1" autocomplete="new-password" placeholder="٦ أرقام أو حروف على الأقل" style="direction:ltr;text-align:right;"></div>'
     +'<div class="fg"><label>تأكيد كلمة المرور</label><input class="in" type="password" id="np2" autocomplete="new-password" style="direction:ltr;text-align:right;"></div>'
     +'<button class="btn btn-p" style="width:100%;" id="np-btn" onclick="changeMyPassword()">'+ic('check','sm')+' حفظ</button></div></div></div>'
     +'<button class="btn btn-o" style="width:100%;color:var(--red);" onclick="confirmLogout()">'+ic('logout','sm')+' تسجيل الخروج</button>';
+}
+// رقم الموبايل — RPC آمنة (دفعة ١١)
+async function saveMyPhone(){
+  const v=String($('my-phone').value||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^0-9+]/g,'');
+  if(!/^\+?[0-9]{10,15}$/.test(v)){ showToast('⚠️ اكتب رقم موبايل صحيح'); return; }
+  const b=$('ph-btn'); b.disabled=true;
+  try{ const {data,error}=await db.rpc('parent_set_phone',{p_phone:v}); if(error) throw error;
+    ME.phone=data||v; $('my-phone').value=ME.phone; showToast('✅ الرقم اتحفظ'); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'الرقم ما اتحفظش')); }
+  finally{ b.disabled=false; }
 }
 async function changeMyPassword(){
   const a=$('np1').value, b=$('np2').value;

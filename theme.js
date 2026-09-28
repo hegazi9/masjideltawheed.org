@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 //  theme.js — نظام الثيمات الشخصية | مدرسة التوحيد القرآنية
-//  كل مستخدم يختار ثيم شخصي يُحفظ في Supabase
+//  كل مستخدم يختار ثيم شخصي يُحفظ في Supabase (RPC set_my_theme — دفعة ١١)
 // ═══════════════════════════════════════════════════════════
 
 const THEMES = {
@@ -326,22 +326,22 @@ async function loadUserTheme() {
     if (data?.theme && THEMES[data.theme]) {
       applyTheme(data.theme);
     }
-  } catch(e) { /* silent */ }
+  } catch(e) { console.warn('[theme] load', e); }
 }
 
 // ─────────────────────────────────────────────
-//  saveUserTheme — يحفظ في Supabase + localStorage
+//  saveUserTheme — يحفظ في Supabase (RPC آمنة) + localStorage
 // ─────────────────────────────────────────────
 async function saveUserTheme(themeKey) {
   applyTheme(themeKey);
   try {
-    const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (!cu.id || !window.db) return;
-    await window.db
-      .from('users')
-      .update({ theme: themeKey })
-      .eq('id', cu.id);
-  } catch(e) { /* silent */ }
+    if (!window.db) return;
+    const { error } = await window.db.rpc('set_my_theme', { p_theme: themeKey });
+    if (error) throw error;
+  } catch(e) {
+    console.warn('[theme] save', e);
+    if (typeof showToast === 'function') showToast('⚠️ الثيم اتطبّق على الجهاز ده بس — ما اتحفظش في حسابك');
+  }
 }
 
 // ─────────────────────────────────────────────
