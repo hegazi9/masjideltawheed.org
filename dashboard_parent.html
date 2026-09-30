@@ -7,10 +7,10 @@
      ولي الأمر يدخل بحساب واحد ويشوف كل أولاده (parent_students).
      ┌─ الصفحات (id="page-XXX") ──────────────────────────────────
      │  home · prayers · attendance · recitation · plan · points
-     │  exams · behavior · subs · inbox · settings
+     │  file · exams · behavior · subs · inbox · settings
      └────────────────────────────────────────────────────────────
-     • البيانات: RLS (my_child_ids) + RPC: parent_children / parent_circle_board / parent_set_phone
-     • الصلوات: ولي الأمر يسجّل أي يوم في أسبوع الدورة الحالي + يوم امبارح (pr_parent_can_write — دفعة ١١)
+     • البيانات: RLS (my_child_ids) + RPC: parent_children / parent_circle_board
+     • الصلوات: ولي الأمر يسجّل أي يوم في أسبوع الدورة الحالي (pr_parent_can_write)
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -316,6 +316,8 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
     <section class="page" id="page-recitation"></section>
     <!-- خطة الطالب -->
     <section class="page" id="page-plan"></section>
+    <!-- ملف الطالب (عرض بس) -->
+    <section class="page" id="page-file"></section>
     <!-- النقاط ولوحة الشرف -->
     <section class="page" id="page-points"></section>
     <!-- الاختبارات -->
@@ -396,7 +398,7 @@ function confirmLogout(){ if(confirm('تسجيل الخروج؟')) secureLogout(
 let TERMS=[], CUR_TERM=null, VIEW_TERM=null;
 const TERM_GIRLS=['البنات','الملكات','الأميرات'];
 const TERM_DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
+const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"no_review":true,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
 function termIsGirls(b){ return TERM_GIRLS.includes(b); }
 function _termD(iso){ const d=new Date(String(iso).slice(0,10)+'T00:00:00'); d.setHours(0,0,0,0); return d; }
 async function loadTerms(){
@@ -542,8 +544,10 @@ function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'
 function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
 function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
 // ── HTML ملخّص الإنجاز لخطة واحدة ──
+function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
+function spNoRev(plan){ const t=(typeof TERMS!=='undefined'?TERMS:[]).find(x=>x.id===(plan&&plan.term_id)); return termNoReview(t); }
 function spProgressHtml(plan,recs,asOf){
-  const H=spTrack(plan,'h',recs,asOf), R=spTrack(plan,'r',recs,asOf);
+  const NR=spNoRev(plan), H=spTrack(plan,'h',recs,asOf), R=NR?null:spTrack(plan,'r',recs,asOf);
   const card=(ttl,T,col)=>'<div style="flex:1;min-width:200px;border:1.5px solid var(--border);border-top:3px solid '+col+';border-radius:var(--r-sm);padding:12px 14px;background:var(--white);">'
     +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
     +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
@@ -554,9 +558,9 @@ function spProgressHtml(plan,recs,asOf){
   const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
     return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
   const dates=Object.keys(map).sort();
-  const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th><th>هدف المراجعة</th><th>الإنجاز</th></tr></thead><tbody>'
-    +dates.map(d=>'<tr><td style="white-space:nowrap;font-weight:700;">'+spFmt(d)+'</td>'+cell(map[d].h)+cell(map[d].r)+'</tr>').join('')+'</tbody></table></div>'):'';
-  return '<div style="display:flex;gap:12px;flex-wrap:wrap;">'+card('📖 خطة الحفظ',H,'var(--jade)')+card('🔁 خطة المراجعة',R,'var(--blue)')+'</div>'+tbl
+  const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th>'+(NR?'':'<th>هدف المراجعة</th><th>الإنجاز</th>')+'</tr></thead><tbody>'
+    +dates.map(d=>'<tr><td style="white-space:nowrap;font-weight:700;">'+spFmt(d)+'</td>'+cell(map[d].h)+(NR?'':cell(map[d].r))+'</tr>').join('')+'</tbody></table></div>'):'';
+  return '<div style="display:flex;gap:12px;flex-wrap:wrap;">'+card('📖 خطة الحفظ',H,'var(--jade)')+(NR?'':card('🔁 خطة المراجعة',R,'var(--blue)'))+'</div>'+tbl
     +(plan.data&&plan.data.notes?'<div style="font-size:.76rem;color:var(--mid);margin-top:10px;">📝 '+esc(plan.data.notes)+'</div>':'');
 }
 
@@ -613,6 +617,7 @@ async function prLoad(ids,from,to){
 // 👨‍👩‍👧 لوحة ولي الأمر
 // ══════════════════════════════════════════════════════════════
 const ICONS={"home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9.5V21h14V9.5\"/><path d=\"M9.5 21v-6h5v6\"/>", "moon": "<path d=\"M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z\"/>", "calcheck": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/><path d=\"m9 16 2 2 4-4\"/>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>", "book": "<path d=\"M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z\"/><path d=\"M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>", "trophy": "<path d=\"M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z\"/><path d=\"M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3\"/>", "award": "<circle cx=\"12\" cy=\"8\" r=\"6\"/><path d=\"M15.5 13 17 22l-5-3-5 3 1.5-9\"/>", "smile": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M8 14s1.5 2 4 2 4-2 4-2\"/><path d=\"M9 9h.01M15 9h.01\"/>", "wallet": "<path d=\"M20 7H5a2 2 0 0 1 0-4h13v4\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15V7\"/><path d=\"M16 14h.01\"/>", "mail": "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m22 7-10 5L2 7\"/>", "lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>", "star": "<path d=\"m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/>", "grid": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "logout": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><path d=\"m16 17 5-5-5-5M21 12H9\"/>", "menu": "<path d=\"M4 6h16M4 12h16M4 18h16\"/>", "bell": "<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/>", "x": "<path d=\"M18 6 6 18M6 6l12 12\"/>", "send": "<path d=\"m22 2-7 20-4-9-9-4z\"/><path d=\"M22 2 11 13\"/>", "flag": "<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><path d=\"M4 22v-7\"/>", "users": "<path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>", "edit": "<path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z\"/>", "activity": "<path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/>", "check": "<path d=\"M20 6 9 17l-5-5\"/>", "checks": "<path d=\"M18 6 7 17l-5-5\"/><path d=\"m22 10-7.5 7.5L13 16\"/>", "mosque": "<path d=\"M12 2.5c1.8 1.6 4 2.8 4 5.5H8c0-2.7 2.2-3.9 4-5.5z\"/><path d=\"M5 22V12h14v10\"/><path d=\"M10 22v-4a2 2 0 0 1 4 0v4\"/><path d=\"M2 22h20M8 12V8M16 12V8\"/>", "house": "<path d=\"M3 10 12 3l9 7\"/><path d=\"M5 9v12h14V9\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41\"/>", "sunrise": "<path d=\"M17 18a5 5 0 0 0-10 0\"/><path d=\"M12 2v7M4.22 10.22l1.42 1.42M1 18h2M21 18h2M18.36 11.64l1.42-1.42M23 22H1M8 6l4-4 4 4\"/>", "alert": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 8v4M12 16h.01\"/>", "inbox": "<path d=\"M22 12h-6l-2 3h-4l-2-3H2\"/><path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>", "chevR": "<path d=\"m9 18 6-6-6-6\"/>", "chevL": "<path d=\"m15 18-6-6 6-6\"/>", "loader": "<path d=\"M21 12a9 9 0 1 1-6.22-8.56\"/>", "gift": "<rect x=\"3\" y=\"8\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7\"/><path d=\"M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5\"/>", "repeat": "<path d=\"m17 2 4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\"/><path d=\"m7 22-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/>", "compass": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36z\"/>", "card": "<rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M2 10h20\"/>", "receipt": "<path d=\"M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .67V2l-1 .67L16 2l-3 2-3-2-3 2-3-2z\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>", "megaphone": "<path d=\"m3 11 18-5v12L3 13v-2z\"/><path d=\"M11.6 16.8a3 3 0 1 1-5.8-1.6\"/>", "reply": "<path d=\"m9 17-5-5 5-5\"/><path d=\"M20 18v-2a4 4 0 0 0-4-4H4\"/>"};
+ICONS.folder='<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/>';
 function ic(n,cls){ return '<svg class="ic'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[n]||'')+'</svg>'; }
 const AR=spAr;
 const BR_COL={'الأبطال':['#1d6fa4','#e8f2fb'],'الرواد':['#2d7a50','#e8f5ee'],'الملكات':['#6b3fa0','#f0ebfa'],'الأميرات':['#c2417a','#fcebf3']};
@@ -623,7 +628,7 @@ const STF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['pa
 const STF_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
 const NAV=[
   ['home','الرئيسية','home'],['prayers','الصلوات','moon'],['attendance','الحضور','calcheck'],['recitation','التسميع','book'],
-  ['plan','خطة الطالب','target'],['points','النقاط ولوحة الشرف','trophy'],['exams','الاختبارات','award'],['behavior','التقييم السلوكي','smile'],
+  ['plan','خطة الطالب','target'],['file','ملف الطالب','folder'],['points','النقاط ولوحة الشرف','trophy'],['exams','الاختبارات','award'],['behavior','التقييم السلوكي','smile'],
   ['subs','الاشتراك','wallet'],['inbox','الإعلانات والرسائل','mail'],['settings','الإعدادات','lock']
 ];
 const BNAV=[['home','الرئيسية','home'],['prayers','الصلوات','moon'],['recitation','التسميع','book'],['points','النقاط','star'],['more','المزيد','grid']];
@@ -668,14 +673,14 @@ async function init(){
 }
 function showPageErr(){ document.querySelector('.wrap').innerHTML='<div class="card">'+errBox()+'</div>'; }
 function buildNav(){
-  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(i===9?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+'</button>').join('');
+  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(n[0]==='inbox'?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+'</button>').join('');
   $('bnav').innerHTML=BNAV.map(n=>'<button class="bn" data-p="'+n[0]+'" onclick="'+(n[0]==='more'?'toggleSide(true)':'navPage(\''+n[0]+'\')')+'">'+ic(n[2])+'<span>'+n[1]+'</span></button>').join('');
 }
 function buildTermSel(){
   const s=$('term-sel'); const td=today();
   s.innerHTML=TERMS.map(t=>'<option value="'+esc(t.id)+'"'+(VIEW_TERM&&t.id===VIEW_TERM.id?' selected':'')+'>'+esc(t.name)+(CUR_TERM&&t.id===CUR_TERM.id?' (الحالية)':(t.start_date>td?' (القادمة)':' (أرشيف)'))+'</option>').join('');
 }
-async function changeTerm(id){ VIEW_TERM=TERMS.find(t=>t.id===id)||CUR_TERM; try{ sessionStorage.setItem('viewTerm',VIEW_TERM.id); }catch(e){} await loadKid(); }
+async function changeTerm(id){ VIEW_TERM=TERMS.find(t=>t.id===id)||CUR_TERM; try{ sessionStorage.setItem('viewTerm',VIEW_TERM.id); }catch(e){} FILE_MON=null; await loadKid(); }
 function toggleSide(v){ $('sidebar').classList.toggle('open',v); $('scrim').classList.toggle('show',v); }
 function navPage(p){
   if(p==='more'){ toggleSide(true); return; }
@@ -695,7 +700,7 @@ function renderKids(){
     return '<button class="kid'+(KID&&k.id===KID.id?' on':'')+'" style="--c:'+c[0]+';--p:'+c[1]+';" onclick="pickKid(\''+esc(k.id)+'\')"><span class="kid-av">'+esc(first(k.name).charAt(0))+'</span><span style="text-align:right;"><span class="kid-n">'+esc(first(k.name))+'</span><br><span class="kid-b">'+esc(k.branch||'')+'</span></span></button>'; }).join('');
   if(KID){ const c=brCol(KID.branch); document.documentElement.style.setProperty('--kc',c[0]); document.documentElement.style.setProperty('--kp',c[1]); }
 }
-async function pickKid(id){ if(KID&&KID.id===id) return; KID=KIDS.find(k=>k.id===id)||KID; try{ sessionStorage.setItem('pKid',KID.id); }catch(e){} PR.ws=null; renderKids(); await loadKid(); }
+async function pickKid(id){ if(KID&&KID.id===id) return; KID=KIDS.find(k=>k.id===id)||KID; try{ sessionStorage.setItem('pKid',KID.id); }catch(e){} PR.ws=null; FILE_MON=null; renderKids(); await loadKid(); }
 
 // ══ تحميل بيانات الابن (الدورة المختارة) ══
 async function loadKid(){
@@ -711,6 +716,7 @@ async function loadKid(){
     ppts: ()=>selectAll(db.from('prayer_points').select('id,week_start,points,note,awarded_by_name').eq('student_id',k.id).order('week_start',{ascending:false}).order('id')),
     plans:()=>t?selectAll(db.from('student_plans').select('*').eq('student_id',k.id).eq('term_id',t.id).order('period_no').order('id')):Promise.resolve({data:[]}),
     file: ()=>db.from('student_files').select('data').eq('student_id',k.id).maybeSingle(),
+    stu:  ()=>db.from('students').select('id,is_sponsored').eq('id',k.id).maybeSingle(),
     subs: ()=>selectAll(db.from('fin_subscriptions').select('id,month_no,amount,pay_method,paid_date,reversed,reversal_of,term_id').eq('student_id',k.id).order('paid_date').order('id')),
     board:()=>db.rpc('parent_circle_board',{p_student:k.id}),
     kid:  ()=>db.rpc('parent_children'),
@@ -721,7 +727,7 @@ async function loadKid(){
   D=X; renderPage();
 }
 function renderPage(){
-  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,points:rPoints,exams:rExams,behavior:rBeh,subs:rSubs,inbox:rInbox,settings:rSettings}[PAGE];
+  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,file:rFile,points:rPoints,exams:rExams,behavior:rBeh,subs:rSubs,inbox:rInbox,settings:rSettings}[PAGE];
   if(f) f();
 }
 function pg(id){ return $('page-'+id); }
@@ -772,8 +778,8 @@ async function rHome(){
   const tile=(tone,icon,val,lbl,sub,go)=>'<div class="st '+tone+'" onclick="navPage(\''+go+'\')"><div class="st-i">'+ic(icon)+'</div><div class="st-v">'+val+'</div><div class="st-l">'+lbl+'</div>'+(sub?'<div class="st-s">'+sub+'</div>':'')+'</div>';
   h+='<div class="stats">'
     +tile('t-green','calcheck',D.err.att?'!':(A.pct==null?'—':AR(A.pct)+'٪'),'نسبة الحضور',D.err.att?'':AR(A.present+A.late)+' من '+AR(A.total)+' حلقة','attendance')
-    +tile('t-blue','book',D.err.mem?'!':AR(nNew),'تسميع الحفظ',D.err.mem?'':'المراجعة: '+AR(nRev),'recitation')
-    +tile('t-purple','target',D.err.plans?'!':(hp==null?'—':AR(hp)+'٪'),'خطة الحفظ',rp==null?'':'المراجعة: '+AR(rp)+'٪','plan')
+    +tile('t-blue','book',D.err.mem?'!':AR(nNew),'تسميع الحفظ',(D.err.mem||pNR())?'':'المراجعة: '+AR(nRev),'recitation')
+    +tile('t-purple','target',D.err.plans?'!':(hp==null?'—':AR(hp)+'٪'),'خطة الحفظ',(rp==null||pNR())?'':'المراجعة: '+AR(rp)+'٪','plan')
     +tile('t-gold','trophy',D.err.board||!B.rank?'—':AR(B.rank),'الترتيب في الحلقة',B.total?'من '+AR(B.total)+' '+kidWord('طالب','طالبة'):'','points')
     +'</div>';
   // صلوات الأسبوع
@@ -816,8 +822,7 @@ function liMem(r){
 // ══ الصلوات ══
 const PR={ws:null, rows:{}, sel:null, chain:Promise.resolve(), state:{}, loading:false, fail:false};
 function prCurWs(){ return prWeekStart(KID.branch,today()); }
-// الأسبوع الحالي + امبارح دايماً (دفعة ١١ — نفس pr_parent_can_write)
-function prEditable(iso){ const td=today(); return iso<=td && (iso>=prCurWs() || iso===prAddDays(td,-1)); }
+function prEditable(iso){ const td=today(); return iso<=td && iso>=prCurWs(); }
 function prOpts(key){
   const g=girls();
   if(PR_FARD.includes(key)&&prIsAbtal(KID.branch)) return [['mosque','في المسجد','mosque'],['home','في البيت','house'],['missed','لم يصلِّ','x']];
@@ -845,7 +850,7 @@ function prRender(){
   let h='<div class="wk"><button class="wk-b" onclick="prShift(-1)" title="الأسبوع اللي فات">'+ic('chevR')+'</button>'
     +'<div class="wk-t">'+(isCur?'الأسبوع الحالي':(t&&wi!=null?'الأسبوع '+AR(wi+1):'أسبوع سابق'))+'<small>'+fmtD(days[0])+' ← '+fmtD(days[6])+(t?' • '+esc(t.name):'')+'</small></div>'
     +'<button class="wk-b" onclick="prShift(1)" '+(isCur?'disabled':'')+' title="الأسبوع اللي بعده">'+ic('chevL')+'</button></div>';
-  if(!isCur) h+='<div class="lock-note">'+ic('lock','sm')+' الأسبوع ده للعرض بس — التسجيل متاح في الأسبوع الحالي + يوم امبارح</div>';
+  if(!isCur) h+='<div class="lock-note">'+ic('lock','sm')+' الأسبوع ده للعرض بس — التسجيل متاح في أسبوع الدورة الحالي فقط</div>';
   h+='<div class="stats">'
     +'<div class="st t-green"><div class="st-i">'+ic('check')+'</div><div class="st-v">'+(S.pct==null?'—':AR(S.pct)+'٪')+'</div><div class="st-l">الصلوات الخمس</div><div class="st-s">'+AR(S.fard)+' من '+AR(S.fardRec)+' مسجّلة</div></div>'
     +(prIsAbtal(k.branch)?'<div class="st t-blue"><div class="st-i">'+ic('mosque')+'</div><div class="st-v">'+AR(S.mosque)+'</div><div class="st-l">في المسجد</div><div class="st-s">في البيت: '+AR(S.home)+'</div></div>'
@@ -917,15 +922,17 @@ let REC_F='all';
 function rRec(){
   const el=pg('recitation'); if(!needD('recitation')) return;
   if(D.err.mem){ el.innerHTML='<div class="card">'+errBox()+'</div>'; return; }
+  const NR=pNR(); if(NR) REC_F='all';
   const all=D.mem||[], rows=all.filter(r=>REC_F==='all'||r.type===REC_F);
   const cnt=t=>all.filter(r=>r.type===t).length;
   const exc=all.filter(r=>r.grade==='excellent').length, pts=all.reduce((s,r)=>s+memPts(r),0);
   let h='<div class="stats">'
     +'<div class="st t-blue"><div class="st-i">'+ic('book')+'</div><div class="st-v">'+AR(cnt('new'))+'</div><div class="st-l">تسميع الحفظ</div></div>'
-    +'<div class="st t-purple"><div class="st-i">'+ic('repeat')+'</div><div class="st-v">'+AR(cnt('review'))+'</div><div class="st-l">تسميع المراجعة</div></div>'
+    +(NR?'<div class="st t-purple"><div class="st-i">'+ic('calendar')+'</div><div class="st-v">'+AR(new Set(all.map(r=>r.date)).size)+'</div><div class="st-l">حلقات التسميع</div><div class="st-s">في الدورة دي</div></div>'
+        :'<div class="st t-purple"><div class="st-i">'+ic('repeat')+'</div><div class="st-v">'+AR(cnt('review'))+'</div><div class="st-l">تسميع المراجعة</div></div>')
     +'<div class="st t-green"><div class="st-i">'+ic('award')+'</div><div class="st-v">'+AR(exc)+'</div><div class="st-l">تقدير ممتاز</div><div class="st-s">'+(all.length?AR(pct(exc,all.length))+'٪ من التسميع':'')+'</div></div>'
     +'<div class="st t-gold"><div class="st-i">'+ic('star')+'</div><div class="st-v">'+AR(pts)+'</div><div class="st-l">نقاط التسميع</div><div class="st-s">في الدورة دي</div></div></div>';
-  h+='<div class="tabs">'+[['all','الكل'],['new','الحفظ الجديد'],['review','المراجعة']].map(x=>'<button class="tab'+(REC_F===x[0]?' on':'')+'" onclick="REC_F=\''+x[0]+'\';rRec();">'+x[1]+'</button>').join('')+'</div>';
+  if(!NR) h+='<div class="tabs">'+[['all','الكل'],['new','الحفظ الجديد'],['review','المراجعة']].map(x=>'<button class="tab'+(REC_F===x[0]?' on':'')+'" onclick="REC_F=\''+x[0]+'\';rRec();">'+x[1]+'</button>').join('')+'</div>';
   h+='<div class="card"><div class="list">'+(rows.length?rows.map(liMem).join(''):emptyBox('book','لسه مفيش تسميع مسجّل'))+'</div></div>';
   h+='<div style="font-size:.72rem;color:var(--light);text-align:center;">التقدير: ١–٢ أخطاء ممتاز • ٣–٤ جيد جداً • ٥–٦ جيد • أكتر من ٦ إعادة</div>';
   el.innerHTML=h;
@@ -940,7 +947,7 @@ function rPlan(){
   const H=spAggPct(plans,D.mem||[],'h',td), R=spAggPct(plans,D.mem||[],'r',td);
   let h='<div class="card"><div class="card-b" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;">'
     +'<div class="ring" style="--v:'+(H||0)+';--rc:var(--jade);"><div><b>'+(H==null?'—':AR(H)+'٪')+'</b><small>الحفظ</small></div></div>'
-    +'<div class="ring" style="--v:'+(R||0)+';--rc:var(--blue);"><div><b>'+(R==null?'—':AR(R)+'٪')+'</b><small>المراجعة</small></div></div>'
+    +(pNR()?'':'<div class="ring" style="--v:'+(R||0)+';--rc:var(--blue);"><div><b>'+(R==null?'—':AR(R)+'٪')+'</b><small>المراجعة</small></div></div>')
     +'<div style="flex:1;min-width:200px;font-size:.8rem;color:var(--mid);line-height:1.9;">نسبة الإنجاز = الآيات اللي '+kidWord('سمّعها','سمّعتها')+' فعلاً ÷ المطلوب لحد النهارده حسب خطة '+kidWord('المعلم','المعلمة')+'.<br><span style="color:var(--light);font-size:.72rem;">'+esc(t.name)+'</span></div></div></div>';
   if(!plans.length){ el.innerHTML=h+'<div class="card">'+emptyBox('target',kidWord('المعلم','المعلمة')+' لسه ما حطّش خطة للدورة دي')+'</div>'; return; }
   per.forEach(p=>{
@@ -949,6 +956,81 @@ function rPlan(){
     h+='<div class="card">'+cardH('target','الفترة '+AR(p.no)+(cur?' <span class="pill p-green" style="margin-right:6px;">الحالية</span>':''),fmtD(p.from)+' ← '+fmtD(p.to)+(p.exam?' • اختبار: '+fmtD(p.exam):''))
       +'<div class="card-b">'+(pl?('<div style="font-size:.74rem;color:var(--mid);margin-bottom:10px;">'+ic('compass','sm')+' اتجاه الحفظ: '+esc(SP_DIR_AR[pl.direction]||'')+'</div>'+spProgressHtml(pl,D.mem||[],td)):'<div class="empty" style="padding:14px;">مفيش خطة للفترة دي</div>')+'</div></div>';
   });
+  el.innerHTML=h;
+}
+
+// ══ 📁 ملف الطالب (نفس ملف المعلم — عرض بس) ══
+const STF_GR_TONE={'ممتاز':'p-green','جيد جداً':'p-blue','جيد':'p-gold','يحتاج تطوير':'p-red'};
+const STF_TJ=[
+  ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
+  ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
+  ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
+  ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
+  ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
+  ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
+  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]],
+];
+const STF_MLBL=['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس','الشهر السابع','الشهر الثامن','الشهر التاسع','الشهر العاشر','الشهر الحادي عشر','الشهر الثاني عشر'];
+let FILE_TAB='quran', FILE_MON=null;
+function pNR(){ return termNoReview((D&&D.t)||VIEW_TERM); }
+function stfGrade(v){ return v?'<span class="pill '+(STF_GR_TONE[v]||'p-gray')+'">'+esc(v)+'</span>':'<span style="color:var(--light);">—</span>'; }
+function rFile(){
+  const el=pg('file'); if(!needD('file')) return;
+  if(D.err.file||D.err.mem){ el.innerHTML='<div class="card">'+errBox()+'</div>'; return; }
+  const k=D.k, d=(D.file&&D.file.data)||{}, t=D.t, A=attStats(D.att), mem=D.mem||[], NR=pNR();
+  const exd=d.exams||{}, exDates=Object.keys(exd).filter(x=>!t||(x>=t.start_date&&x<=t.end_date)).sort();
+  const tile=(tone,icon,val,lbl,sub,go)=>'<div class="st '+tone+'" onclick="navPage(\''+go+'\')"><div class="st-i">'+ic(icon)+'</div><div class="st-v">'+val+'</div><div class="st-l">'+lbl+'</div>'+(sub?'<div class="st-s">'+sub+'</div>':'')+'</div>';
+  let h='<div class="card"><div class="card-b" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
+    +'<div style="width:54px;height:54px;border-radius:16px;background:var(--kp);color:var(--kc);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;">'+esc(first(k.name).charAt(0))+'</div>'
+    +'<div style="flex:1;min-width:180px;"><div style="font-family:Amiri,serif;font-size:1.25rem;font-weight:700;color:var(--forest);">'+esc(k.name)+'</div>'
+    +'<div style="font-size:.76rem;color:var(--mid);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px;"><span>'+ic('flag','sm')+' '+esc(k.branch||'—')+'</span>'+(k.circle?'<span>'+ic('users','sm')+' '+esc(k.circle)+'</span>':'')+(k.teacher?'<span>'+ic('user','sm')+' '+kidWord('المعلم','المعلمة')+': '+esc(k.teacher)+'</span>':'')+'</div></div>'
+    +'<span class="pill p-gray">'+ic('lock','sm')+' للعرض بس'+(t?' • '+esc(t.name):'')+'</span></div></div>';
+  h+='<div class="stats">'
+    +tile('t-green','calcheck',D.err.att?'!':(A.pct==null?'—':AR(A.pct)+'٪'),'الحضور',D.err.att?'':AR(A.present+A.late)+' من '+AR(A.total)+' حلقة','attendance')
+    +tile('t-blue','book',AR(mem.filter(r=>r.type==='new').length),'تسميع الحفظ',NR?'':'المراجعة: '+AR(mem.filter(r=>r.type==='review').length),'recitation')
+    +tile('t-gold','star',AR(k.total_points||0),'رصيد النقاط','تراكمي','points')
+    +tile('t-purple','award',AR(exDates.length),'الاختبارات','في الدورة دي','exams')
+    +'</div>';
+  h+='<div class="tabs">'+[['quran','السجل القرآني'],['tajweed','التجويد'],['behavior','التقييم السلوكي']].map(x=>'<button class="tab'+(FILE_TAB===x[0]?' on':'')+'" onclick="FILE_TAB=\''+x[0]+'\';rFile();">'+x[1]+'</button>').join('')+'</div>';
+  if(FILE_TAB==='tajweed'){
+    const tj=d.tajweed||{}, any=STF_TJ.some(([,sk])=>sk.some(([s])=>tj[s]));
+    if(!any){ h+='<div class="card">'+emptyBox('book','لسه مفيش تقييم تجويد مسجّل')+'</div>'; }
+    else STF_TJ.forEach(([lvl,skills])=>{
+      if(!skills.some(([s])=>tj[s]||tj[s+'_note'])) return;
+      h+='<div class="card">'+cardH('book',esc(lvl),null,null,['var(--blue-pale)','var(--blue)'])+'<div class="list">'
+        +skills.map(([s,l])=>'<div class="li"><div class="li-m"><div class="li-t">'+l+'</div>'+(tj[s+'_note']?'<div class="li-s">'+esc(tj[s+'_note'])+'</div>':'')+'</div><div class="li-e">'+stfGrade(tj[s])+'</div></div>').join('')+'</div></div>';
+    });
+  }else if(FILE_TAB==='behavior'){
+    const bh=termBh(d,t); let any=false;
+    STF_MONTHS.forEach(([mo,lbl])=>{
+      if(!STF_BH.some(([f])=>bh[mo+f])) return; any=true;
+      h+='<div class="card">'+cardH('smile',lbl,(bh[mo+'From']?fmtD(bh[mo+'From']):'')+(bh[mo+'To']?' ← '+fmtD(bh[mo+'To']):''),null,['var(--pale)','var(--jade)'])+'<div class="list">'
+        +STF_BH.map(([f,l])=>'<div class="li"><div class="li-m"><div class="li-t">'+l+'</div>'+(bh[mo+f+'Notes']?'<div class="li-s">'+esc(bh[mo+f+'Notes'])+'</div>':'')+'</div><div class="li-e">'+stfGrade(bh[mo+f])+'</div></div>').join('')+'</div></div>';
+    });
+    if(!any) h+='<div class="card">'+emptyBox('smile','لسه مفيش تقييم سلوكي في الدورة دي')+'</div>';
+  }else{
+    // الإنجاز الحالي + نتائج الاختبارات + السجل الشهري (من التسميع الفعلي)
+    h+='<div class="card">'+cardH('target','الإنجاز الحالي',null,null,['var(--gold-pale)','var(--gold)'])+'<div class="card-b" style="font-size:.9rem;font-weight:700;color:var(--forest);">'+(d.currentAchievement?esc(d.currentAchievement):'<span style="color:var(--light);font-weight:500;">لسه ما اتكتبش</span>')+'</div></div>';
+    if(exDates.length){
+      h+='<div class="card">'+cardH('award','نتائج الاختبارات',null,'<button class="btn btn-o btn-sm" onclick="navPage(\'exams\')">التفاصيل</button>',['var(--gold-pale)','var(--gold)'])+'<div class="list">'
+        +exDates.slice().reverse().map(x=>{ const rec=exd[x]||{}, meta=rec._meta||{}, cols=Object.keys(rec).filter(c=>c!=='_meta');
+          let sum=0,max=0; cols.forEach(c=>{ sum+=(+(rec[c]||{}).score||0); max+=(+(rec[c]||{}).max||0); }); const tot=+meta.total||max, p=pct(sum,tot);
+          return '<div class="li"><div class="li-m"><div class="li-t">'+esc(meta.kind||'اختبار')+'</div><div class="li-s">'+fmtD(x)+'</div></div><div class="li-e"><b style="color:'+spColor(p)+';">'+AR(sum)+'</b><small style="color:var(--light);"> / '+AR(tot)+'</small></div></div>'; }).join('')+'</div></div>';
+    }
+    const map={}, order=[];
+    mem.slice().sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:0)).forEach(r=>{ const m=String(r.date||'').slice(0,7); if(!m) return; if(!map[m]){ map[m]=[]; order.push(m); } map[m].push(r); });
+    if(!order.length){ h+='<div class="card">'+emptyBox('book','لسه مفيش سجل تسميع في الدورة دي')+'</div>'; }
+    else{
+      if(FILE_MON==null||FILE_MON>=order.length) FILE_MON=order.length-1;
+      h+='<div class="card">'+cardH('calendar','السجل القرآني','بيتملى تلقائياً من تسميع '+kidWord('المعلم','المعلمة'))+'<div class="card-b">'
+        +'<div class="tabs" style="margin-bottom:12px;">'+order.map((m,i)=>'<button class="tab'+(i===FILE_MON?' on':'')+'" onclick="FILE_MON='+i+';rFile();">'+(STF_MLBL[i]||('الشهر '+AR(i+1)))+' <small style="font-weight:600;opacity:.75;">('+AR(map[m].length)+')</small></button>').join('')+'</div>'
+        +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>التاريخ</th>'+(NR?'':'<th>النوع</th>')+'<th>السور والآيات</th><th>التقييم</th><th>النقاط</th><th>الملاحظات</th></tr></thead><tbody>'
+        +map[order[FILE_MON]].map(r=>{ const g=GRADE_AR[r.grade]||[r.grade||'—','p-gray'], e=memErr(r);
+          return '<tr><td style="white-space:nowrap;">'+fmtD(r.date)+'</td>'+(NR?'':'<td>'+(r.type==='review'?'مراجعة':'حفظ')+'</td>')+'<td>'+memRange(r)+'</td><td><span class="pill '+g[1]+'">'+esc(g[0])+'</span>'+(e!=null?'<div style="font-size:.66rem;color:var(--light);">'+AR(e)+' خطأ</div>':'')+'</td><td>'+(memPts(r)?'+'+AR(memPts(r)):'—')+'</td><td style="font-size:.74rem;color:var(--mid);">'+esc(r.notes||'—')+'</td></tr>'; }).join('')
+        +'</tbody></table></div></div></div>';
+    }
+  }
+  h+='<div style="font-size:.72rem;color:var(--light);text-align:center;">ملف '+kidWord('ابنك','بنتك')+' زي ما بيسجّله '+kidWord('المعلم','المعلمة')+' — لأي استفسار ابعت رسالة من «الإعلانات والرسائل»</div>';
   el.innerHTML=h;
 }
 
@@ -1026,11 +1108,13 @@ function rSubs(){
   const t=D.t, months=+((t&&t.settings&&t.settings.subs_months)||3);
   const rows=(D.subs||[]).filter(r=>!r.reversed&&!r.reversal_of&&(+r.amount||0)>0&&termRowMatch(r,t));
   const paid=new Set(rows.map(r=>+r.month_no));
+  const SPON=!!(D.stu&&D.stu.is_sponsored);   // ⭐ مكفول — الاشتراك متغطّي
   const MLBL=['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'];
-  let h='<div class="card">'+cardH('wallet','اشتراك '+(t?esc(t.name):'الدورة'),AR(paid.size)+' من '+AR(months)+' شهور مدفوعة',null,['var(--gold-pale)','var(--gold)'])
+  let h=(SPON?'<div class="lock-note" style="background:var(--pale);color:var(--emerald);">'+ic('star','sm')+' '+kidWord('الطالب','الطالبة')+' «مكفول'+kidWord('','ة')+'» — الاشتراك متغطّي، مفيش مطلوب منك دفع</div>':'')
+    +'<div class="card">'+cardH('wallet','اشتراك '+(t?esc(t.name):'الدورة'),SPON?'مكفول':AR(paid.size)+' من '+AR(months)+' شهور مدفوعة',null,['var(--gold-pale)','var(--gold)'])
     +'<div class="card-b"><div style="display:grid;grid-template-columns:repeat('+Math.min(months,3)+',1fr);gap:10px;">';
   for(let m=1;m<=months;m++){ const ok=paid.has(m);
-    h+='<div style="border-radius:14px;padding:14px 10px;text-align:center;border:2px solid '+(ok?'var(--jade)':'var(--border)')+';background:'+(ok?'var(--pale)':'var(--white)')+';"><div style="color:'+(ok?'var(--jade)':'var(--light)')+';">'+ic(ok?'check':'clock','lg')+'</div><div style="font-weight:800;font-size:.84rem;margin-top:4px;">'+(MLBL[m-1]||('شهر '+AR(m)))+'</div><div style="font-size:.7rem;color:'+(ok?'var(--jade)':'var(--light)')+';font-weight:700;">'+(ok?'مدفوع':'لم يُسدَّد')+'</div></div>'; }
+    h+='<div style="border-radius:14px;padding:14px 10px;text-align:center;border:2px solid '+(ok?'var(--jade)':'var(--border)')+';background:'+(ok?'var(--pale)':'var(--white)')+';"><div style="color:'+(ok?'var(--jade)':'var(--light)')+';">'+ic(ok?'check':'clock','lg')+'</div><div style="font-weight:800;font-size:.84rem;margin-top:4px;">'+(MLBL[m-1]||('شهر '+AR(m)))+'</div><div style="font-size:.7rem;color:'+(ok?'var(--jade)':'var(--light)')+';font-weight:700;">'+(ok?'مدفوع':(SPON?'مكفول':'لم يُسدَّد'))+'</div></div>'; }
   h+='</div></div></div>';
   h+='<div class="card">'+cardH('receipt','سجل المدفوعات')+'<div class="list">'+(rows.length?rows.map(r=>'<div class="li"><div class="li-i" style="background:var(--pale);color:var(--jade);">'+ic('check')+'</div><div class="li-m"><div class="li-t">'+(MLBL[(+r.month_no||1)-1]||'شهر')+'</div><div class="li-s">'+fmtD(r.paid_date)+' • '+esc(PAY_AR[r.pay_method]||r.pay_method||'')+'</div></div><div class="li-e"><b style="color:var(--emerald);">'+AR(r.amount)+'</b> <small style="color:var(--light);">ج.م</small></div></div>').join(''):emptyBox('wallet','مفيش مدفوعات مسجّلة للدورة دي'))+'</div></div>';
   h+='<div style="font-size:.72rem;color:var(--light);text-align:center;">لو فيه أي ملاحظة على الاشتراك تواصل مع إدارة المدرسة</div>';
@@ -1116,26 +1200,12 @@ function rSettings(){
   pg('settings').innerHTML='<div class="grid2"><div class="card">'+cardH('user','بيانات الحساب')+'<div class="list">'
     +'<div class="li"><div class="li-m"><div class="li-t">الاسم</div></div><div class="li-e">'+esc(ME.full_name||'')+'</div></div>'
     +'<div class="li"><div class="li-m"><div class="li-t">كود الدخول</div></div><div class="li-e" style="direction:ltr;font-weight:800;">'+esc(String(ME.username||'').split('@')[0])+'</div></div>'
-    +'<div class="li"><div class="li-m"><div class="li-t">الأبناء</div></div><div class="li-e">'+KIDS.map(k=>esc(first(k.name))).join(' • ')+'</div></div></div>'
-    +'<div class="card-b" style="border-top:1px solid var(--border);">'
-    +'<div class="fg"><label>رقم الموبايل (واتساب)</label><input class="in" id="my-phone" inputmode="tel" maxlength="16" placeholder="01xxxxxxxxx" value="'+esc(ME.phone||'')+'" style="direction:ltr;text-align:right;"></div>'
-    +'<button class="btn btn-o" style="width:100%;" id="ph-btn" onclick="saveMyPhone()">'+ic('check','sm')+' حفظ الرقم</button>'
-    +'<div style="font-size:.7rem;color:var(--light);margin-top:6px;">الرقم بيوصل للإدارة بس — عشان التواصل معاك</div></div></div>'
+    +'<div class="li"><div class="li-m"><div class="li-t">الأبناء</div></div><div class="li-e">'+KIDS.map(k=>esc(first(k.name))).join(' • ')+'</div></div></div></div>'
     +'<div class="card">'+cardH('lock','تغيير كلمة المرور')+'<div class="card-b">'
     +'<div class="fg"><label>كلمة المرور الجديدة</label><input class="in" type="password" id="np1" autocomplete="new-password" placeholder="٦ أرقام أو حروف على الأقل" style="direction:ltr;text-align:right;"></div>'
     +'<div class="fg"><label>تأكيد كلمة المرور</label><input class="in" type="password" id="np2" autocomplete="new-password" style="direction:ltr;text-align:right;"></div>'
     +'<button class="btn btn-p" style="width:100%;" id="np-btn" onclick="changeMyPassword()">'+ic('check','sm')+' حفظ</button></div></div></div>'
     +'<button class="btn btn-o" style="width:100%;color:var(--red);" onclick="confirmLogout()">'+ic('logout','sm')+' تسجيل الخروج</button>';
-}
-// رقم الموبايل — RPC آمنة (دفعة ١١)
-async function saveMyPhone(){
-  const v=String($('my-phone').value||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^0-9+]/g,'');
-  if(!/^\+?[0-9]{10,15}$/.test(v)){ showToast('⚠️ اكتب رقم موبايل صحيح'); return; }
-  const b=$('ph-btn'); b.disabled=true;
-  try{ const {data,error}=await db.rpc('parent_set_phone',{p_phone:v}); if(error) throw error;
-    ME.phone=data||v; $('my-phone').value=ME.phone; showToast('✅ الرقم اتحفظ'); }
-  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'الرقم ما اتحفظش')); }
-  finally{ b.disabled=false; }
 }
 async function changeMyPassword(){
   const a=$('np1').value, b=$('np2').value;

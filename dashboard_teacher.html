@@ -817,7 +817,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="sb-item" onclick="nav(this,'settings')"><span class="sb-icon">⚙️</span> الإعدادات</div>
 
     <div class="sb-section">حلقاتي</div>
-    <div class="sb-item" onclick="nav(this,'circles')"><span class="sb-icon">🕌</span> حلقاتي</div>
     <div class="sb-item" onclick="nav(this,'splans')"><span class="sb-icon">🎯</span> خطة الطالب</div>
     <div class="sb-item" onclick="nav(this,'prayers')"><span class="sb-icon">🕌</span> تقرير الصلوات</div>
 
@@ -869,7 +868,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <div id="circle-switcher" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"></div>
 
   <div class="qs-row">
-    <div class="qs-card" onclick="navPage('circles')"><div class="qs-icon">🕌</div><div><div class="qs-val" id="qs-circles">0</div><div class="qs-lbl">حلقاتي</div></div></div>
+    <div class="qs-card" onclick="navPage('students')"><div class="qs-icon">🕌</div><div><div class="qs-val" id="qs-circles">0</div><div class="qs-lbl">حلقاتي</div></div></div>
     <div class="qs-card" onclick="navPage('attendance')"><div class="qs-icon">📅</div><div><div class="qs-val" id="qs-today">—</div><div class="qs-lbl">حلقة اليوم</div></div></div>
     <div class="qs-card" onclick="navPage('training')"><div class="qs-icon">🎓</div><div><div class="qs-val" id="qs-train">—</div><div class="qs-lbl">تأهيل المعلمين</div></div></div>
   </div>
@@ -951,7 +950,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
           <th>اسم الطالب</th>
           <th style="text-align:center;">الحضور</th>
           <th style="text-align:center;">مستوى الحفظ</th>
-          <th style="text-align:center;">مستوى المراجعة</th>
+          <th style="text-align:center;" id="th-revlvl">مستوى المراجعة</th>
           <th style="text-align:center;" id="th-memplan">خطة الحفظ</th>
           <th style="text-align:center;" id="th-revplan">خطة المراجعة</th>
           <th style="text-align:center;">ملف الطالب</th>
@@ -1875,7 +1874,7 @@ function loadWarn(e){
 let TERMS=[], CUR_TERM=null, VIEW_TERM=null;
 const TERM_GIRLS=['البنات','الملكات','الأميرات'];
 const TERM_DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
+const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"no_review":true,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
 function termIsGirls(b){ return TERM_GIRLS.includes(b); }
 function _termD(iso){ const d=new Date(String(iso).slice(0,10)+'T00:00:00'); d.setHours(0,0,0,0); return d; }
 async function loadTerms(){
@@ -2025,8 +2024,10 @@ function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'
 function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
 function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
 // ── HTML ملخّص الإنجاز لخطة واحدة ──
+function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
+function spNoRev(plan){ const t=(typeof TERMS!=='undefined'?TERMS:[]).find(x=>x.id===(plan&&plan.term_id)); return termNoReview(t); }
 function spProgressHtml(plan,recs,asOf){
-  const H=spTrack(plan,'h',recs,asOf), R=spTrack(plan,'r',recs,asOf);
+  const NR=spNoRev(plan), H=spTrack(plan,'h',recs,asOf), R=NR?null:spTrack(plan,'r',recs,asOf);
   const card=(ttl,T,col)=>'<div style="flex:1;min-width:200px;border:1.5px solid var(--border);border-top:3px solid '+col+';border-radius:var(--r-sm);padding:12px 14px;background:var(--white);">'
     +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
     +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
@@ -2037,9 +2038,9 @@ function spProgressHtml(plan,recs,asOf){
   const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
     return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
   const dates=Object.keys(map).sort();
-  const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th><th>هدف المراجعة</th><th>الإنجاز</th></tr></thead><tbody>'
-    +dates.map(d=>'<tr><td style="white-space:nowrap;font-weight:700;">'+spFmt(d)+'</td>'+cell(map[d].h)+cell(map[d].r)+'</tr>').join('')+'</tbody></table></div>'):'';
-  return '<div style="display:flex;gap:12px;flex-wrap:wrap;">'+card('📖 خطة الحفظ',H,'var(--jade)')+card('🔁 خطة المراجعة',R,'var(--blue)')+'</div>'+tbl
+  const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th>'+(NR?'':'<th>هدف المراجعة</th><th>الإنجاز</th>')+'</tr></thead><tbody>'
+    +dates.map(d=>'<tr><td style="white-space:nowrap;font-weight:700;">'+spFmt(d)+'</td>'+cell(map[d].h)+(NR?'':cell(map[d].r))+'</tr>').join('')+'</tbody></table></div>'):'';
+  return '<div style="display:flex;gap:12px;flex-wrap:wrap;">'+card('📖 خطة الحفظ',H,'var(--jade)')+(NR?'':card('🔁 خطة المراجعة',R,'var(--blue)'))+'</div>'+tbl
     +(plan.data&&plan.data.notes?'<div style="font-size:.76rem;color:var(--mid);margin-top:10px;">📝 '+esc(plan.data.notes)+'</div>':'');
 }
 // ── تحميل ──
@@ -2117,6 +2118,7 @@ async function spLoadCtx(){
 }
 function spRender(){
   const C=SP_CTX, P=C.period, pl=C.plan, d=(pl&&pl.data)||{};
+  const NR=termNoReview(C.term);   // الخريف: مفيش مراجعة
   const dates=spSessionDates(C.term,C.st.branch,P.from,P.to);
   const ses={}; (d.sessions||[]).forEach(x=>ses[x.date]=x);
   const btn=document.getElementById('sp-save-btn');
@@ -2130,8 +2132,8 @@ function spRender(){
   const rowsHtml=dates.length?dates.map((dt,i)=>{ const x=ses[dt]||{};
     return '<tr><td style="white-space:nowrap;font-weight:700;">'+spAr(i+1)+'. '+spFmt(dt)+'</td>'
       +'<td><div style="display:flex;gap:6px;justify-content:center;">'+spPosInputs('sp-h-'+dt,x.h)+'</div></td>'
-      +'<td><div style="display:flex;gap:6px;justify-content:center;">'+spPosInputs('sp-r-'+dt,x.r)+'</div></td></tr>'; }).join('')
-    :'<tr><td colspan="3" style="color:var(--light);padding:16px;">مفيش حلقات في الفترة دي</td></tr>';
+      +(NR?'':'<td><div style="display:flex;gap:6px;justify-content:center;">'+spPosInputs('sp-r-'+dt,x.r)+'</div></td>')+'</tr>'; }).join('')
+    :'<tr><td colspan="'+(NR?2:3)+'" style="color:var(--light);padding:16px;">مفيش حلقات في الفترة دي</td></tr>';
   const asOf=localISO();
   document.getElementById('sp-body').innerHTML=
     '<div class="sp-row"><b style="color:var(--forest);">'+esc(C.term.name)+'</b> • '+esc(C.st.branch||'')+'</div>'
@@ -2142,10 +2144,10 @@ function spRender(){
     +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'
     +'<div class="sp-box"><h4>📖 الحفظ الجديد</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-h-lines" type="number" min="1" style="width:70px;" value="'+(((d.hifz||{}).lines)||'')+'"></div>'
     +'<div class="sp-row">البداية من '+spPosInputs('sp-h-start',(d.hifz||{}).start)+'</div></div>'
-    +'<div class="sp-box"><h4>🔁 المراجعة</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-r-lines" type="number" min="1" style="width:70px;" value="'+(((d.rev||{}).lines)||'')+'"></div>'
-    +'<div class="sp-row">البداية من '+spPosInputs('sp-r-start',(d.rev||{}).start)+'</div></div></div>'
+    +(NR?'':'<div class="sp-box"><h4>🔁 المراجعة</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-r-lines" type="number" min="1" style="width:70px;" value="'+(((d.rev||{}).lines)||'')+'"></div>'
+    +'<div class="sp-row">البداية من '+spPosInputs('sp-r-start',(d.rev||{}).start)+'</div></div>')+'</div>'
     +'<div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;">الهدف في كل حلقة: <b>إلى</b> سورة / آية</div>'
-    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>الحفظ إلى</th><th>المراجعة إلى</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'
+    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>الحفظ إلى</th>'+(NR?'':'<th>المراجعة إلى</th>')+'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'
     +'<div class="sp-row" style="margin-top:10px;">ملاحظات <input class="sp-in" id="sp-notes" style="flex:1;min-width:200px;" value="'+esc(d.notes||'')+'"></div>'
     +(pl?('<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);"><div style="font-weight:800;color:var(--forest);margin-bottom:8px;">📊 الإنجاز</div>'+spProgressHtml(pl,C.recs,asOf)+'</div>'):'')
     +(pl&&pl.updated_by_name?'<div style="font-size:.68rem;color:var(--light);margin-top:10px;">آخر تعديل: '+esc(pl.updated_by_name)+'</div>':'');
@@ -2170,7 +2172,7 @@ async function spSave(){
   }
   let me={}; try{ me=JSON.parse(localStorage.getItem('currentUser')||'{}')||{}; }catch(e){}
   const row={ student_id:C.st.id, term_id:C.term.id, period_no:P.no, period_from:P.from, period_to:P.to, direction:dir,
-    data:{ hifz:{lines:+document.getElementById('sp-h-lines').value||null, start:hs}, rev:{lines:+document.getElementById('sp-r-lines').value||null, start:rs},
+    data:{ hifz:{lines:+document.getElementById('sp-h-lines').value||null, start:hs}, rev:{lines:+((document.getElementById('sp-r-lines')||{}).value)||null, start:rs},
            sessions, notes:document.getElementById('sp-notes').value.trim() },
     updated_by:me.id||null, updated_by_name:me.full_name||null, updated_at:new Date().toISOString() };
   const btn=document.getElementById('sp-save-btn'); if(btn) btn.disabled=true;
@@ -2239,15 +2241,16 @@ async function renderStudentPlans(){
     recs=await spLoadRecs(ids,P.from,P.to);
   }catch(e){ wrap.innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>الخطط ما اتحمّلتش — اعمل تحديث</div>'; return; }
   const asOf=D();
+  const NRt=termNoReview(t);
   const byS={}; plans.forEach(p=>byS[p.student_id]=p);
   wrap.innerHTML='<div style="font-size:.78rem;color:var(--mid);margin-bottom:10px;">'+esc(t.name)+' • الخطة بتتعمل أول الفترة (بداية الدورة / الحلقة اللي بعد الاختبار الشهري) • النسبة = الآيات المُسمَّعة ÷ المطلوبة لحد النهارده</div>'
-    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th style="text-align:right;">الطالب</th><th>خطة الحفظ</th><th>خطة المراجعة</th><th></th></tr></thead><tbody>'
+    +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th style="text-align:right;">الطالب</th><th>خطة الحفظ</th>'+(NRt?'':'<th>خطة المراجعة</th>')+'<th></th></tr></thead><tbody>'
     +list.map(s=>{ const pl=byS[s.id]; const rc=recs.filter(r=>String(r.student_id)===String(s.id));
       const H=pl?spTrack(pl,'h',rc,asOf):null, R=pl?spTrack(pl,'r',rc,asOf):null;
       const arg=JSON.stringify({id:s.id,name:cleanName(s.name),branch:cleanName(c.branch)}).replace(/"/g,'&quot;');
       return '<tr><td style="text-align:right;font-weight:700;color:var(--forest);">'+esc(s.name)+'</td>'
         +'<td>'+(H?spBadge(H.pct)+'<div style="font-size:.66rem;color:var(--light);">'+spAr(H.done)+'/'+spAr(H.planned)+' آية</div>':'—')+'</td>'
-        +'<td>'+(R?spBadge(R.pct)+'<div style="font-size:.66rem;color:var(--light);">'+spAr(R.done)+'/'+spAr(R.planned)+' آية</div>':'—')+'</td>'
+        +(NRt?'':'<td>'+(R?spBadge(R.pct)+'<div style="font-size:.66rem;color:var(--light);">'+spAr(R.done)+'/'+spAr(R.planned)+' آية</div>':'—')+'</td>')
         +'<td><button class="btn '+(pl?'btn-outline':'btn-primary')+' btn-xs" onclick="spOpen('+arg+',TERMS.find(x=>x.id===\''+t.id+'\'),'+P.no+')">'+(pl?'✏️ الخطة':'➕ عمل خطة')+'</button></td></tr>'; }).join('')
     +'</tbody></table></div>';
 }
@@ -2737,6 +2740,7 @@ function closeMediaVideo(){
 }
 
 function nav(el, pageId, fromPopstate){
+  if(pageId==='circles'){ pageId='dashboard'; el=document.querySelector(".sb-item[onclick*=\"'dashboard'\"]"); }   // «حلقاتي» اتشالت
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   const pg=document.getElementById('page-'+pageId);
@@ -3469,8 +3473,10 @@ function renderStudents(){
   if(exam){ if(nw)nw.style.display='none'; if(ew)ew.style.display='block'; renderExamTable(c,list,exam); return; }
   if(nw)nw.style.display=''; if(ew){ ew.style.display='none'; ew.innerHTML=''; }
   const showPlan=planAllowed();
+  const NR=termNoReview(termOf(D())||CUR_TERM);   // الدورة الخريفية: مفيش تسميع مراجعة ولا خطة مراجعة
+  const thRL=document.getElementById('th-revlvl'); if(thRL) thRL.style.display=NR?'none':'';
   const thM=document.getElementById('th-memplan'); if(thM) thM.style.display=showPlan?'':'none';
-  const thR=document.getElementById('th-revplan'); if(thR) thR.style.display=showPlan?'':'none';
+  const thR=document.getElementById('th-revplan'); if(thR) thR.style.display=(showPlan&&!NR)?'':'none';
   if(!list.length){ tb.innerHTML='<tr><td colspan="'+(showPlan?9:7)+'" style="text-align:center;color:var(--light);padding:30px;">لا يوجد طلاب في هذه الحلقة</td></tr>'; return; }
   tb.innerHTML=list.map((s,i)=>{
     if(!REC_STATE[s.id]) REC_STATE[s.id]={};
@@ -3493,9 +3499,9 @@ function renderStudents(){
         </div>
       </td>
       <td style="text-align:center;" id="memcell-${s.id}">${evalCellBtn(s.id,'new')}</td>
-      <td style="text-align:center;" id="revcell-${s.id}">${evalCellBtn(s.id,'review')}</td>
+      <td style="text-align:center;${NR?'display:none;':''}" id="revcell-${s.id}">${evalCellBtn(s.id,'review')}</td>
       <td style="text-align:center;${showPlan?'':'display:none;'}" id="memplan-${s.id}">—</td>
-      <td style="text-align:center;${showPlan?'':'display:none;'}" id="revplan-${s.id}">—</td>
+      <td style="text-align:center;${(showPlan&&!NR)?'':'display:none;'}" id="revplan-${s.id}">—</td>
       <td style="text-align:center;"><button class="btn btn-ghost btn-xs" onclick="openStudentFile('${s.id}')">📁 الملف</button></td>
       <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">× إزالة</button>`:''}</td>
     </tr>`;
@@ -4037,37 +4043,17 @@ function setAttUI(sid,status,mins){
 }
 
 // أركان الحلقة (تلقين/كنوز/تجويد) — تُحفظ محلياً لليوم
-// أركان الحلقة — في جدول circle_arkan (دفعة ١١) بدل localStorage
-let ARKAN={}, _arkChain=Promise.resolve();
-async function renderArkan(c){
-  const box=document.getElementById('arkan-checklist'); if(!box) return;
-  if(!c){ box.innerHTML=''; return; }
-  const cid=c.id, day=D(), key=cid+'_'+day;
-  box.innerHTML='<div style="color:var(--light);font-size:.8rem;">⏳ جارٍ التحميل…</div>';
-  let st={}, failed=false;
-  try{ const {data,error}=await db.from('circle_arkan').select('data').eq('circle_id',cid).eq('date',day).maybeSingle(); if(error) throw error; st=(data&&data.data)||{}; }
-  catch(e){ loadWarn(e); failed=true; }
-  if(!failed){ // نقل أي تسجيل قديم من الجهاز (مرة واحدة)
-    try{ const lk='arkan_'+cid+'_'+day, old=JSON.parse(localStorage.getItem(lk)||'null');
-      if(old&&Object.keys(old).length&&!Object.keys(st).length){ st=old; await arkSave(cid,day,st); }
-      localStorage.removeItem(lk); }catch(e){ console.warn(e); } }
-  ARKAN[key]=st;
-  const cur=activeCircle&&activeCircle(); if(cur&&cur.id!==cid) return;
+function renderArkan(c){
+  if(!c){ document.getElementById('arkan-checklist').innerHTML=''; return; }
+  const key='arkan_'+c.id+'_'+D();
+  const st=JSON.parse(localStorage.getItem(key)||'{}');
   const items=[['talqeen','🔁 التلقين الجماعي'],['kunoz','💎 شرح الكنوز الأثرية'],['tajweed','📗 شرح التجويد']];
-  box.innerHTML=(failed?'<div style="color:var(--red);font-size:.8rem;">⚠️ الأركان ما اتحمّلتش — اعمل تحديث للصفحة</div>':'')+items.map(([k,t])=>`
+  document.getElementById('arkan-checklist').innerHTML=items.map(([k,t])=>`
     <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-size:.86rem;">
-      <input type="checkbox" ${st[k]?'checked':''} ${failed?'disabled':''} onchange="toggleArkan('${cid}','${k}',this)" style="width:18px;height:18px;"> ${t}
+      <input type="checkbox" ${st[k]?'checked':''} onchange="toggleArkan('${c.id}','${k}',this.checked)" style="width:18px;height:18px;"> ${t}
     </label>`).join('');
 }
-async function arkSave(cid,day,st){
-  const {data,error}=await db.from('circle_arkan').upsert([{circle_id:cid,date:day,data:st,updated_by:cu.id,updated_at:new Date().toISOString()}],{onConflict:'circle_id,date'}).select('circle_id');
-  if(error||!data||data.length!==1) throw (error||new Error('rls'));
-}
-function toggleArkan(cid,k,el){
-  const day=D(), key=cid+'_'+day, v=!!el.checked;
-  const st=Object.assign({},ARKAN[key]||{}); st[k]=v; ARKAN[key]=st;
-  _arkChain=_arkChain.then(()=>arkSave(cid,day,st)).catch(e=>{ console.warn(e); el.checked=!v; const s2=Object.assign({},ARKAN[key]||{}); s2[k]=!v; ARKAN[key]=s2; showToast('⚠️ الركن ما اتحفظش — جرّب تاني'); });
-}
+function toggleArkan(cid,k,v){ const key='arkan_'+cid+'_'+D(); const st=JSON.parse(localStorage.getItem(key)||'{}'); st[k]=v; localStorage.setItem(key,JSON.stringify(st)); }
 
 // ══ POINTS / CARDS ══
 const CARDS=[['excellent','أخضر ١٥',15,'#1a7a4a'],['very_good','أزرق ١٠',10,'var(--blue)'],['good','أصفر ٥',5,'var(--gold)'],['silver','فضي ٥٠',50,'#8a8f98'],['gold','ذهبي ١٠٠',100,'#c8920a'],['diamond','ماسي ٢٠٠',200,'#6b3fa0']];
@@ -5606,12 +5592,7 @@ document.addEventListener('click', function(e) {
 async function loadAnnouncements(){
   const box=document.getElementById('ann-list');
   try{
-    const {data:all}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false});
-    // اللي يخص المعلم بس: «للكل» أو فيه teacher أو مخصّص باسمه
-    const data=(all||[]).filter(a=>{ const t=String(a.target_role||'all').replace(/\s/g,'');
-      if(t==='all'||t==='') return true;
-      if(t.indexOf('custom:')===0) return t.slice(7).split(',').includes(String(cu.id));
-      return t.split(',').includes('teacher'); });
+    const {data}=await db.from('announcements').select('*').eq('is_active',true).order('created_at',{ascending:false});
     if(!data||!data.length){ box.innerHTML='<div class="empty"><span class="empty-icon">📢</span>لا توجد إعلانات</div>'; return; }
     box.innerHTML=data.map(a=>`<div class="alert-strip alert-ok" style="flex-direction:column;align-items:flex-start;">
       <div style="font-weight:700;">📢 ${esc(a.body||'')}</div>
