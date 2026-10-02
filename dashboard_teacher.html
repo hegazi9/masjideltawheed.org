@@ -804,6 +804,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   <nav class="sb-nav">
     <div class="sb-section">الرئيسية</div>
     <div class="sb-item active" onclick="nav(this,'dashboard')"><span class="sb-icon">🏠</span> لوحة القيادة</div>
+    <div class="sb-item" onclick="nav(this,'splans')"><span class="sb-icon">🎯</span> خطة الطالب</div>
     <div class="sb-item" onclick="nav(this,'tasks')"><span class="sb-icon">✅</span> المهام اليومية</div>
     <div class="sb-item" onclick="nav(this,'lessonprep')"><span class="sb-icon">📝</span> تحضير الدروس</div>
     <div class="sb-item" onclick="nav(this,'strategies')"><span class="sb-icon">🎬</span> استراتيجيات التعلم النشط</div>
@@ -817,7 +818,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="sb-item" onclick="nav(this,'settings')"><span class="sb-icon">⚙️</span> الإعدادات</div>
 
     <div class="sb-section">حلقاتي</div>
-    <div class="sb-item" onclick="nav(this,'splans')"><span class="sb-icon">🎯</span> خطة الطالب</div>
     <div class="sb-item" onclick="nav(this,'prayers')"><span class="sb-icon">🕌</span> تقرير الصلوات</div>
 
     <div class="sb-section">المتابعة</div>
@@ -866,6 +866,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
   <!-- شريط تبديل الحلقات -->
   <div id="circle-switcher" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"></div>
+  <div id="sp-dash-banner"></div>
 
   <div class="qs-row">
     <div class="qs-card" onclick="navPage('students')"><div class="qs-icon">🕌</div><div><div class="qs-val" id="qs-circles">0</div><div class="qs-lbl">حلقاتي</div></div></div>
@@ -2085,6 +2086,7 @@ function spEnsureUI(){
     +'<div class="modal-body" id="sp-body" style="max-height:74vh;overflow-y:auto;"></div>'
     +'<div class="modal-foot" id="sp-foot" style="padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;">'
     +'<button class="btn btn-primary" id="sp-save-btn" onclick="spSave()">💾 حفظ الخطة</button>'
+    +'<button class="btn btn-gold" id="sp-next-btn" style="display:none;" onclick="spSaveNext()">💾 حفظ ← الطالب التالي</button>'
     +'<button class="btn btn-ghost" onclick="closeModal(\'modal-splan\')">إغلاق</button></div></div>';
   document.body.appendChild(ov);
 }
@@ -2127,6 +2129,7 @@ function spRender(){
     if(btn) btn.disabled=true; return;
   }
   if(btn) btn.disabled=false;
+  const nb=document.getElementById('sp-next-btn'); if(nb) nb.style.display=spNextStudent()?'':'none';
   const perOpts=C.periods.map(p=>'<option value="'+p.no+'"'+(p.no===P.no?' selected':'')+'>الفترة '+spAr(p.no)+': '+spFmt(p.from)+' ← '+spFmt(p.to)+(p.exam?' (اختبار)':'')+'</option>').join('');
   const dir=(pl&&pl.direction)||'forward';
   const rowsHtml=dates.length?dates.map((dt,i)=>{ const x=ses[dt]||{};
@@ -2146,6 +2149,9 @@ function spRender(){
     +'<div class="sp-row">البداية من '+spPosInputs('sp-h-start',(d.hifz||{}).start)+'</div></div>'
     +(NR?'':'<div class="sp-box"><h4>🔁 المراجعة</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-r-lines" type="number" min="1" style="width:70px;" value="'+(((d.rev||{}).lines)||'')+'"></div>'
     +'<div class="sp-row">البداية من '+spPosInputs('sp-r-start',(d.rev||{}).start)+'</div></div>')+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;padding:9px 12px;border-radius:var(--r-sm);background:var(--gold-pale);">'
+    +'<button class="btn btn-gold btn-sm" type="button" onclick="spAutoFill()">⚡ وزّع الأهداف تلقائياً</button>'
+    +'<span style="font-size:.72rem;color:#7a5200;">من «البداية» + «عدد الأسطر» (١٥ سطر = وجه) — تقريبي، عدّل اللي محتاج وبعدين احفظ</span></div>'
     +'<div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;">الهدف في كل حلقة: <b>إلى</b> سورة / آية</div>'
     +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>الحفظ إلى</th>'+(NR?'':'<th>المراجعة إلى</th>')+'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'
     +'<div class="sp-row" style="margin-top:10px;">ملاحظات <input class="sp-in" id="sp-notes" style="flex:1;min-width:200px;" value="'+esc(d.notes||'')+'"></div>'
@@ -2181,8 +2187,11 @@ async function spSave(){
     if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
     C.plan=data[0]; spRender(); showToast('✅ اتحفظت الخطة');
     if(typeof spOnSaved==='function') spOnSaved(C.st.id);
+    if(btn) btn.disabled=false;
+    return true;
   }catch(e){ showToast('❌ الخطة ما اتحفظتش — '+(e.message||e.code||'')); }
   finally{ if(btn) btn.disabled=false; }
+  return false;
 }
 // ── قسم «خطة الطالب» في تقرير الطالب (المدير/المشرف) ──
 async function spAppendReport(out,s,rg){
@@ -2243,6 +2252,7 @@ async function renderStudentPlans(){
   const asOf=D();
   const NRt=termNoReview(t);
   const byS={}; plans.forEach(p=>byS[p.student_id]=p);
+  SPT_QUEUE={ term:t.id, period:P.no, list:list.map(s=>({id:s.id, name:cleanName(s.name), branch:cleanName(c.branch), has:!!byS[s.id]})) };
   wrap.innerHTML='<div style="font-size:.78rem;color:var(--mid);margin-bottom:10px;">'+esc(t.name)+' • الخطة بتتعمل أول الفترة (بداية الدورة / الحلقة اللي بعد الاختبار الشهري) • النسبة = الآيات المُسمَّعة ÷ المطلوبة لحد النهارده</div>'
     +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th style="text-align:right;">الطالب</th><th>خطة الحفظ</th>'+(NRt?'':'<th>خطة المراجعة</th>')+'<th></th></tr></thead><tbody>'
     +list.map(s=>{ const pl=byS[s.id]; const rc=recs.filter(r=>String(r.student_id)===String(s.id));
@@ -2254,7 +2264,100 @@ async function renderStudentPlans(){
         +'<td><button class="btn '+(pl?'btn-outline':'btn-primary')+' btn-xs" onclick="spOpen('+arg+',TERMS.find(x=>x.id===\''+t.id+'\'),'+P.no+')">'+(pl?'✏️ الخطة':'➕ عمل خطة')+'</button></td></tr>'; }).join('')
     +'</tbody></table></div>';
 }
-function spOnSaved(){ const pg=document.getElementById('page-splans'); if(pg&&pg.classList.contains('active')) renderStudentPlans(); }
+function spOnSaved(sid){
+  if(SPT_QUEUE){ const q=SPT_QUEUE.list.find(x=>String(x.id)===String(sid)); if(q) q.has=true; }
+  const pg=document.getElementById('page-splans'); if(pg&&pg.classList.contains('active')) renderStudentPlans();
+  const pd=document.getElementById('page-dashboard'); if(pd&&pd.classList.contains('active')) spDashBanner();
+}
+// ── «حفظ ← التالي»: أول طالب بعده من غير خطة (وإلا اللي بعده على طول) ──
+let SPT_QUEUE=null;
+function spNextStudent(){
+  const C=SP_CTX; if(!C||!SPT_QUEUE||!C.term||SPT_QUEUE.term!==C.term.id||!C.period||SPT_QUEUE.period!==C.period.no) return null;
+  const L=SPT_QUEUE.list, i=L.findIndex(x=>String(x.id)===String(C.st.id)); if(i<0) return null;
+  const rest=L.slice(i+1).concat(L.slice(0,i));
+  return rest.find(x=>!x.has) || L[i+1] || null;
+}
+async function spSaveNext(){
+  const C=SP_CTX; if(!C) return;
+  const nx=spNextStudent();
+  const ok=await spSave(); if(!ok) return;
+  if(!nx){ closeModal('modal-splan'); showToast('✅ خلصت خطط الحلقة'); return; }
+  spOpen({id:nx.id, name:nx.name, branch:nx.branch}, C.term, C.period.no);
+}
+// ── ⚡ توزيع الأهداف تلقائياً (البداية + عدد الأسطر/حلقة) — المصحف المدني ١٥ سطر للوجه ──
+let SP_W=null;
+function spWeights(){
+  if(SP_W) return SP_W;
+  const cnt={}, pg=[];
+  SP_SURAH.forEach((x,i)=>{ pg[i]=[]; for(let a=1;a<=x[1];a++){ const p=(typeof madaniPageOf==='function')?madaniPageOf(i+1,a):null; pg[i][a]=p; if(p) cnt[p]=(cnt[p]||0)+1; } });
+  SP_W=(s,a)=>{ const p=(pg[s-1]||[])[a]; return (p&&cnt[p])?1/cnt[p]:1/15; };   // نصيب الآية من الوجه
+  return SP_W;
+}
+function spFillTrack(dir,start,lines,dates){
+  const W=spWeights(), step=lines/15, out={};
+  let cur=null, acc=0, end=false;
+  dates.forEach((dt,k)=>{
+    if(end) return;
+    const tgt=step*(k+1); let moved=false;
+    do{
+      const n=cur?spNextPos(dir,cur):{s:start.s,a:start.a};
+      if(cur&&n.s===cur.s&&n.a===cur.a){ end=true; break; }
+      cur=n; acc+=W(cur.s,cur.a); moved=true;
+    }while(acc<tgt-1e-9);
+    if(moved) out[dt]={s:cur.s,a:cur.a};
+  });
+  return out;
+}
+function spAutoFill(){
+  const C=SP_CTX; if(!C||C.loadFailed) return;
+  const P=C.period, dates=spSessionDates(C.term,C.st.branch,P.from,P.to);
+  if(!dates.length){ showToast('⚠️ مفيش حلقات في الفترة دي'); return; }
+  const dir=document.getElementById('sp-dir').value==='backward'?'backward':'forward';
+  const NR=termNoReview(C.term);
+  const tracks=[['h','الحفظ']].concat(NR?[]:[['r','المراجعة']]).map(([k,lbl])=>{
+    const ln=+((document.getElementById('sp-'+k+'-lines')||{}).value)||0, st=spReadPos('sp-'+k+'-start');
+    return {k,lbl,ln,st};
+  });
+  const ready=tracks.filter(t=>t.ln>0&&t.st);
+  if(!ready.length){ showToast('⚠️ اختار «البداية من» واكتب «عدد الأسطر» الأول'); return; }
+  const filled=dates.some(dt=>ready.some(t=>spReadPos('sp-'+t.k+'-'+dt)));
+  if(filled&&!confirm('فيه أهداف مكتوبة — هيتكتب فوقها. تكمّل؟')) return;
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v; };
+  ready.forEach(t=>{
+    const out=spFillTrack(dir,t.st,t.ln,dates);
+    dates.forEach(dt=>{ const p=out[dt]; set('sp-'+t.k+'-'+dt+'-s',p?p.s:''); set('sp-'+t.k+'-'+dt+'-a',p?p.a:''); });
+  });
+  const skip=tracks.filter(t=>!(t.ln>0&&t.st)).map(t=>t.lbl);
+  showToast('✅ اتوزّعت الأهداف'+(skip.length?(' (ماعدا '+skip.join(' و')+' — ناقص البداية أو الأسطر)'):'')+' — راجعها واحفظ');
+}
+// ── تنبيه لوحة القيادة: طلاب من غير خطة في الفترة الحالية ──
+async function spDashBanner(){
+  const box=document.getElementById('sp-dash-banner'); if(!box) return;
+  const t=spTeacherTerm();
+  if(!t||termIsLegacy(t)||!MY_CIRCLES.length){ box.innerHTML=''; return; }
+  const today=D(), items=[]; let ids=[];
+  MY_CIRCLES.forEach(c=>{
+    const P=spPeriodOf(spPeriods(t,c.branch),today); if(!P) return;
+    const list=studentsOf(c).filter(s=>!s._static&&!s._guest); if(!list.length) return;
+    const first=spSessionDates(t,c.branch,P.from,P.to).find(d=>d>=today)||null;
+    items.push({c,P,list,first}); ids=ids.concat(list.map(s=>s.id));
+  });
+  if(!items.length){ box.innerHTML=''; return; }
+  let plans=[];
+  try{ plans=(await spLoadPlans([...new Set(ids)])).filter(p=>p.term_id===t.id); }catch(e){ box.innerHTML=''; return; }
+  const rows=items.map(it=>{ const have=new Set(plans.filter(p=>p.period_no===it.P.no).map(p=>String(p.student_id)));
+    return Object.assign({},it,{miss:it.list.filter(s=>!have.has(String(s.id))).length}); }).filter(x=>x.miss>0);
+  if(!rows.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="card" style="border-right:4px solid var(--gold);margin-bottom:18px;"><div class="card-body" style="padding:14px 16px;">'
+    +'<div style="font-weight:800;color:var(--forest);margin-bottom:8px;">🎯 خطة الطالب — '+esc(t.name)+'</div>'
+    +rows.map(r=>'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px dashed var(--border);">'
+      +'<div style="flex:1;min-width:190px;font-size:.82rem;"><b>'+esc(r.c.name)+'</b> — '+esc(r.c.branch)
+      +'<div style="font-size:.72rem;color:var(--mid);">الفترة '+spAr(r.P.no)+': '+spFmt(r.P.from)+' ← '+spFmt(r.P.to)
+      +(r.first?(' • '+(r.first===today?'<b style="color:var(--jade);">أول حلقة النهارده</b>':'أول حلقة: '+spFmt(r.first))):'')+'</div></div>'
+      +'<span class="badge bg-red">'+spAr(r.miss)+' من '+spAr(r.list.length)+' من غير خطة</span>'
+      +'<button class="btn btn-primary btn-sm" onclick="SPT_CIRCLE=\''+esc(String(r.c.id))+'\';SPT_PERIOD='+r.P.no+';navPage(\'splans\')">➕ اعمل الخطة</button></div>').join('')
+    +'</div></div>';
+}
 // ── تلميح هدف النهارده في مودال التسميع + ملء المدى تلقائياً + «تم/لم يتم» تلقائي ──
 let SP_EVAL=null;   // {sid,type,plan,key,recs} لو فيه هدف للنهارده
 function spPlanManualUI(show, msg){
@@ -2892,6 +2995,7 @@ function renderDashboard(){
   const todayC=MY_CIRCLES.filter(circleMeetsToday).map(x=>x.name);
   document.getElementById('qs-today').textContent=todayC.length?todayC.length:'لا يوجد';
   loadTeacherCurriculum();
+  spDashBanner();
 }
 
 // ══ الخطط والمقررات — عرض فقط للمعلم (يقرأ نفس جدول المدير/المشرف) ══
