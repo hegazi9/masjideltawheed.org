@@ -3855,112 +3855,51 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 
 <!-- ══ PAGE: EMPLOYEES ══ -->
 <div id="page-employees" class="page">
-
-  <!-- Breadcrumb -->
-  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
-    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'dashboard')">الصفحة الرئيسية</span>
-    <span style="margin:0 8px;">/ </span>
-    <span>إدارة الموظفين</span>
-  </div>
-
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
     <div>
-      <div class="section-title" style="margin-bottom:4px;">👔 إدارة الموظفين</div>
-      <div style="font-size:.8rem;color:var(--light);">إجمالي <span id="stat-employees">—</span> موظف في المدرسة</div>
+      <div class="section-title" style="margin-bottom:4px;">👔 الموظفون</div>
+      <div style="font-size:.8rem;color:var(--light);">حسابات دخول «الموظفون» — لوحة خاصة: بيانات كل الطلاب والطالبات وملفاتهم + التنبيهات الأسبوعية</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-outline btn-sm" onclick="printEmployeeList()">🖨️ طباعة</button>
-      <button class="btn btn-outline btn-sm" onclick="exportEmployeesExcel()">📊 Excel</button>
-      <select id="em-rows-per-page" onchange="changeEmployeeRows(this.value)" style="font-family:Tajawal;font-size:.8rem;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-        <option value="10">إظهار 10 أسطر</option>
-        <option value="25">إظهار 25 سطر</option>
-        <option value="50">إظهار 50 سطر</option>
-        <option value="999">إظهار الكل</option>
-      </select>
-      <button class="btn btn-outline btn-sm" id="em-btn-edit" onclick="editEmployeeSelected()" disabled>✏️ تعديل</button>
-      <button class="btn btn-outline btn-sm" id="em-btn-dup" onclick="dupEmployee()" disabled>🔁 تكرار</button>
-      <button class="btn btn-danger btn-sm" id="em-btn-del" onclick="deleteEmployeeSelected()" disabled>🗑 حذف</button>
-      <button class="btn btn-primary" onclick="openAddEmployee()">➕ إضافة</button>
-    </div>
+    <button class="btn btn-primary" onclick="eaOpenAdd()">➕ موظف جديد</button>
   </div>
-
-  <!-- Stats Row -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--jade);" id="em-stat-active">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظف نشط</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--gold);" id="em-stat-male">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظف ذكر</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--blue);" id="em-stat-female">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظفة أنثى</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--purple);" id="em-stat-jobs">—</div>
-      <div style="font-size:.75rem;color:var(--light);">وظيفة مختلفة</div>
-    </div>
-  </div>
-
-  <!-- Search + Filter -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-    <div style="font-size:.85rem;font-weight:700;color:var(--mid);margin-left:auto;">ابحث:</div>
-    <div style="display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:7px 14px;min-width:220px;">
-      <span style="color:var(--light);">🔍</span>
-      <input type="text" id="employee-search" placeholder="اكتب للبحث..." onkeyup="filterEmployees()" style="border:none;outline:none;font-family:Tajawal;font-size:.84rem;background:transparent;color:var(--ink);flex:1;">
-    </div>
-    <select id="employee-filter-job" onchange="filterEmployees()" style="font-family:Tajawal;font-size:.82rem;padding:8px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-      <option value="">كل الوظائف</option>
-      <option value="مشرف الحلقات">مشرف الحلقات</option>
-      <option value="المشرف على الموقع">المشرف على الموقع</option>
-      <option value="راصد الدرجات">راصد الدرجات</option>
-      <option value="أخرى">أخرى</option>
-    </select>
-    <select id="employee-filter-status" onchange="filterEmployees()" style="font-family:Tajawal;font-size:.82rem;padding:8px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-      <option value="">كل الحالات</option>
-      <option value="نشط">نشط</option>
-      <option value="موقوف">موقوف</option>
-    </select>
-  </div>
-
-  <!-- Employees Table -->
+  <div class="stats-row" id="ea-stats"></div>
   <div class="card">
-    <div class="card-head">
-      <div class="card-title">قائمة الموظفين</div>
-      <div style="display:flex;gap:8px;">
-        <span class="badge bg-green" id="em-badge-active">نشط: —</span>
-        <span class="badge bg-gray" id="em-badge-selected" style="display:none;">محدد: 0</span>
-      </div>
-    </div>
-    <div class="card-body-0" style="overflow-x:auto;">
-      <table class="tbl" id="employees-table">
-        <thead>
-          <tr>
-            <th style="width:36px;"><input type="checkbox" id="em-check-all" onchange="toggleAllEmployees(this)" style="cursor:pointer;"></th>
-            <th style="cursor:pointer;" onclick="sortEmployees('name')">الاسم ↕</th>
-            <th style="cursor:pointer;" onclick="sortEmployees('lname')">العائلة ↕</th>
-            <th style="cursor:pointer;" onclick="sortEmployees('job')">الوظيفة ↕</th>
-            <th>الجنس</th>
-            <th>اسم المستخدم</th>
-            <th>رقم الهاتف</th>
-            <th>البريد الإلكتروني</th>
-            <th>نوع الهوية</th>
-            <th>رقم الهوية</th>
-          </tr>
-        </thead>
-        <tbody id="employees-tbody"></tbody>
-      </table>
-    </div>
-    <div style="padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:.8rem;color:var(--light);">
-      <span id="em-page-info">—</span>
-      <div style="display:flex;gap:6px;" id="em-pagination"></div>
+    <div class="card-head"><div class="card-title">📋 الحسابات</div>
+      <input type="text" id="ea-q" placeholder="🔍 اسم / اسم دخول" oninput="eaRender()" style="font-family:Tajawal;font-size:.84rem;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);outline:none;margin-right:auto;"></div>
+    <div id="ea-list" style="overflow-x:auto;"></div>
+  </div>
+  <div class="card" style="border:1.5px dashed var(--border);">
+    <div style="padding:12px 16px;font-size:.78rem;color:var(--mid);line-height:1.9;">
+      <b style="color:var(--forest);">صلاحيات الموظف:</b> يشوف كل الطلاب والطالبات • يعدّل البيانات الأساسية وملف الطالب • يتخذ إجراءات التنبيهات الأسبوعية (بتظهر عند المشرفين والمديرين باسمه).
+      <br><b style="color:var(--forest);">ممنوع:</b> نقل/إيقاف/حذف الطلاب • درجات الاختبارات • الماليات • التحضير • أولياء الأمور.
     </div>
   </div>
-
 </div><!-- /employees -->
+
+<!-- ══ MODAL: موظف جديد / تعديل (الموظفون) ══ -->
+<div class="overlay" id="modal-ea-form">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head"><div class="modal-title" id="ea-form-title">➕ موظف جديد</div><button class="modal-close" onclick="closeModal('modal-ea-form')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg" style="grid-column:1/-1;"><label>الاسم *</label><input type="text" id="ea-name" maxlength="80" placeholder="مثال: أم خديجة"></div>
+        <div class="fg"><label>المسمّى</label><input type="text" id="ea-job" maxlength="40" placeholder="مثال: المشرفة"></div>
+        <div class="fg"><label>الموبايل</label><input type="tel" id="ea-phone" maxlength="15" dir="ltr" placeholder="01xxxxxxxxx"></div>
+        <div class="fg" id="ea-login-box"><label>اسم الدخول *</label><input type="text" id="ea-login" maxlength="30" dir="ltr" placeholder="m-omkhadija" autocapitalize="off" spellcheck="false"></div>
+        <div class="fg" id="ea-gender-box"><label>النوع</label><select id="ea-gender"><option value="أنثى">أنثى</option><option value="ذكر">ذكر</option></select></div>
+      </div>
+      <div id="ea-login-hint" style="font-size:.72rem;color:var(--light);">اسم الدخول: حروف إنجليزي صغيرة وأرقام و- بس، وبيبدأ بـ m- لوحده. كلمة المرور بتتعمل تلقائي وبتظهر مرة واحدة.</div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" id="ea-form-btn" onclick="eaSubmit()">💾 حفظ</button><button class="btn btn-outline" onclick="closeModal('modal-ea-form')">إلغاء</button></div>
+  </div>
+</div>
+<div class="overlay" id="modal-ea-cred">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head"><div class="modal-title">🔑 بيانات دخول الموظف</div><button class="modal-close" onclick="closeModal('modal-ea-cred')">×</button></div>
+    <div class="modal-body" id="ea-cred-body"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="eaCopyCred()">📋 نسخ</button><a class="btn btn-outline" id="ea-cred-wa" target="_blank" rel="noopener" style="display:none;text-decoration:none;">💬 واتساب</a><button class="btn btn-outline" onclick="closeModal('modal-ea-cred')">تم</button></div>
+  </div>
+</div>
 
 <!-- ══ MODAL: ADD EMPLOYEE ══ -->
 <div class="overlay" id="modal-add-employee">
@@ -10822,7 +10761,7 @@ function nav(el, pageId, fromPopstate){
   if (BRANCH_BY_PAGE[pageId]) renderBranchGrid(BRANCH_BY_PAGE[pageId]);
   if (pageId === 'teachers') { closeTeacherBranch(); renderTeacherBranchCards(); }
   if (pageId === 'supervisors') { loadSupervisors(); svShowBranches(true); }
-  if (pageId === 'employees') loadEmployees();
+  if (pageId === 'employees') eaLoad();
   if (pageId === 'parents') paLoad();
   if (pageId === 'memorization') loadAdminMemorization();
   if (pageId === 'attendance') loadAdminAttendance();
@@ -17185,7 +17124,7 @@ async function getFinStaff(){
   if(window._finStaff) return window._finStaff;
   const out = [];
   try{
-    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin']);
+    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin','employee']);
     (data||[]).forEach(u => { const n=(u.full_name||'').trim(); if(n) out.push({ id:u.id, name:n, role:FIN_ROLE_AR[u.role]||u.role, job:u.job_title||'' }); });
   }catch(e){ console.warn('finStaff users:', e); }
   try{
@@ -20796,6 +20735,126 @@ function paExport(){
   const rows=[['الكود','الحساب','الأبناء','الشعب','الموبايل','الحالة']].concat(PA.parents.map(p=>{ const k=paKids(p.id); return [paCode(p.username),p.full_name,k.map(x=>x.name).join(' - '),[...new Set(k.map(x=>x.branch))].join(' - '),p.phone||'',p.is_active===false?'موقوف':'نشط']; }));
   const csv='﻿'+rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='أولياء_الأمور.csv'; a.click();
+}
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// 👔 الموظفون (دفعة ١٣) — users.role='employee' + RPC admin_create_employee / admin_delete_employee
+//    كلمة المرور: admin_set_password • التعديل والإيقاف: users مباشرة (سياسة المدير) + .select()
+// ══════════════════════════════════════════════════════════════
+let EA={list:[], loaded:false, cur:null, cred:''};
+function eaAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function eaNorm(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ').trim(); }
+function eaCode(u){ return String(u||'').split('@')[0]; }
+function eaPass(){ let p=''; while(p.length<8){ const d=_rnd(10); if(!p&&d===0) continue; p+=d; } return p; }
+async function eaLoad(){
+  const box=document.getElementById('ea-list'); if(box&&!EA.loaded) box.innerHTML='<div style="padding:30px;text-align:center;color:var(--light);">⏳ جارٍ التحميل…</div>';
+  try{
+    const [u,a]=await Promise.all([
+      db.from('users').select('id,full_name,username,phone,job_title,gender,is_active,created_at').eq('role','employee').order('full_name'),
+      selectAll(db.from('weekly_alert_actions').select('taken_by,updated_at').order('alert_id'))
+    ]);
+    if(u.error) throw u.error;
+    const acts={}; (a.data||[]).forEach(x=>{ if(!x.taken_by) return; const o=acts[x.taken_by]=acts[x.taken_by]||{n:0,last:''}; o.n++; if((x.updated_at||'')>o.last) o.last=x.updated_at; });
+    EA.list=(u.data||[]).map(x=>Object.assign({},x,{acts:(acts[x.id]||{n:0,last:''})})); EA.loaded=true;
+  }catch(e){ console.warn(e); if(box) box.innerHTML='<div style="padding:30px;text-align:center;color:var(--red);">⚠️ البيانات ما اتحمّلتش — اعمل تحديث</div>'; return; }
+  eaRender();
+}
+function eaRender(){
+  if(!EA.loaded) return;
+  const act=EA.list.filter(x=>x.is_active!==false).length, tot=EA.list.reduce((s,x)=>s+x.acts.n,0);
+  const st=(ic,v,l,cls)=>'<div class="stat-card '+cls+'"><div class="stat-icon">'+ic+'</div><div class="stat-val">'+eaAr(v)+'</div><div class="stat-lbl">'+l+'</div></div>';
+  document.getElementById('ea-stats').innerHTML=st('👔',EA.list.length,'حساب موظف','green')+st('✅',act,'نشط','blue')+st('🔔',tot,'إجراء تنبيه متسجّل','gold');
+  const q=eaNorm(document.getElementById('ea-q').value);
+  const rows=EA.list.filter(x=>!q||eaNorm(x.full_name).includes(q)||eaCode(x.username).includes(q.toLowerCase()));
+  const box=document.getElementById('ea-list');
+  if(!rows.length){ box.innerHTML='<div style="padding:30px;text-align:center;color:var(--light);">'+(EA.list.length?'مفيش نتايج':'مفيش حسابات موظفين لسه — اضغط «➕ موظف جديد»')+'</div>'; return; }
+  const th=t=>'<th style="padding:9px 10px;text-align:right;">'+t+'</th>';
+  box.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.83rem;font-family:Tajawal;"><thead><tr style="background:var(--pale);color:var(--forest);">'
+    +th('الاسم')+th('اسم الدخول')+th('الموبايل')+th('إجراءات التنبيهات')+th('الحالة')+'<th></th></tr></thead><tbody>'
+    +rows.map(x=>'<tr style="border-bottom:1px solid var(--border);'+(x.is_active===false?'opacity:.55;':'')+'">'
+      +'<td style="padding:8px 10px;font-weight:700;">'+esc((x.job_title?x.job_title+'/ ':'')+(x.full_name||''))+'</td>'
+      +'<td style="padding:8px 10px;font-weight:800;direction:ltr;text-align:right;color:var(--emerald);">'+esc(eaCode(x.username))+'</td>'
+      +'<td style="padding:8px 10px;direction:ltr;text-align:right;">'+esc(x.phone||'—')+'</td>'
+      +'<td style="padding:8px 10px;">'+eaAr(x.acts.n)+(x.acts.last?' <small style="color:var(--light);">• آخر واحد '+esc(new Date(x.acts.last).toLocaleDateString('ar-EG',{day:'numeric',month:'short'}))+'</small>':'')+'</td>'
+      +'<td style="padding:8px 10px;"><span class="badge '+(x.is_active===false?'bg-red':'bg-green')+'">'+(x.is_active===false?'موقوف':'نشط')+'</span></td>'
+      +'<td style="padding:8px 10px;white-space:nowrap;text-align:center;">'
+      +'<button class="btn btn-xs btn-outline" title="تعديل" onclick="eaOpenEdit(\''+x.id+'\')">✏️</button> '
+      +'<button class="btn btn-xs btn-outline" title="كلمة مرور جديدة" onclick="eaResetPass(\''+x.id+'\')">🔑</button> '
+      +'<button class="btn btn-xs btn-outline" title="'+(x.is_active===false?'تفعيل':'إيقاف')+'" onclick="eaToggle(\''+x.id+'\')">'+(x.is_active===false?'▶️':'⏸️')+'</button> '
+      +'<button class="btn btn-xs btn-danger" title="حذف" onclick="eaDelete(\''+x.id+'\')">🗑️</button></td></tr>').join('')+'</tbody></table>';
+}
+function eaOpenAdd(){
+  EA.cur=null;
+  document.getElementById('ea-form-title').textContent='➕ موظف جديد';
+  ['ea-name','ea-phone','ea-login'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ea-job').value='المشرفة'; document.getElementById('ea-gender').value='أنثى';
+  ['ea-login-box','ea-gender-box','ea-login-hint'].forEach(id=>document.getElementById(id).style.display='');
+  openModal('modal-ea-form');
+}
+function eaOpenEdit(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return; EA.cur=id;
+  document.getElementById('ea-form-title').textContent='✏️ تعديل '+(x.full_name||'');
+  document.getElementById('ea-name').value=x.full_name||''; document.getElementById('ea-job').value=x.job_title||''; document.getElementById('ea-phone').value=x.phone||'';
+  ['ea-login-box','ea-gender-box','ea-login-hint'].forEach(i=>document.getElementById(i).style.display='none');
+  openModal('modal-ea-form');
+}
+async function eaSubmit(){
+  const name=cleanName(document.getElementById('ea-name').value).replace(/\s+/g,' '), job=cleanName(document.getElementById('ea-job').value);
+  const phone=document.getElementById('ea-phone').value.replace(/[^0-9+]/g,'');
+  if(name.length<3){ showToast('اكتب الاسم'); return; }
+  const btn=document.getElementById('ea-form-btn'); btn.disabled=true;
+  try{
+    if(EA.cur){
+      const {data,error}=await db.from('users').update({full_name:name, job_title:job||null, phone:phone||null}).eq('id',EA.cur).eq('role','employee').select('id');
+      if(error) throw error; if(!data||data.length!==1) throw new Error('ما اتحفظش');
+      closeModal('modal-ea-form'); showToast('✅ اتحفظ'); await eaLoad(); return;
+    }
+    let login=document.getElementById('ea-login').value.trim().toLowerCase().replace(/@.*$/,'');
+    if(login && !/^m-/.test(login)) login='m-'+login;
+    if(!/^m-[a-z0-9][a-z0-9_-]{1,28}$/.test(login)){ showToast('⚠️ اسم الدخول: حروف إنجليزي صغيرة وأرقام بس — مثال: m-omkhadija'); return; }
+    const pass=eaPass();
+    const {data,error}=await db.rpc('admin_create_employee',{p_name:name,p_login:login,p_password:pass,p_phone:phone||null,p_job_title:job||null,p_gender:document.getElementById('ea-gender').value});
+    if(error) throw error; if(!data||!data.id) throw new Error('الحساب ما اتعملش');
+    closeModal('modal-ea-form');
+    eaShowCred((job?job+'/ ':'')+name, eaCode(data.username), pass, phone);
+    await eaLoad();
+  }catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+  finally{ btn.disabled=false; }
+}
+function eaShowCred(name,code,pass,phone){
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'login.html';
+  EA.cred='السلام عليكم ورحمة الله\nبيانات دخول لوحة الموظفين — مدرسة التوحيد القرآنية\n'+name+'\nالرابط: '+url+'\nاختار «الموظفون»\nاسم المستخدم: '+code+'\nكلمة المرور: '+pass;
+  document.getElementById('ea-cred-body').innerHTML='<div style="text-align:center;margin-bottom:12px;font-weight:800;color:var(--forest);">'+esc(name)+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    +'<div style="background:var(--pale);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:.74rem;color:var(--mid);">اسم المستخدم</div><div style="font-size:1.05rem;font-weight:900;color:var(--emerald);direction:ltr;word-break:break-all;">'+esc(code)+'</div></div>'
+    +'<div style="background:var(--gold-pale);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:.74rem;color:var(--mid);">كلمة المرور</div><div style="font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:2px;direction:ltr;">'+esc(pass)+'</div></div></div>'
+    +'<div style="font-size:.74rem;color:var(--red);margin-top:12px;text-align:center;">⚠️ كلمة المرور مش هتظهر تاني — انسخها أو ابعتها دلوقتي</div>';
+  const wa=document.getElementById('ea-cred-wa'), ph=String(phone||'').replace(/^0/,'20').replace(/[^0-9]/g,'');
+  wa.style.display=ph.length>=11?'':'none'; wa.href='https://wa.me/'+ph+'?text='+encodeURIComponent(EA.cred);
+  openModal('modal-ea-cred');
+}
+async function eaCopyCred(){ try{ await navigator.clipboard.writeText(EA.cred); showToast('📋 اتنسخت'); }catch(e){ showToast('⚠️ النسخ ما اشتغلش — انسخ يدوي'); } }
+async function eaResetPass(id){
+  const x=EA.list.find(e=>e.id===id); if(!x||!confirm('عمل كلمة مرور جديدة لـ «'+x.full_name+'»؟ القديمة هتبطل.')) return;
+  const pass=eaPass();
+  try{ const {data,error}=await db.rpc('admin_set_password',{p_user_id:id,p_password:pass}); if(error) throw error; if(!data||!data.ok) throw new Error('فشل');
+    eaShowCred((x.job_title?x.job_title+'/ ':'')+x.full_name, eaCode(x.username), pass, x.phone); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+}
+async function eaToggle(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return; const v=x.is_active===false;
+  if(!confirm((v?'تفعيل':'إيقاف')+' حساب «'+x.full_name+'»؟'+(v?'':'\nمش هيقدر يدخل لحد ما يتفعّل تاني.'))) return;
+  try{ const {data,error}=await db.from('users').update({is_active:v}).eq('id',id).eq('role','employee').select('id'); if(error) throw error; if(!data||data.length!==1) throw new Error('ما اتحفظش');
+    x.is_active=v; eaRender(); showToast(v?'✅ الحساب اتفعّل':'⏸️ الحساب اتوقف'); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+}
+async function eaDelete(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return;
+  if(!confirm('حذف حساب «'+x.full_name+'» نهائياً؟\nالإجراءات اللي سجّلها في التنبيهات هتفضل باسمه.')) return;
+  try{ const {data,error}=await db.rpc('admin_delete_employee',{p_user_id:id}); if(error) throw error; if(!data||!data.deleted) throw new Error('ما اتحذفش');
+    showToast('🗑️ اتحذف'); await eaLoad(); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
 }
 </script>
 </body>
