@@ -1613,6 +1613,9 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div class="sb-item" onclick="nav(this,'walerts')">
       <span class="sb-icon">🔔</span> التنبيهات الأسبوعية
     </div>
+    <div class="sb-item" onclick="nav(this,'tadmin')">
+      <span class="sb-icon">🎓</span> إدارة التأهيل
+    </div>
     <div class="sb-item" onclick="nav(this,'stats')" style="display:none;">
       <span class="sb-icon">📊</span> الإحصاءات
     </div>
@@ -1732,6 +1735,27 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 
 </div><!-- /dashboard -->
+
+<!-- ══ (دفعة ١٤) كليك يمين على حلقة في لوحة القيادة ══ -->
+<div id="dgc-menu" style="display:none;position:fixed;z-index:9999;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);box-shadow:var(--shadow-lg);min-width:220px;overflow:hidden;">
+  <div id="dgc-menu-h" style="padding:9px 14px;font-size:.78rem;font-weight:800;color:var(--forest);background:var(--pale);border-bottom:1px solid var(--border);"></div>
+  <div class="dgc-mi" onclick="dgcEdit()" style="padding:10px 14px;cursor:pointer;font-size:.85rem;font-weight:700;">✏️ تعديل البيانات والمواعيد</div>
+  <div class="dgc-mi" onclick="dgcAskDel()" style="padding:10px 14px;cursor:pointer;font-size:.85rem;font-weight:700;color:var(--red);border-top:1px solid var(--border);">🗑️ حذف الحلقة</div>
+</div>
+<style>.dgc-mi:hover{background:var(--bg);} .dgc-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;} .dgc-row select,.dgc-row input{font-family:Tajawal;font-size:.84rem;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);} .dgc-sec{background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:9px 13px;margin:16px 0 12px;font-size:.84rem;font-weight:800;color:var(--emerald);} .dgc-note{font-size:.74rem;color:var(--mid);margin-bottom:10px;line-height:1.7;}</style>
+<div class="overlay" id="modal-dgc-edit">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head"><div class="modal-title" id="dgc-title">✏️ تعديل الحلقة</div><button class="modal-close" onclick="closeModal('modal-dgc-edit')">×</button></div>
+    <div class="modal-body" id="dgc-body" style="max-height:74vh;overflow-y:auto;"></div>
+  </div>
+</div>
+<div class="overlay" id="modal-dgc-del">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-head"><div class="modal-title">🗑️ تأكيد حذف الحلقة</div><button class="modal-close" onclick="closeModal('modal-dgc-del')">×</button></div>
+    <div class="modal-body" id="dgc-del-body"></div>
+    <div class="modal-foot"><button class="btn btn-danger" id="dgc-del-btn" onclick="dgcDoDel()">🗑️ نعم، احذف</button><button class="btn btn-outline" onclick="closeModal('modal-dgc-del')">إلغاء</button></div>
+  </div>
+</div>
 
 <!-- ══ MODAL: تفاصيل الحلقة الأسبوعية ══ -->
 <div class="overlay" id="modal-dash-circle">
@@ -2119,6 +2143,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       </div>
 
     </div><!-- /sv-branches-grid -->
+    <div id="sv-off-box" style="margin-top:22px;"></div>
   </div><!-- /branches view -->
 
   <!-- Supervisors Detail View -->
@@ -2138,7 +2163,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
   <div style="height:1px;background:var(--border);margin:0 10px;"></div>
   <div onclick="svContextAction('delete')" style="padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:.86rem;font-weight:600;color:var(--red);cursor:pointer;" onmouseenter="this.style.background='var(--red-pale)'" onmouseleave="this.style.background=''">
-    <span>🗑️</span> حذف من القائمة
+    <span>🗑️</span> إيقاف / حذف المشرف
   </div>
 </div>
 
@@ -2952,6 +2977,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="addCpRow()">➕ صف جديد</button>
+        <button class="btn btn-outline btn-sm" onclick="fillCpTerm()" title="يضيف كل أيام حلقات الدورة الناقصة">📅 كل أيام الدورة</button>
         <button class="btn btn-primary btn-sm" onclick="saveCpAll()">💾 حفظ التعديلات</button>
       </div>
     </div>
@@ -3855,112 +3881,51 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 
 <!-- ══ PAGE: EMPLOYEES ══ -->
 <div id="page-employees" class="page">
-
-  <!-- Breadcrumb -->
-  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
-    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'dashboard')">الصفحة الرئيسية</span>
-    <span style="margin:0 8px;">/ </span>
-    <span>إدارة الموظفين</span>
-  </div>
-
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
     <div>
-      <div class="section-title" style="margin-bottom:4px;">👔 إدارة الموظفين</div>
-      <div style="font-size:.8rem;color:var(--light);">إجمالي <span id="stat-employees">—</span> موظف في المدرسة</div>
+      <div class="section-title" style="margin-bottom:4px;">👔 الموظفون</div>
+      <div style="font-size:.8rem;color:var(--light);">حسابات دخول «الموظفون» — لوحة خاصة: بيانات كل الطلاب والطالبات وملفاتهم + التنبيهات الأسبوعية</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-outline btn-sm" onclick="printEmployeeList()">🖨️ طباعة</button>
-      <button class="btn btn-outline btn-sm" onclick="exportEmployeesExcel()">📊 Excel</button>
-      <select id="em-rows-per-page" onchange="changeEmployeeRows(this.value)" style="font-family:Tajawal;font-size:.8rem;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-        <option value="10">إظهار 10 أسطر</option>
-        <option value="25">إظهار 25 سطر</option>
-        <option value="50">إظهار 50 سطر</option>
-        <option value="999">إظهار الكل</option>
-      </select>
-      <button class="btn btn-outline btn-sm" id="em-btn-edit" onclick="editEmployeeSelected()" disabled>✏️ تعديل</button>
-      <button class="btn btn-outline btn-sm" id="em-btn-dup" onclick="dupEmployee()" disabled>🔁 تكرار</button>
-      <button class="btn btn-danger btn-sm" id="em-btn-del" onclick="deleteEmployeeSelected()" disabled>🗑 حذف</button>
-      <button class="btn btn-primary" onclick="openAddEmployee()">➕ إضافة</button>
-    </div>
+    <button class="btn btn-primary" onclick="eaOpenAdd()">➕ موظف جديد</button>
   </div>
-
-  <!-- Stats Row -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--jade);" id="em-stat-active">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظف نشط</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--gold);" id="em-stat-male">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظف ذكر</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--blue);" id="em-stat-female">—</div>
-      <div style="font-size:.75rem;color:var(--light);">موظفة أنثى</div>
-    </div>
-    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:1.6rem;font-weight:900;color:var(--purple);" id="em-stat-jobs">—</div>
-      <div style="font-size:.75rem;color:var(--light);">وظيفة مختلفة</div>
-    </div>
-  </div>
-
-  <!-- Search + Filter -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-    <div style="font-size:.85rem;font-weight:700;color:var(--mid);margin-left:auto;">ابحث:</div>
-    <div style="display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:7px 14px;min-width:220px;">
-      <span style="color:var(--light);">🔍</span>
-      <input type="text" id="employee-search" placeholder="اكتب للبحث..." onkeyup="filterEmployees()" style="border:none;outline:none;font-family:Tajawal;font-size:.84rem;background:transparent;color:var(--ink);flex:1;">
-    </div>
-    <select id="employee-filter-job" onchange="filterEmployees()" style="font-family:Tajawal;font-size:.82rem;padding:8px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-      <option value="">كل الوظائف</option>
-      <option value="مشرف الحلقات">مشرف الحلقات</option>
-      <option value="المشرف على الموقع">المشرف على الموقع</option>
-      <option value="راصد الدرجات">راصد الدرجات</option>
-      <option value="أخرى">أخرى</option>
-    </select>
-    <select id="employee-filter-status" onchange="filterEmployees()" style="font-family:Tajawal;font-size:.82rem;padding:8px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;">
-      <option value="">كل الحالات</option>
-      <option value="نشط">نشط</option>
-      <option value="موقوف">موقوف</option>
-    </select>
-  </div>
-
-  <!-- Employees Table -->
+  <div class="stats-row" id="ea-stats"></div>
   <div class="card">
-    <div class="card-head">
-      <div class="card-title">قائمة الموظفين</div>
-      <div style="display:flex;gap:8px;">
-        <span class="badge bg-green" id="em-badge-active">نشط: —</span>
-        <span class="badge bg-gray" id="em-badge-selected" style="display:none;">محدد: 0</span>
-      </div>
-    </div>
-    <div class="card-body-0" style="overflow-x:auto;">
-      <table class="tbl" id="employees-table">
-        <thead>
-          <tr>
-            <th style="width:36px;"><input type="checkbox" id="em-check-all" onchange="toggleAllEmployees(this)" style="cursor:pointer;"></th>
-            <th style="cursor:pointer;" onclick="sortEmployees('name')">الاسم ↕</th>
-            <th style="cursor:pointer;" onclick="sortEmployees('lname')">العائلة ↕</th>
-            <th style="cursor:pointer;" onclick="sortEmployees('job')">الوظيفة ↕</th>
-            <th>الجنس</th>
-            <th>اسم المستخدم</th>
-            <th>رقم الهاتف</th>
-            <th>البريد الإلكتروني</th>
-            <th>نوع الهوية</th>
-            <th>رقم الهوية</th>
-          </tr>
-        </thead>
-        <tbody id="employees-tbody"></tbody>
-      </table>
-    </div>
-    <div style="padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:.8rem;color:var(--light);">
-      <span id="em-page-info">—</span>
-      <div style="display:flex;gap:6px;" id="em-pagination"></div>
+    <div class="card-head"><div class="card-title">📋 الحسابات</div>
+      <input type="text" id="ea-q" placeholder="🔍 اسم / اسم دخول" oninput="eaRender()" style="font-family:Tajawal;font-size:.84rem;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);outline:none;margin-right:auto;"></div>
+    <div id="ea-list" style="overflow-x:auto;"></div>
+  </div>
+  <div class="card" style="border:1.5px dashed var(--border);">
+    <div style="padding:12px 16px;font-size:.78rem;color:var(--mid);line-height:1.9;">
+      <b style="color:var(--forest);">صلاحيات الموظف:</b> يشوف كل الطلاب والطالبات • يعدّل البيانات الأساسية وملف الطالب • يتخذ إجراءات التنبيهات الأسبوعية (بتظهر عند المشرفين والمديرين باسمه).
+      <br><b style="color:var(--forest);">ممنوع:</b> نقل/إيقاف/حذف الطلاب • درجات الاختبارات • الماليات • التحضير • أولياء الأمور.
     </div>
   </div>
-
 </div><!-- /employees -->
+
+<!-- ══ MODAL: موظف جديد / تعديل (الموظفون) ══ -->
+<div class="overlay" id="modal-ea-form">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head"><div class="modal-title" id="ea-form-title">➕ موظف جديد</div><button class="modal-close" onclick="closeModal('modal-ea-form')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg" style="grid-column:1/-1;"><label>الاسم *</label><input type="text" id="ea-name" maxlength="80" placeholder="مثال: أم خديجة"></div>
+        <div class="fg"><label>المسمّى</label><input type="text" id="ea-job" maxlength="40" placeholder="مثال: المشرفة"></div>
+        <div class="fg"><label>الموبايل</label><input type="tel" id="ea-phone" maxlength="15" dir="ltr" placeholder="01xxxxxxxxx"></div>
+        <div class="fg" id="ea-login-box"><label>اسم الدخول *</label><input type="text" id="ea-login" maxlength="30" dir="ltr" placeholder="m-omkhadija" autocapitalize="off" spellcheck="false"></div>
+        <div class="fg" id="ea-gender-box"><label>النوع</label><select id="ea-gender"><option value="أنثى">أنثى</option><option value="ذكر">ذكر</option></select></div>
+      </div>
+      <div id="ea-login-hint" style="font-size:.72rem;color:var(--light);">اسم الدخول: حروف إنجليزي صغيرة وأرقام و- بس، وبيبدأ بـ m- لوحده. كلمة المرور بتتعمل تلقائي وبتظهر مرة واحدة.</div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" id="ea-form-btn" onclick="eaSubmit()">💾 حفظ</button><button class="btn btn-outline" onclick="closeModal('modal-ea-form')">إلغاء</button></div>
+  </div>
+</div>
+<div class="overlay" id="modal-ea-cred">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head"><div class="modal-title">🔑 بيانات دخول الموظف</div><button class="modal-close" onclick="closeModal('modal-ea-cred')">×</button></div>
+    <div class="modal-body" id="ea-cred-body"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="eaCopyCred()">📋 نسخ</button><a class="btn btn-outline" id="ea-cred-wa" target="_blank" rel="noopener" style="display:none;text-decoration:none;">💬 واتساب</a><button class="btn btn-outline" onclick="closeModal('modal-ea-cred')">تم</button></div>
+  </div>
+</div>
 
 <!-- ══ MODAL: ADD EMPLOYEE ══ -->
 <div class="overlay" id="modal-add-employee">
@@ -4450,20 +4415,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       </div>
     </div>
 
-    <div onclick="nav(null,'fin-ijaza')"
-      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
-      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
-      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(107,63,160,.25);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/><path d="M15 8h-5"/><path d="M15 12h-5"/></svg></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">اشتراك برنامج الإجازة والإقراء</div>
-          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">اشتراك شهري بالتقويم الهجري</div>
-        </div>
-        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
-      </div>
-    </div>
-
+    <!-- (دفعة ١٤) اشتراك برنامج الإجازة والإقراء اتشال -->
     <div onclick="nav(null,'fin-due')"
       style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
       onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
@@ -5269,8 +5221,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- ══ FOOTER ══ -->
-<div style="text-align:center;padding:20px 28px;border-top:1px solid var(--border);margin-top:auto;font-size:.78rem;color:var(--light);display:flex;align-items:center;justify-content:space-between;">
-  <span>جميع الحقوق محفوظة © ٢٠٢٤ مدرسة التوحيد القرآنية.</span>
+<div style="text-align:center;padding:20px 28px;border-top:1px solid var(--border);margin-top:auto;font-size:.78rem;color:var(--light);display:flex;align-items:center;justify-content:center;">
   <span style="display:flex;align-items:center;gap:5px;">برمجة وتطوير: <strong style="color:var(--jade);">فريق التطوير</strong> <span style="color:#e25555;">♥️</span></span>
 </div>
 
@@ -5694,6 +5645,9 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div id="ctx-menu-header" style="padding:10px 16px 8px;border-bottom:1px solid var(--border);font-size:.78rem;color:var(--light);"></div>
     <div class="ctx-item" onclick="ctxEditTeacher()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
       <span style="font-size:1rem;">✏️</span> تعديل البيانات
+    </div>
+    <div class="ctx-item" onclick="ctxTeacherLevel()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
+      <span style="font-size:1rem;">🏅</span> مستوى التأهيل
     </div>
     <div class="ctx-item" onclick="ctxSendMessage()" style="display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:.87rem;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
       <span style="font-size:1rem;">💬</span> إرسال رسالة
@@ -6241,39 +6195,70 @@ const BRANCH_DATA = {
 function getStudentData(key) { return {}; }
 function saveStudentData(key, obj) { /* لا تخزين محلي */ }
 
-function buildStudentRow(s, i, key, d, color, safeId) {
+function buildStudentRow(s, i, key, d, color, safeId, sid) {
   const sEsc = s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  return `<tr
-    oncontextmenu="showStudentMenu(event,'${key}','${sEsc}','${safeId}');return false;"
-    ontouchstart="startLongPress(event,'${key}','${sEsc}','${safeId}')"
+  const c = 'padding:6px;text-align:center;';
+  return `<tr data-sid="${sid||''}"
+    oncontextmenu="_ctxSid='${sid||''}';showStudentMenu(event,'${key}','${sEsc}','${safeId}');return false;"
+    ontouchstart="_ctxSid='${sid||''}';startLongPress(event,'${key}','${sEsc}','${safeId}')"
     ontouchend="clearLongPress()"
     ontouchmove="clearLongPress()"
+    ondblclick="_ctxSid='${sid||''}';ctxEditStudent()"
     style="border-bottom:1px solid var(--border);cursor:pointer;"
-    onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
+    onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''" title="كليك يمين أو دبل كليك: تعديل البيانات">
     <td style="padding:6px 10px;color:var(--light);font-size:.75rem;text-align:center;">${i+1}</td>
-    <td style="padding:6px 10px;font-weight:600;">${s}</td>
-    <td style="padding:6px;text-align:center;">${d.age || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.mem || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.dad || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.mom || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.dob || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.pts || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.lvl || '—'}</td>
+    <td style="padding:6px 10px;font-weight:600;" data-f="name">${s}</td>
+    <td style="${c}" data-f="age">—</td>
+    <td style="${c}" data-f="mem">—</td>
+    <td style="${c}direction:ltr;" data-f="dad">—</td>
+    <td style="${c}direction:ltr;" data-f="mom">—</td>
+    <td style="${c}" data-f="dob">—</td>
+    <td style="${c}" data-f="pts">—</td>
+    <td style="${c}" data-f="lvl">—</td>
   </tr>`;
+}
+let _ctxSid = '';
+// يملا الجدول الطلابي من القاعدة (students_sheet) — مصدر واحد لكل اللوحات
+async function stuSheetFill(root){
+  root = root || document;
+  const trs = [...root.querySelectorAll('tr[data-sid]')].filter(tr => tr.dataset.sid);
+  if (!trs.length) return;
+  let M = {};
+  try { M = await stuEdSheet(trs.map(tr => tr.dataset.sid)); } catch(e){ loadWarn(e); return; }
+  trs.forEach(tr => {
+    const r = M[tr.dataset.sid]; if (!r) return;
+    const set = (f, v) => { const td = tr.querySelector('[data-f="'+f+'"]'); if (td) td.textContent = (v===null||v===undefined||v==='') ? '—' : v; };
+    const age = stuEdAge(r.date_of_birth);
+    set('name', r.full_name);
+    set('age', age==null ? '' : toAr(age));
+    set('mem', r.memorized_parts ? toAr(+r.memorized_parts) + ' جزء' : '');
+    set('dad', r.dad || r.parent_phone || '');
+    set('mom', r.mom);
+    set('dob', stuEdDob(r.date_of_birth));
+    set('pts', toAr(r.total_points || 0));
+    set('lvl', r.level);
+  });
+}
+// بعد أي تعديل: حدّث القوايم + الجدول الطلابي
+async function stuAfterSave(){
+  try{ if (typeof refreshAdminData === 'function') await refreshAdminData(); }catch(e){ loadWarn(e); }
+  try{ if (typeof hydrateBranchDataFromDB === 'function') await hydrateBranchDataFromDB(); }catch(e){ loadWarn(e); }
+  const pg = document.querySelector('.page.active'); const br = pg ? BRANCH_BY_PAGE[pg.id.replace('page-','')] : null;
+  if (br) await renderBranchGrid(br);
 }
 
 
 // ══════════════════════════════════════
 // KEBAR CIRCLE CARD (اسم + هاتف فقط)
 // ══════════════════════════════════════
-function buildCircleCard(teacher, students, color, isFemale) {
+function buildCircleCard(teacher, students, color, isFemale, ids) {
   const safeId = teacher.replace(/\s+/g,'_');
   const prefix = isFemale ? 'المعلمة' : 'المعلم';
   const icon = isFemale ? '👩‍🏫' : '👨‍🏫';
   const rows = students.map((s, i) => {
     const key = safeId + '_' + i;
     const d = getStudentData(key);
-    return buildStudentRow(s, i, key, d, color, safeId);
+    return buildStudentRow(s, i, key, d, color, safeId, (ids||[])[i]);
   }).join('');
 
   return `
@@ -6355,8 +6340,9 @@ function refreshCircleCard(safeId) {
     tbody.innerHTML = circle.students.map((s, i) => {
       const key = safeId + '_' + i;
       const d = getStudentData(key);
-      return buildStudentRow(s, i, key, d, circle.color, safeId);
+      return buildStudentRow(s, i, key, d, circle.color, safeId, (circle.studentIds||[])[i]);
     }).join('');
+    stuSheetFill(tbody);
     return;
   }
 }
@@ -6394,7 +6380,8 @@ async function renderBranchGrid(branchName) {
   if (!circles.length) { grid.innerHTML = bgState('لا توجد حلقات مسجّلة في هذه الشعبة'); return; }
 
   const isFemale = branchName === 'البنات';
-  grid.innerHTML = circles.map(c => buildCircleCard(c.teacher, c.students || [], c.color, isFemale)).join('');
+  grid.innerHTML = circles.map(c => buildCircleCard(c.teacher, c.students || [], c.color, isFemale, c.studentIds || [])).join('');
+  stuSheetFill(grid);
 }
 
 function openBranch(branchName) {
@@ -6830,8 +6817,8 @@ function renderTeacherBranchDetail(branchName, meta) {
     const phone   = (item.phone && item.phone !== '—') ? item.phone : (matched?.phone && matched.phone !== '—' ? matched.phone : '—');
     const _age    = (item.age != null ? item.age : (calcAge(item.dob) != null ? calcAge(item.dob) : matched?.age));
     const age     = (_age != null && _age !== '') ? _age : '—';
-    const level   = item.level || matched?.level || 'غير محدد';
-    const tId     = matched?.id || '';
+    const tId     = item.teacherId || matched?.id || '';
+    const level   = tlvText(tId);
     const safeId  = tName.replace(/\s+/g,'_').replace(/[()]/g,'');
     const tNameEsc = tName.replace(/'/g, "\\'");
 
@@ -6870,8 +6857,8 @@ function renderTeacherBranchDetail(branchName, meta) {
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);">
-          <span style="font-size:.78rem;color:var(--light);">🏅 المستوى</span>
-          <span style="background:${cardColor};color:#fff;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:700;">${level}</span>
+          <span style="font-size:.78rem;color:var(--light);">🏅 مستوى التأهيل</span>
+          <span data-tlv="${tId}" style="background:${cardColor};color:#fff;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:700;">${level}</span>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);">
@@ -6889,6 +6876,48 @@ function renderTeacherBranchDetail(branchName, meta) {
     </div>
     </div>`;
   }).join('');
+  tlvLoad().then(tlvPaint);
+}
+
+/* ══ (دفعة ١٤) مستوى المعلم — تلقائي من التأهيل + يدوي (tlv*) ══ */
+let TLV=null, TLV_LV=null, TLV_P=null;
+async function tlvLoad(force){
+  if(TLV&&!force) return TLV;
+  if(TLV_P&&!force) return TLV_P;
+  TLV_P=(async()=>{
+    try{
+      const [a,b]=await Promise.all([db.rpc('teachers_training_levels'), db.from('training_levels').select('id,name,sort_order').order('sort_order')]);
+      if(a.error) throw a.error; if(b.error) throw b.error;
+      TLV={}; (a.data||[]).forEach(r=>{ TLV[String(r.teacher_id)]=r; }); TLV_LV=b.data||[];
+    }catch(e){ loadWarn(e); TLV=TLV||{}; TLV_LV=TLV_LV||[]; }
+    TLV_P=null; return TLV;
+  })();
+  return TLV_P;
+}
+function tlvText(tId){
+  const r=TLV&&TLV[String(tId||'')]; if(!r) return TLV?'—':'⏳';
+  return (r.level_name||'—')+(r.is_manual?' ✋':(r.total?' ('+toAr(r.passed)+'/'+toAr(r.total)+')':''));
+}
+function tlvPaint(){ document.querySelectorAll('[data-tlv]').forEach(el=>{ el.textContent=tlvText(el.dataset.tlv); const r=TLV&&TLV[el.dataset.tlv]; el.title=r?(r.is_manual?'محدد يدوياً — التلقائي: '+(r.auto_level_name||'—'):'تلقائي من التأهيل: نجح في '+(r.passed||0)+' من '+(r.total||0)+' اختبار في المستوى ده'):''; }); }
+async function ctxTeacherLevel(){
+  hideTeacherCtxMenu();
+  const tId=_ctxTeacherId; if(!tId){ showToast('⚠️ المعلم مش متحدد'); return; }
+  await tlvLoad();
+  const r=TLV[String(tId)]||{};
+  let ov=document.getElementById('tlv-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='tlv-ov'; ov.className='overlay'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="modal" style="max-width:440px;"><div class="modal-head"><div class="modal-title">🏅 مستوى التأهيل — '+esc(_ctxTeacherName)+'</div><button class="modal-close" onclick="closeModal(\'tlv-ov\')">×</button></div>'
+    +'<div class="modal-body"><div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 12px;font-size:.84rem;margin-bottom:14px;line-height:1.8;">🤖 التلقائي من التأهيل: <b>'+esc(r.auto_level_name||'—')+'</b>'+(r.total?' — نجح في '+toAr(r.passed)+' من '+toAr(r.total)+' اختبار':'')+'</div>'
+    +'<div class="fg"><label>المستوى المعتمد</label><select id="tlv-sel" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);">'
+    +'<option value="">🤖 تلقائي حسب التأهيل</option>'+(TLV_LV||[]).map(l=>'<option value="'+esc(l.id)+'"'+(r.manual_level_id===l.id?' selected':'')+'>✋ '+esc(l.name)+'</option>').join('')+'</select></div></div>'
+    +'<div class="modal-foot"><button class="btn btn-primary" id="tlv-save" onclick="tlvSave(\''+esc(tId)+'\')">💾 حفظ</button><button class="btn btn-outline" onclick="closeModal(\'tlv-ov\')">إلغاء</button></div></div>';
+  openModal('tlv-ov');
+}
+async function tlvSave(tId){
+  const b=document.getElementById('tlv-save'); b.disabled=true;
+  try{ const {error}=await db.rpc('admin_set_teacher_level',{p_teacher:tId,p_level:document.getElementById('tlv-sel').value||null}); if(error) throw error;
+       closeModal('tlv-ov'); showToast('✅ المستوى اتحفظ'); await tlvLoad(true); tlvPaint(); }
+  catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); b.disabled=false; }
 }
 
 async function openAddTeacherForBranch(branchName) {
@@ -7861,6 +7890,7 @@ async function addTeacher() {
 
     _ctxTeacherBranch = branchNameById(branchId) || _ctxTeacherBranch;
     await refreshTeacherViews();
+    if (role === 'supervisor' && typeof loadSupervisors === 'function') { await loadSupervisors(); if (svCurrentBranchKey) svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null); }
   } catch (e) {
     showToast('❌ تعذّرت الإضافة: ' + adminErr(e));
   } finally {
@@ -8996,6 +9026,7 @@ function editStudentFromView() {
 }
 
 function editStudent(id) {
+  if (id) { stuEdOpen(id, stuAfterSave, { canStatus:true }); return; }
   const s = STUDENTS.find(s => s.id === id);
   if (!s) return;
   const parts = s.name.split(' ');
@@ -10626,37 +10657,39 @@ function svViewReport(i){
 // CURRICULUM (الخطط والمقررات) — live من Supabase
 // ══════════════════════════════════════
 let CP_ROWS = [];
-let CP_COURSE = 'الدورة الصيفية 2026 م';
+let CP_COURSE = '';
 let CP_SECTION = 'boys';
 const CP_SECT_TITLE = { boys:'شعبة البنون — الأبطال والرواد', banat:'شعبة البنات — الملكات والأميرات' };
-let CP_SECT_DAY = { boys:'الاثنين', banat:'السبت' };
+const CP_SECT_BR = { boys:['الأبطال','الرواد'], banat:['الملكات','الأميرات'] };
+const CP_FIELDS = ['day','date','tajweed','kunooz','talqeen','activity'];
+let CP_DIRTY = {}, CP_SAVE_T = {}, CP_CHAIN = Promise.resolve(), CP_LOAD_ERR = false;
+function cpTerm(){ return VIEW_TERM||CUR_TERM; }
 function cpSyncTerm(){
-  const t=VIEW_TERM||CUR_TERM; if(!t) return;
-  CP_COURSE=t.name;
-  CP_SECT_DAY={ boys:termDayNames(t,'الأبطال')[0]||'', banat:termDayNames(t,'الملكات')[0]||'' };
-  document.querySelectorAll('.cp-term-name').forEach(e=>{ e.textContent=CP_COURSE; });
+  const t=cpTerm(); CP_COURSE=t?t.name:'';
+  document.querySelectorAll('.cp-term-name').forEach(e=>{ e.textContent=CP_COURSE||'—'; });
+}
+function cpDayName(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); return isNaN(d)?'':TERM_DAYS_AR[d.getDay()]; }
+// كل أيام حلقات القسم في الدورة (اتحاد شعب القسم: الأبطال+الرواد أو الملكات+الأميرات) من غير أيام الاختبارات
+function cpSessionDates(){
+  const t=cpTerm(); if(!t) return [];
+  const days=new Set(); CP_SECT_BR[CP_SECTION].forEach(b=>termDays(t,b).forEach(d=>days.add(d)));
+  const ex=new Set((((t.settings||{}).exams||{}).dated||[]).filter(e=>(e.branches||[]).some(b=>CP_SECT_BR[CP_SECTION].includes(b))).map(e=>e.date));
+  const out=[]; const d=new Date(t.start_date+'T00:00:00'), end=new Date(t.end_date+'T00:00:00');
+  for(;d<=end;d.setDate(d.getDate()+1)){ const iso=localISO(d); if(days.has(d.getDay())&&!ex.has(iso)) out.push(iso); }
+  return out;
 }
 
-async function loadCurriculum(){
-  cpSyncTerm();
-  const { data, error } = await db.from('curriculum_plan')
-    .select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('sort_order', { ascending:true });
-  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
-  else CP_ROWS = data || [];
-  renderCpTable();
-  loadCpCounts();
-}
+async function loadCurriculum(){ cpSyncTerm(); loadCpCounts(); if(document.getElementById('cp-detail')?.style.display==='block') await loadCurriculumRows(); }
 async function loadCpCounts(){
   for (const sec of ['boys','banat']){
     try{
-      const { count } = await db.from('curriculum_plan')
-        .select('id', { count:'exact', head:true }).eq('course', CP_COURSE).eq('section', sec);
+      const { count, error } = await db.from('curriculum_plan').select('id', { count:'exact', head:true }).eq('course', CP_COURSE).eq('section', sec);
+      if(error) throw error;
       const el = document.getElementById('cp-card-count-'+sec);
-      if (el) el.textContent = (count||0) || '\u0660';
+      if (el) el.textContent = toAr(count||0);
     }catch(e){ loadWarn(e); }
   }
 }
-
 function openCourse(section){
   CP_SECTION = (section==='banat') ? 'banat' : 'boys';
   cpSyncTerm();
@@ -10666,83 +10699,126 @@ function openCourse(section){
   loadCurriculumRows();
 }
 async function loadCurriculumRows(){
-  const { data, error } = await db.from('curriculum_plan')
-    .select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('sort_order', { ascending:true });
-  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
+  CP_DIRTY = {}; CP_LOAD_ERR=false;
+  const tb=document.getElementById('cp-tbody'); if(tb) tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;">⏳ جارٍ التحميل…</td></tr>';
+  const { data, error } = await selectAll(db.from('curriculum_plan').select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('date', { ascending:true, nullsFirst:false }).order('sort_order', { ascending:true }));
+  if (error){ loadWarn(error); CP_ROWS = []; CP_LOAD_ERR=true; }
   else CP_ROWS = data || [];
   renderCpTable();
 }
 function closeCourse(){
+  if(Object.keys(CP_DIRTY).length && !confirm('فيه تعديلات لسه ما اتحفظتش — تخرج من غير حفظ؟')) return;
   const d = document.getElementById('cp-detail'), c = document.getElementById('cp-courses');
   if (d) d.style.display = 'none';
   if (c) c.style.display = 'block';
   loadCpCounts();
 }
-
 function cpCell(id, field, val){
-  const v = (val == null ? '' : String(val)).replace(/"/g,'&quot;');
-  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+v+'</textarea></td>';
+  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" oninput="cpEdit(this)" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;">'+esc(val==null?'':val)+'</textarea></td>';
 }
-
 function renderCpTable(){
-  const tb = document.getElementById('cp-tbody');
-  if (!tb) return;
+  const tb = document.getElementById('cp-tbody'); if (!tb) return;
+  if (CP_LOAD_ERR){ tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--red);padding:30px;font-weight:700;">⚠️ الخطة ما اتحمّلتش — اعمل تحديث (التعديل مقفول عشان مايتكتبش فوق المحفوظ)</td></tr>'; return; }
   if (!CP_ROWS.length){
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">\ud83d\udcd6</span>\u0644\u0645 \u062a\u064f\u0633\u062c\u0651\u0644 \u062e\u0637\u0629 \u0628\u0639\u062f \u2014 \u0627\u0636\u063a\u0637 \u00ab\u2795 \u0635\u0641 \u062c\u062f\u064a\u062f\u00bb</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">📖</span>لم تُسجَّل خطة بعد — اضغط «➕ صف جديد» أو «📅 كل أيام الدورة»</td></tr>';
     return;
   }
   tb.innerHTML = CP_ROWS.map(function(r,i){ return ''
-    + '<tr>'
-    + '<td style="text-align:center;font-weight:700;">'+(i+1)+'</td>'
-    + cpCell(r.id,'day',r.day)
-    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+(r.date||'')+'" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
+    + '<tr data-row="'+r.id+'">'
+    + '<td style="text-align:center;font-weight:700;">'+toAr(i+1)+'<div class="cp-st" id="cp-st-'+r.id+'" style="font-size:.62rem;font-weight:700;margin-top:2px;"></div></td>'
+    + '<td><input data-id="'+r.id+'" data-field="day" value="'+esc(r.day||'')+'" readonly style="width:80px;border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.8rem;background:var(--bg);font-weight:700;color:var(--forest);"></td>'
+    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+esc(r.date||'')+'" onchange="cpDateChange(this)" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
     + cpCell(r.id,'tajweed',r.tajweed)
     + cpCell(r.id,'kunooz',r.kunooz)
     + cpCell(r.id,'talqeen',r.talqeen)
     + cpCell(r.id,'activity',r.activity)
-    + '<td style="text-align:center;"><button title="حذف" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);display:inline-flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background=\'var(--red-pale)\'" onmouseout="this.style.background=\'none\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>'
+    + '<td style="text-align:center;"><button title="حذف" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);font-size:1rem;">🗑️</button></td>'
     + '</tr>';
   }).join('');
+  tb.querySelectorAll('textarea').forEach(t=>{ t.style.height='auto'; t.style.height=Math.max(34,t.scrollHeight)+'px'; });
 }
-
-async function addCpRow(){
-  const maxOrder = CP_ROWS.reduce(function(m,r){ return Math.max(m, r.sort_order||0); }, 0);
-  const { data, error } = await db.from('curriculum_plan')
-    .insert({ course: CP_COURSE, section: CP_SECTION, day: CP_SECT_DAY[CP_SECTION], date:null, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
-    .select().single();
-  if (error){ showToast('\u274c '+error.message); return; }
-  CP_ROWS.push(data);
-  renderCpTable();
-  showToast('\u2795 \u0623\u064f\u0636\u064a\u0641 \u0635\u0641 \u2014 \u0627\u0645\u0644\u0623\u0647 \u062b\u0645 \u0627\u062d\u0641\u0638');
+// كل تعديل بيتحفظ لوحده بعد ثانية (والزرار «حفظ» بيحفظ أي حاجة فاضلة)
+function cpRowVals(id){
+  const o={}; document.querySelectorAll('#cp-tbody [data-id="'+id+'"]').forEach(el=>{ o[el.dataset.field]=el.value; });
+  if(o.date==='') o.date=null; return o;
 }
-
-async function deleteCpRow(id){
-  if (!confirm('\u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0635\u0641\u061f')) return;
-  const { error } = await db.from('curriculum_plan').delete().eq('id', id);
-  if (error){ showToast('\u274c '+error.message); return; }
-  CP_ROWS = CP_ROWS.filter(function(r){ return r.id !== id; });
-  renderCpTable();
-  showToast('\ud83d\uddd1\ufe0f \u062a\u0645 \u0627\u0644\u062d\u0630\u0641');
+function cpSt(id,st){ const el=document.getElementById('cp-st-'+id); if(!el) return; el.textContent=st==='busy'?'⏳':st==='ok'?'✅ محفوظ':st==='err'?'⚠️ لم يُحفظ':st==='dirty'?'✏️':''; el.style.color=st==='err'?'var(--red)':st==='ok'?'var(--jade)':'var(--gold)'; }
+function cpEdit(el){
+  el.style.height='auto'; el.style.height=Math.max(34,el.scrollHeight)+'px';
+  const id=el.dataset.id; CP_DIRTY[id]=1; cpSt(id,'dirty');
+  clearTimeout(CP_SAVE_T[id]); CP_SAVE_T[id]=setTimeout(()=>cpSaveRow(id),1200);
 }
-
+function cpDateChange(el){
+  const id=el.dataset.id, d=el.value;
+  if(d && CP_ROWS.some(r=>r.id!==id && r.date===d)){ showToast('⚠️ التاريخ ده موجود في صف تاني'); }
+  const day=document.querySelector('#cp-tbody [data-id="'+id+'"][data-field="day"]'); if(day) day.value=cpDayName(d);
+  cpEdit(el);
+}
+function cpSaveRow(id){
+  clearTimeout(CP_SAVE_T[id]);
+  const patch=cpRowVals(id); cpSt(id,'busy');
+  CP_CHAIN=CP_CHAIN.then(async()=>{
+    const { data, error } = await db.from('curriculum_plan').update(patch).eq('id', id).select('id');
+    if(error||!data||data.length!==1) throw (error||new Error('لم يُحفظ (صلاحيات)'));
+    const r=CP_ROWS.find(x=>x.id===id); if(r) Object.assign(r,patch);
+    delete CP_DIRTY[id]; cpSt(id,'ok'); setTimeout(()=>{ if(!CP_DIRTY[id]) cpSt(id,''); },2500);
+  }).catch(e=>{ console.warn('[cp]',e); cpSt(id,'err'); showToast('⚠️ صف ما اتحفظش: '+(e.message||e.code||'')); });
+  return CP_CHAIN;
+}
 async function saveCpAll(){
-  const map = {};
-  document.querySelectorAll('#cp-tbody [data-id]').forEach(function(el){
-    const id = el.dataset.id, f = el.dataset.field;
-    (map[id] = map[id] || {})[f] = el.value;
-  });
-  const ids = Object.keys(map);
-  if (!ids.length){ showToast('\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0627 \u064a\u064f\u062d\u0641\u0638'); return; }
-  showToast('\u23f3 \u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638...');
-  let ok = 0, fail = 0;
-  for (const id of ids){
-    const patch = map[id];
-    if (patch.date === '') patch.date = null;
-    const { error } = await db.from('curriculum_plan').update(patch).eq('id', id);
-    if (error){ fail++; console.error(error); } else ok++;
-  }
-  await loadCurriculum();
-  showToast(fail ? ('\u26a0\ufe0f \u062d\u064f\u0641\u0638 '+ok+' \u0648\u0641\u0634\u0644 '+fail) : ('\u2705 \u062d\u064f\u0641\u0638\u062a \u0643\u0644 \u0627\u0644\u062a\u0639\u062f\u064a\u0644\u0627\u062a ('+ok+')'));
+  if(CP_LOAD_ERR){ showToast('⚠️ الخطة ما اتحمّلتش — اعمل تحديث'); return; }
+  const ids=[...document.querySelectorAll('#cp-tbody tr[data-row]')].map(tr=>tr.dataset.row);
+  if (!ids.length){ showToast('لا يوجد ما يُحفظ'); return; }
+  showToast('⏳ جارٍ الحفظ...');
+  ids.forEach(id=>cpSaveRow(id));
+  await CP_CHAIN;
+  const bad=ids.filter(id=>CP_DIRTY[id]).length;
+  showToast(bad?('⚠️ '+toAr(bad)+' صف ما اتحفظش — جرّب تاني'):('✅ اتحفظت كل الصفوف ('+toAr(ids.length)+')'));
+  loadCpCounts();
+}
+// صف جديد = أول يوم حلقة بعد آخر تاريخ (أيام القسم كلها مش الجمعة بس) — ومن غير ما يمسح اللي اتكتب
+async function addCpRow(){
+  if(CP_LOAD_ERR){ showToast('⚠️ الخطة ما اتحمّلتش — اعمل تحديث'); return; }
+  if(!CP_COURSE){ showToast('⚠️ مفيش دورة محددة'); return; }
+  // احفظ أي تعديل مفتوح الأول
+  Object.keys(CP_DIRTY).forEach(id=>cpSaveRow(id)); await CP_CHAIN;
+  const used=new Set(CP_ROWS.map(r=>r.date).filter(Boolean));
+  const last=CP_ROWS.map(r=>r.date).filter(Boolean).sort().pop()||'';
+  const all=cpSessionDates();
+  const next=all.find(d=>d>last&&!used.has(d)) || all.find(d=>!used.has(d)) || null;
+  const maxOrder = CP_ROWS.reduce((m,r)=>Math.max(m, r.sort_order||0), 0);
+  const { data, error } = await db.from('curriculum_plan')
+    .insert({ course: CP_COURSE, section: CP_SECTION, day: cpDayName(next), date: next, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
+    .select().single();
+  if (error){ showToast('❌ '+(error.message||'')); return; }
+  CP_ROWS.push(data); CP_ROWS.sort((a,b)=>(a.date||'9')<(b.date||'9')?-1:((a.date||'9')>(b.date||'9')?1:(a.sort_order||0)-(b.sort_order||0)));
+  renderCpTable(); loadCpCounts();
+  showToast(next?('➕ اتضاف '+cpDayName(next)+' '+toAr(next.split('-').reverse().join('/'))):'➕ اتضاف صف — اختار التاريخ');
+}
+// يضيف كل أيام حلقات الدورة اللي لسه مالهاش صف (مرة واحدة)
+async function fillCpTerm(){
+  if(CP_LOAD_ERR||!CP_COURSE) return;
+  const used=new Set(CP_ROWS.map(r=>r.date).filter(Boolean));
+  const miss=cpSessionDates().filter(d=>!used.has(d));
+  if(!miss.length){ showToast('✅ كل أيام الدورة موجودة بالفعل'); return; }
+  if(!confirm('إضافة '+miss.length+' يوم ناقص لخطة '+CP_SECT_TITLE[CP_SECTION]+'؟')) return;
+  Object.keys(CP_DIRTY).forEach(id=>cpSaveRow(id)); await CP_CHAIN;
+  let so=CP_ROWS.reduce((m,r)=>Math.max(m, r.sort_order||0), 0);
+  const rows=miss.map(d=>({ course:CP_COURSE, section:CP_SECTION, day:cpDayName(d), date:d, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order:++so }));
+  const { data, error } = await db.from('curriculum_plan').insert(rows).select('id');
+  if(error||!data||data.length!==rows.length){ showToast('⚠️ الإضافة ما كملتش: '+((error&&error.message)||'')); }
+  else showToast('✅ اتضاف '+toAr(rows.length)+' يوم');
+  await loadCurriculumRows(); loadCpCounts();
+}
+async function deleteCpRow(id){
+  if (!confirm('حذف هذا الصف؟')) return;
+  Object.keys(CP_DIRTY).filter(x=>x!==id).forEach(x=>cpSaveRow(x)); await CP_CHAIN;
+  const { data, error } = await db.from('curriculum_plan').delete().eq('id', id).select('id');
+  if (error||!data||!data.length){ showToast('❌ ما اتحذفش '+((error&&error.message)||'')); return; }
+  delete CP_DIRTY[id];
+  CP_ROWS = CP_ROWS.filter(r => r.id !== id);
+  renderCpTable(); loadCpCounts();
+  showToast('🗑️ تم الحذف');
 }
 
 // ══════════════ معرض المرئيات (Google Drive) ══════════════
@@ -10822,7 +10898,7 @@ function nav(el, pageId, fromPopstate){
   if (BRANCH_BY_PAGE[pageId]) renderBranchGrid(BRANCH_BY_PAGE[pageId]);
   if (pageId === 'teachers') { closeTeacherBranch(); renderTeacherBranchCards(); }
   if (pageId === 'supervisors') { loadSupervisors(); svShowBranches(true); }
-  if (pageId === 'employees') loadEmployees();
+  if (pageId === 'employees') eaLoad();
   if (pageId === 'parents') paLoad();
   if (pageId === 'memorization') loadAdminMemorization();
   if (pageId === 'attendance') loadAdminAttendance();
@@ -10838,7 +10914,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'fin-don')   loadFinDonations();
   if (pageId === 'fin-spon')  loadFinSponsorships();
   if (pageId === 'fin-subs')  loadFinSubs();
-  if (pageId === 'fin-ijaza') loadFinIjaza();
+  if (pageId === 'fin-ijaza') { navPage('fin-rev'); return; }   // (دفعة ١٤) البند اتشال
   if (pageId === 'fin-refund') loadFinRefunds();
   if (pageId === 'fin-sal')    loadFinSalaries();
   if (pageId === 'fin-food')   loadFinExp('food');
@@ -10936,66 +11012,134 @@ let SUPERVISORS = [], SUPERVISORS_FILTERED = [], SV_SELECTED = new Set();
 let svPage = 1, svRowsPerPage = 10, svSortField = '', svSortDir = 1;
 
 async function loadSupervisors() {
-  // ── live من قاعدة البيانات (لا بيانات ثابتة) ──
+  // ── live: المشرف مربوط بالشعب عن طريق users.admin_scope (مش users.supervisor_id القديم) ──
+  let ok=true;
   try {
-    const { data:brs }   = await db.from('branches').select('id,name');
-    const brName = {}; (brs||[]).forEach(b => brName[b.id] = b.name);
+    const [rb, rs, rt, rc] = await Promise.all([
+      db.from('branches').select('id,name'),
+      db.from('users').select('id,full_name,phone,email,gender,dob,address,id_type,id_number,admin_scope,branch_id,is_active,username').eq('role','supervisor').order('full_name'),
+      db.from('users').select('id,full_name').eq('role','teacher').eq('is_active',true),
+      db.from('circles').select('teacher_id,branch_id,is_active')
+    ]);
+    [rb,rs,rt,rc].forEach(r=>{ if(r.error) throw r.error; });
+    const brName = {}; (rb.data||[]).forEach(b => brName[b.id] = b.name);
+    const BR_ORD = ['الأبطال','الرواد','الملكات','الأميرات'];
+    SVM_BR = (rb.data||[]).filter(b => BR_ORD.includes(b.name)).sort((x,y)=>BR_ORD.indexOf(x.name)-BR_ORD.indexOf(y.name)).map(b => [b.id, b.name]);
     const grp = bn => (bn === 'الملكات' || bn === 'الأميرات') ? 'البنات' : bn;
-
-    const { data:sups }     = await db.from('users').select('id,full_name').eq('role','supervisor');
-    const { data:teachers } = await db.from('users').select('id,full_name,supervisor_id').eq('role','teacher');
-    const { data:circles }  = await db.from('circles').select('teacher_id,branch_id');
-
-    // معلم → مجموعة شُعبه (قد يدرّس في أكثر من شعبة)
-    const tBranch = {};
-    (circles||[]).forEach(c => {
-      if (!c.teacher_id) return;
-      // تقييد المدير بنطاقه: تجاهل الحلقات خارج الشعب المسموحة
-      if (window.ADMIN_ALLOWED_BRANCH_IDS && !window.ADMIN_ALLOWED_BRANCH_IDS.has(c.branch_id)) return;
-      const bn = brName[c.branch_id]; if (!bn) return;
-      (tBranch[c.teacher_id] = tBranch[c.teacher_id] || new Set()).add(bn);
+    const tName = {}; (rt.data||[]).forEach(t => tName[t.id] = t.full_name);
+    const tByBranch = {};   // branch_id → أسماء المعلمين النشطين في حلقات نشطة
+    (rc.data||[]).forEach(c => {
+      if (c.is_active === false || !c.teacher_id || !tName[c.teacher_id]) return;
+      (tByBranch[c.branch_id] = tByBranch[c.branch_id] || new Set()).add(tName[c.teacher_id]);
     });
-
-    // مشرف واحد قد يظهر تحت أكثر من شعبة → سجل لكل (مشرف × شعبة)
-    const out = [];
-    (sups||[]).forEach(sv => {
-      const mine = (teachers||[]).filter(t => t.supervisor_id === sv.id);
-      const byBranch = {};
-      mine.forEach(t => {
-        const setb = tBranch[t.id] || new Set();
-        setb.forEach(bn => { const g = grp(bn); (byBranch[g] = byBranch[g] || []).push(t.full_name); });
+    const allow = window.ADMIN_ALLOWED_BRANCH_IDS || null;
+    const out = [], off = [];
+    (rs.data||[]).forEach(sv => {
+      const parts = (sv.full_name || '').trim().split(/\s+/);
+      let scope = String(sv.admin_scope||'').split(',').map(x=>x.trim()).filter(x=>/^[0-9a-f-]{36}$/i.test(x));
+      if (!scope.length && sv.branch_id) scope = [sv.branch_id];
+      const base = { uid:sv.id, name:parts[0]||sv.full_name||'مشرف', lname:parts.slice(1).join(' '), full_name:sv.full_name||'',
+        phone:sv.phone||'', email:sv.email||'', gender:sv.gender||'', dob:sv.dob||'', address:sv.address||'', id_type:sv.id_type||'', id_number:sv.id_number||'',
+        username:sv.username||'', scope, is_active: sv.is_active!==false, status: sv.is_active===false?'موقوف':'نشط' };
+      if (sv.is_active === false || !scope.length) { off.push(Object.assign({ id:'sv-'+sv.id+'-x', branch:'', teacherList:[] }, base)); return; }
+      const byG = {};
+      scope.forEach(bid => {
+        if (allow && !allow.has(bid)) return;
+        const bn = brName[bid]; if (!bn) return; const g = grp(bn);
+        byG[g] = byG[g] || new Set(); (tByBranch[bid] || new Set()).forEach(n => byG[g].add(n));
       });
-      const parts = (sv.full_name || '').trim().split(' ');
-      Object.keys(byBranch).forEach(bg => {
-        out.push({
-          id: 'sv-' + sv.id + '-' + bg,
-          name: parts[0] || sv.full_name,
-          lname: parts.slice(1).join(' '),
-          branch: bg,
-          teacherList: [...new Set(byBranch[bg])],
-        });
-      });
+      Object.keys(byG).forEach(g => out.push(Object.assign({ id:'sv-'+sv.id+'-'+g, branch:g, teacherList:[...byG[g]].sort() }, base)));
     });
-    SUPERVISORS = out;
-  } catch(e) { console.warn('loadSupervisors live failed:', e); SUPERVISORS = []; }
+    SUPERVISORS = out; window.SV_OFF = off;
+  } catch(e) { ok=false; loadWarn(e); SUPERVISORS = []; window.SV_OFF = []; }
 
-  // أعداد المعلمين/الطلاب من BRANCH_DATA المُحمّل من القاعدة
   SUPERVISORS.forEach(sv => {
     sv.teachers = sv.teacherList.length;
     const branchItems = BRANCH_DATA[sv.branch] || [];
-    sv.students = sv.teacherList.reduce((sum, tName) => {
-      const item = branchItems.find(i => i.teacher === tName);
-      return sum + (item ? item.students.length : 0);
-    }, 0);
+    sv.students = branchItems.filter(i => sv.teacherList.includes(i.teacher)).reduce((n,i)=>n+(i.students||[]).length,0);
   });
-
   updateSupervisorStats();
-  saveSupervisorsToStorage();
+  svmRenderOff(ok);
+}
+
+
+/* ══ (دفعة ١٤) إدارة المشرفين الحقيقية — svm* (staff_update / admin_delete_staff) ══ */
+let SVM_BR=[];   // [[id,name]] — من جدول branches (بيتعمّر في loadSupervisors)
+function svmFind(uid){ return SUPERVISORS.find(s=>s.uid===uid) || (window.SV_OFF||[]).find(s=>s.uid===uid) || null; }
+function svmRenderOff(ok){
+  const box=document.getElementById('sv-off-box'); if(!box) return;
+  const L=window.SV_OFF||[];
+  if(!ok){ box.innerHTML='<div class="card"><div class="card-body" style="color:var(--red);text-align:center;">⚠️ المشرفين ما اتحمّلوش — اعمل تحديث</div></div>'; return; }
+  if(!L.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="card"><div class="card-head"><div class="card-title">⛔ مشرفون موقوفون / بدون شعبة <span style="color:var(--light);font-weight:600;font-size:.8rem;">('+toAr(L.length)+')</span></div></div><div class="card-body" style="padding:8px 14px;">'
+    +L.map(sv=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border);flex-wrap:wrap;">'
+      +'<div><b>'+esc(sv.full_name)+'</b> '+(sv.is_active?'<span class="badge bg-blue">بدون شعبة</span>':'<span class="badge bg-gray">موقوف</span>')+(sv.phone?' <span style="font-size:.76rem;color:var(--light);direction:ltr;display:inline-block;">'+esc(sv.phone)+'</span>':'')+'</div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button class="btn btn-outline btn-xs" onclick="svmEdit(\''+sv.uid+'\')">✏️ تعديل</button>'
+      +(sv.is_active?'':'<button class="btn btn-primary btn-xs" onclick="svmSetActive(\''+sv.uid+'\',true)">✅ تفعيل</button>')
+      +'<button class="btn btn-danger btn-xs" onclick="svmAskDel(\''+sv.uid+'\')">🗑️ حذف</button></div></div>').join('')
+    +'</div></div>';
+}
+function svmEdit(uid){
+  const sv=svmFind(uid); if(!sv) return;
+  let ov=document.getElementById('svm-ov'); if(!ov){ ov=document.createElement('div'); ov.id='svm-ov'; ov.className='overlay'; document.body.appendChild(ov); }
+  const inp='font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);';
+  ov.innerHTML='<div class="modal" style="max-width:560px;"><div class="modal-head"><div class="modal-title">✏️ تعديل المشرف — '+esc(sv.full_name)+'</div><button class="modal-close" onclick="closeModal(\'svm-ov\')">×</button></div><div class="modal-body">'
+    +'<div class="fg"><label>الاسم الكامل *</label><input type="text" id="svm-name" maxlength="120" value="'+esc(sv.full_name)+'"></div>'
+    +'<div class="form-grid-2"><div class="fg"><label>الهاتف</label><input type="tel" id="svm-phone" dir="ltr" value="'+esc(sv.phone)+'"></div>'
+    +'<div class="fg"><label>البريد</label><input type="email" id="svm-email" dir="ltr" value="'+esc(sv.email)+'"></div>'
+    +'<div class="fg"><label>النوع</label><select id="svm-gender" style="'+inp+'"><option value="">—</option><option'+(sv.gender==='ذكر'?' selected':'')+'>ذكر</option><option'+(sv.gender==='أنثى'?' selected':'')+'>أنثى</option></select></div>'
+    +'<div class="fg"><label>الحالة</label><select id="svm-active" style="'+inp+'"><option value="true"'+(sv.is_active?' selected':'')+'>نشط</option><option value="false"'+(sv.is_active?'':' selected')+'>موقوف</option></select></div></div>'
+    +'<div class="fg"><label>الشُّعب اللي بيشرف عليها *</label><div style="display:flex;gap:14px;flex-wrap:wrap;">'
+    +SVM_BR.map(([id,n])=>'<label style="font-size:.86rem;font-weight:700;"><input type="checkbox" class="svm-br" value="'+id+'"'+((sv.scope||[]).includes(id)?' checked':'')+'> '+n+'</label>').join('')+'</div>'
+    +'<div style="font-size:.74rem;color:var(--mid);margin-top:6px;">المشرف بيشوف كل حلقات ومعلمي الشعب دي — وأكتر من مشرف ينفع يشرفوا على نفس الشعبة.</div></div>'
+    +'<div style="font-size:.74rem;color:var(--light);">اسم الدخول: <span dir="ltr">'+esc(sv.username||'—')+'</span> • كلمة المرور من «تغيير كلمة المرور» في المعلمين/الإعدادات</div>'
+    +'</div><div class="modal-foot"><button class="btn btn-primary" id="svm-save" onclick="svmSave(\''+uid+'\')">💾 حفظ</button><button class="btn btn-outline" onclick="closeModal(\'svm-ov\')">إلغاء</button></div></div>';
+  openModal('svm-ov');
+}
+async function svmAfter(){ await loadSupervisors(); if(svCurrentBranchKey) svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null); try{ if(typeof refreshAdminData==='function') await refreshAdminData(); }catch(e){} }
+async function svmSave(uid){
+  const name=document.getElementById('svm-name').value.trim(); if(!name){ showToast('⚠️ اكتب الاسم'); return; }
+  const scope=[...document.querySelectorAll('.svm-br:checked')].map(x=>x.value);
+  const act=document.getElementById('svm-active').value==='true';
+  if(act&&!scope.length){ showToast('⚠️ اختار شعبة واحدة على الأقل'); return; }
+  const b=document.getElementById('svm-save'); b.disabled=true;
+  try{
+    const {error}=await db.rpc('staff_update',{p_user:uid,p_data:{ full_name:name, phone:document.getElementById('svm-phone').value.trim(), email:document.getElementById('svm-email').value.trim(),
+      gender:document.getElementById('svm-gender').value, is_active:act, sv_scope:scope.join(','), branch_id:scope[0]||'' }});
+    if(error) throw error;
+    closeModal('svm-ov'); showToast('✅ بيانات المشرف اتحفظت'); await svmAfter();
+  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); b.disabled=false; }
+}
+async function svmSetActive(uid,on){
+  try{ const {error}=await db.rpc('staff_update',{p_user:uid,p_data:{is_active:!!on}}); if(error) throw error;
+       showToast(on?'✅ المشرف اتفعّل — حدّد شعبه من «تعديل» لو مش ظاهر':'⛔ المشرف اتوقف'); await svmAfter(); }
+  catch(e){ showToast('⚠️ '+(e.message||e.code||'')); }
+}
+function svmAskDel(uid){
+  const sv=svmFind(uid); if(!sv) return;
+  let ov=document.getElementById('svm-del'); if(!ov){ ov=document.createElement('div'); ov.id='svm-del'; ov.className='overlay'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="modal" style="max-width:470px;"><div class="modal-head"><div class="modal-title">⛔ إيقاف أو حذف المشرف</div><button class="modal-close" onclick="closeModal(\'svm-del\')">×</button></div><div class="modal-body">'
+    +'<div style="font-size:.95rem;font-weight:800;color:var(--forest);margin-bottom:10px;">'+esc(sv.full_name)+'</div>'
+    +'<div style="font-size:.84rem;line-height:1.9;color:var(--mid);">• <b>إيقاف</b> (المقترح): الحساب مايقدرش يدخل ويختفي من الشعب — وتاريخه (إجراءات التنبيهات والزيارات) يفضل محفوظ وتقدر ترجّعه.<br>• <b>حذف نهائي</b>: بيمسح الحساب ورسايله وإجراءات التنبيهات اللي سجّلها — ومفيش رجوع.</div>'
+    +'<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:.84rem;color:var(--red);font-weight:700;"><input type="checkbox" id="svm-del-ok"> متأكد من الحذف النهائي</label></div>'
+    +'<div class="modal-foot">'+(sv.is_active?'<button class="btn btn-gold" onclick="closeModal(\'svm-del\');svmSetActive(\''+uid+'\',false)">⛔ إيقاف</button>':'')
+    +'<button class="btn btn-danger" id="svm-del-btn" onclick="svmDel(\''+uid+'\')">🗑️ حذف نهائي</button><button class="btn btn-outline" onclick="closeModal(\'svm-del\')">إلغاء</button></div></div>';
+  openModal('svm-del');
+}
+async function svmDel(uid){
+  if(!document.getElementById('svm-del-ok').checked){ showToast('⚠️ علّم «متأكد من الحذف النهائي» الأول'); return; }
+  const b=document.getElementById('svm-del-btn'); b.disabled=true;
+  try{
+    if (typeof adminEnsureSession==='function' && !(await adminEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {error}=await db.rpc('admin_delete_staff',{p_user_id:uid,p_force:true}); if(error) throw error;
+    closeModal('svm-del'); showToast('🗑️ المشرف اتحذف نهائياً'); await svmAfter();
+  }catch(e){ showToast('⚠️ ما اتحذفش: '+(e.message||e.code||'')); b.disabled=false; }
 }
 
 function updateSupervisorStats() {
   const el = document.getElementById('stat-supervisors');
-  if (el) el.textContent = SUPERVISORS.length;
+  if (el) el.textContent = new Set(SUPERVISORS.map(s => s.uid)).size;
   svUpdateBranchOverviewCards();
 }
 
@@ -11081,7 +11225,8 @@ function svRenderDetailCards(cfg, list) {
         <div style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,.4);">${initials}</div>
         <div style="flex:1;">
           <div style="font-size:1rem;font-weight:800;color:#fff;">${sv.name} ${sv.lname}</div>
-          <div style="font-size:.73rem;color:rgba(255,255,255,.75);margin-top:2px;">مشرف شعبة ${cfg.label}</div>
+          <div style="font-size:.73rem;color:rgba(255,255,255,.75);margin-top:2px;">مشرف شعبة ${cfg.label}${sv.phone?' • <span dir="ltr">'+esc(sv.phone)+'</span>':''}</div>
+          <div style="font-size:.66rem;color:rgba(255,255,255,.6);margin-top:2px;">كليك يمين: تعديل / إيقاف / حذف</div>
                   </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;background:${cfg.paleBg};border-bottom:1px solid var(--border);">
@@ -11268,8 +11413,10 @@ function svCloseContextMenu() {
 
 function svContextAction(action) {
   svCloseContextMenu();
-  const sv = SUPERVISORS.find(s => s.id === svActiveId);
+  const sv = SUPERVISORS.find(s => s.id === svActiveId) || (window.SV_OFF||[]).find(s => s.id === svActiveId);
   if (!sv) return;
+  if (action === 'edit')   { svmEdit(sv.uid); return; }
+  if (action === 'delete') { svmAskDel(sv.uid); return; }
   if (action === 'message') {
     const av = document.getElementById('sv-msg-avatar');
     const nm = document.getElementById('sv-msg-name');
@@ -11309,9 +11456,9 @@ async function sendSvMessage() {
   const subject = (document.getElementById('sv-msg-subject')?.value || '').trim();
   const body    = (document.getElementById('sv-msg-body')?.value || '').trim();
   if (!body) { showToast('⚠️ نص الرسالة مطلوب', 'error'); return; }
-  const sv = SUPERVISORS.find(s => s.id === svActiveId);
+  const sv = SUPERVISORS.find(s => s.id === svActiveId) || (window.SV_OFF||[]).find(s => s.id === svActiveId);
   if (!(await _sendMessageToUser({
-    toId:   sv?.id || null,
+    toId:   sv?.uid || null,
     toName: sv ? sv.name + ' ' + sv.lname : (document.getElementById('sv-msg-name')?.textContent || 'مشرف'),
     toRole: 'supervisor',
     subject: subject || 'رسالة من المدير',
@@ -11998,6 +12145,103 @@ function exportEmployeesExcel() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 </script>
 
+
+<script>
+/* ══════════ (دفعة ١٤) تعديل بيانات الطالب — نافذة موحّدة stuEd* ══════════
+   نفس النافذة في لوحة المدير والمشرف والموظفين — الحفظ عبر RPC student_update_full
+   والقراءة عبر students_sheet ← أي تعديل يظهر في كل اللوحات (المعلم/ولي الأمر/الملف). */
+const STUED={ id:null, onSaved:null, canStatus:true, row:null };
+function stuEdAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function stuEdE(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function stuEdAge(dob){
+  if(!dob) return null; const b=new Date(String(dob).slice(0,10)+'T00:00:00'); if(isNaN(b)) return null;
+  const n=new Date(); let a=n.getFullYear()-b.getFullYear(); if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--; return a>=0?a:null;
+}
+function stuEdDob(d){ if(!d) return ''; const p=String(d).slice(0,10).split('-'); return p.length===3?stuEdAr(p[2]+'/'+p[1]+'/'+p[0]):''; }
+async function stuEdSheet(ids){
+  ids=[...new Set((ids||[]).filter(Boolean).map(String))]; const out={};
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await db.rpc('students_sheet',{p_ids:ids.slice(i,i+150)});
+    if(error) throw error; (data||[]).forEach(r=>{ out[String(r.id)]=r; });
+  }
+  return out;
+}
+function stuEdEnsure(){
+  if(document.getElementById('stued-ov')) return;
+  const inp='width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--border,#dce8e0);border-radius:9px;font-family:Tajawal,sans-serif;font-size:.88rem;background:var(--bg,#f5f7f5);color:var(--ink,#1a1a1a);outline:none;';
+  const lb='display:block;font-size:.78rem;font-weight:700;color:var(--forest,#0f2318);margin-bottom:5px;';
+  const f=(id,label,type,extra)=>'<div style="margin-bottom:12px;'+(extra||'')+'"><label style="'+lb+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" style="'+inp+(type==='tel'?'direction:ltr;text-align:right;':'')+'"></div>';
+  const ov=document.createElement('div'); ov.id='stued-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,35,24,.5);z-index:10050;display:none;align-items:center;justify-content:center;padding:14px;font-family:Tajawal,sans-serif;direction:rtl;';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:600px;max-height:92vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318));color:#fff;position:sticky;top:0;z-index:1;">'
+    +'<div style="font-weight:800;">✏️ تعديل بيانات الطالب</div><button type="button" onclick="stuEdClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
+    +'<div style="padding:18px 20px;" id="stued-body">'
+    +'<div id="stued-msg" style="display:none;"></div>'
+    +f('stued-name','الاسم الكامل *','text')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">'
+    +f('stued-dad','📞 هاتف الأب','tel')+f('stued-mom','📞 هاتف الأم','tel')
+    +'<div style="margin-bottom:12px;"><label style="'+lb+'">تاريخ الميلاد</label><input id="stued-dob" type="date" style="'+inp+'" oninput="stuEdAgeLbl()"><div id="stued-age" style="font-size:.74rem;color:var(--mid,#4a5e52);margin-top:4px;"></div></div>'
+    +f('stued-mem','الحفظ (عدد الأجزاء)','number')
+    +f('stued-level','المستوى','text')+f('stued-phone','هاتف الطالب (اختياري)','tel')
+    +f('stued-dadedu','تعليم الأب','text')+f('stued-momedu','تعليم الأم','text')
+    +'</div>'
+    +f('stued-addr','العنوان','text')
+    +'<div style="margin-bottom:12px;" id="stued-st-wrap"><label style="'+lb+'">الحالة</label><select id="stued-status" style="'+inp+'"><option value="true">نشط</option><option value="false">موقوف</option></select></div>'
+    +'<div style="margin-bottom:6px;"><label style="'+lb+'">ملاحظات</label><textarea id="stued-notes" rows="3" style="'+inp+'resize:vertical;"></textarea></div>'
+    +'<div id="stued-pp" style="font-size:.74rem;color:var(--light,#8ea598);"></div>'
+    +'</div>'
+    +'<div style="padding:12px 20px 18px;display:flex;gap:10px;justify-content:flex-start;border-top:1px solid var(--border,#dce8e0);">'
+    +'<button type="button" id="stued-save" onclick="stuEdSave()" style="padding:10px 22px;background:linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318));color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:800;">💾 حفظ التعديلات</button>'
+    +'<button type="button" onclick="stuEdClose()" style="padding:10px 20px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.86rem;">إلغاء</button></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov) stuEdClose(); });
+}
+function stuEdAgeLbl(){ const a=stuEdAge(document.getElementById('stued-dob').value); document.getElementById('stued-age').textContent=a==null?'':('العمر: '+stuEdAr(a)+' سنة'); }
+function stuEdClose(){ const o=document.getElementById('stued-ov'); if(o) o.style.display='none'; }
+// opts: { canStatus:bool }
+async function stuEdOpen(studentId, onSaved, opts){
+  if(!studentId){ if(typeof showToast==='function') showToast('⚠️ الطالب مش متحدد'); return; }
+  stuEdEnsure(); opts=opts||{};
+  STUED.id=String(studentId); STUED.onSaved=onSaved||null; STUED.canStatus=opts.canStatus!==false; STUED.row=null;
+  const ov=document.getElementById('stued-ov'), btn=document.getElementById('stued-save'), msg=document.getElementById('stued-msg');
+  ['name','dad','mom','dob','mem','level','phone','dadedu','momedu','addr','notes'].forEach(k=>{ const el=document.getElementById('stued-'+k); el.value=''; el.disabled=true; });
+  document.getElementById('stued-st-wrap').style.display=STUED.canStatus?'':'none';
+  document.getElementById('stued-age').textContent=''; document.getElementById('stued-pp').textContent='';
+  msg.style.display='block'; msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--light,#8ea598);font-size:.82rem;'; msg.textContent='⏳ جارٍ تحميل بيانات الطالب…';
+  btn.disabled=true; ov.style.display='flex';
+  try{
+    const m=await stuEdSheet([STUED.id]); const r=m[STUED.id]; if(!r) throw new Error('الطالب مش في نطاقك');
+    STUED.row=r;
+    const set=(k,v)=>{ const el=document.getElementById('stued-'+k); el.value=v==null?'':v; el.disabled=false; };
+    set('name',r.full_name); set('dad',r.dad); set('mom',r.mom); set('dob',r.date_of_birth?String(r.date_of_birth).slice(0,10):'');
+    set('mem',r.memorized_parts==null?'':+r.memorized_parts); set('level',r.level); set('phone',r.phone);
+    set('dadedu',r.dad_edu); set('momedu',r.mom_edu); set('addr',r.addr); set('notes',r.notes);
+    document.getElementById('stued-status').value=String(r.is_active!==false);
+    document.getElementById('stued-pp').textContent=r.parent_phone?('📱 رقم حساب ولي الأمر (لوحة ولي الأمر): '+r.parent_phone):'';
+    stuEdAgeLbl(); msg.style.display='none'; btn.disabled=false;
+  }catch(e){ msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--red,#c0392b);font-size:.84rem;font-weight:700;'; msg.textContent='⚠️ البيانات ما اتحمّلتش — مينفعش تعدّل دلوقتي ('+(e.message||e.code||'')+')'; }
+}
+async function stuEdSave(){
+  const v=k=>document.getElementById('stued-'+k).value.trim();
+  const name=v('name'); if(!name){ showToast('⚠️ اكتب اسم الطالب'); return; }
+  const mem=v('mem'); if(mem!==''&&(isNaN(+mem)||+mem<0||+mem>30)){ showToast('⚠️ الحفظ من ٠ لـ ٣٠ جزء'); return; }
+  const digits=x=>x.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const p={ full_name:name, dad:digits(v('dad')), mom:digits(v('mom')), date_of_birth:v('dob')||null,
+            level:v('level'), phone:digits(v('phone')), dadEdu:v('dadedu'), momEdu:v('momedu'), addr:v('addr'), notes:v('notes') };
+  if(mem!=='') p.memorized_parts=+mem;
+  if(STUED.canStatus) p.is_active=document.getElementById('stued-status').value==='true';
+  const btn=document.getElementById('stued-save'); btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
+  try{
+    const {data,error}=await db.rpc('student_update_full',{p_student:STUED.id,p_data:p});
+    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
+    stuEdClose(); showToast('✅ بيانات الطالب اتحفظت — وهتظهر في كل اللوحات');
+    if(typeof STUED.onSaved==='function'){ try{ await STUED.onSaved(STUED.id,p); }catch(e){ console.warn('[stued] after save',e); } }
+  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
+  finally{ btn.disabled=false; btn.textContent='💾 حفظ التعديلات'; }
+}
+</script>
+
 <!-- ══ EDIT STUDENT MODAL ══ -->
 <div id="overlay-edit-student" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Tajawal;direction:rtl;">
@@ -12091,6 +12335,7 @@ function clearLongPress() {
 // ─────────────────────────────────────
 function ctxEditStudent() {
   hideStudentMenu();
+  if (_ctxSid) { stuEdOpen(_ctxSid, stuAfterSave, { canStatus:true }); return; }
   // فتح نافذة الإضافة بعد ملء بياناته
   const d = getStudentData(_ctxKey);
   // reset form first
@@ -16994,6 +17239,7 @@ function _finSubCell(r){
 
 async function loadFinSubs(){
   const tb = document.getElementById('fin-subs-tbody'); if(!tb) return;
+  if (typeof kfRender === 'function') kfRender();   // ⭐ المكفولون (دفعة ١٤)
   tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
   try{
     const { data, error } = await selectAll(db.from('fin_subscriptions').select('*').order('created_at',{ascending:true}));
@@ -17185,7 +17431,7 @@ async function getFinStaff(){
   if(window._finStaff) return window._finStaff;
   const out = [];
   try{
-    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin']);
+    const { data } = await db.from('users').select('id,full_name,role,job_title').in('role',['teacher','supervisor','admin','employee']);
     (data||[]).forEach(u => { const n=(u.full_name||'').trim(); if(n) out.push({ id:u.id, name:n, role:FIN_ROLE_AR[u.role]||u.role, job:u.job_title||'' }); });
   }catch(e){ console.warn('finStaff users:', e); }
   try{
@@ -18568,7 +18814,6 @@ async function buildFinReport(btn){
         { name:'اشتراكات الطلاب',         a:D.subs.filter(r=>inR(finRevDate(r),a,b)) },
         { name:'التبرعات',                a:D.don .filter(r=>inR(r.date,a,b)) },
         { name:'الكفالات',                a:D.spon.filter(r=>inR(r.date,a,b)) },
-        { name:'برنامج الإجازة والإقراء', a:D.ijz .filter(r=>inR(finRevDate(r),a,b)) },
       ].map(x => ({ name:x.name, cnt:x.a.length, val:finSum(x.a) }));
       const exp = Object.keys(FIN_EXP_CAT_AR).map(k => {
         const g = D.exp.filter(r => r.category===k && inR(r.date,a,b));
@@ -18829,7 +19074,7 @@ function tadminCourseCard(l,c){
     ${open?`<div style="padding:12px;">
       <div style="font-weight:800;font-size:.82rem;color:var(--mid);margin-bottom:6px;">الفيديوهات</div>
       ${vids.map((v,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;">
-        <span style="font-size:.82rem;">${tadminAr(i+1)}. <code>${tadminEsc(v.youtube_id)}</code> ${v.title?('— '+tadminEsc(v.title)):''}</span>
+        <span style="font-size:.82rem;">${tadminAr(i+1)}. <a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.youtube_id)}" target="_blank" rel="noopener" style="color:var(--blue);">▶️ ${v.title?tadminEsc(v.title):tadminEsc(v.youtube_id)}</a></span>
         <span><button class="btn btn-ghost btn-xs" onclick="tadminEditVideo('${c.id}','${v.id}')">✏️</button><button class="btn btn-ghost btn-xs" onclick="tadminDelVideo('${v.id}')">🗑️</button></span>
       </div>`).join('') || '<div style="color:var(--light);font-size:.8rem;">لا فيديوهات.</div>'}
       <button class="btn btn-outline btn-xs" style="margin:4px 0 12px;" onclick="tadminEditVideo('${c.id}',null)">➕ فيديو</button>
@@ -18891,6 +19136,17 @@ function tadminModal(title, bodyHtml, onSave){
     catch(e){ showToast('⚠️ '+(e.message||e.code||'تعذّر الحفظ')); this.disabled=false; this.textContent='💾 حفظ'; }
   };
 }
+// رابط يوتيوب بأي شكل (watch / youtu.be / shorts / embed / live) أو المعرّف → المعرّف
+function tadminYtId(v){
+  v=String(v||'').trim(); if(!v) return '';
+  if(/^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+  const m=v.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/|\/v\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:'';
+}
+function tadminYtPrev(){
+  const box=document.getElementById('ta-v-prev'); if(!box) return; const id=tadminYtId(tadminVal('ta-v-yt'));
+  box.innerHTML=id?'<img src="https://img.youtube.com/vi/'+id+'/mqdefault.jpg" style="width:200px;border-radius:8px;border:1px solid var(--border);" alt=""><div style="font-size:.74rem;color:var(--jade);font-weight:700;">✔ '+id+'</div>':(tadminVal('ta-v-yt')?'<div style="font-size:.76rem;color:var(--red);font-weight:700;">⚠️ الرابط مش واضح</div>':'');
+}
 function tadminCloseModal(){ const ov=document.getElementById('tadmin-ov'); if(ov) ov.style.display='none'; }
 function tadminVal(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
 function tadminNum(id,def){ const v=parseInt(tadminVal(id),10); return isNaN(v)?def:v; }
@@ -18940,14 +19196,15 @@ async function tadminDelCourse(id){ if(!confirm('حذف الدورة وكل في
 function tadminEditVideo(courseId,id){
   const v=id?tadminFindVideo(courseId,id):null;
   tadminModal(v?'تعديل فيديو':'فيديو جديد',
-    `<div style="${tadminFG}"><label style="${tadminLbl}">معرّف يوتيوب (YouTube ID) — الجزء بعد v=</label><input id="ta-v-yt" style="${tadminInp}" value="${v?tadminEsc(v.youtube_id):''}" placeholder="مثال: dQw4w9WgXcQ"></div>
+    `<div style="${tadminFG}"><label style="${tadminLbl}">رابط فيديو يوتيوب (أو المعرّف بس)</label><input id="ta-v-yt" style="${tadminInp}direction:ltr;text-align:left;" value="${v?tadminEsc(v.youtube_id):''}" placeholder="https://www.youtube.com/watch?v=..." oninput="tadminYtPrev()"><div id="ta-v-prev" style="margin-top:8px;"></div></div>
      <div style="${tadminFG}"><label style="${tadminLbl}">عنوان (اختياري)</label><input id="ta-v-title" style="${tadminInp}" value="${v&&v.title?tadminEsc(v.title):''}"></div>
      <div style="${tadminFG}"><label style="${tadminLbl}">الترتيب</label><input id="ta-v-sort" type="number" style="${tadminInp}" value="${v?v.sort_order:0}"></div>`,
     async ()=>{
-      const yt=tadminVal('ta-v-yt'); if(!yt) throw new Error('معرّف يوتيوب مطلوب');
+      const yt=tadminYtId(tadminVal('ta-v-yt')); if(!yt) throw new Error('رابط يوتيوب مش صحيح');
       const {error}=await db.rpc('admin_save_video',{p_id:id||null,p_course_id:courseId,p_youtube_id:yt,p_title:tadminVal('ta-v-title')||null,p_sort:tadminNum('ta-v-sort',0)});
       if(error) throw error; showToast('✅ تم الحفظ');
     });
+  tadminYtPrev();
 }
 async function tadminDelVideo(id){ if(!confirm('حذف هذا الفيديو؟')) return;
   try{ const {error}=await db.rpc('admin_delete_video',{p_id:id}); if(error)throw error; showToast('🗑️ حُذف'); await tadminReload(); }catch(e){ showToast('⚠️ '+(e.message||e.code)); } }
@@ -19004,6 +19261,147 @@ async function tadminDelQ(id){ if(!confirm('حذف هذا السؤال؟')) retu
 </script>
 
 
+
+<script>
+/* ══════════ (دفعة ١٤) تعديل / حذف الحلقة من لوحة القيادة — dgc* ══════════
+   • البيانات: admin_circle_save (اسم + معلم — الطلاب بيتنقلوا مع المعلم)
+   • الموعد الأسبوعي الثابت للشعبة: admin_term_branch_schedule → terms.schedule (الدورة الحالية)
+   • استثناء ليوم معيّن (إلغاء / ساعة مختلفة): admin_term_override → terms.settings.overrides
+   • الحذف: admin_circle_delete (فاضية → حذف • ليها تاريخ → أرشفة) */
+let DGC_ID=null, DGC_TEACHERS=null, DGC_LPT=null;
+function dgcC(){ return (DG.byId||{})[DGC_ID]||null; }
+function dgcOverride(cid,iso){
+  const t=termOf(iso); const L=(t&&t.settings&&t.settings.overrides)||[];
+  return L.find(o=>o.circle_id===String(cid)&&o.date===iso)||null;
+}
+function dgcMenu(e,id){
+  e.preventDefault(); DGC_ID=id; const c=dgcC(); if(!c) return;
+  const m=document.getElementById('dgc-menu'); document.getElementById('dgc-menu-h').textContent='🕌 '+c.name;
+  m.style.display='block';
+  let x=e.clientX, y=e.clientY; const mw=m.offsetWidth, mh=m.offsetHeight;
+  if(x+mw>innerWidth) x=innerWidth-mw-8; if(y+mh>innerHeight) y=innerHeight-mh-8;
+  m.style.left=Math.max(8,x)+'px'; m.style.top=Math.max(8,y)+'px';
+  setTimeout(()=>document.addEventListener('click',dgcHide,{once:true}),10);
+}
+function dgcHide(){ const m=document.getElementById('dgc-menu'); if(m) m.style.display='none'; }
+function dgcLP(e,id){ const t=e.touches&&e.touches[0]; if(!t) return; dgcLPx(); DGC_LPT=setTimeout(()=>{ dgcMenu({preventDefault(){},clientX:t.clientX,clientY:t.clientY},id); },600); }
+function dgcLPx(){ clearTimeout(DGC_LPT); }
+function dgcH2T(h){ h=+h||0; const hh=Math.floor(h), mm=Math.round((h-hh)*60); return String(Math.min(hh,23)).padStart(2,'0')+':'+String(hh>=24?59:mm).padStart(2,'0'); }
+function dgcT2H(v){ const m=/^(\d{1,2}):(\d{2})$/.exec(String(v||'')); if(!m) return null; const h=+m[1]+(+m[2])/60; return (h>=23.98)?24:Math.round(h*100)/100; }
+async function dgcLoadTeachers(){
+  if(DGC_TEACHERS) return DGC_TEACHERS;
+  const {data,error}=await db.from('users').select('id,full_name').eq('role','teacher').eq('is_active',true).order('full_name');
+  if(error) throw error; DGC_TEACHERS=data||[]; return DGC_TEACHERS;
+}
+async function dgcEdit(){
+  dgcHide(); const c=dgcC(); if(!c) return;
+  const t=CUR_TERM;
+  document.getElementById('dgc-title').textContent='✏️ '+c.name;
+  const body=document.getElementById('dgc-body'); body.innerHTML='<div style="text-align:center;padding:20px;color:var(--light);">⏳ جارٍ التحميل…</div>';
+  openModal('modal-dgc-edit');
+  let T=[]; try{ T=await dgcLoadTeachers(); }catch(e){ body.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;">⚠️ تعذّر تحميل المعلمين — اعمل تحديث</div>'; return; }
+  const dayOpts=sel=>TERM_DAYS_AR.map((d,i)=>'<option value="'+i+'"'+(i===sel?' selected':'')+'>'+d+'</option>').join('');
+  const rows=t?termSched(t,c.branch):[];
+  let h='<div class="dgc-sec">🕌 بيانات الحلقة</div>'
+    +'<div class="form-grid-2"><div class="fg"><label>اسم الحلقة *</label><input type="text" id="dgc-name" maxlength="120" value="'+esc(c.name)+'"></div>'
+    +'<div class="fg"><label>المعلم</label><select id="dgc-teacher" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);">'
+    +(c.teacherId?'':'<option value="">— بدون معلم —</option>')
+    +T.map(u=>'<option value="'+esc(u.id)+'"'+(u.id===c.teacherId?' selected':'')+'>'+esc(u.full_name)+'</option>').join('')+'</select></div></div>'
+    +'<div class="dgc-note">لو غيّرت المعلم، طلاب الحلقة بيتنقلوا معاه تلقائياً.</div>'
+    +'<button class="btn btn-primary btn-sm" id="dgc-save-info" onclick="dgcSaveInfo()">💾 حفظ البيانات</button>';
+  h+='<div class="dgc-sec">📅 الموعد الأسبوعي الثابت — شعبة '+esc(c.branch)+(t?' • '+esc(t.name):'')+'</div>';
+  if(!t) h+='<div class="dgc-note" style="color:var(--red);">مفيش دورة حالية</div>';
+  else{
+    h+='<div class="dgc-note">⚠️ ده موعد <b>الشعبة كلها</b> في الدورة الحالية (كل حلقات '+esc(c.branch)+') — وهو اللي بيحدد أيام الحلقة عند المعلم.</div><div id="dgc-wk">'
+      +rows.map(r=>'<div class="dgc-row" data-exam="'+(r.exam?1:0)+'" data-label="'+esc(r.label||'')+'"><select class="dgc-d">'+dayOpts(+r.d)+'</select> من <input type="time" class="dgc-s" value="'+dgcH2T(r.s)+'"> إلى <input type="time" class="dgc-e" value="'+dgcH2T(r.e)+'"><button class="btn btn-ghost btn-xs" onclick="this.parentNode.remove()" title="حذف اليوم ده">✕</button></div>').join('')
+      +'</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-outline btn-sm" onclick="dgcAddRow()">➕ إضافة يوم</button><button class="btn btn-gold btn-sm" id="dgc-save-wk" onclick="dgcSaveWeek()">💾 حفظ الموعد الثابت</button></div>';
+  }
+  h+='<div class="dgc-sec">🗓️ تعديل أو إلغاء حلقة يوم معيّن (للحلقة دي بس)</div>';
+  if(t){
+    h+='<div class="dgc-row"><input type="date" id="dgc-od" min="'+t.start_date+'" max="'+t.end_date+'" value="'+localISO()+'">'
+      +'<label style="font-size:.82rem;font-weight:700;"><input type="radio" name="dgc-ok" value="cancel" checked onchange="dgcOK()"> إلغاء الحلقة</label>'
+      +'<label style="font-size:.82rem;font-weight:700;"><input type="radio" name="dgc-ok" value="time" onchange="dgcOK()"> موعد مختلف</label></div>'
+      +'<div class="dgc-row" id="dgc-otime" style="display:none;">من <input type="time" id="dgc-os" value="17:00"> إلى <input type="time" id="dgc-oe" value="19:00"></div>'
+      +'<div class="dgc-row"><input type="text" id="dgc-on" maxlength="200" placeholder="السبب (اختياري) — مثال: إجازة" style="flex:1;min-width:200px;"><button class="btn btn-primary btn-sm" id="dgc-save-ov" onclick="dgcSaveOv()">➕ حفظ</button></div>'
+      +'<div id="dgc-ovlist"></div>';
+  }
+  body.innerHTML=h; dgcRenderOv();
+}
+function dgcOK(){ const v=(document.querySelector('input[name="dgc-ok"]:checked')||{}).value; document.getElementById('dgc-otime').style.display=v==='time'?'':'none'; }
+function dgcAddRow(){
+  const box=document.getElementById('dgc-wk'); if(!box) return;
+  const d=document.createElement('div'); d.className='dgc-row'; d.dataset.exam='0'; d.dataset.label='';
+  d.innerHTML='<select class="dgc-d">'+TERM_DAYS_AR.map((x,i)=>'<option value="'+i+'">'+x+'</option>').join('')+'</select> من <input type="time" class="dgc-s" value="17:00"> إلى <input type="time" class="dgc-e" value="19:00"><button class="btn btn-ghost btn-xs" onclick="this.parentNode.remove()">✕</button>';
+  box.appendChild(d);
+}
+function dgcRenderOv(){
+  const box=document.getElementById('dgc-ovlist'); const t=CUR_TERM; if(!box||!t) return;
+  const L=((t.settings||{}).overrides||[]).filter(o=>o.circle_id===String(DGC_ID)).sort((a,b)=>a.date<b.date?-1:1);
+  box.innerHTML=L.length?L.map(o=>'<div class="dgc-row" style="justify-content:space-between;background:var(--bg);border-radius:var(--r-sm);padding:7px 10px;"><span style="font-size:.82rem;font-weight:700;">'
+      +esc(TERM_DAYS_AR[new Date(o.date+'T00:00:00').getDay()])+' '+toAr(o.date.split('-').reverse().join('/'))+' — '+(o.cancel?'<span style="color:var(--red);">🔕 ملغاة</span>':'<span style="color:var(--gold);">⏰ '+termHourAr(o.s)+'–'+termHourAr(o.e)+'</span>')+(o.note?' <span style="color:var(--light);">• '+esc(o.note)+'</span>':'')+'</span>'
+      +'<button class="btn btn-ghost btn-xs" onclick="dgcDelOv(\''+o.date+'\')" title="إلغاء الاستثناء">✕</button></div>').join('')
+    :'<div class="dgc-note">مفيش استثناءات للحلقة دي.</div>';
+}
+async function dgcAfter(msg){ showToast(msg); try{ await loadTerms(); }catch(e){ loadWarn(e); } DG.loaded=false; await dgLoad(); }
+async function dgcSaveInfo(){
+  const c=dgcC(); if(!c) return;
+  const name=document.getElementById('dgc-name').value.trim(), tid=document.getElementById('dgc-teacher').value||null;
+  if(!name){ showToast('⚠️ اكتب اسم الحلقة'); return; }
+  const b=document.getElementById('dgc-save-info'); b.disabled=true;
+  try{ const {error}=await db.rpc('admin_circle_save',{p_id:c.id,p_name:name,p_teacher:tid}); if(error) throw error;
+       closeModal('modal-dgc-edit'); await dgcAfter('✅ بيانات الحلقة اتحفظت'); }
+  catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); } finally{ b.disabled=false; }
+}
+async function dgcSaveWeek(){
+  const c=dgcC(), t=CUR_TERM; if(!c||!t) return;
+  const rows=[]; let bad=false; const seen=new Set();
+  document.querySelectorAll('#dgc-wk .dgc-row').forEach(r=>{
+    const d=+r.querySelector('.dgc-d').value, s=dgcT2H(r.querySelector('.dgc-s').value), e=dgcT2H(r.querySelector('.dgc-e').value);
+    if(s==null||e==null||s>=e||seen.has(d)) bad=true; seen.add(d);
+    const o={d,s,e}; if(r.dataset.exam==='1') o.exam=true; if(r.dataset.label) o.label=r.dataset.label; rows.push(o);
+  });
+  if(bad){ showToast('⚠️ راجع المواعيد — الساعة غلط أو يوم متكرر'); return; }
+  if(!rows.length&&!confirm('مفيش ولا يوم — كده الشعبة مالهاش حلقات في الدورة. متأكد؟')) return;
+  if(!confirm('تغيير الموعد الثابت لشعبة '+c.branch+' كلها في '+t.name+'؟')) return;
+  const b=document.getElementById('dgc-save-wk'); b.disabled=true;
+  try{ const {error}=await db.rpc('admin_term_branch_schedule',{p_term:t.id,p_branch:c.branch,p_rows:rows}); if(error) throw error;
+       closeModal('modal-dgc-edit'); await dgcAfter('✅ موعد شعبة '+c.branch+' اتحدّث'); }
+  catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); } finally{ b.disabled=false; }
+}
+async function dgcSaveOv(){
+  const c=dgcC(), t=CUR_TERM; if(!c||!t) return;
+  const date=document.getElementById('dgc-od').value, kind=(document.querySelector('input[name="dgc-ok"]:checked')||{}).value;
+  if(!date||date<t.start_date||date>t.end_date){ showToast('⚠️ اختار تاريخ جوه الدورة'); return; }
+  const item={date,circle_id:c.id,cancel:kind!=='time',note:document.getElementById('dgc-on').value.trim()};
+  if(kind==='time'){ item.s=dgcT2H(document.getElementById('dgc-os').value); item.e=dgcT2H(document.getElementById('dgc-oe').value);
+    if(item.s==null||item.e==null||item.s>=item.e){ showToast('⚠️ الساعة غلط'); return; } }
+  const b=document.getElementById('dgc-save-ov'); b.disabled=true;
+  try{ const {error}=await db.rpc('admin_term_override',{p_term:t.id,p_item:item,p_remove:false}); if(error) throw error;
+       try{ await loadTerms(); }catch(e){} dgcRenderOv(); showToast(item.cancel?'🔕 الحلقة اتلغت في اليوم ده':'⏰ اتحفظ الموعد المختلف'); DG.loaded=false; dgLoad(); }
+  catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); } finally{ b.disabled=false; }
+}
+async function dgcDelOv(date){
+  const t=CUR_TERM; if(!t||!confirm('إلغاء الاستثناء ده؟')) return;
+  try{ const {error}=await db.rpc('admin_term_override',{p_term:t.id,p_item:{date,circle_id:DGC_ID},p_remove:true}); if(error) throw error;
+       try{ await loadTerms(); }catch(e){} dgcRenderOv(); showToast('✅ اتشال'); DG.loaded=false; dgLoad(); }
+  catch(e){ showToast('⚠️ '+(e.message||e.code||'')); }
+}
+function dgcAskDel(){
+  dgcHide(); const c=dgcC(); if(!c) return;
+  const n=(c.studentIds||[]).length;
+  document.getElementById('dgc-del-body').innerHTML='<div style="font-size:.92rem;line-height:1.9;">هتحذف <b>'+esc(c.name)+'</b> ('+esc(c.branch)+') — المعلم: '+esc(c.teacher)+'</div>'
+    +(n?'<div style="margin-top:10px;background:var(--red-pale);color:var(--red);border-radius:var(--r-sm);padding:10px 12px;font-size:.84rem;font-weight:700;">⚠️ الحلقة فيها '+toAr(n)+' طالب نشط — لازم تنقلهم لحلقة تانية الأول.</div>'
+       :'<div style="margin-top:10px;font-size:.8rem;color:var(--mid);">لو الحلقة ليها تاريخ (حضور/تسميع/تقارير) هتتأرشف وتختفي من اللوحة — من غير ما يتمسح أي تاريخ.</div>');
+  document.getElementById('dgc-del-btn').disabled=!!n;
+  openModal('modal-dgc-del');
+}
+async function dgcDoDel(){
+  const c=dgcC(); if(!c) return; const b=document.getElementById('dgc-del-btn'); b.disabled=true;
+  try{ const {data,error}=await db.rpc('admin_circle_delete',{p_id:c.id}); if(error) throw error;
+       closeModal('modal-dgc-del'); await dgcAfter(data&&data.mode==='archived'?'🗄️ الحلقة اتأرشفت واختفت من اللوحة':'🗑️ الحلقة اتحذفت'); }
+  catch(e){ showToast('⚠️ ما اتحذفتش: '+(e.message||e.code||'')); b.disabled=false; }
+}
+</script>
 <script>
 /* ══════════ لوحة القيادة: عدّادات أداء الحلقات الأسبوعية ══════════
    البيانات كلها حيّة من Supabase (attendance / memorization / circle_reports /
@@ -19049,8 +19447,8 @@ async function dgLoad(){
     const uName={}; (us||[]).forEach(u=>uName[u.id]=u.full_name);
     const isUuid=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
 
-    const { data:circles } = await db.from('circles').select('id,name,name_ar,teacher_id,teachers,branch_id,schedule');
-    let clist=(circles||[]).filter(c=>{ if(allow && !allow.has(c.branch_id)) return false; return true; }).map(c=>{
+    const { data:circles } = await db.from('circles').select('id,name,name_ar,teacher_id,teachers,branch_id,schedule,is_active');
+    let clist=(circles||[]).filter(c=>{ if(c.is_active===false) return false; if(allow && !allow.has(c.branch_id)) return false; return true; }).map(c=>{
       let tName=(c.teachers||[])[0]; if(isUuid(tName)) tName=uName[tName]||tName;
       if(!tName && c.teacher_id) tName=uName[c.teacher_id]||null;
       return { id:c.id, name:c.name_ar||c.name||'حلقة', teacher:tName||'—', teacherId:c.teacher_id||null,
@@ -19143,7 +19541,9 @@ function dgRender(rg){
       const m=c.metrics;
       const attTxt=m.attPct==null?'—':toAr(m.attPct)+'٪';
       const memTxt=m.memPct==null?'—':toAr(m.memPct)+'٪';
-      html+='<div class="dg-card" onclick="dgOpenCircle(\''+c.id+'\')">'
+      const ov=(typeof dgcOverride==='function')?dgcOverride(c.id,localISO()):null;
+      html+='<div class="dg-card" onclick="dgOpenCircle(\''+c.id+'\')" oncontextmenu="dgcMenu(event,\''+c.id+'\');return false;" ontouchstart="dgcLP(event,\''+c.id+'\')" ontouchend="dgcLPx()" ontouchmove="dgcLPx()" title="كليك يمين: تعديل / حذف">'
+        + (ov?'<div style="font-size:.66rem;font-weight:800;border-radius:99px;padding:2px 8px;display:inline-block;margin-bottom:4px;'+(ov.cancel?'background:var(--red-pale);color:var(--red);">🔕 ملغاة النهارده':'background:var(--gold-pale);color:var(--gold);">⏰ النهارده '+termHourAr(ov.s)+'–'+termHourAr(ov.e))+'</div>':'')
         + dgGauge(m.comp)
         + '<div class="dg-card-name">'+c.name+'</div>'
         + '<div class="dg-card-teacher">👤 '+c.teacher+'</div>'
@@ -20798,5 +21198,257 @@ function paExport(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='أولياء_الأمور.csv'; a.click();
 }
 </script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// 👔 الموظفون (دفعة ١٣) — users.role='employee' + RPC admin_create_employee / admin_delete_employee
+//    كلمة المرور: admin_set_password • التعديل والإيقاف: users مباشرة (سياسة المدير) + .select()
+// ══════════════════════════════════════════════════════════════
+let EA={list:[], loaded:false, cur:null, cred:''};
+function eaAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function eaNorm(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ').trim(); }
+function eaCode(u){ return String(u||'').split('@')[0]; }
+function eaPass(){ let p=''; while(p.length<8){ const d=_rnd(10); if(!p&&d===0) continue; p+=d; } return p; }
+async function eaLoad(){
+  const box=document.getElementById('ea-list'); if(box&&!EA.loaded) box.innerHTML='<div style="padding:30px;text-align:center;color:var(--light);">⏳ جارٍ التحميل…</div>';
+  try{
+    const [u,a]=await Promise.all([
+      db.from('users').select('id,full_name,username,phone,job_title,gender,is_active,created_at').eq('role','employee').order('full_name'),
+      selectAll(db.from('weekly_alert_actions').select('taken_by,updated_at').order('alert_id'))
+    ]);
+    if(u.error) throw u.error;
+    const acts={}; (a.data||[]).forEach(x=>{ if(!x.taken_by) return; const o=acts[x.taken_by]=acts[x.taken_by]||{n:0,last:''}; o.n++; if((x.updated_at||'')>o.last) o.last=x.updated_at; });
+    EA.list=(u.data||[]).map(x=>Object.assign({},x,{acts:(acts[x.id]||{n:0,last:''})})); EA.loaded=true;
+  }catch(e){ console.warn(e); if(box) box.innerHTML='<div style="padding:30px;text-align:center;color:var(--red);">⚠️ البيانات ما اتحمّلتش — اعمل تحديث</div>'; return; }
+  eaRender();
+}
+function eaRender(){
+  if(!EA.loaded) return;
+  const act=EA.list.filter(x=>x.is_active!==false).length, tot=EA.list.reduce((s,x)=>s+x.acts.n,0);
+  const st=(ic,v,l,cls)=>'<div class="stat-card '+cls+'"><div class="stat-icon">'+ic+'</div><div class="stat-val">'+eaAr(v)+'</div><div class="stat-lbl">'+l+'</div></div>';
+  document.getElementById('ea-stats').innerHTML=st('👔',EA.list.length,'حساب موظف','green')+st('✅',act,'نشط','blue')+st('🔔',tot,'إجراء تنبيه متسجّل','gold');
+  const q=eaNorm(document.getElementById('ea-q').value);
+  const rows=EA.list.filter(x=>!q||eaNorm(x.full_name).includes(q)||eaCode(x.username).includes(q.toLowerCase()));
+  const box=document.getElementById('ea-list');
+  if(!rows.length){ box.innerHTML='<div style="padding:30px;text-align:center;color:var(--light);">'+(EA.list.length?'مفيش نتايج':'مفيش حسابات موظفين لسه — اضغط «➕ موظف جديد»')+'</div>'; return; }
+  const th=t=>'<th style="padding:9px 10px;text-align:right;">'+t+'</th>';
+  box.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.83rem;font-family:Tajawal;"><thead><tr style="background:var(--pale);color:var(--forest);">'
+    +th('الاسم')+th('اسم الدخول')+th('الموبايل')+th('إجراءات التنبيهات')+th('الحالة')+'<th></th></tr></thead><tbody>'
+    +rows.map(x=>'<tr style="border-bottom:1px solid var(--border);'+(x.is_active===false?'opacity:.55;':'')+'">'
+      +'<td style="padding:8px 10px;font-weight:700;">'+esc((x.job_title?x.job_title+'/ ':'')+(x.full_name||''))+'</td>'
+      +'<td style="padding:8px 10px;font-weight:800;direction:ltr;text-align:right;color:var(--emerald);">'+esc(eaCode(x.username))+'</td>'
+      +'<td style="padding:8px 10px;direction:ltr;text-align:right;">'+esc(x.phone||'—')+'</td>'
+      +'<td style="padding:8px 10px;">'+eaAr(x.acts.n)+(x.acts.last?' <small style="color:var(--light);">• آخر واحد '+esc(new Date(x.acts.last).toLocaleDateString('ar-EG',{day:'numeric',month:'short'}))+'</small>':'')+'</td>'
+      +'<td style="padding:8px 10px;"><span class="badge '+(x.is_active===false?'bg-red':'bg-green')+'">'+(x.is_active===false?'موقوف':'نشط')+'</span></td>'
+      +'<td style="padding:8px 10px;white-space:nowrap;text-align:center;">'
+      +'<button class="btn btn-xs btn-outline" title="تعديل" onclick="eaOpenEdit(\''+x.id+'\')">✏️</button> '
+      +'<button class="btn btn-xs btn-outline" title="كلمة مرور جديدة" onclick="eaResetPass(\''+x.id+'\')">🔑</button> '
+      +'<button class="btn btn-xs btn-outline" title="'+(x.is_active===false?'تفعيل':'إيقاف')+'" onclick="eaToggle(\''+x.id+'\')">'+(x.is_active===false?'▶️':'⏸️')+'</button> '
+      +'<button class="btn btn-xs btn-danger" title="حذف" onclick="eaDelete(\''+x.id+'\')">🗑️</button></td></tr>').join('')+'</tbody></table>';
+}
+function eaOpenAdd(){
+  EA.cur=null;
+  document.getElementById('ea-form-title').textContent='➕ موظف جديد';
+  ['ea-name','ea-phone','ea-login'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ea-job').value='المشرفة'; document.getElementById('ea-gender').value='أنثى';
+  ['ea-login-box','ea-gender-box','ea-login-hint'].forEach(id=>document.getElementById(id).style.display='');
+  openModal('modal-ea-form');
+}
+function eaOpenEdit(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return; EA.cur=id;
+  document.getElementById('ea-form-title').textContent='✏️ تعديل '+(x.full_name||'');
+  document.getElementById('ea-name').value=x.full_name||''; document.getElementById('ea-job').value=x.job_title||''; document.getElementById('ea-phone').value=x.phone||'';
+  ['ea-login-box','ea-gender-box','ea-login-hint'].forEach(i=>document.getElementById(i).style.display='none');
+  openModal('modal-ea-form');
+}
+async function eaSubmit(){
+  const name=cleanName(document.getElementById('ea-name').value).replace(/\s+/g,' '), job=cleanName(document.getElementById('ea-job').value);
+  const phone=document.getElementById('ea-phone').value.replace(/[^0-9+]/g,'');
+  if(name.length<3){ showToast('اكتب الاسم'); return; }
+  const btn=document.getElementById('ea-form-btn'); btn.disabled=true;
+  try{
+    if(EA.cur){
+      const {data,error}=await db.from('users').update({full_name:name, job_title:job||null, phone:phone||null}).eq('id',EA.cur).eq('role','employee').select('id');
+      if(error) throw error; if(!data||data.length!==1) throw new Error('ما اتحفظش');
+      closeModal('modal-ea-form'); showToast('✅ اتحفظ'); await eaLoad(); return;
+    }
+    let login=document.getElementById('ea-login').value.trim().toLowerCase().replace(/@.*$/,'');
+    if(login && !/^m-/.test(login)) login='m-'+login;
+    if(!/^m-[a-z0-9][a-z0-9_-]{1,28}$/.test(login)){ showToast('⚠️ اسم الدخول: حروف إنجليزي صغيرة وأرقام بس — مثال: m-omkhadija'); return; }
+    const pass=eaPass();
+    const {data,error}=await db.rpc('admin_create_employee',{p_name:name,p_login:login,p_password:pass,p_phone:phone||null,p_job_title:job||null,p_gender:document.getElementById('ea-gender').value});
+    if(error) throw error; if(!data||!data.id) throw new Error('الحساب ما اتعملش');
+    closeModal('modal-ea-form');
+    eaShowCred((job?job+'/ ':'')+name, eaCode(data.username), pass, phone);
+    await eaLoad();
+  }catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+  finally{ btn.disabled=false; }
+}
+function eaShowCred(name,code,pass,phone){
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'login.html';
+  EA.cred='السلام عليكم ورحمة الله\nبيانات دخول لوحة الموظفين — مدرسة التوحيد القرآنية\n'+name+'\nالرابط: '+url+'\nاختار «الموظفون»\nاسم المستخدم: '+code+'\nكلمة المرور: '+pass;
+  document.getElementById('ea-cred-body').innerHTML='<div style="text-align:center;margin-bottom:12px;font-weight:800;color:var(--forest);">'+esc(name)+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    +'<div style="background:var(--pale);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:.74rem;color:var(--mid);">اسم المستخدم</div><div style="font-size:1.05rem;font-weight:900;color:var(--emerald);direction:ltr;word-break:break-all;">'+esc(code)+'</div></div>'
+    +'<div style="background:var(--gold-pale);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:.74rem;color:var(--mid);">كلمة المرور</div><div style="font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:2px;direction:ltr;">'+esc(pass)+'</div></div></div>'
+    +'<div style="font-size:.74rem;color:var(--red);margin-top:12px;text-align:center;">⚠️ كلمة المرور مش هتظهر تاني — انسخها أو ابعتها دلوقتي</div>';
+  const wa=document.getElementById('ea-cred-wa'), ph=String(phone||'').replace(/^0/,'20').replace(/[^0-9]/g,'');
+  wa.style.display=ph.length>=11?'':'none'; wa.href='https://wa.me/'+ph+'?text='+encodeURIComponent(EA.cred);
+  openModal('modal-ea-cred');
+}
+async function eaCopyCred(){ try{ await navigator.clipboard.writeText(EA.cred); showToast('📋 اتنسخت'); }catch(e){ showToast('⚠️ النسخ ما اشتغلش — انسخ يدوي'); } }
+async function eaResetPass(id){
+  const x=EA.list.find(e=>e.id===id); if(!x||!confirm('عمل كلمة مرور جديدة لـ «'+x.full_name+'»؟ القديمة هتبطل.')) return;
+  const pass=eaPass();
+  try{ const {data,error}=await db.rpc('admin_set_password',{p_user_id:id,p_password:pass}); if(error) throw error; if(!data||!data.ok) throw new Error('فشل');
+    eaShowCred((x.job_title?x.job_title+'/ ':'')+x.full_name, eaCode(x.username), pass, x.phone); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+}
+async function eaToggle(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return; const v=x.is_active===false;
+  if(!confirm((v?'تفعيل':'إيقاف')+' حساب «'+x.full_name+'»؟'+(v?'':'\nمش هيقدر يدخل لحد ما يتفعّل تاني.'))) return;
+  try{ const {data,error}=await db.from('users').update({is_active:v}).eq('id',id).eq('role','employee').select('id'); if(error) throw error; if(!data||data.length!==1) throw new Error('ما اتحفظش');
+    x.is_active=v; eaRender(); showToast(v?'✅ الحساب اتفعّل':'⏸️ الحساب اتوقف'); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+}
+async function eaDelete(id){
+  const x=EA.list.find(e=>e.id===id); if(!x) return;
+  if(!confirm('حذف حساب «'+x.full_name+'» نهائياً؟\nالإجراءات اللي سجّلها في التنبيهات هتفضل باسمه.')) return;
+  try{ const {data,error}=await db.rpc('admin_delete_employee',{p_user_id:id}); if(error) throw error; if(!data||!data.deleted) throw new Error('ما اتحذفش');
+    showToast('🗑️ اتحذف'); await eaLoad(); }
+  catch(e){ console.warn(e); showToast('⚠️ '+((e&&e.message)||'فشل')); }
+}
+</script>
+
+<script>
+/* ══════════ (دفعة ١٤) الطلاب المكفولون في كشف الاشتراكات — kf* ══════════
+   • اختيار المكفولين من الكشف (fin_set_sponsored → students.is_sponsored) — المدير والمشرف
+   • الكفالة شهرية: كل شهر من شهور الدورة صف في fin_sponsorships (term_id + month_no) ← مدفوعة / لأ */
+const KF={ stu:null, rows:[], term:null, pick:{}, err:false };
+const KF_PAY={ cash:'نقدي', vodafone_cash:'فودافون كاش', instapay:'انستاباي' };
+function kfAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function kfE(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function kfMonths(){ const t=KF.term; return +(((t&&t.settings)||{}).subs_months||3); }
+async function kfLoadStudents(force){
+  if(KF.stu&&!force) return KF.stu;
+  const [rb,rc,rs]=await Promise.all([
+    db.from('branches').select('id,name'),
+    db.from('circles').select('id,name,branch_id'),
+    selectAll(db.from('students').select('id,circle_id,branch_id,is_sponsored,users!students_user_id_fkey(full_name)').eq('is_active',true).order('id'))
+  ]);
+  [rb,rc,rs].forEach(r=>{ if(r.error) throw r.error; });
+  const bn={}; (rb.data||[]).forEach(b=>bn[b.id]=b.name);
+  const cm={}; (rc.data||[]).forEach(c=>cm[c.id]=c);
+  KF.stu=(rs.data||[]).map(s=>{ const c=cm[s.circle_id]; return { id:s.id, name:(s.users&&s.users.full_name)||'طالب', sp:!!s.is_sponsored,
+      circle:c?c.name:'—', branch:c?(bn[c.branch_id]||'—'):(bn[s.branch_id]||'—') }; }).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  return KF.stu;
+}
+function kfBox(){
+  let box=document.getElementById('fin-kf-box'); if(box) return box;
+  const pg=document.getElementById('page-fin-subs'); if(!pg) return null;
+  const card=pg.querySelector('.card'); box=document.createElement('div'); box.id='fin-kf-box'; box.style.marginBottom='18px';
+  pg.insertBefore(box, card); return box;
+}
+async function kfRender(){
+  const box=kfBox(); if(!box) return;
+  KF.term=(typeof VIEW_TERM!=='undefined'&&VIEW_TERM)||(typeof CUR_TERM!=='undefined'&&CUR_TERM)||null;
+  box.innerHTML='<div class="card"><div class="card-body" style="text-align:center;color:var(--light);">⏳ جارٍ تحميل المكفولين…</div></div>';
+  KF.err=false;
+  try{
+    await kfLoadStudents(true);
+    const r=await selectAll(db.from('fin_sponsorships').select('*').order('date').order('id'));
+    if(r.error) throw r.error; KF.rows=r.data||[];
+  }catch(e){ KF.err=true; loadWarn(e); box.innerHTML='<div class="card"><div class="card-body" style="text-align:center;color:var(--red);font-weight:700;">⚠️ المكفولين ما اتحمّلوش — اعمل تحديث</div></div>'; return; }
+  const M=kfMonths(), sp=KF.stu.filter(s=>s.sp), tid=KF.term?KF.term.id:null;
+  const live=KF.rows.filter(x=>!x.reversed&&!x.reversal_of);
+  const cell=(s,m)=>{ const p=live.find(x=>x.student_id===s.id&&x.term_id===tid&&+x.month_no===m);
+    if(p) return '<td style="text-align:center;background:var(--pale);"><div style="color:var(--jade);font-weight:800;">✅ '+kfAr(p.amount)+' ج.م</div><div style="font-size:.66rem;color:var(--mid);">'+kfE(p.sponsor_name||'')+' • '+kfE(KF_PAY[p.pay_method]||'')+'</div><div style="font-size:.64rem;color:var(--light);">'+kfAr(String(p.date||'').split('-').reverse().join('/'))+'</div></td>';
+    return '<td style="text-align:center;"><div style="color:var(--red);font-weight:800;font-size:.78rem;">❌ لم تُدفع</div>'+(tid?'<button class="btn btn-outline btn-xs" style="margin-top:4px;" onclick="kfPayOpen(\''+s.id+'\','+m+')">💵 تسجيل</button>':'')+'</td>'; };
+  let paidN=0; sp.forEach(s=>{ for(let m=1;m<=M;m++) if(live.some(x=>x.student_id===s.id&&x.term_id===tid&&+x.month_no===m)) paidN++; });
+  const lastSponsor=id=>{ const L=KF.rows.filter(x=>x.student_id===id&&!x.reversed&&!x.reversal_of); return L.length?L[L.length-1].sponsor_name:''; };
+  box.innerHTML='<div class="card"><div class="card-head" style="flex-wrap:wrap;gap:8px;"><div class="card-title">⭐ الطلاب المكفولون — '+kfE(KF.term?KF.term.name:'')+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="badge bg-blue">'+kfAr(sp.length)+' مكفول</span><span class="badge bg-green">مدفوع '+kfAr(paidN)+'</span><span class="badge bg-red">لسه '+kfAr(sp.length*M-paidN)+'</span>'
+    +'<button class="btn btn-gold btn-sm" onclick="kfPickOpen()">⭐ اختيار المكفولين</button></div></div>'
+    +'<div class="card-body card-body-0" style="overflow-x:auto;">'
+    +(sp.length?'<table class="tbl" style="font-size:.78rem;"><thead><tr><th style="text-align:center;">م</th><th>الطالب</th><th>الكفيل</th>'
+      +Array.from({length:M},(_,i)=>'<th style="text-align:center;">كفالة '+(['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'][i]||('شهر '+(i+1)))+'</th>').join('')+'</tr></thead><tbody>'
+      +sp.map((s,i)=>'<tr><td style="text-align:center;color:var(--light);font-weight:700;">'+kfAr(i+1)+'</td><td><div style="font-weight:700;color:var(--forest);">⭐ '+kfE(s.name)+'</div><div style="font-size:.68rem;color:var(--light);">'+kfE(s.branch)+' • '+kfE(s.circle)+'</div></td>'
+        +'<td style="font-size:.78rem;">'+kfE(lastSponsor(s.id)||'—')+'</td>'+Array.from({length:M},(_,k)=>cell(s,k+1)).join('')+'</tr>').join('')+'</tbody></table>'
+     :'<div style="text-align:center;color:var(--light);padding:26px;">مفيش طلاب مكفولين — اضغط «⭐ اختيار المكفولين» واختارهم من الكشف</div>')
+    +'</div></div>';
+}
+// ── اختيار المكفولين من كشف الطلاب ──
+function kfPickOpen(){
+  if(KF.err||!KF.stu){ showToast('⚠️ القايمة ما اتحمّلتش'); return; }
+  KF.pick={}; KF.stu.forEach(s=>KF.pick[s.id]=s.sp);
+  let ov=document.getElementById('kf-pick'); if(!ov){ ov=document.createElement('div'); ov.id='kf-pick'; ov.className='overlay'; document.body.appendChild(ov); }
+  const brs=[...new Set(KF.stu.map(s=>s.branch).filter(b=>b&&b!=='—'))];
+  ov.innerHTML='<div class="modal" style="max-width:600px;"><div class="modal-head"><div class="modal-title">⭐ اختيار الطلاب المكفولين</div><button class="modal-close" onclick="closeModal(\'kf-pick\')">×</button></div>'
+    +'<div class="modal-body"><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;"><input type="text" id="kf-q" placeholder="🔍 ابحث باسم الطالب…" oninput="kfPickList()" style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;">'
+    +'<select id="kf-b" onchange="kfPickList()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;"><option value="">كل الشُّعب</option>'+brs.map(b=>'<option>'+kfE(b)+'</option>').join('')+'</select>'
+    +'<label style="font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="kf-only" onchange="kfPickList()"> المكفولين بس</label></div>'
+    +'<div id="kf-list" style="max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);"></div>'
+    +'<div id="kf-cnt" style="font-size:.78rem;color:var(--mid);margin-top:8px;"></div></div>'
+    +'<div class="modal-foot"><button class="btn btn-primary" id="kf-pick-save" onclick="kfPickSave()">💾 حفظ الاختيار</button><button class="btn btn-outline" onclick="closeModal(\'kf-pick\')">إلغاء</button></div></div>';
+  openModal('kf-pick'); kfPickList();
+}
+function kfN(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim(); }
+function kfPickList(){
+  const q=kfN(document.getElementById('kf-q').value), b=document.getElementById('kf-b').value, only=document.getElementById('kf-only').checked;
+  const L=KF.stu.filter(s=>(!q||kfN(s.name).includes(q))&&(!b||s.branch===b)&&(!only||KF.pick[s.id]));
+  document.getElementById('kf-list').innerHTML=L.length?L.map(s=>'<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;'+(KF.pick[s.id]?'background:var(--gold-pale);':'')+'"><input type="checkbox" '+(KF.pick[s.id]?'checked':'')+' onchange="KF.pick[\''+s.id+'\']=this.checked;kfPickList()" style="width:17px;height:17px;accent-color:var(--gold);">'
+      +'<span style="flex:1;"><b style="color:var(--forest);">'+kfE(s.name)+'</b><span style="font-size:.7rem;color:var(--light);"> — '+kfE(s.branch)+' • '+kfE(s.circle)+'</span></span>'+(KF.pick[s.id]?'<span>⭐</span>':'')+'</label>').join('')
+    :'<div style="padding:20px;text-align:center;color:var(--light);">مفيش نتايج</div>';
+  const ch=KF.stu.filter(s=>!!KF.pick[s.id]!==s.sp).length;
+  document.getElementById('kf-cnt').textContent='المكفولين: '+kfAr(KF.stu.filter(s=>KF.pick[s.id]).length)+(ch?' • تغييرات لسه ما اتحفظتش: '+kfAr(ch):'');
+}
+async function kfPickSave(){
+  const ch=KF.stu.filter(s=>!!KF.pick[s.id]!==s.sp);
+  if(!ch.length){ closeModal('kf-pick'); return; }
+  const b=document.getElementById('kf-pick-save'); b.disabled=true; let ok=0, bad=0;
+  for(const s of ch){
+    try{ const {data,error}=await db.rpc('fin_set_sponsored',{p_student:s.id,p_on:!!KF.pick[s.id]}); if(error||!data||!data.ok) throw (error||new Error('x')); s.sp=!!KF.pick[s.id]; ok++; }
+    catch(e){ bad++; console.warn('[kf]',e); }
+  }
+  b.disabled=false; closeModal('kf-pick');
+  showToast(bad?('⚠️ اتحفظ '+kfAr(ok)+' وفشل '+kfAr(bad)+' (ممكن مش في نطاقك)'):('✅ اتحفظ اختيار المكفولين ('+kfAr(ok)+' تغيير)'));
+  kfRender();
+}
+// ── تسجيل دفع كفالة شهر ──
+function kfPayOpen(sid,m){
+  const s=(KF.stu||[]).find(x=>x.id===sid); if(!s||!KF.term) return;
+  if(typeof finLockGuard==='function' && !finLockGuard()) return;
+  const last=KF.rows.filter(x=>x.student_id===sid&&!x.reversed&&!x.reversal_of).pop()||{};
+  const me=(typeof finMe==='function')?finMe():{name:''};
+  let ov=document.getElementById('kf-pay'); if(!ov){ ov=document.createElement('div'); ov.id='kf-pay'; ov.className='overlay'; document.body.appendChild(ov); }
+  const inp='width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.88rem;';
+  ov.innerHTML='<div class="modal" style="max-width:480px;"><div class="modal-head"><div class="modal-title">💵 كفالة '+(['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'][m-1]||('شهر '+m))+' — '+kfE(s.name)+'</div><button class="modal-close" onclick="closeModal(\'kf-pay\')">×</button></div><div class="modal-body">'
+    +'<div class="fg"><label>اسم الكفيل *</label><input id="kf-sp" style="'+inp+'" value="'+kfE(last.sponsor_name||'')+'"></div>'
+    +'<div class="form-grid-2"><div class="fg"><label>المبلغ (ج.م) *</label><input id="kf-amt" type="number" min="1" style="'+inp+'" value="'+kfE(last.amount||'')+'"></div>'
+    +'<div class="fg"><label>وسيلة الدفع</label><select id="kf-pm" style="'+inp+'">'+Object.keys(KF_PAY).map(k=>'<option value="'+k+'"'+(last.pay_method===k?' selected':'')+'>'+KF_PAY[k]+'</option>').join('')+'</select></div>'
+    +'<div class="fg"><label>المستلم</label><input id="kf-rec" style="'+inp+'" value="'+kfE(me.name||'')+'"></div>'
+    +'<div class="fg"><label>التاريخ</label><input id="kf-dt" type="date" style="'+inp+'" value="'+localISO()+'"></div></div>'
+    +'<div class="fg"><label>ملاحظات</label><input id="kf-nt" style="'+inp+'"></div></div>'
+    +'<div class="modal-foot"><button class="btn btn-primary" id="kf-pay-btn" onclick="kfPaySave(\''+sid+'\','+m+')">💾 تسجيل الدفع</button><button class="btn btn-outline" onclick="closeModal(\'kf-pay\')">إلغاء</button></div></div>';
+  openModal('kf-pay');
+}
+async function kfPaySave(sid,m){
+  const s=KF.stu.find(x=>x.id===sid), t=KF.term; if(!s||!t) return;
+  const sp=document.getElementById('kf-sp').value.trim(), amt=+document.getElementById('kf-amt').value, pm=document.getElementById('kf-pm').value,
+        rec=document.getElementById('kf-rec').value.trim(), dt=document.getElementById('kf-dt').value||localISO(), nt=document.getElementById('kf-nt').value.trim();
+  if(!sp){ showToast('⚠️ اكتب اسم الكفيل'); return; }
+  if(!(amt>0)){ showToast('⚠️ اكتب المبلغ'); return; }
+  if(!rec){ showToast('⚠️ اكتب المستلم'); return; }
+  const b=document.getElementById('kf-pay-btn'); b.disabled=true;
+  try{
+    if(pm!=='cash' && typeof finEnsureClient==='function') await finEnsureClient(rec);
+    const me=(typeof finMe==='function')?finMe():{id:null};
+    const {data,error}=await db.from('fin_sponsorships').insert([{ amount:amt, sponsor_name:sp, student_id:s.id, student_name:s.name, student_branch:s.branch, student_circle:s.circle,
+      months:1, term_id:t.id, month_no:m, pay_method:pm, receiver:rec, notes:nt||null, date:dt, created_by:me.id, collected:pm==='cash' }]).select('id');
+    if(error) throw error; if(!data||data.length!==1) throw new Error('لم يُحفظ (صلاحيات)');
+    closeModal('kf-pay'); showToast('✅ اتسجّلت كفالة الشهر'); kfRender();
+  }catch(e){ showToast(String(e.code)==='23505'?'⚠️ الشهر ده متسجّل بالفعل':('⚠️ ما اتحفظش: '+(e.message||e.code||''))); b.disabled=false; }
+}
+</script>
+
 </body>
 </html>

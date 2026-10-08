@@ -2983,7 +2983,9 @@ function circleDays(c){
   return sch.filter(s=>(typeof s==='object'&&s)?s.active!==false:true)
             .map(s=>typeof s==='string'?s:(s&&s.day)).filter(Boolean);
 }
-function circleMeetsToday(c){ if(circleDays(c).includes(DAYS_AR[new Date().getDay()])) return true; const t=termOf(D())||CUR_TERM; return !!(c&&termExam(t,c.branch,D())&&((t.settings.exams||{}).dated||[]).some(e=>e.date===D())); }
+// (دفعة ١٤) استثناء المدير ليوم معيّن: إلغاء الحلقة أو موعد مختلف (terms.settings.overrides)
+function circleOverride(c,iso){ iso=iso||D(); const t=termOf(iso)||CUR_TERM; const L=(t&&t.settings&&t.settings.overrides)||[]; return c?(L.find(o=>o.circle_id===String(c.id)&&o.date===iso)||null):null; }
+function circleMeetsToday(c){ const ov=circleOverride(c); if(ov) return !ov.cancel; if(circleDays(c).includes(DAYS_AR[new Date().getDay()])) return true; const t=termOf(D())||CUR_TERM; return !!(c&&termExam(t,c.branch,D())&&((t.settings.exams||{}).dated||[]).some(e=>e.date===D())); }
 function circlesToday(){ return MY_CIRCLES.filter(circleMeetsToday); }
 
 // ══ DASHBOARD ══
@@ -3013,8 +3015,9 @@ async function loadTeacherCurriculum(){
   const cal=document.getElementById('tcp-cal');
   try{
     const _t=termOf(D())||CUR_TERM, _n=document.getElementById('tcp-term-name'); if(_n&&_t) _n.textContent=_t.name;
+    const _c=activeCircle()||(MY_CIRCLES||[])[0];
     const {data,error}=await db.from('curriculum_plan')
-      .select('*').eq('course',_t?_t.name:'').order('sort_order',{ascending:true});
+      .select('*').eq('course',_t?_t.name:'').eq('section',(_c&&termIsGirls(_c.branch))?'banat':'boys').order('date',{ascending:true,nullsFirst:false}).order('sort_order',{ascending:true});
     if(error) throw error;
     TCP_ROWS=data||[];
   }catch(e){ TCP_ROWS=[]; }
@@ -3258,7 +3261,10 @@ async function loadLessonPrep(){
   const subject=lpSubject();
   // خطة اليوم (عنوان الدرس والمقرر تلقائياً)
   let plan=null;
-  try{ const {data}=await db.from('curriculum_plan').select('*').eq('date',date).maybeSingle(); plan=data||null; }catch(e){ loadWarn(e); }
+  try{ const _c=activeCircle()||(MY_CIRCLES||[])[0], _t=termOf(date)||CUR_TERM;
+       let q=db.from('curriculum_plan').select('*').eq('date',date).eq('section',(_c&&termIsGirls(_c.branch))?'banat':'boys');
+       if(_t) q=q.eq('course',_t.name);
+       const {data,error}=await q.limit(1); if(error) throw error; plan=(data&&data[0])||null; }catch(e){ loadWarn(e); }
   const autoTitle=(plan && plan[LP_PLAN_FIELD[subject]] && String(plan[LP_PLAN_FIELD[subject]]).trim()) || '';
   // التحضير المحفوظ
   let row=null;
@@ -3544,7 +3550,7 @@ function circleCard(c){
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div><div style="font-size:1rem;font-weight:800;color:var(--forest);">${c.name}</div>
         <div style="font-size:.76rem;color:var(--light);margin-top:2px;">${c.branch} • ${c.gender}</div></div>
-        ${today?'<span class="badge bg-green">🟢 اليوم</span>':''}
+        ${(()=>{ const ov=circleOverride(c); if(ov&&ov.cancel) return '<span class="badge bg-red">🔕 ملغاة النهارده'+(ov.note?' — '+esc(ov.note):'')+'</span>'; if(ov) return '<span class="badge bg-gold">⏰ النهارده '+termHourAr(ov.s)+'–'+termHourAr(ov.e)+'</span>'; return today?'<span class="badge bg-green">🟢 اليوم</span>':''; })()}
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;">${days}</div>
       <div style="display:flex;justify-content:space-between;font-size:.82rem;border-top:1px solid var(--border);padding-top:10px;">

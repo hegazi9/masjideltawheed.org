@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<!-- ████████████████████████████████████████████████████████████████
+     مدرسة التوحيد القرآنية | لوحة الموظفين  —  شعار: إصلاح حياة
+  ════════════════════════════════════════════════════════════════
+     الدور: employee (المشرفة/ أم خديجة • المشرفة/ أم أسماء)
+     ┌─ الصفحات (id="page-XXX") ──────────────────────────────────
+     │  home · students · walerts · settings
+     └────────────────────────────────────────────────────────────
+     • القراءة: RLS (emp_*_sel) — كل الطلاب والطالبات + الحضور + التسميع
+     • التعديل: RPC بس — emp_update_student / emp_save_student_file (دمج على السيرفر)
+     • التنبيهات الأسبوعية: نفس محرّك لوحة المشرف (نفس الـ id) → weekly_alert_actions
+     • قفل RESTRICTIVE zz_emp_* (دفعة ١٣)
+████████████████████████████████████████████████████████████████ -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f2318">
+<title>لوحة الموظفين — مدرسة التوحيد القرآنية</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
+  const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08';
+  const _NAME_KEYS = {full_name:1,name:1,name_ar:1,student_name:1,teacher_name:1,sender_name:1,to_name:1,student_teacher:1,taken_by_name:1,circle_name:1,awarded_by_name:1,teacher:1,circle:1};
+  function _cleanNames(o){
+    if(Array.isArray(o)){ for(const x of o) _cleanNames(x); return; }
+    if(o && typeof o==='object'){ for(const k in o){ const v=o[k];
+      if(typeof v==='string'){ if(_NAME_KEYS[k]) o[k]=v.replace(/[<>"'`&\\]/g,''); }
+      else if(v && typeof v==='object') _cleanNames(v); } }
+  }
+  async function _safeFetch(input, init){
+    const res = await fetch(input, init);
+    try{
+      const url = typeof input==='string' ? input : (input && input.url) || '';
+      const ct = res.headers.get('content-type') || '';
+      if(url.indexOf('/rest/v1/')<0 || ct.indexOf('json')<0) return res;
+      const txt = await res.text();
+      if(!txt) return new Response(txt,{status:res.status,statusText:res.statusText,headers:res.headers});
+      let j; try{ j=JSON.parse(txt); }catch(e){ return new Response(txt,{status:res.status,statusText:res.statusText,headers:res.headers}); }
+      _cleanNames(j);
+      return new Response(JSON.stringify(j),{status:res.status,statusText:res.statusText,headers:res.headers});
+    }catch(e){ return res; }
+  }
+  window.db = supabase.createClient(_SB_URL, _SB_KEY, { global: { fetch: _safeFetch } });
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body,button,input,select,textarea{font-family:'Tajawal',sans-serif;}
+:root{
+  --bg:#f5f7f5; --white:#fff; --forest:#0f2318; --emerald:#1e5c36; --jade:#2d7a50;
+  --mint:#52a876; --pale:#e8f5ee; --gold:#c8920a; --gold-l:#f0b429; --gold-pale:#fdf3dc;
+  --ink:#1a1a1a; --mid:#4a5e52; --light:#8ea598; --border:#dce8e0; --red:#c0392b;
+  --red-pale:#fdf0ef; --blue:#1d6fa4; --blue-pale:#e8f2fb; --purple:#6b3fa0;
+  --purple-pale:#f0ebfa; --shadow:0 2px 16px rgba(15,35,24,.08);
+  --shadow-lg:0 8px 32px rgba(15,35,24,.13); --r:14px; --r-sm:9px; --sidebar-w:252px;
+}
+body{background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;}
+/* ── Sidebar ── */
+.sidebar{position:fixed;top:0;right:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,var(--forest),#14301f);color:#fff;display:flex;flex-direction:column;z-index:300;transition:transform .25s;}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-brand img{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#fff;}
+.sb-brand .t1{font-family:'Amiri',serif;font-weight:700;font-size:1.02rem;}
+.sb-brand .t2{font-size:.7rem;color:var(--gold-l);}
+.sb-user{margin:12px;padding:11px 12px;background:rgba(255,255,255,.06);border-radius:var(--r-sm);display:flex;gap:10px;align-items:center;}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
+.sb-uname{font-size:.84rem;font-weight:700;line-height:1.4;}
+.sb-urole{font-size:.68rem;color:rgba(255,255,255,.55);}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 12px;}
+.sb-section{font-size:.62rem;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.3);padding:14px 8px 6px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-sm);font-size:.86rem;color:rgba(255,255,255,.72);cursor:pointer;margin-bottom:3px;transition:all .15s;}
+.sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sb-item.active{background:linear-gradient(135deg,var(--jade),var(--emerald));color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.18);}
+.sb-icon{width:22px;text-align:center;}
+.sb-badge{margin-right:auto;background:var(--red);color:#fff;font-size:.64rem;font-weight:800;border-radius:99px;padding:1px 8px;}
+.sb-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08);}
+/* ── Main ── */
+.main{margin-right:var(--sidebar-w);min-height:100vh;}
+.topbar{height:62px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 22px;position:sticky;top:0;z-index:200;}
+.tb-title{font-weight:800;font-size:1rem;color:var(--forest);flex:1;}
+.tb-burger{display:none;width:38px;height:38px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--white);font-size:1.1rem;}
+#term-sel{font-family:Tajawal;font-size:.8rem;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);max-width:250px;}
+#term-sel.archive{border-color:var(--gold);background:var(--gold-pale);}
+.content{padding:22px;}
+.page{display:none;animation:fadeUp .25s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+/* ── Cards / stats ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:18px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.card-title{font-weight:800;color:var(--forest);font-size:.95rem;}
+.card-body{padding:16px 18px;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--jade);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);position:relative;}
+.stat-card.gold{border-top-color:var(--gold);} .stat-card.blue{border-top-color:var(--blue);} .stat-card.purple{border-top-color:var(--purple);} .stat-card.green{border-top-color:var(--jade);}
+.stat-icon{position:absolute;left:14px;top:12px;font-size:1.4rem;opacity:.85;}
+.stat-val{font-size:1.6rem;font-weight:900;color:var(--forest);}
+.stat-lbl{font-size:.82rem;font-weight:700;color:var(--mid);}
+.stat-sub{font-size:.7rem;color:var(--light);margin-top:2px;}
+.welcome{background:linear-gradient(135deg,var(--emerald),var(--forest));color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;}
+.welcome .w1{font-family:'Amiri',serif;font-size:1.35rem;font-weight:700;}
+.welcome .w2{font-size:.82rem;opacity:.85;margin-top:4px;line-height:1.7;}
+/* ── Buttons / badges / inputs ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:var(--r-sm);border:1.5px solid transparent;font-size:.84rem;font-weight:700;transition:all .15s;white-space:nowrap;}
+.btn:disabled{opacity:.55;cursor:not-allowed;}
+.btn-primary{background:linear-gradient(135deg,var(--jade),var(--emerald));color:#fff;}
+.btn-gold{background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#fff;}
+.btn-outline{background:var(--white);border-color:var(--jade);color:var(--jade);}
+.btn-ghost{background:var(--bg);color:var(--mid);border-color:var(--border);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:7px 12px;font-size:.78rem;} .btn-xs{padding:5px 10px;font-size:.72rem;}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.7rem;font-weight:700;}
+.bg-green{background:var(--pale);color:var(--jade);} .bg-red{background:var(--red-pale);color:var(--red);}
+.bg-blue{background:var(--blue-pale);color:var(--blue);} .bg-gray{background:#eef1ef;color:var(--mid);} .bg-gold{background:var(--gold-pale);color:#8a6000;}
+.inp{font-family:Tajawal;font-size:.85rem;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--white);color:var(--ink);outline:none;width:100%;}
+.inp:focus{border-color:var(--jade);}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg label{font-size:.76rem;font-weight:700;color:var(--mid);}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.empty{text-align:center;color:var(--light);font-size:.86rem;}
+.empty-icon{display:block;font-size:1.8rem;margin-bottom:6px;}
+/* ── Tables ── */
+.tbl-wrap{overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.tbl th{background:var(--pale);color:var(--forest);font-weight:800;padding:9px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:hover td{background:#fafcfb;}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:6px;}
+/* ── Modals ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:10px;}
+.overlay.open{display:flex;animation:fadeUp .2s ease;}
+.modal{background:var(--white);border-radius:var(--r);width:94%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);}
+.modal-head{background:linear-gradient(135deg,var(--emerald),var(--forest));color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;}
+.modal-title{font-size:.98rem;font-weight:700;}
+.modal-close{background:rgba(255,255,255,.18);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:1.1rem;}
+.modal-body{padding:18px 20px;}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;}
+.tabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:2px solid var(--border);flex-wrap:wrap;background:var(--white);}
+.tab{padding:7px 12px;border:none;border-radius:8px 8px 0 0;font-size:.78rem;font-weight:700;background:transparent;color:var(--ink);}
+.tab.active{background:var(--jade);color:#fff;}
+.sec-h{background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:8px 13px;border-radius:8px;font-weight:700;font-size:.84rem;margin:4px 0 12px;}
+.mini{width:100%;border-collapse:collapse;font-size:.8rem;}
+.mini th{background:var(--pale);color:var(--forest);padding:6px 8px;border:1px solid var(--border);font-weight:800;}
+.mini td{padding:6px 8px;border:1px solid var(--border);}
+.mini select,.mini input{width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;outline:none;}
+.row-box{border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--forest);color:#fff;padding:11px 20px;border-radius:99px;font-size:.84rem;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:9999;max-width:92vw;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.sb-shade{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:290;}
+@media(max-width:900px){
+  .sidebar{transform:translateX(100%);}
+  .sidebar.open{transform:none;}
+  .sb-shade.open{display:block;}
+  .main{margin-right:0;}
+  .tb-burger{display:inline-flex;align-items:center;justify-content:center;}
+  .content{padding:14px;}
+  .topbar{padding:0 12px;}
+  #term-sel{max-width:150px;}
+}
+@media(max-width:599px){
+  .form-grid-2{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:1.3rem;}
+  .tbl{font-size:.76rem;}
+}
+</style>
+</head>
+<body>
+<div class="sb-shade" id="sb-shade" onclick="toggleSide(false)"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <img src="data:image/jpeg;base64,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" alt="">
+    <div><div class="t1">مدرسة التوحيد القرآنية</div><div class="t2">إصلاح حياة • لوحة الموظفين</div></div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar" id="sb-avatar">م</div>
+    <div><div class="sb-uname" id="sb-uname">—</div><div class="sb-urole">الموظفون</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">الرئيسية</div>
+    <div class="sb-item active" onclick="nav(this,'home')"><span class="sb-icon">🏠</span> الرئيسية</div>
+    <div class="sb-section">الطلاب</div>
+    <div class="sb-item" onclick="nav(this,'students')"><span class="sb-icon">👨‍🎓</span> الطلاب والطالبات</div>
+    <div class="sb-section">المتابعة</div>
+    <div class="sb-item" onclick="nav(this,'walerts')"><span class="sb-icon">🔔</span> التنبيهات الأسبوعية <span class="sb-badge" id="sb-wa-badge" style="display:none;"></span></div>
+    <div class="sb-section">الحساب</div>
+    <div class="sb-item" onclick="nav(this,'settings')"><span class="sb-icon">⚙️</span> الإعدادات</div>
+  </nav>
+  <div class="sb-footer"><button class="btn btn-ghost" style="width:100%;" onclick="confirmLogout()">🚪 تسجيل الخروج</button></div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <button class="tb-burger" onclick="toggleSide(true)">☰</button>
+    <div class="tb-title" id="tb-title">🏠 الرئيسية</div>
+    <select id="term-sel" onchange="termSwitch(this.value)" title="الدورة"></select>
+  </div>
+  <div class="content">
+
+    <!-- ══ الرئيسية ══ -->
+    <div id="page-home" class="page active">
+      <div class="welcome"><div class="w1" id="w-hello">أهلاً بك</div>
+        <div class="w2">بيانات كل الطلاب والطالبات وملفاتهم، والتنبيهات الأسبوعية واتخاذ الإجراءات — وكل تعديل بيظهر في باقي اللوحات على طول.</div></div>
+      <div class="stats-row" id="home-stats" style="margin-bottom:18px;"><div class="empty" style="padding:24px;grid-column:1/-1;"><span class="empty-icon">⏳</span>جاري التحميل…</div></div>
+      <div class="card"><div class="card-head"><div class="card-title">🔔 التنبيهات المفتوحة — الأسبوع الحالي</div>
+        <button class="btn btn-primary btn-sm" onclick="navPage('walerts')">فتح التنبيهات</button></div>
+        <div class="card-body" id="home-alerts"><div class="empty" style="padding:16px;">⏳ جاري الحساب…</div></div></div>
+      <div class="card"><div class="card-head"><div class="card-title">🏫 الشُّعب</div>
+        <button class="btn btn-outline btn-sm" onclick="navPage('students')">كل الطلاب</button></div>
+        <div class="card-body" id="home-branches"></div></div>
+    </div>
+
+    <!-- ══ الطلاب والطالبات ══ -->
+    <div id="page-students" class="page">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">👨‍🎓 الطلاب والطالبات <span class="badge bg-gray" id="st-count">—</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <select class="inp" id="st-branch" style="width:auto;" onchange="stFillCircles();renderStudents()"></select>
+            <select class="inp" id="st-circle" style="width:auto;max-width:220px;" onchange="renderStudents()"></select>
+            <input class="inp" id="st-q" style="width:190px;" placeholder="🔍 بحث بالاسم" oninput="renderStudents()">
+            <label style="font-size:.76rem;color:var(--mid);display:flex;gap:5px;align-items:center;"><input type="checkbox" id="st-inactive" onchange="renderStudents()"> الموقوفين</label>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>الشعبة</th><th>الحلقة / المعلم</th><th>النقاط</th><th></th></tr></thead>
+          <tbody id="st-body"><tr><td colspan="6"><div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ التنبيهات الأسبوعية ══ -->
+    <div id="page-walerts" class="page">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 16px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="wa-prev" onclick="waPrevWeek()" title="الأسبوع السابق">‹</button>
+          <div style="text-align:center;min-width:210px;">
+            <div style="font-size:.98rem;font-weight:800;color:var(--forest);" id="wa-week-title">—</div>
+            <div style="font-size:.72rem;color:var(--light);margin-top:2px;" id="wa-week-range">—</div>
+          </div>
+          <button class="btn btn-outline btn-sm" id="wa-next" onclick="waNextWeek()" title="الأسبوع التالي">›</button>
+          <span class="badge bg-gray" id="wa-week-counter">—</span>
+        </div>
+      </div>
+      <div class="stats-row" id="wa-stats" style="margin-bottom:18px;"><div class="empty" style="padding:24px;grid-column:1/-1;"><span class="empty-icon">⏳</span>جاري التحميل...</div></div>
+      <div id="wa-progress" style="margin-bottom:18px;display:none;"></div>
+      <div id="wa-branches" style="display:flex;flex-direction:column;gap:18px;"></div>
+    </div>
+
+    <!-- ══ الإعدادات ══ -->
+    <div id="page-settings" class="page">
+      <div class="card" style="max-width:520px;">
+        <div class="card-head"><div class="card-title">🔑 تغيير كلمة المرور</div></div>
+        <div class="card-body">
+          <div class="fg"><label>كلمة المرور الجديدة (٦ على الأقل)</label><input class="inp" id="np1" type="password" autocomplete="new-password"></div>
+          <div class="fg"><label>تأكيد كلمة المرور</label><input class="inp" id="np2" type="password" autocomplete="new-password"></div>
+          <button class="btn btn-primary" id="np-btn" onclick="changeMyPassword()">💾 حفظ</button>
+          <div style="font-size:.74rem;color:var(--light);margin-top:10px;">اسم الدخول: <b id="set-login" dir="ltr">—</b></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ مودال: بيانات الطالب ══ -->
+<div class="overlay" id="modal-stu">
+  <div class="modal" style="max-width:780px;">
+    <div class="modal-head"><div class="modal-title" id="stu-title">👤 بيانات الطالب</div><button class="modal-close" onclick="closeModal('modal-stu')">×</button></div>
+    <div class="tabs" id="stu-tabs">
+      <button class="tab active" onclick="stuTab(1)">① البيانات</button>
+      <button class="tab" onclick="stuTab(2)">② الحضور</button>
+      <button class="tab" onclick="stuTab(3)">③ التسميع</button>
+      <button class="tab" onclick="stuTab(4)">④ الاختبارات</button>
+    </div>
+    <div class="modal-body" id="stu-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="stu-save" onclick="stuSave()">💾 حفظ البيانات</button>
+      <button class="btn btn-gold" onclick="sfOpenFromStu()">📁 ملف الطالب</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-stu')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال: ملف الطالب (٧ أقسام — نفس ملف المعلم/المشرف/المدير) ══ -->
+<div class="overlay" id="modal-sf">
+  <div class="modal" style="max-width:880px;">
+    <div class="modal-head"><div><div class="modal-title">📁 ملف الطالب</div><div id="sf-head-name" style="font-size:.8rem;opacity:.85;"></div></div><button class="modal-close" onclick="closeModal('modal-sf')">×</button></div>
+    <div class="tabs" id="sf-tabs">
+      <button class="tab active" onclick="sfTab(1)">① البيانات الأساسية</button>
+      <button class="tab" onclick="sfTab(2)">② الملف الأسري</button>
+      <button class="tab" onclick="sfTab(3)">③ السجل القرآني</button>
+      <button class="tab" onclick="sfTab(4)">④ التجويد</button>
+      <button class="tab" onclick="sfTab(5)">⑤ التقييم السلوكي</button>
+      <button class="tab" onclick="sfTab(6)">⑥ السجل النفسي</button>
+      <button class="tab" onclick="sfTab(7)">⑦ استدعاء ولي الأمر</button>
+    </div>
+    <div class="modal-body" id="sf-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="sf-save" onclick="sfSave()">💾 حفظ الملف</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-sf')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال: الإجراء المتخذ ══ -->
+<div class="overlay" id="modal-wa-action">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head"><div class="modal-title" id="wa-action-title">✅ تسجيل الإجراء المتخذ</div><button class="modal-close" onclick="closeModal('modal-wa-action')">×</button></div>
+    <div class="modal-body">
+      <div style="padding:11px 13px;background:var(--bg);border-right:3px solid var(--gold);border-radius:var(--r-sm);margin-bottom:14px;font-size:.83rem;font-weight:600;color:var(--mid);line-height:1.6;" id="wa-action-alert-text">—</div>
+      <div class="fg">
+        <label>الإجراء المتخذ تجاه هذا التنبيه *</label>
+        <textarea class="inp" id="wa-action-input" rows="4" style="resize:vertical;" placeholder="مثال: تم التواصل مع ولي الأمر وحثّه على المتابعة..." onkeydown="if(event.ctrlKey&&event.key==='Enter')waSaveAction()"></textarea>
+        <div id="wa-action-by" style="display:none;margin-top:10px;padding:8px 12px;background:var(--pale);border-radius:var(--r-sm);font-size:.78rem;color:var(--jade);"></div>
+        <div style="font-size:.72rem;color:var(--light);margin-top:3px;">اترك الحقل فاضي لإلغاء الإجراء</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="wa-action-save" onclick="waSaveAction()">💾 حفظ الإجراء</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-wa-action')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ مودال: بيان التنبيه ══ -->
+<div class="overlay" id="modal-wa-detail">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head"><div class="modal-title" id="wa-detail-title" style="line-height:1.6;">بيان التنبيه</div><button class="modal-close" onclick="closeModal('modal-wa-detail')">×</button></div>
+    <div class="modal-body" id="wa-detail-body" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-wa-detail')">إغلاق</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+// ══ أدوات مشتركة (أمان) ══
+const $=id=>document.getElementById(id);
+function localISO(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function cleanName(v){ return String(v==null?'':v).replace(/[<>"'`&\\]/g,'').trim(); }
+function _rnd(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
+async function selectAll(q, page){ page=page||1000; let out=[], from=0;
+  for(let i=0;i<50;i++){ const {data,error}=await q.range(from, from+page-1); if(error) return {data:null,error};
+    out=out.concat(data||[]); if(!data || data.length<page) break; from+=page; }
+  return {data:out,error:null}; }
+async function secureLogout(){
+  try{ if(window.db && db.auth) await db.auth.signOut(); }catch(e){ console.warn('signOut',e); }
+  try{ localStorage.removeItem('currentUser'); }catch(e){}
+  window.location.href='login.html';
+}
+function confirmLogout(){ if(confirm('تسجيل الخروج؟')) secureLogout(); }
+async function verifyMe(allowedRoles){
+  try{
+    const { data:{ session } } = await db.auth.getSession();
+    if(!session){ await secureLogout(); return null; }
+    const { data:me, error } = await db.from('users').select('*').eq('auth_id', session.user.id).eq('is_active', true).maybeSingle();
+    if(error) throw error;
+    if(!me || (allowedRoles && !allowedRoles.includes(me.role))){ await secureLogout(); return null; }
+    try{ const safe=Object.assign({},me); ['id_number','id_type','dob','address','marital','licenses','notes','password_plain'].forEach(k=>delete safe[k]); localStorage.setItem('currentUser', JSON.stringify(safe)); }catch(e){}
+    return me;
+  }catch(e){ showToast('⚠️ تعذّر التحقق من الحساب — تأكد من الاتصال'); return null; }
+}
+function loadWarn(e){
+  try{ console.warn('[load]',e); }catch(_){}
+  if(window._lwT) return; window._lwT=1;
+  showToast('⚠️ بعض البيانات ما اتحمّلتش — تأكد من الاتصال واعمل تحديث');
+  setTimeout(()=>{ window._lwT=0; },6000);
+}
+function showToast(m){ const t=$('toast'); if(!t) return; t.textContent=m; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),3400); }
+function openModal(id){ const el=$(id); if(el) el.classList.add('open'); }
+function closeModal(id){ const el=$(id); if(el) el.classList.remove('open'); }
+function toggleSide(o){ $('sidebar').classList.toggle('open',!!o); $('sb-shade').classList.toggle('open',!!o); }
+function ar(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function arNorm(x){ return String(x||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ').trim(); }
+
+let TERMS=[], CUR_TERM=null, VIEW_TERM=null;
+const TERM_GIRLS=['البنات','الملكات','الأميرات'];
+const TERM_DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const TERMS_FALLBACK=[{"id":"5f0a2026-0612-4000-8000-000000000001","code":"summer26","name":"الدورة الصيفية 2026 م","start_date":"2026-06-12","end_date":"2026-10-01","week_base":{"boys":"2026-06-14","girls":"2026-06-13","all":"2026-06-07"},"schedule":{"الأبطال":[{"d":0,"s":9,"e":12},{"d":1,"s":9,"e":12},{"d":3,"s":9,"e":12},{"d":4,"s":9,"e":12},{"d":5,"s":9,"e":12,"exam":true,"label":"الحصاد الأسبوعي"}],"الرواد":[{"d":0,"s":13,"e":16},{"d":1,"s":13,"e":16},{"d":3,"s":13,"e":16},{"d":4,"s":13,"e":16},{"d":5,"s":9,"e":12,"exam":true,"label":"اختبار الحصاد الأسبوعي"}],"الملكات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}],"الأميرات":[{"d":6,"s":14,"e":17},{"d":2,"s":14,"e":17}]},"settings":{"legacy":true,"subs_months":3,"plan_days":{"الأبطال":[4],"الرواد":[4],"الملكات":[2],"الأميرات":[2]},"exams":{"weekly":[{"branches":["الأبطال","الرواد"],"d":5,"kind":"الاختبار الأسبوعي","total":40,"cols":[["quran","درجة القرآن",15],["manhaj","درجة المنهج المصاحب",10],["tajweed","درجة التجويد",5],["activity","درجة النشاط التربوي",10]]}],"dated":[{"date":"2026-08-07","branches":["الأبطال","الرواد"],"kind":"اختبار الشهر الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-09-11","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-08-15","branches":["الملكات","الأميرات"],"kind":"اختبار الشهر الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-09-12","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]}]}}},{"id":"5f0a2026-1002-4000-8000-000000000002","code":"autumn26","name":"الدورة الخريفية 2026 م","start_date":"2026-10-02","end_date":"2026-12-31","week_base":{"boys":"2026-10-02","girls":"2026-10-02","all":"2026-10-02"},"schedule":{"الأبطال":[{"d":5,"s":9,"e":12},{"d":2,"s":19,"e":21}],"الرواد":[{"d":5,"s":19,"e":21},{"d":1,"s":19,"e":21}],"الملكات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}],"الأميرات":[{"d":0,"s":17,"e":20},{"d":3,"s":17,"e":20}]},"settings":{"legacy":false,"no_review":true,"subs_months":3,"plan_days":null,"exams":{"weekly":[],"dated":[{"date":"2026-10-30","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الأول","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-11-27","branches":["الأبطال","الرواد"],"kind":"الاختبار الشهري الثاني","total":65,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",10],["activity","درجة النشاط التربوي",15]]},{"date":"2026-12-25","branches":["الأبطال","الرواد"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]]},{"date":"2026-12-28","branches":["الأبطال","الرواد"],"kind":"اختبار المتخلفين — الربع سنوي","total":105,"cols":[["quran","درجة القرآن",40],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",15],["activity","درجة النشاط التربوي",25]],"of":"2026-12-25"},{"date":"2026-11-01","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الأول","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-11-29","branches":["الملكات","الأميرات"],"kind":"الاختبار الشهري الثاني","total":55,"cols":[["quran","درجة القرآن",25],["manhaj","درجة المنهج المصاحب",15],["tajweed","درجة التجويد",15]]},{"date":"2026-12-27","branches":["الملكات","الأميرات"],"kind":"الاختبار الربع سنوي (الشهري الثالث)","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]]},{"date":"2026-12-30","branches":["الملكات","الأميرات"],"kind":"اختبار المتخلفين — الربع سنوي","total":100,"cols":[["hifz","درجة الحفظ",25],["review","درجة المراجعة",25],["manhaj","درجة المنهج المصاحب",25],["tajweed","درجة التجويد",25]],"of":"2026-12-27"}]}}}];
+function termIsGirls(b){ return TERM_GIRLS.includes(b); }
+function _termD(iso){ const d=new Date(String(iso).slice(0,10)+'T00:00:00'); d.setHours(0,0,0,0); return d; }
+async function loadTerms(){
+  let rows=null;
+  try{ const {data,error}=await db.from('terms').select('*').order('start_date'); if(error) throw error; rows=data; }
+  catch(e){ console.warn('[terms]',e); }
+  if(!rows||!rows.length){ rows=TERMS_FALLBACK; loadWarn('terms'); }
+  TERMS=rows.map(t=>Object.assign({},t,{ schedule:t.schedule||{}, settings:t.settings||{}, week_base:t.week_base||{} }));
+  const today=localISO();
+  CUR_TERM=TERMS.find(t=>t.start_date<=today&&today<=t.end_date) || TERMS.filter(t=>t.start_date<=today).pop() || TERMS[0] || null;
+  let saved=null; try{ saved=sessionStorage.getItem('viewTerm'); }catch(e){}
+  VIEW_TERM=TERMS.find(t=>t.id===saved) || CUR_TERM;
+  return TERMS;
+}
+function termOf(iso){ iso=String(iso||'').slice(0,10); return TERMS.find(t=>t.start_date<=iso&&iso<=t.end_date)||null; }
+function termIsLegacy(t){ return !!(t&&t.settings&&t.settings.legacy); }
+function termIsArchive(t){ return !!(t&&CUR_TERM&&t.id!==CUR_TERM.id); }
+function termSched(t,b){
+  if(!t) return [];
+  const s=t.schedule||{}; let a=s[b];
+  if(!a&&termIsGirls(b)) a=s['الملكات']||s['الأميرات']||s['البنات'];
+  return Array.isArray(a)?a:[];
+}
+// أول يوم في الأسبوع الأول (b: اسم الشعبة أو '*' للكل)
+function termBase(t,b){
+  const wb=(t&&t.week_base)||{};
+  const iso=(b==='*')?(wb.all||wb.boys):(termIsGirls(b)?(wb.girls||wb.all):(wb.boys||wb.all));
+  return _termD(iso||(t?t.start_date:localISO()));
+}
+function termStartDow(t,b){ return termBase(t,b).getDay(); }
+// أيام الحلقة (getDay) مرتّبة حسب ترتيبها في الأسبوع
+function termDays(t,b){ const sd=termStartDow(t,b); return termSched(t,b).map(x=>x.d).sort((a,c)=>((a-sd+7)%7)-((c-sd+7)%7)); }
+function termDayNames(t,b){ return termDays(t,b).map(d=>TERM_DAYS_AR[d]); }
+function termDaysAt(iso,b){ return termDays(termOf(iso),b); }
+function termWeeks(t,b){ if(!t) return 1; const base=termBase(t,b||'*'), end=_termD(t.end_date); return Math.max(1, Math.floor((end-base)/(7*86400000))+1); }
+// تواريخ أسبوع — مفهرسة بـ getDay (0=أحد..6=سبت)
+function termWeekDates(t,w,b){ const base=termBase(t,b||'*'), sd=base.getDay(), arr=[]; for(let g=0;g<7;g++){ const d=new Date(base); d.setDate(base.getDate()+w*7+((g-sd+7)%7)); arr.push(d); } return arr; }
+function termWeekFirst(t,w,b){ const a=termWeekDates(t,w,b); return a[termStartDow(t,b||'*')]; }
+function termWeekLast(t,w,b){ const a=termWeekDates(t,w,b); return a[(termStartDow(t,b||'*')+6)%7]; }
+function termWeekIndex(t,b,date){ const base=termBase(t,b||'*'); const x=new Date(date||new Date()); x.setHours(0,0,0,0); const i=Math.floor((x-base)/(7*86400000)); return Math.max(0,Math.min(termWeeks(t,b)-1,i)); }
+function termWindow(t,b,dow){ const s=termSched(t,b).find(x=>x.d===dow); return s?{start:+s.s,end:+s.e,label:s.label||'',exam:!!s.exam}:null; }
+function termHourAr(h){ h=+h||0; const hh=Math.floor(h), mm=Math.round((h-hh)*60); const h12=((hh+11)%12)+1; const ar=n=>String(n).replace(/[0-9]/g,x=>'٠١٢٣٤٥٦٧٨٩'[x]); return ar(h12)+(mm?':'+ar(String(mm).padStart(2,'0')):'')+(hh<12?' ص':(hh===12?' ظ':' م')); }
+function termSchedText(t,b){ const sd=termStartDow(t,b); return termSched(t,b).slice().sort((a,c)=>((a.d-sd+7)%7)-((c.d-sd+7)%7)).map(x=>TERM_DAYS_AR[x.d]+' '+termHourAr(x.s)+'–'+termHourAr(x.e)).join(' • '); }
+// خطة الحفظ/المراجعة: plan_days = null → في كل حلقة
+function termPlanAllowed(t,b,dow){
+  const p=t&&t.settings&&t.settings.plan_days; if(!p) return true;
+  const a=p[b]||(termIsGirls(b)?(p['الملكات']||p['البنات']):null);
+  return Array.isArray(a)?a.includes(dow):true;
+}
+// إعداد الاختبار ليوم معيّن (المحدّد بتاريخ يسبق الأسبوعي) — null = يوم عادي
+function termExam(t,b,iso){
+  const ex=(t&&t.settings&&t.settings.exams)||{}; const dow=_termD(iso).getDay();
+  const inB=e=>!Array.isArray(e.branches)||e.branches.includes(b);
+  const d=(ex.dated||[]).find(e=>e.date===iso&&inB(e)); if(d) return d;
+  return (ex.weekly||[]).find(e=>+e.d===dow&&inB(e))||null;
+}
+// ملف الطالب: التقييم السلوكي (٣ شهور) خاص بكل دورة
+function termBh(d,t){ if(!d) return {}; if(!t||termIsLegacy(t)) return d.behavior||{}; return ((d.behavior_t||{})[t.id])||{}; }
+function termBhPack(prev,obj,t){
+  if(!obj||!('behavior' in obj)||!t||termIsLegacy(t)) return obj;
+  const bt=Object.assign({}, (prev&&prev.behavior_t)||{}); bt[t.id]=obj.behavior;
+  const o=Object.assign({},obj,{behavior_t:bt}); delete o.behavior; return o;
+}
+// الدورة القديمة (قبل جدول terms) = الصفوف اللي مالهاش term_id
+function termLegacyId(){ const t=TERMS.find(termIsLegacy); return t?t.id:null; }
+function termRowMatch(r,t){ t=t||VIEW_TERM; if(!t) return true; return (r.term_id||termLegacyId())===t.id; }
+
+function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
+
+
+// ══ اختيار الدورة (الحالية / أرشيف) ══
+function termRenderSelect(){
+  const s=$('term-sel'); if(!s) return;
+  s.innerHTML=TERMS.slice().reverse().map(t=>'<option value="'+esc(t.id)+'"'+(VIEW_TERM&&t.id===VIEW_TERM.id?' selected':'')+'>'
+    +esc(t.name)+(CUR_TERM&&t.id===CUR_TERM.id?' — الحالية':(t.start_date>localISO()?' — القادمة':' — أرشيف'))+'</option>').join('');
+  s.classList.toggle('archive', termIsArchive(VIEW_TERM));
+}
+function termSwitch(id){
+  const t=TERMS.find(x=>x.id===id); if(!t) return;
+  VIEW_TERM=t; try{ sessionStorage.setItem('viewTerm',id); }catch(e){}
+  termRenderSelect(); waResetCaches();
+  const cur=document.querySelector('.page.active'); const pid=cur?cur.id.replace('page-',''):'home';
+  nav(document.querySelector('.sb-item.active'), pid);
+  showToast('📚 '+t.name);
+}
+
+// ══ البيانات الأساسية (كل الشعب) ══
+const BR_ORDER=['الأبطال','الرواد','الملكات','الأميرات'];
+const BR_COLOR={'الأبطال':'#1d6fa4','الرواد':'#2d7a50','الملكات':'#6b3fa0','الأميرات':'#c2417a'};
+let ME=null, BRANCHES={}, CIRCLES={}, USERS={}, STU=[], BASE_OK=false;
+const BRANCH_DATA={'الأبطال':[],'الرواد':[],'البنات':[]};   // نفس شكل لوحة المشرف (للتنبيهات)
+const SV_DB_BRANCH_CFG = {
+  'الأبطال': {emoji:'🦁', accent:'#1a7a4a', bg:'#e8f5ee', key:'abtal'},
+  'الرواد':  {emoji:'🚀', accent:'#15616d', bg:'#e0f2f4', key:'rowad'},
+  'البنات':  {emoji:'👑', accent:'#9b59b6', bg:'#f0ebfa', key:'banat'},
+};
+const isUuid = v => typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-/.test(v);
+
+async function loadBase(){
+  BASE_OK=false;
+  try{
+    const [br, ci, us, st] = await Promise.all([
+      db.from('branches').select('id,name'),
+      db.from('circles').select('id,name,name_ar,teachers,teacher_id,branch_id,is_active'),
+      selectAll(db.from('users').select('id,full_name,gender,role,phone').order('id')),
+      selectAll(db.from('students').select('id,user_id,circle_id,branch_id,teacher_id,date_of_birth,enrollment_date,memorized_parts,total_points,notes,is_active').order('id'))
+    ]);
+    [br,ci,us,st].forEach(r=>{ if(r.error) throw r.error; });
+    BRANCHES={}; (br.data||[]).forEach(b=>BRANCHES[b.id]=b.name);
+    USERS={}; (us.data||[]).forEach(u=>USERS[u.id]=u);
+    CIRCLES={}; (ci.data||[]).forEach(c=>{
+      let t=(c.teachers||[])[0]; if(isUuid(t)) t=(USERS[t]||{}).full_name||t;
+      if(!t && c.teacher_id) t=(USERS[c.teacher_id]||{}).full_name||null;
+      CIRCLES[c.id]=Object.assign({}, c, { tName: t?cleanName(t):'', bName: BRANCHES[c.branch_id]||'' });
+    });
+    STU=(st.data||[]).map(s=>{
+      const c=CIRCLES[s.circle_id]||{}, u=USERS[s.user_id]||{};
+      return Object.assign({}, s, { name: cleanName(u.full_name||'طالب'), phone: u.phone||'',
+        bName: c.bName || BRANCHES[s.branch_id] || '', cName: c.name_ar||c.name||'', tName: c.tName||'' });
+    }).sort((a,b)=> (BR_ORDER.indexOf(a.bName)-BR_ORDER.indexOf(b.bName)) || a.tName.localeCompare(b.tName,'ar') || a.name.localeCompare(b.name,'ar'));
+    // BRANCH_DATA — نفس منطق hydrateBranchDataFromDB في لوحة المشرف (عشان id التنبيه يطلع هو هو)
+    const stuIdsByCircle={};
+    STU.filter(s=>s.is_active!==false && s.circle_id).forEach(s=>{ (stuIdsByCircle[s.circle_id]=stuIdsByCircle[s.circle_id]||[]).push(s.id); });
+    ['الأبطال','الرواد','البنات'].forEach(k=>{ BRANCH_DATA[k]=[]; });
+    (ci.data||[]).forEach(c=>{
+      if(c.is_active===false) return;
+      const bn=BRANCHES[c.branch_id]||'', tName=CIRCLES[c.id].tName; if(!tName) return;
+      const key=(bn==='الملكات'||bn==='الأميرات')?'البنات':bn; if(!BRANCH_DATA[key]) BRANCH_DATA[key]=[];
+      const item={ teacher:tName, circleId:c.id, branchId:c.branch_id, studentIds:stuIdsByCircle[c.id]||[] };
+      if(key==='البنات') item.sub=bn;
+      BRANCH_DATA[key].push(item);
+    });
+    BASE_OK=true;
+  }catch(e){ loadWarn(e); }
+  return BASE_OK;
+}
+
+// ══ الرئيسية ══
+async function renderHome(){
+  const act=STU.filter(s=>s.is_active!==false);
+  const boys=act.filter(s=>!termIsGirls(s.bName)).length, girls=act.length-boys;
+  const nCirc=Object.values(CIRCLES).filter(c=>c.is_active!==false).length;
+  $('home-stats').innerHTML=BASE_OK?`
+    <div class="stat-card blue"><span class="stat-icon">👦</span><div class="stat-val">${ar(boys)}</div><div class="stat-lbl">الطلاب</div><div class="stat-sub">الأبطال + الرواد</div></div>
+    <div class="stat-card purple"><span class="stat-icon">👧</span><div class="stat-val">${ar(girls)}</div><div class="stat-lbl">الطالبات</div><div class="stat-sub">الملكات + الأميرات</div></div>
+    <div class="stat-card green"><span class="stat-icon">🕌</span><div class="stat-val">${ar(nCirc)}</div><div class="stat-lbl">الحلقات</div><div class="stat-sub">النشطة</div></div>
+    <div class="stat-card gold"><span class="stat-icon">🔔</span><div class="stat-val" id="hs-open">…</div><div class="stat-lbl">تنبيهات مفتوحة</div><div class="stat-sub">لم يُتخذ فيها إجراء</div></div>`
+    :'<div class="empty" style="padding:24px;grid-column:1/-1;color:var(--red);"><span class="empty-icon">⚠️</span>البيانات ما اتحمّلتش — اعمل تحديث</div>';
+  $('home-branches').innerHTML=BR_ORDER.map(b=>{
+    const n=act.filter(s=>s.bName===b).length, c=Object.values(CIRCLES).filter(x=>x.is_active!==false&&x.bName===b).length;
+    return `<div onclick="stGoBranch('${b}')" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-right:4px solid ${BR_COLOR[b]};border-radius:var(--r-sm);margin-bottom:8px;">
+      <b style="color:${BR_COLOR[b]};min-width:80px;">${b}</b><span style="font-size:.8rem;color:var(--mid);flex:1;">${ar(n)} ${termIsGirls(b)?'طالبة':'طالب'} • ${ar(c)} حلقة</span><span style="color:var(--light);">‹</span></div>`;
+  }).join('');
+  homeAlerts();
+}
+async function homeAlerts(){
+  const box=$('home-alerts'); if(!box) return;
+  if(!BASE_OK){ box.innerHTML='<div class="empty" style="padding:14px;">—</div>'; return; }
+  try{
+    await waFetchActions(true);
+    const wk=waCurrentWeekIndex(); let open=0; const rows=[];
+    for(const b of svGetMyBranches()){
+      const r=await waAccumulate(b, wk);
+      const o=[...r.warnings, ...r.alerts].filter(a=>!waHasAction(a.id));
+      o.forEach(a=>{ WA_INDEX[a.id]={text:a.text, branch:b, kind:(r.warnings.includes(a)?'warning':'alert')}; });
+      open+=o.length; rows.push({b, o, w:r.warnings.filter(a=>!waHasAction(a.id)).length});
+    }
+    const hs=$('hs-open'); if(hs) hs.textContent=ar(open);
+    const bd=$('sb-wa-badge'); if(bd){ bd.style.display=open?'':'none'; bd.textContent=ar(open); }
+    box.innerHTML=open? rows.filter(x=>x.o.length).map(x=>`<div style="margin-bottom:12px;">
+        <div style="font-weight:800;color:var(--forest);margin-bottom:6px;">شعبة ${esc(x.b)} <span class="badge bg-gray">${ar(x.o.length)} مفتوح</span>${x.w?` <span class="badge bg-red">${ar(x.w)} إنذار</span>`:''}</div>
+        ${x.o.slice(0,6).map(a=>`<div style="display:flex;gap:8px;align-items:center;padding:7px 10px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:5px;font-size:.8rem;">
+          <span>${a.icon||'🔔'}</span><span style="flex:1;">${esc(a.text)}</span>
+          <button class="btn btn-primary btn-xs" onclick="waOpenActionById('${a.id}')">✔ الإجراء</button></div>`).join('')}
+        ${x.o.length>6?`<div style="font-size:.74rem;color:var(--light);">+ ${ar(x.o.length-6)} تانيين في صفحة التنبيهات</div>`:''}</div>`).join('')
+      :'<div class="empty" style="padding:14px;"><span class="empty-icon">👏</span>مفيش تنبيهات مفتوحة</div>';
+  }catch(e){ loadWarn(e); box.innerHTML='<div class="empty" style="padding:14px;color:var(--red);">⚠️ التنبيهات ما اتحسبتش — اعمل تحديث</div>'; }
+}
+function waSyncDashboard(){ homeAlerts(); }
+
+// ══ الطلاب والطالبات ══
+function stFillBranches(){
+  $('st-branch').innerHTML='<option value="">كل الشعب</option>'+BR_ORDER.map(b=>'<option value="'+b+'">'+b+'</option>').join('');
+  stFillCircles();
+}
+function stFillCircles(){
+  const b=$('st-branch').value;
+  const list=Object.values(CIRCLES).filter(c=>c.is_active!==false&&(!b||c.bName===b))
+    .sort((x,y)=>(BR_ORDER.indexOf(x.bName)-BR_ORDER.indexOf(y.bName))||x.tName.localeCompare(y.tName,'ar'));
+  $('st-circle').innerHTML='<option value="">كل الحلقات</option>'+list.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.tName||c.name||'حلقة')+(b?'':' — '+esc(c.bName))+'</option>').join('');
+}
+function stGoBranch(b){ navPage('students'); $('st-branch').value=b; stFillCircles(); renderStudents(); }
+function renderStudents(){
+  const body=$('st-body');
+  if(!BASE_OK){ body.innerHTML='<tr><td colspan="6"><div class="empty" style="padding:24px;color:var(--red);"><span class="empty-icon">⚠️</span>البيانات ما اتحمّلتش — اعمل تحديث</div></td></tr>'; return; }
+  const b=$('st-branch').value, c=$('st-circle').value, q=arNorm($('st-q').value), inact=$('st-inactive').checked;
+  const list=STU.filter(s=>(inact?s.is_active===false:s.is_active!==false)&&(!b||s.bName===b)&&(!c||s.circle_id===c)&&(!q||arNorm(s.name).includes(q)));
+  $('st-count').textContent=ar(list.length);
+  body.innerHTML=list.length? list.map((s,i)=>`<tr>
+      <td style="color:var(--light);">${ar(i+1)}</td>
+      <td style="font-weight:700;color:var(--forest);">${esc(s.name)}${s.is_active===false?' <span class="badge bg-red">موقوف</span>':''}</td>
+      <td><span class="dot" style="background:${BR_COLOR[s.bName]||'#999'};"></span>${esc(s.bName||'—')}</td>
+      <td style="font-size:.78rem;">${esc(s.tName||s.cName||'—')}</td>
+      <td style="font-weight:800;color:var(--gold);">${ar(s.total_points||0)}</td>
+      <td style="white-space:nowrap;"><button class="btn btn-outline btn-xs" onclick="stuOpen('${s.id}')">✏️ البيانات</button>
+        <button class="btn btn-gold btn-xs" onclick="sfOpen('${s.id}')">📁 الملف</button></td></tr>`).join('')
+    :'<tr><td colspan="6"><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>مفيش نتائج</div></td></tr>';
+}
+function stuById(id){ return STU.find(s=>s.id===id)||null; }
+async function stuReload(id){
+  try{
+    const {data,error}=await db.from('students').select('id,user_id,circle_id,branch_id,teacher_id,date_of_birth,enrollment_date,memorized_parts,total_points,notes,is_active').eq('id',id).maybeSingle();
+    if(error||!data) return;
+    let u=USERS[data.user_id]||{};
+    if(data.user_id){ const r=await db.from('users').select('id,full_name,gender,role,phone').eq('id',data.user_id).maybeSingle(); if(!r.error&&r.data){ u=r.data; USERS[u.id]=u; } }
+    const s=stuById(id), c=CIRCLES[data.circle_id]||{};
+    if(s) Object.assign(s, data, { name:cleanName(u.full_name||s.name), phone:u.phone||'', bName:c.bName||s.bName, cName:c.name_ar||c.name||'', tName:c.tName||'' });
+  }catch(e){ loadWarn(e); }
+}
+
+// ── مودال بيانات الطالب ──
+let STU_CTX=null;
+function stuTab(n){ STU_CTX&&(STU_CTX.tab=n); document.querySelectorAll('#stu-tabs .tab').forEach((b,i)=>b.classList.toggle('active',i+1===n)); $('stu-save').style.display=n===1?'':'none'; stuRenderTab(); }
+function termRange(){ const t=VIEW_TERM||CUR_TERM; return t?{from:t.start_date,to:t.end_date,name:t.name}:{from:'2000-01-01',to:'2100-01-01',name:''}; }
+async function stuOpen(id){
+  const s=stuById(id); if(!s) return;
+  const C=STU_CTX={ id, tab:1, att:null, mem:null, file:null, sheet:null, err:{} };
+  $('stu-title').textContent='👤 '+s.name;
+  openModal('modal-stu'); stuTab(1);
+  // (دفعة ١٤) هواتف الأب والأم + المستوى + العنوان من نفس مصدر المدير والمشرف
+  db.rpc('students_sheet',{p_ids:[id]}).then(r=>{
+    if(r.error){ C.err.sheet=1; C.sheet={}; loadWarn(r.error); } else C.sheet=(r.data||[])[0]||{};
+    if(STU_CTX!==C) return;
+    [['su-dad','dad'],['su-mom','mom'],['su-level','level'],['su-addr','addr']].forEach(([el,k])=>{ const x=$(el); if(x){ x.value=C.sheet[k]||''; x.disabled=!!C.err.sheet; } });
+    const pp=$('su-pp'); if(pp) pp.textContent=C.err.sheet?'⚠️ هواتف الأب والأم ما اتحمّلتش — مش هتتعدّل':(C.sheet.parent_phone?'📱 رقم حساب ولي الأمر: '+C.sheet.parent_phone:'');
+  });
+}
+function stuRenderTab(){
+  const C=STU_CTX; if(!C) return; const s=stuById(C.id); const box=$('stu-body');
+  if(C.tab===1){
+    box.innerHTML=`<div class="sec-h">👤 البيانات الأساسية</div>
+      <div class="form-grid-2">
+        <div class="fg" style="grid-column:1/-1;"><label>الاسم</label><input class="inp" id="su-name" maxlength="120" value="${esc(s.name)}"></div>
+        <div class="fg"><label>هاتف الطالب</label><input class="inp" id="su-phone" type="tel" dir="ltr" style="text-align:right;" value="${esc(s.phone||'')}"></div>
+        <div class="fg"><label>عدد الأجزاء المحفوظة</label><input class="inp" id="su-mem" type="number" min="0" max="30" step="0.5" value="${esc(s.memorized_parts==null?'':s.memorized_parts)}"></div>
+        <div class="fg"><label>تاريخ الميلاد</label><input class="inp" id="su-dob" type="date" value="${esc(s.date_of_birth||'')}"></div>
+        <div class="fg"><label>تاريخ الالتحاق</label><input class="inp" id="su-join" type="date" value="${esc(s.enrollment_date||'')}"></div>
+        <div class="fg"><label>📞 هاتف الأب</label><input class="inp" id="su-dad" type="tel" dir="ltr" style="text-align:right;" value="${esc((C.sheet&&C.sheet.dad)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
+        <div class="fg"><label>📞 هاتف الأم</label><input class="inp" id="su-mom" type="tel" dir="ltr" style="text-align:right;" value="${esc((C.sheet&&C.sheet.mom)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
+        <div class="fg"><label>المستوى</label><input class="inp" id="su-level" maxlength="100" value="${esc((C.sheet&&C.sheet.level)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
+        <div class="fg"><label>العنوان</label><input class="inp" id="su-addr" maxlength="200" value="${esc((C.sheet&&C.sheet.addr)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
+        <div style="grid-column:1/-1;font-size:.72rem;color:var(--light);" id="su-pp">${C.sheet&&C.sheet.parent_phone?'📱 رقم حساب ولي الأمر: '+esc(C.sheet.parent_phone):''}</div>
+        <div class="fg" style="grid-column:1/-1;"><label>ملاحظات</label><textarea class="inp" id="su-notes" rows="3">${esc(s.notes||'')}</textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.78rem;color:var(--mid);background:var(--bg);padding:10px 12px;border-radius:var(--r-sm);">
+        <span>🏫 ${esc(s.bName||'—')}</span><span>•</span><span>🕌 ${esc(s.cName||'—')}</span><span>•</span><span>👤 ${esc(s.tName||'—')}</span><span>•</span>
+        <span>⭐ ${ar(s.total_points||0)} نقطة</span><span>•</span><span>${s.is_active===false?'⛔ موقوف':'✅ نشط'}</span></div>
+      <div style="font-size:.7rem;color:var(--light);margin-top:6px;">النقل بين الحلقات والإيقاف من لوحة المدير/المشرف.</div>`;
+    return;
+  }
+  const R=termRange();
+  if(C.tab===2){
+    if(C.att===null){ box.innerHTML='<div class="empty" style="padding:24px;">⏳ جاري التحميل…</div>';
+      selectAll(db.from('attendance').select('date,status,late_minutes').eq('student_id',C.id).gte('date',R.from).lte('date',R.to).order('date',{ascending:false}))
+        .then(r=>{ if(r.error){ C.err.att=1; C.att=[]; loadWarn(r.error); } else C.att=r.data||[]; if(STU_CTX===C&&C.tab===2) stuRenderTab(); }); return; }
+    if(C.err.att){ box.innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ الحضور ما اتحمّلش</div>'; return; }
+    const st={present:'✅ حاضر',late:'⏰ متأخر',absent:'🚫 غائب'};
+    const cnt=k=>C.att.filter(a=>a.status===k).length;
+    box.innerHTML=`<div style="font-size:.76rem;color:var(--light);margin-bottom:8px;">${esc(R.name)}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"><span class="badge bg-green">حاضر ${ar(cnt('present'))}</span><span class="badge bg-gold">متأخر ${ar(cnt('late'))}</span><span class="badge bg-red">غائب ${ar(cnt('absent'))}</span></div>
+      ${C.att.length?'<div class="tbl-wrap"><table class="mini"><thead><tr><th>التاريخ</th><th>الحالة</th><th>التأخير</th></tr></thead><tbody>'+C.att.map(a=>`<tr><td>${esc(svFmtArDate(a.date))}</td><td>${st[a.status]||esc(a.status)}</td><td>${a.status==='late'?ar(a.late_minutes||0)+' د':'—'}</td></tr>`).join('')+'</tbody></table></div>'
+        :'<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>مفيش حضور مسجّل في الدورة دي</div>'}`;
+    return;
+  }
+  if(C.tab===3){
+    if(C.mem===null){ box.innerHTML='<div class="empty" style="padding:24px;">⏳ جاري التحميل…</div>';
+      selectAll(db.from('memorization').select('date,type,grade,points,surah_from,ayah_from,surah_to,ayah_to').eq('student_id',C.id).gte('date',R.from).lte('date',R.to).order('date',{ascending:false}).order('type'))
+        .then(r=>{ if(r.error){ C.err.mem=1; C.mem=[]; loadWarn(r.error); } else C.mem=r.data||[]; if(STU_CTX===C&&C.tab===3) stuRenderTab(); }); return; }
+    if(C.err.mem){ box.innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ التسميع ما اتحمّلش</div>'; return; }
+    box.innerHTML=`<div style="font-size:.76rem;color:var(--light);margin-bottom:8px;">${esc(R.name)}</div>`+memTable(C.mem);
+    return;
+  }
+  if(C.tab===4){
+    if(C.file===null){ box.innerHTML='<div class="empty" style="padding:24px;">⏳ جاري التحميل…</div>';
+      db.from('student_files').select('data').eq('student_id',C.id).maybeSingle()
+        .then(r=>{ if(r.error){ C.err.file=1; C.file={}; loadWarn(r.error); } else C.file=(r.data&&r.data.data)||{}; if(STU_CTX===C&&C.tab===4) stuRenderTab(); }); return; }
+    if(C.err.file){ box.innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ الاختبارات ما اتحمّلتش</div>'; return; }
+    const ex=C.file.exams||{}, ds=Object.keys(ex).sort().reverse();
+    box.innerHTML=ds.length? ds.map(d=>{ const e=ex[d]||{}, m=e._meta||{}; const cols=Object.keys(e).filter(k=>k!=='_meta'&&e[k]&&typeof e[k]==='object');
+        const sum=cols.reduce((a,k)=>a+(+e[k].score||0),0), tot=m.total||cols.reduce((a,k)=>a+(+e[k].max||0),0);
+        return `<div class="row-box"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px;"><b style="color:var(--forest);">${esc(m.kind||'اختبار')}</b>
+          <span style="font-size:.78rem;color:var(--mid);">${esc(svFmtArDate(d))} • <b style="color:var(--jade);">${ar(sum)} / ${ar(tot)}</b></span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${cols.map(k=>`<span class="badge bg-gray">${esc(e[k].label||k)}: ${ar(e[k].score==null?'—':e[k].score)}/${ar(e[k].max||'')}</span>`).join('')}</div></div>`; }).join('')
+      :'<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>مفيش درجات اختبارات مسجّلة</div>';
+    box.innerHTML+='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">الدرجات بيسجّلها المعلم — للعرض بس هنا.</div>';
+  }
+}
+function memTable(rows){
+  const G={excellent:['ممتاز','var(--jade)'],very_good:['جيد جداً','var(--blue)'],good:['جيد','var(--gold)'],retry:['إعادة','var(--red)']};
+  if(!rows||!rows.length) return '<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>مفيش تسميع مسجّل في الدورة دي</div>';
+  return '<div class="tbl-wrap"><table class="mini"><thead><tr><th>التاريخ</th><th>النوع</th><th>من</th><th>إلى</th><th>التقدير</th><th>النقاط</th></tr></thead><tbody>'
+    +rows.map(m=>{ const g=G[m.grade]||[m.grade||'—','var(--mid)'];
+      return `<tr><td style="white-space:nowrap;">${esc(svFmtArDate(m.date))}</td><td>${m.type==='review'?'🔁 مراجعة':'📖 حفظ'}</td>
+        <td>${esc(m.surah_from||'—')} ${m.ayah_from!=null?ar(m.ayah_from):''}</td><td>${esc(m.surah_to||m.surah_from||'—')} ${m.ayah_to!=null?ar(m.ayah_to):''}</td>
+        <td style="font-weight:800;color:${g[1]};">${esc(g[0])}</td><td>${ar(m.points||0)}</td></tr>`; }).join('')+'</tbody></table></div>';
+}
+async function stuSave(){
+  const C=STU_CTX; if(!C) return; const s=stuById(C.id); if(!s) return;
+  const name=cleanName($('su-name').value).replace(/\s+/g,' ');
+  if(!name){ showToast('⚠️ اكتب الاسم'); return; }
+  const mem=$('su-mem').value;
+  if(mem!==''&&(isNaN(+mem)||+mem<0||+mem>30)){ showToast('⚠️ عدد الأجزاء من ٠ لـ ٣٠'); return; }
+  const data={ full_name:name, phone:$('su-phone').value.trim(), date_of_birth:$('su-dob').value||null, enrollment_date:$('su-join').value||null,
+               notes:$('su-notes').value.trim() };
+  if(mem!=='') data.memorized_parts=+mem;
+  if(C.sheet&&!C.err.sheet){ data.dad=$('su-dad').value.trim(); data.mom=$('su-mom').value.trim(); data.level=$('su-level').value.trim(); data.addr=$('su-addr').value.trim(); }
+  const btn=$('stu-save'); btn.disabled=true;
+  try{
+    const {data:r,error}=await db.rpc('student_update_full',{ p_student:C.id, p_data:data });
+    if(error) throw error; if(!r||!r.ok) throw new Error('لم يُحفظ');
+    await stuReload(C.id);
+    showToast('✅ اتحفظت البيانات — ظاهرة في كل اللوحات');
+    $('stu-title').textContent='👤 '+(stuById(C.id)||s).name;
+    renderStudents(); stuRenderTab();
+  }catch(e){ showToast('❌ ما اتحفظش — '+(e.message||'')); }
+  finally{ btn.disabled=false; }
+}
+
+// ══ ملف الطالب (٧ أقسام) — الحفظ دمج على السيرفر (emp_save_student_file) ══
+const SF_LV=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+const SF_TJ=[['L','المستوى الأول — أحكام نون الساكنة والتنوين'],['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء'],
+  ['L','المستوى الثاني — أحكام الميم الساكنة'],['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي'],
+  ['L','المستوى الثالث — أحكام المدود'],['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل'],
+  ['L','المستوى الرابع — مخارج الحروف'],['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية'],
+  ['L','المستوى الخامس — صفات الحروف'],['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة'],
+  ['L','المستوى السادس — الوقف والابتداء'],['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن'],
+  ['L','المستوى السابع — أحكام متقدمة'],['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']];
+const SF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['participation','المشاركة'],['cleanliness','النظافة والهندام'],['cooperation','التعاون']];
+let SF=null;
+function sfOpenFromStu(){ if(STU_CTX){ const id=STU_CTX.id; closeModal('modal-stu'); sfOpen(id); } }
+function sfSel(id,val,opts){ return '<select class="inp" id="'+id+'">'+['',...opts].map(o=>'<option value="'+esc(o)+'"'+(o===(val||'')?' selected':'')+'>'+(o||'—')+'</option>').join('')+'</select>'; }
+function sfLvl(attrs,val){ return '<select '+attrs+'>'+['',...SF_LV].map(o=>'<option value="'+esc(o)+'"'+(o===(val||'')?' selected':'')+'>'+(o||'—')+'</option>').join('')+'</select>'; }
+async function sfOpen(id){
+  const s=stuById(id); if(!s) return;
+  SF={ id, tab:1, d:{}, ok:false, mem:null };
+  $('sf-head-name').textContent=s.name+' — '+(s.bName||'')+(s.tName?' • '+s.tName:'');
+  $('sf-body').innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  $('sf-save').disabled=true; openModal('modal-sf');
+  try{
+    const {data,error}=await db.from('student_files').select('data').eq('student_id',id).maybeSingle();
+    if(error) throw error;
+    SF.d=(data&&data.data)||{}; SF.ok=true;
+  }catch(e){ loadWarn(e); }
+  if(!SF||SF.id!==id) return;
+  if(!SF.ok){ $('sf-body').innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>الملف ما اتحمّلش — الحفظ مقفول. اقفل وافتح تاني.</div>'; return; }
+  sfBuild(s); sfTab(1); $('sf-save').disabled=false;
+}
+function sfBuild(s){
+  const d=SF.d, tj=d.tajweed||{}, bh=termBh(d, VIEW_TERM||CUR_TERM);
+  const inp=(id,v,type,ph)=>'<input class="inp" id="'+id+'" type="'+(type||'text')+'"'+(ph?' placeholder="'+ph+'"':'')+' value="'+esc(v||'')+'">';
+  const p1=`<div class="sec-h">👤 البيانات الأساسية</div><div class="form-grid-2">
+      <div class="fg" style="grid-column:1/-1;"><label>اسم الطالب</label><input class="inp" value="${esc(s.name)}" disabled title="الاسم بيتعدّل من «البيانات»"></div>
+      <div class="fg"><label>تاريخ الميلاد</label>${inp('sf-dob',d.dob||s.date_of_birth,'date')}</div>
+      <div class="fg"><label>تاريخ الالتحاق بالمسجد</label>${inp('sf-join',d.joinDate||s.enrollment_date,'date')}</div>
+      <div class="fg"><label>هاتف الأب</label>${inp('sf-dad',d.dad,'tel','01xxxxxxxxx')}</div>
+      <div class="fg"><label>هاتف الأم</label>${inp('sf-mom',d.mom,'tel','01xxxxxxxxx')}</div>
+      <div class="fg" style="grid-column:1/-1;"><label>العنوان</label>${inp('sf-addr',d.addr,'text','العنوان الكامل')}</div>
+      <div class="fg"><label>نوع المدرسة</label>${sfSel('sf-school',d.schoolType,['عام','أزهاري'])}</div></div>`;
+  const p2=`<div class="sec-h">👨‍👦 الملف الأسري</div><div class="form-grid-2">
+      <div class="fg"><label>الحالة الأسرية</label>${sfSel('sf-fam',d.familyStatus,['مستقرة','منفصلة','الأب متوفى','الأم متوفاة'])}</div>
+      <div class="fg"><label>عدد الأخوة</label>${inp('sf-sib',d.siblings,'number')}</div>
+      <div class="fg"><label>مؤهل الأب</label>${inp('sf-dadedu',d.dadEdu,'text','المؤهل الدراسي')}</div>
+      <div class="fg"><label>مؤهل الأم</label>${inp('sf-momedu',d.momEdu,'text','المؤهل الدراسي')}</div>
+      <div class="fg" style="grid-column:1/-1;"><label>ملاحظات عن البيئة الأسرية</label><textarea class="inp" id="sf-famnotes" rows="4">${esc(d.familyNotes||'')}</textarea></div></div>`;
+  const p3=`<div class="sec-h">📖 السجل القرآني — بيتملا تلقائياً من تسميع المعلم</div>
+      <div class="fg"><label>الإنجاز الحالي</label>${inp('sf-ach',d.currentAchievement,'text','مثال: تم حفظ جزء عم وجزء تبارك')}</div><div id="sf-quran"></div>`;
+  const p4=`<div class="sec-h">🎙️ سجل التجويد — ٧ مستويات</div><div class="tbl-wrap"><table class="mini"><thead><tr><th style="text-align:right;">المهارة</th><th style="width:140px;">مستوى الطالب</th><th>الملاحظات</th></tr></thead><tbody>`
+      +SF_TJ.map(([k,l])=>k==='L'?`<tr style="background:var(--pale);"><td colspan="3" style="font-weight:800;color:var(--forest);">${l}</td></tr>`
+        :`<tr><td>${l}</td><td>${sfLvl('data-tj="'+k+'"',tj[k])}</td><td><input data-tj="${k}_note" placeholder="ملاحظات" value="${esc(tj[k+'_note']||'')}"></td></tr>`).join('')+'</tbody></table></div>';
+  const t=VIEW_TERM||CUR_TERM;
+  const p5=`<div class="sec-h">📊 التقييم الأخلاقي والسلوكي — ${esc(t?t.name:'')}</div>`+['month1','month2','month3'].map((mo,i)=>`<div class="row-box">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:.8rem;font-weight:800;color:var(--forest);">الشهر ${['الأول','الثاني','الثالث'][i]}
+        <span style="font-weight:600;color:var(--mid);">من: <input type="date" class="inp" style="width:auto;padding:5px 8px;" id="sf-${mo}-from" value="${esc(bh[mo+'From']||'')}"></span>
+        <span style="font-weight:600;color:var(--mid);">إلى: <input type="date" class="inp" style="width:auto;padding:5px 8px;" id="sf-${mo}-to" value="${esc(bh[mo+'To']||'')}"></span></div>
+      <table class="mini"><thead><tr><th>المجال</th><th style="width:140px;">التقييم</th><th>الملاحظات</th></tr></thead><tbody>`
+      +SF_BH.map(([f,l])=>`<tr><td>${l}</td><td>${sfLvl('id="sf-'+mo+'-'+f+'"',bh[mo+f])}</td><td><input id="sf-${mo}-${f}-notes" placeholder="ملاحظات" value="${esc(bh[mo+f+'Notes']||'')}"></td></tr>`).join('')
+      +'</tbody></table></div>').join('');
+  const p6=`<div class="sec-h">🧠 السجل النفسي والتربوي</div><div class="form-grid-2">
+      <div class="fg"><label>نقاط القوة</label><textarea class="inp" id="sf-str" rows="5">${esc(d.strengths||'')}</textarea></div>
+      <div class="fg"><label>الاحتياجات الداعمة</label><textarea class="inp" id="sf-needs" rows="5">${esc(d.needs||'')}</textarea></div></div>
+      <div style="font-weight:800;color:var(--forest);margin:6px 0 8px;font-size:.84rem;">التدخلات التربوية</div><div id="sf-ints"></div>
+      <button class="btn btn-outline btn-sm" type="button" onclick="sfAddInt()">➕ إضافة تدخل</button>`;
+  const p7=`<div class="sec-h">📞 استدعاء ولي الأمر</div><div id="sf-calls"></div><button class="btn btn-outline btn-sm" type="button" onclick="sfAddCall()">➕ إضافة استدعاء</button>`;
+  $('sf-body').innerHTML=[p1,p2,p3,p4,p5,p6,p7].map((h,i)=>'<div class="sf-pane" style="display:none;">'+h+'</div>').join('');
+  (d.interventions&&d.interventions.length?d.interventions:[{}]).forEach(x=>sfAddInt(x));
+  (d.parentCalls&&d.parentCalls.length?d.parentCalls:[{}]).forEach(x=>sfAddCall(x));
+}
+function sfIntRow(x){ x=x||{}; return `<div class="sf-int" style="display:grid;grid-template-columns:130px 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center;">
+  <input class="inp int-date" type="date" value="${esc(x.date||'')}"><input class="inp int-problem" placeholder="المشكلة" value="${esc(x.problem||'')}">
+  <input class="inp int-action" placeholder="شكل التدخل" value="${esc(x.action||'')}"><button class="btn btn-danger btn-xs" type="button" onclick="this.closest('.sf-int').remove()">×</button></div>`; }
+function sfAddInt(x){ $('sf-ints').insertAdjacentHTML('beforeend', sfIntRow(x)); }
+function sfCallRow(x){ x=x||{}; return `<div class="sf-call row-box"><div class="form-grid-2">
+  <div class="fg"><label>تاريخ الاستدعاء</label><input class="inp call-date" type="date" value="${esc(x.date||'')}"></div>
+  <div class="fg"><label>الحضور</label><select class="inp call-attended">${['','حضر','لم يحضر'].map(o=>'<option value="'+o+'"'+(o===(x.attended||'')?' selected':'')+'>'+(o||'—')+'</option>').join('')}</select></div></div>
+  <div class="fg"><label>المشكلة</label><textarea class="inp call-problem" rows="2">${esc(x.problem||'')}</textarea></div>
+  <div class="fg"><label>نتيجة الاتفاق مع ولي الأمر</label><textarea class="inp call-result" rows="2">${esc(x.result||'')}</textarea></div>
+  <button class="btn btn-danger btn-xs" type="button" onclick="this.closest('.sf-call').remove()">🗑 حذف الاستدعاء</button></div>`; }
+function sfAddCall(x){ $('sf-calls').insertAdjacentHTML('beforeend', sfCallRow(x)); }
+function sfTab(n){
+  if(!SF) return; SF.tab=n;
+  document.querySelectorAll('#sf-tabs .tab').forEach((b,i)=>b.classList.toggle('active',i+1===n));
+  document.querySelectorAll('#sf-body .sf-pane').forEach((p,i)=>p.style.display=(i+1===n)?'block':'none');
+  if(n===3&&SF.ok&&SF.mem===null){
+    SF.mem=[]; const id=SF.id, box=$('sf-quran'); if(box) box.innerHTML='<div class="empty" style="padding:18px;">⏳ جاري تحميل السجل…</div>';
+    selectAll(db.from('memorization').select('date,type,grade,points,surah_from,ayah_from,surah_to,ayah_to').eq('student_id',id).order('date',{ascending:false}).order('type'))
+      .then(r=>{ const b=$('sf-quran'); if(!b||!SF||SF.id!==id) return; if(r.error){ loadWarn(r.error); b.innerHTML='<div class="empty" style="color:var(--red);">⚠️ السجل ما اتحمّلش</div>'; return; } b.innerHTML=memTable(r.data||[]); });
+  }
+}
+async function sfSave(){
+  if(!SF||!SF.ok){ showToast('⚠️ الملف ما اتحمّلش — الحفظ مقفول'); return; }
+  const v=id=>{ const e=$(id); return e?e.value:''; };
+  const tajweed={}; document.querySelectorAll('#sf-body [data-tj]').forEach(el=>{ tajweed[el.dataset.tj]=el.value; });
+  const behavior={};
+  ['month1','month2','month3'].forEach(mo=>{ behavior[mo+'From']=v('sf-'+mo+'-from'); behavior[mo+'To']=v('sf-'+mo+'-to');
+    SF_BH.forEach(([f])=>{ behavior[mo+f]=v('sf-'+mo+'-'+f); behavior[mo+f+'Notes']=v('sf-'+mo+'-'+f+'-notes'); }); });
+  const interventions=[...document.querySelectorAll('#sf-body .sf-int')].map(r=>({ date:r.querySelector('.int-date').value, problem:r.querySelector('.int-problem').value, action:r.querySelector('.int-action').value }))
+    .filter(x=>x.date||x.problem||x.action);
+  const parentCalls=[...document.querySelectorAll('#sf-body .sf-call')].map(r=>({ date:r.querySelector('.call-date').value, problem:r.querySelector('.call-problem').value, attended:r.querySelector('.call-attended').value, result:r.querySelector('.call-result').value }))
+    .filter(x=>x.date||x.problem||x.attended||x.result);
+  const patch={ dob:v('sf-dob'), joinDate:v('sf-join'), dad:v('sf-dad').trim(), mom:v('sf-mom').trim(), addr:v('sf-addr').trim(), schoolType:v('sf-school'),
+    familyStatus:v('sf-fam'), siblings:v('sf-sib'), dadEdu:v('sf-dadedu').trim(), momEdu:v('sf-momedu').trim(), familyNotes:v('sf-famnotes'),
+    currentAchievement:v('sf-ach').trim(), tajweed, interventions, parentCalls, strengths:v('sf-str'), needs:v('sf-needs') };
+  const t=VIEW_TERM||CUR_TERM;
+  if(!t||termIsLegacy(t)) patch.behavior=behavior; else patch.behavior_t={ [t.id]:behavior };
+  const btn=$('sf-save'); btn.disabled=true;
+  try{
+    const {data,error}=await db.rpc('emp_save_student_file',{ p_student:SF.id, p_patch:patch });
+    if(error) throw error; if(!data||!data.ok) throw new Error('لم يُحفظ');
+    showToast('✅ اتحفظ ملف الطالب — ظاهر في كل اللوحات');
+    closeModal('modal-sf');
+  }catch(e){ showToast('❌ الملف ما اتحفظش — '+(e.message||'')); }
+  finally{ btn.disabled=false; }
+}
+
+// ══ التنبيهات الأسبوعية — نفس محرّك لوحة المشرف (نفس الـ id) ══
+function wkTerm(){ return VIEW_TERM||CUR_TERM; }
+Object.defineProperty(window,'WK_TOTAL',{ get:()=>termWeeks(wkTerm(),'الأبطال'), configurable:true });
+const WK_AR_NUM=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون'];
+const WK_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function wkAr(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function wkBranchDays(branchName, t){ return termDays(t||wkTerm(), branchName); }
+function wkWeekDates(wIdx, branchName, t){ return termWeekDates(t||wkTerm(), wIdx, branchName||'الأبطال'); }
+function wkRangeOf(dates){ const s=dates.slice().sort((a,b)=>a-b), f=s[0], l=s[s.length-1]; return wkFmt(f)+' — '+wkFmt(l)+' '+wkAr(l.getFullYear()); }
+function wkFmt(d){ return wkAr(d.getDate())+' '+WK_MONTHS[d.getMonth()]; }
+function wkIso(d){ const m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+m+'-'+dd; }
+function svGetMyBranches(){ return ['الأبطال','الرواد','البنات'].filter(b=>(BRANCH_DATA[b]||[]).length); }   // الموظفة: كل الشعب
+function svBranchCircles(branchName){ return (BRANCH_DATA||{})[branchName] || []; }
+function svHash(str){ let h=0; str=String(str||''); for(let i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i)) & 0x7fffffff; } return h; }
+function svFmtArDate(iso){ try{ return new Date(iso+'T00:00:00').toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'}); }catch(e){ return iso; } }
+let WA_CURRENT=0, WA_DATA={}; const WA_INDEX={};
+window._waInit=false;
+function waPrevWeek(){ if(WA_CURRENT>0){ WA_CURRENT--; renderWAlerts(); } }
+function waNextWeek(){ if(WA_CURRENT<WK_TOTAL-1){ WA_CURRENT++; renderWAlerts(); } }
+async function waMigrateLegacyActions(){ /* ترحيل الصيف القديم بيتعمل من لوحة المشرف بس */ }
+function waOpenActionById(id){ const x=WA_INDEX[id]; if(!x){ showToast('⚠️ افتح صفحة التنبيهات تاني'); return; } waOpenAction(id, x.kind, x.text, x.branch); }
+function waResetCaches(){ window.WA_ANALYSIS={}; window.WA_MONTH_CACHE={}; window.WA_DETAILS={}; window._waInit=false; }
+
+// رصد أطول سلسلة متتالية لقيمة معينة داخل مصفوفة
+function waMaxStreak(arr, matchFn){
+  let max=0, cur=0;
+  arr.forEach(v=>{ if(matchFn(v)){ cur++; if(cur>max) max=cur; } else cur=0; });
+  return max;
+}
+
+// تحليل شعبة لأسبوع معيّن
+// ══════════════════════════════════════════════════════
+// محرّك التنبيهات — بيانات حقيقية بالـ ID على نطاق الشهر المحيط بالأسبوع
+// ══════════════════════════════════════════════════════
+window.WA_ANALYSIS = window.WA_ANALYSIS || {};
+
+// حدود الشهر التقويمي الذي تقع فيه بداية الأسبوع
+function waMonthRange(weekIdx){
+  const ref = termWeekFirst(wkTerm(), weekIdx, 'الأبطال');   // أول يوم في الأسبوع (مرجع)
+  const mStart = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  const mEnd   = new Date(ref.getFullYear(), ref.getMonth()+1, 0);
+  return { from: wkIso(mStart), to: wkIso(mEnd) };
+}
+
+// تحميل بيانات التحليل من Supabase (الشهر) وتخزينها بالكاش
+async function waLoadAnalysis(weekIdx){
+  if(window.WA_ANALYSIS[weekIdx]) return window.WA_ANALYSIS[weekIdx];
+  const mr = waMonthRange(weekIdx);
+  window.WA_MONTH_CACHE = window.WA_MONTH_CACHE || {};
+  if(window.WA_MONTH_CACHE[mr.from]){ window.WA_ANALYSIS[weekIdx] = window.WA_MONTH_CACHE[mr.from]; return window.WA_ANALYSIS[weekIdx]; }
+  const A = { month: mr, attByStu:{}, memByStu:{}, sessByTB:{}, stuName:{}, stuCircle:{} };
+
+  const circleIds = [];
+  svGetMyBranches().forEach(b=> svBranchCircles(b).forEach(c=>{ if(c.circleId) circleIds.push(c.circleId); }));
+
+  const stuIds = [];
+  try{
+    if(circleIds.length){
+      const { data:studs } = await db.from('students')
+        .select('id,circle_id,users!students_user_id_fkey(full_name)')
+        .in('circle_id', circleIds).eq('is_active', true);
+      (studs||[]).forEach(s=>{
+        A.stuName[s.id]   = (s.users&&s.users.full_name)||'طالب';
+        A.stuCircle[s.id] = s.circle_id;
+        stuIds.push(s.id);
+      });
+    }
+  }catch(e){ loadWarn(e); }
+
+  try{
+    if(stuIds.length){
+      const { data:att, error:_ea } = await selectAll(db.from('attendance')
+        .select('student_id,date,status,late_minutes')
+        .in('student_id', stuIds).gte('date',mr.from).lte('date',mr.to).order('date',{ascending:true}).order('student_id'));
+      if(_ea) throw _ea;
+      (att||[]).forEach(a=>{ (A.attByStu[a.student_id]=A.attByStu[a.student_id]||[]).push(a); });
+    }
+  }catch(e){ loadWarn(e); }
+
+  try{
+    if(stuIds.length){
+      const { data:mem, error:_em } = await selectAll(db.from('memorization')
+        .select('student_id,date,type,grade')
+        .in('student_id', stuIds).gte('date',mr.from).lte('date',mr.to).order('date',{ascending:true}).order('student_id').order('type'));
+      if(_em) throw _em;
+      (mem||[]).forEach(m=>{ (A.memByStu[m.student_id]=A.memByStu[m.student_id]||[]).push(m); });
+    }
+  }catch(e){ loadWarn(e); }
+
+  // الجلسات الإشرافية (حضور/تأخير المعلم) — مفتاح: teacher||branch (منفصل لكل شعبة)
+  try{
+    const { data:sess, error:_es } = await selectAll(db.from('supervisory_sessions')
+      .select('id,teacher_name,branch,session_date,attendance,late_min')
+      .gte('session_date',mr.from).lte('session_date',mr.to).order('session_date',{ascending:true}).order('id'));
+    if(_es) throw _es;
+    (sess||[]).forEach(s=>{ const k=(s.teacher_name||'')+'||'+(s.branch||''); (A.sessByTB[k]=A.sessByTB[k]||[]).push(s); });
+  }catch(e){ loadWarn(e); }
+
+  window.WA_MONTH_CACHE[mr.from] = A;
+  window.WA_ANALYSIS[weekIdx] = A;
+  return A;
+}
+
+// عتبات التنبيهات
+const WA_TH = { absStreak:3, absScatter:6, tAbsStreak:3, tLateMonth:100, gradeStreak:3, stuLateWeek:100 };
+
+// تحليل شعبة — يقرأ من الكاش (متزامن)
+function waAnalyzeBranch(branchName, weekIdx){
+  if(weekIdx===undefined) weekIdx = WA_CURRENT;
+  const alerts=[], warnings=[];
+  const A = (window.WA_ANALYSIS||{})[weekIdx];
+  if(!A) return { alerts, warnings };
+
+  // تواريخ أيام الأسبوع المعروض لهذه الشعبة (لقاعدة تأخير الطالب الأسبوعي)
+  const wdates  = wkWeekDates(weekIdx, branchName);
+  const weekSet = new Set(wkBranchDays(branchName).map(di=>wdates[di]).filter(Boolean).map(wkIso));
+
+  svBranchCircles(branchName).forEach(c=>{
+    const teacher = c.teacher, cid = c.circleId;
+    const toInt = v => parseInt(String(v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)),10)||0;
+
+    // ── المعلم (من الجلسات الإشرافية، مقيّدة بالشعبة) ──
+    const sess = A.sessByTB[teacher+'||'+branchName] || [];
+    const tAbsStreak = waMaxStreak(sess.map(s=>s.attendance), a=>a==='غائب');
+    if(tAbsStreak>=WA_TH.tAbsStreak)
+      warnings.push({type:'red', icon:'⛔', key:'t-abs|'+teacher, text:`إنذار: المعلم/ ${teacher} غاب ${wkAr(tAbsStreak)} مرات متتالية خلال الشهر`,
+        _detail:{ intro:'أيام غياب المعلم المسجّلة خلال الشهر:', rows: sess.filter(s=>s.attendance==='غائب').map(s=>({date:s.session_date, note:'غائب'})) }});
+    let tLate=0; sess.forEach(s=>{ tLate += toInt(s.late_min); });
+    if(tLate>=WA_TH.tLateMonth)
+      alerts.push({type:'gold', icon:'⏱️', key:'t-late|'+teacher, text:`المعلم/ ${teacher} — تأخير ${wkAr(tLate)} دقيقة مجمّعة خلال الشهر`,
+        _detail:{ intro:'أيام تأخير المعلم خلال الشهر:', total:wkAr(tLate)+' دقيقة', rows: sess.map(s=>({d:s.session_date,m:toInt(s.late_min)})).filter(x=>x.m>0).map(x=>({date:x.d, note:wkAr(x.m)+' دقيقة'})) }});
+
+    // ── طلاب الحلقة (بالـ id) ──
+    const stuIds = Object.keys(A.stuCircle).filter(id=>A.stuCircle[id]===cid);
+    stuIds.forEach(sid=>{
+      const sName = A.stuName[sid] || 'طالب';
+      const attL  = A.attByStu[sid] || [];       // الشهر، مرتبة بالتاريخ
+      const memAll= A.memByStu[sid] || [];
+      const memL  = memAll.filter(m=>m.type!=='review');   // الحفظ
+      const revL  = memAll.filter(m=>m.type==='review');   // المراجعة
+      const absRows   = attL.filter(a=>a.status==='absent').map(a=>({date:a.date, note:'غائب'}));
+      const gradeRows = (list,g)=> list.filter(m=>m.grade===g).map(m=>({date:m.date, note:g==='good'?'جيد':'إعادة'}));
+
+      // 1) غياب متتالي ≥ 3
+      const absStreak = waMaxStreak(attL.map(a=>a.status), s=>s==='absent');
+      if(absStreak>=WA_TH.absStreak)
+        alerts.push({type:'red', icon:'🚫', key:'s-abs|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absStreak)} مرات متتالية`,
+          _detail:{ intro:'الأيام الغائب فيها خلال الشهر:', rows:absRows }});
+
+      // 2) غياب متقطع ≥ 6 خلال الشهر
+      const absTotal = attL.filter(a=>a.status==='absent').length;
+      if(absTotal>=WA_TH.absScatter)
+        warnings.push({type:'red', icon:'📛', key:'s-absm|'+sid, text:`إنذار: الطالب ${sName} (حلقة ${teacher}) — غياب ${wkAr(absTotal)} مرات متقطعة خلال الشهر`,
+          _detail:{ intro:'الأيام الغائب فيها بالتواريخ:', rows:absRows }});
+
+      // 5) تقدير "جيد" متتالي ≥ 3 (حفظ/مراجعة)
+      const memGood = waMaxStreak(memL.map(m=>m.grade), g=>g==='good');
+      if(memGood>=WA_TH.gradeStreak)
+        alerts.push({type:'blue', icon:'📖', key:'s-memgood|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في الحفظ ${wkAr(memGood)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "جيد" في الحفظ:', rows:gradeRows(memL,'good') }});
+      const revGood = waMaxStreak(revL.map(m=>m.grade), g=>g==='good');
+      if(revGood>=WA_TH.gradeStreak)
+        alerts.push({type:'blue', icon:'🔁', key:'s-revgood|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "جيد" في المراجعة ${wkAr(revGood)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "جيد" في المراجعة:', rows:gradeRows(revL,'good') }});
+
+      // 6) تقدير "إعادة" متتالي ≥ 3 (حفظ/مراجعة)
+      const memRetry = waMaxStreak(memL.map(m=>m.grade), g=>g==='retry');
+      if(memRetry>=WA_TH.gradeStreak)
+        alerts.push({type:'gold', icon:'📕', key:'s-memretry|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في الحفظ ${wkAr(memRetry)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "إعادة" في الحفظ:', rows:gradeRows(memL,'retry') }});
+      const revRetry = waMaxStreak(revL.map(m=>m.grade), g=>g==='retry');
+      if(revRetry>=WA_TH.gradeStreak)
+        alerts.push({type:'gold', icon:'🔂', key:'s-revretry|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تقدير "إعادة" في المراجعة ${wkAr(revRetry)} مرات متتالية`,
+          _detail:{ intro:'تواريخ تقدير "إعادة" في المراجعة:', rows:gradeRows(revL,'retry') }});
+
+      // 7) تأخير الطالب ≥ 100 دقيقة خلال الأسبوع المعروض
+      let lateWeek=0; const lateRows=[];
+      attL.forEach(a=>{ if(weekSet.has(a.date) && a.status==='late'){ lateWeek += (a.late_minutes||0); lateRows.push({date:a.date, note:wkAr(a.late_minutes||0)+' دقيقة'}); } });
+      if(lateWeek>=WA_TH.stuLateWeek)
+        alerts.push({type:'gold', icon:'⏰', key:'s-late|'+sid, text:`الطالب ${sName} (حلقة ${teacher}) — تأخير ${wkAr(lateWeek)} دقيقة خلال الأسبوع`,
+          _detail:{ intro:'أيام التأخير خلال الأسبوع:', total:wkAr(lateWeek)+' دقيقة', rows:lateRows }});
+    });
+  });
+
+  // id ثابت لكل عنصر + تخزين التفاصيل
+  window.WA_DETAILS = window.WA_DETAILS || {};
+  const stamp = (a)=>{
+    const _t = wkTerm();
+    a.id = 'wa_' + (termIsLegacy(_t) ? '' : ('t' + String((_t&&_t.code)||'x').replace(/[^a-z0-9]/gi,'') + '_')) + svHash(branchName + '|' + (a.key || a.text));   // ثابت — مستقل عن رقم الأسبوع (يمنع تكرار التنبيه اللي اتّخذ فيه إجراء)
+    if(a._detail){ a._detail.title = a.text; window.WA_DETAILS[a.id] = a._detail; delete a._detail; }
+    return a;
+  };
+  alerts.forEach(stamp); warnings.forEach(stamp);
+  return { alerts, warnings };
+}
+
+// ══ تجميع تنبيهات كل الأسابيع (٠..الأسبوع المعروض) بالـ id الثابت ══
+// النتيجة: التنبيه اللي لم يُتخذ فيه إجراء يتكرر كل أسبوع تالٍ لحد ما يُتخذ معه إجراء.
+// اللي مش موجود في تحليل الأسبوع الحالي يُعلَّم _carried (مُرحَّل من أسبوع سابق).
+async function waAccumulate(branch, uptoWeek){
+  const byId = {};
+  for(let w=0; w<=uptoWeek; w++){
+    try{ await waLoadAnalysis(w); }catch(e){}
+    const r = waAnalyzeBranch(branch, w);
+    r.warnings.forEach(a=>{ byId[a.id]=Object.assign({}, a, {_kind:'warning'}); });   // الأحدث يكتب فوق (نص محدّث)
+    r.alerts  .forEach(a=>{ byId[a.id]=Object.assign({}, a, {_kind:'alert'  }); });
+  }
+  const cur = waAnalyzeBranch(branch, uptoWeek);
+  const curIds = new Set([...cur.warnings, ...cur.alerts].map(a=>a.id));
+  const warnings=[], alerts=[];
+  Object.values(byId).forEach(a=>{ a._carried = !curIds.has(a.id); (a._kind==='warning'?warnings:alerts).push(a); });
+  return { alerts, warnings };
+}
+
+
+// ══ تخزين الإجراءات — Supabase (مشترك بين كل الأجهزة وكل المشرفين والمديرين) ══
+window.WA_ACTS = window.WA_ACTS || {};   // { alert_id: {action_text, taken_by_name, updated_at} }
+window._waActsLoaded = false;
+
+async function waEnsureSession(){
+  try{
+    const {data:{session}} = await db.auth.getSession();
+    if(!session) return false;
+    if(((session.expires_at||0)*1000 - Date.now()) < 120000){
+      const {data,error} = await db.auth.refreshSession();
+      return !error && !!(data&&data.session);
+    }
+    return true;
+  }catch(e){ return false; }
+}
+function waErr(e){
+  const m = String((e&&(e.message||e.error))||e||'');
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'الشبكة مقطوعة';
+  if(/401|jwt|expired|Unauthorized/i.test(m))             return 'الجلسة انتهت — اعمل خروج ودخول تاني';
+  if(/42P01|does not exist|relation/i.test(m))            return 'جدول weekly_alert_actions مش موجود — شغّل ملف SQL';
+  if(/403|policy|row-level|violates/i.test(m))            return 'الصلاحية مرفوضة (RLS)';
+  return m || 'خطأ غير معروف';
+}
+
+// تحميل كل الإجراءات من القاعدة مرة واحدة (ثم تحديث عند كل حفظ)
+async function waFetchActions(force){
+  if(window._waActsLoaded && !force) return window.WA_ACTS;
+  try{
+    const {data,error} = await selectAll(db.from('weekly_alert_actions').select('alert_id,action_text,taken_by_name,updated_at,week_idx,branch,alert_text').order('alert_id'));
+    if(error) throw error;
+    const m = {};
+    (data||[]).forEach(r=>{ m[r.alert_id] = { action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; });
+    // توافق رجعي: الإجراءات القديمة اتخزّنت بـ id فيه رقم الأسبوع — نطابقها بالـ id الثابت الجديد
+    (data||[]).forEach(r=>{ const mo=/^wa_\d+_(.+)$/.exec(r.alert_id||''); if(mo){ const nid='wa_'+mo[1]; if(!m[nid]) m[nid]={ action_text:r.action_text, taken_by_name:r.taken_by_name||'', updated_at:r.updated_at }; } });
+    window.WA_ACTS = m;
+    window.WA_ACTS_RAW = data||[];   // خام — للترحيل من الـ id القديم للـ id الثابت الجديد
+    window._waActsLoaded = true;
+    await waMigrateLocal();     // ترحيل الإجراءات القديمة من الجهاز مرة واحدة
+  }catch(e){
+    console.warn('waFetchActions:', e);
+    if(typeof showToast==='function') showToast('⚠️ تعذّر تحميل الإجراءات: '+waErr(e));
+  }
+  return window.WA_ACTS;
+}
+
+// ترحيل الإجراءات القديمة المخزّنة محلياً على الجهاز → القاعدة (مرة واحدة فقط)
+async function waMigrateLocal(){
+  let old = {};
+  try{ old = JSON.parse(localStorage.getItem('wa_actions')||'{}'); }catch(e){ return; }
+  const ids = Object.keys(old).filter(id=>old[id] && !window.WA_ACTS[id]);
+  if(!ids.length){ try{ localStorage.removeItem('wa_actions'); }catch(e){} return; }
+  let done = 0;
+  for(const id of ids){
+    const ok = await waPutAction(id, old[id], null, null, true);
+    if(ok) done++;
+  }
+  try{ localStorage.removeItem('wa_actions'); }catch(e){}
+  if(done && typeof showToast==='function') showToast('☁️ تم رفع '+wkAr(done)+' إجراء كان محفوظ على الجهاز ده');
+}
+
+// كتابة/تعديل/حذف إجراء — select ثم update/insert (بدل upsert)
+async function waPutAction(id, text, weekIdx, branch, quiet){
+  if(!(await waEnsureSession())){ if(!quiet) showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); return false; }
+  let me={}; try{ me = JSON.parse(localStorage.getItem('currentUser')||'{}')||{}; }catch(e){}
+  try{
+    if(!text){
+      const {error} = await db.from('weekly_alert_actions').delete().eq('alert_id', id);
+      if(error) throw error;
+      delete window.WA_ACTS[id];
+      return true;
+    }
+    const meta = (window.WA_DETAILS||{})[id] || {};
+    const body = { action_text:text, taken_by:me.id||null, taken_by_name:me.full_name||'', updated_at:new Date().toISOString() };
+    const {data:ex} = await db.from('weekly_alert_actions').select('alert_id').eq('alert_id', id).maybeSingle();
+    if(ex){
+      const {data,error} = await db.from('weekly_alert_actions').update(body).eq('alert_id', id).select('alert_id');
+      if(error) throw error;
+      if(!data || !data.length) throw new Error('التعديل مرفوض من RLS (صفر صفوف)');
+    } else {
+      const row = Object.assign({ alert_id:id, week_idx:(weekIdx==null?WA_CURRENT:weekIdx), branch:branch||null, alert_text:meta.title||null }, body);
+      const {data,error} = await db.from('weekly_alert_actions').insert(row).select('alert_id');
+      if(error) throw error;
+      if(!data || !data.length){
+        const {data:chk} = await db.from('weekly_alert_actions').select('alert_id').eq('alert_id', id).maybeSingle();
+        if(!chk) throw new Error('الإضافة مرفوضة من RLS');
+      }
+    }
+    window.WA_ACTS[id] = { action_text:text, taken_by_name:me.full_name||'', updated_at:body.updated_at };
+    return true;
+  }catch(e){
+    if(!quiet) showToast('❌ تعذّر حفظ الإجراء: '+waErr(e));
+    return false;
+  }
+}
+
+// واجهات متوافقة مع باقي الكود (متزامنة — تقرأ من الكاش)
+function waLoadActions(){
+  const m = {};
+  Object.keys(window.WA_ACTS||{}).forEach(k=>{ m[k] = window.WA_ACTS[k].action_text; });
+  return m;
+}
+function waGetAction(id){ return (window.WA_ACTS[id]||{}).action_text || ''; }
+function waActionBy(id){ const a=window.WA_ACTS[id]; return a ? (a.taken_by_name||'') : ''; }
+function waActionWhen(id){
+  const a=window.WA_ACTS[id]; if(!a||!a.updated_at) return '';
+  try{ return new Date(a.updated_at).toLocaleDateString('ar-EG',{day:'numeric',month:'long'}); }catch(e){ return ''; }
+}
+function waHasAction(id){ return !!window.WA_ACTS[id]; }
+
+
+// ── فصل: اللي مالوش إجراء يفضل ظاهر • اللي ليه إجراء يروح لقسم «تم اتخاذ إجراء» ──
+function waSplitByAction(list){
+  const open=[], closed=[];
+  list.forEach(a=>{ (waHasAction(a.id) ? closed : open).push(a); });
+  return { open, closed };
+}
+function waSortByAction(list){
+  const {open, closed} = waSplitByAction(list);
+  return open.concat(closed);
+}
+
+// ── فتح مودال الإجراء ──
+let WA_ACTION_CTX = null;
+function waOpenAction(id, kind, text, branch){
+  WA_ACTION_CTX = { id, kind, branch:branch||null };
+  const existing = waGetAction(id);
+  document.getElementById('wa-action-alert-text').textContent = text;
+  document.getElementById('wa-action-input').value = existing;
+  document.getElementById('wa-action-title').textContent = existing ? '✏️ تعديل الإجراء المتخذ' : '✅ تسجيل الإجراء المتخذ';
+  // مين اتخذ الإجراء وإمتى — يمنع تكرار الإجراءات بين المشرفين
+  const by = waActionBy(id), when = waActionWhen(id);
+  const el = document.getElementById('wa-action-by');
+  if(el){
+    if(existing && by){ el.style.display='block'; el.innerHTML = '👤 سُجِّل بواسطة: <b>'+esc(by)+'</b>'+(when?(' • '+esc(when)):''); }
+    else el.style.display='none';
+  }
+  openModal('modal-wa-action');
+  setTimeout(()=>{ const e2=document.getElementById('wa-action-input'); if(e2) e2.focus(); }, 120);
+}
+
+// ── عرض البيان التفصيلي للتنبيه (التواريخ) ──
+function waShowDetail(id){
+  const d = (window.WA_DETAILS||{})[id];
+  const titleEl = document.getElementById('wa-detail-title');
+  const bodyEl  = document.getElementById('wa-detail-body');
+  if(!titleEl || !bodyEl) return;
+  if(!d){
+    titleEl.textContent = 'بيان التنبيه';
+    bodyEl.innerHTML = '<div class="empty" style="padding:22px;"><span class="empty-icon">📭</span>لا يوجد بيان تفصيلي لهذا التنبيه</div>';
+    openModal('modal-wa-detail'); return;
+  }
+  titleEl.textContent = d.title || 'بيان التنبيه';
+  let html = `<div style="font-size:.85rem;font-weight:700;color:var(--forest);margin-bottom:12px;line-height:1.7;">${d.intro||''}</div>`;
+  if(d.total) html += `<div style="margin-bottom:12px;"><span class="badge bg-gold" style="font-size:.76rem;">الإجمالي: ${d.total}</span></div>`;
+  if(!d.rows || !d.rows.length){
+    html += '<div class="empty" style="padding:18px;"><span class="empty-icon">📭</span>لا توجد تواريخ مسجّلة</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:7px;">' + d.rows.map((r,i)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid var(--border);border-right:3px solid var(--red);border-radius:var(--r-sm);background:var(--white);">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <span style="width:23px;height:23px;border-radius:50%;background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--mid);font-weight:700;flex-shrink:0;">${wkAr(i+1)}</span>
+          <span style="font-size:.85rem;font-weight:700;color:var(--forest);">${svFmtArDate(r.date)}</span>
+        </div>
+        <span class="badge bg-red" style="font-size:.72rem;flex-shrink:0;">${esc(r.note||'')}</span>
+      </div>`).join('') + '</div>';
+  }
+  bodyEl.innerHTML = html;
+  openModal('modal-wa-detail');
+}
+
+// ── حفظ الإجراء ──
+async function waSaveAction(){
+  if(!WA_ACTION_CTX) return;
+  const btn = document.getElementById('wa-action-save');
+  const val = document.getElementById('wa-action-input').value.trim();
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ جارٍ الحفظ…'; }
+  const ok = await waPutAction(WA_ACTION_CTX.id, val, WA_CURRENT, WA_ACTION_CTX.branch);
+  if(btn){ btn.disabled = false; btn.textContent = '💾 حفظ الإجراء'; }
+  if(!ok) return;                       // الرسالة اتعرضت جوّه waPutAction — المودال يفضل مفتوح
+  closeModal('modal-wa-action');
+  showToast(val ? '✅ تم حفظ الإجراء — ظاهر لكل المشرفين والمديرين' : '🗑️ تم حذف الإجراء');
+  await waFetchActions(true);
+  renderWAlerts();
+  waSyncDashboard();   // حدّث لوحة القيادة فوراً
+}
+
+// ── رقم الأسبوع الجاري فعلياً (حسب التاريخ الحالي) ──
+function waCurrentWeekIndex(t){
+  return termWeekIndex(t||wkTerm(), 'الأبطال');
+}
+
+
+// رسم صفحة التنبيهات
+async function renderWAlerts(){
+  // اضبط على الأسبوع الجاري (أول مرة فقط)
+  if(!window._waInit){
+    WA_CURRENT = waCurrentWeekIndex();
+    window._waInit = true;
+  }
+  // حمّل بيانات التحليل + الإجراءات من القاعدة (مشتركة بين كل الأجهزة) قبل الرصد
+  await waLoadAnalysis(WA_CURRENT);
+  await waFetchActions(true);
+
+  const dates = wkWeekDates(WA_CURRENT);
+  document.getElementById('wa-week-title').textContent  = 'الأسبوع '+WK_AR_NUM[WA_CURRENT];
+  document.getElementById('wa-week-range').textContent  = wkRangeOf(dates)+' • '+(wkTerm()?wkTerm().name:'');
+  document.getElementById('wa-week-counter').textContent= 'أسبوع '+wkAr(WA_CURRENT+1)+' / '+wkAr(WK_TOTAL);
+  document.getElementById('wa-prev').disabled = WA_CURRENT===0;
+  document.getElementById('wa-next').disabled = WA_CURRENT===WK_TOTAL-1;
+
+  const branches = svGetMyBranches();
+  WA_DATA = {};
+  let totAlerts=0, totWarn=0, totOpen=0, totDone=0;
+  for(const b of branches){
+    const r = await waAccumulate(b, WA_CURRENT); WA_DATA[b]=r;
+    await waMigrateLegacyActions(WA_CURRENT, b, [...r.alerts, ...r.warnings]);   // ترحيل قبل حساب النِّسب
+    [...r.alerts, ...r.warnings].forEach(a=>{ WA_INDEX[a.id]={text:a.text, branch:b, kind:(r.warnings.includes(a)?'warning':'alert')}; });
+    totAlerts += r.alerts.length; totWarn += r.warnings.length;
+    [...r.alerts, ...r.warnings].forEach(a=>{ waHasAction(a.id) ? totDone++ : totOpen++; });
+  }
+
+  // إحصائيات
+  document.getElementById('wa-stats').innerHTML = `
+    <div class="stat-card gold"><span class="stat-icon">🔔</span><div class="stat-val">${wkAr(totOpen)}</div><div class="stat-lbl">تنبيهات مفتوحة</div><div class="stat-sub">لم يُتخذ فيها إجراء</div></div>
+    <div class="stat-card" style="border-top-color:var(--red);"><span class="stat-icon">⛔</span><div class="stat-val" style="color:var(--red);">${wkAr(totWarn)}</div><div class="stat-lbl">إنذارات</div><div class="stat-sub">تستوجب إجراء</div></div>
+    <div class="stat-card green"><span class="stat-icon">✅</span><div class="stat-val">${wkAr(totDone)}</div><div class="stat-lbl">تم اتخاذ إجراء</div><div class="stat-sub">مسجّل للجميع</div></div>
+    <div class="stat-card" style="border-top-color:var(--blue);"><span class="stat-icon">🏫</span><div class="stat-val" style="color:var(--blue);">${wkAr(branches.length)}</div><div class="stat-lbl">الشعب</div><div class="stat-sub">تحت المتابعة</div></div>`;
+
+  // ── مؤشّر الإنجاز: نسبة التنبيهات اللي اتُّخذ فيها إجراء (يفرّق المُنجَز عن المفتوح) ──
+  const totAll = totOpen + totDone;
+  const pct = totAll ? Math.round(totDone*100/totAll) : 0;
+  const prog = document.getElementById('wa-progress');
+  if(prog){
+    if(totAll){
+      const barCol = pct>=80?'var(--jade)':(pct>=40?'var(--gold)':'var(--red)');
+      prog.style.display='block';
+      prog.innerHTML = `
+        <div style="background:var(--white);border:1.5px solid var(--border);border-top:3px solid ${barCol};border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:9px;">
+            <div style="font-weight:800;color:var(--forest);font-size:.92rem;">📊 نسبة الإنجاز في متابعة التنبيهات</div>
+            <div style="font-weight:800;color:${barCol};font-size:1.05rem;">${wkAr(pct)}٪ <span style="font-size:.74rem;color:var(--light);font-weight:600;">(${wkAr(totDone)} من ${wkAr(totAll)})</span></div>
+          </div>
+          <div style="height:12px;background:var(--bg);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${barCol};border-radius:99px;transition:width .5s;"></div>
+          </div>
+          <div style="margin-top:7px;font-size:.74rem;color:var(--light);">${totOpen? ('متبقّي '+wkAr(totOpen)+' تنبيه بدون إجراء') : '👏 تم اتخاذ إجراء في كل التنبيهات'}</div>
+        </div>`;
+    } else { prog.style.display='none'; prog.innerHTML=''; }
+  }
+
+  // بطاقات الشعب
+  const colorMap = {
+    red:  {bg:'var(--red-pale)',  color:'var(--red)',  border:'var(--red)'},
+    gold: {bg:'var(--gold-pale)', color:'var(--gold)', border:'var(--gold)'},
+    green:{bg:'var(--pale)',      color:'var(--jade)',  border:'var(--jade)'},
+    blue: {bg:'var(--blue-pale)', color:'var(--blue)',  border:'var(--blue)'},
+  };
+  const wrap = document.getElementById('wa-branches');
+
+  // زر الإجراء (SVG)
+  const actionBtn = (id)=>{
+    const has  = waHasAction(id);
+    return `<button class="btn ${has?'btn-outline':'btn-primary'} btn-xs" onclick="waOpenActionById('${id}')" style="flex-shrink:0;align-self:center;">✔ ${has?'تعديل':'الإجراء'}</button>`;
+  };
+  // سطر الإجراء المحفوظ + مين اتخذه (يمنع تكرار الإجراءات بين المشرفين)
+  const actionLine = (id)=>{
+    if(!waHasAction(id)) return '';
+    const by = waActionBy(id), when = waActionWhen(id);
+    const sig = (by||when) ? `<div style="font-size:.68rem;color:var(--light);margin-top:4px;">👤 ${esc(by||'—')}${when?(' • '+esc(when)):''}</div>` : '';
+    return `<div style="margin-top:7px;padding:7px 11px;background:var(--pale);border-radius:var(--r-sm);font-size:.76rem;color:var(--jade);line-height:1.6;"><span style="font-weight:700;">الإجراء المتخذ:</span> ${esc(waGetAction(id))}${sig}</div>`;
+  };
+
+  wrap.innerHTML = branches.map(b=>{
+    const cfg = SV_DB_BRANCH_CFG[b] || SV_DB_BRANCH_CFG['الأبطال'];
+    const r = WA_DATA[b] || {alerts:[],warnings:[]};
+
+    // ★ تعديل ١: المفتوح فوق • المتخذ فيه إجراء يتنقل لقسم مطوي منفصل (ما يتكررش وسط الجديد)
+    const wSplit = waSplitByAction(r.warnings), aSplit = waSplitByAction(r.alerts);
+
+    const warnItem = (a)=>{
+      const done = waHasAction(a.id);
+      const bg   = done ? 'var(--pale)'  : 'var(--red-pale)';
+      const bd   = done ? 'var(--jade)'  : 'var(--red)';
+      const col  = done ? 'var(--jade)'  : 'var(--red)';
+      return `<div style="display:flex;flex-direction:column;padding:11px 13px;background:${bg};border:1.5px solid ${bd};border-radius:var(--r-sm);margin-bottom:8px;">
+        <div style="display:flex;align-items:flex-start;gap:9px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.84rem;font-weight:700;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${esc(a.text||'')}${(a._carried&&!done)?' <span class="badge bg-gray" style="font-size:.6rem;font-weight:800;">🔁 مُكرّر</span>':''}</div>
+          ${actionBtn(a.id)}
+        </div>
+        ${actionLine(a.id)}
+      </div>`;
+    };
+    const alertItem = (a)=>{
+      const c = colorMap[a.type] || colorMap.gold;
+      const done = waHasAction(a.id);
+      const bg  = done ? 'var(--pale)' : c.bg;
+      const bd  = done ? 'var(--jade)' : c.border;
+      const col = done ? 'var(--jade)' : c.color;
+      return `<div style="display:flex;flex-direction:column;padding:10px 13px;background:${bg};border-right:3px solid ${bd};border-radius:var(--r-sm);margin-bottom:7px;">
+        <div style="display:flex;align-items:flex-start;gap:9px;">
+          <span style="font-size:1rem;flex-shrink:0;">${done?'✅':a.icon}</span>
+          <div onclick="waShowDetail('${a.id}')" title="اضغط لعرض التواريخ" style="flex:1;font-size:.82rem;font-weight:600;color:${col};line-height:1.6;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;">${esc(a.text||'')}${(a._carried&&!done)?' <span class="badge bg-gray" style="font-size:.6rem;font-weight:800;">🔁 مُكرّر</span>':''}</div>
+          ${actionBtn(a.id)}
+        </div>
+        ${actionLine(a.id)}
+      </div>`;
+    };
+
+    const openHtml   = wSplit.open.map(warnItem).join('') + aSplit.open.map(alertItem).join('');
+    const closedList = [...wSplit.closed, ...aSplit.closed];
+    const closedHtml = closedList.length ? `
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;font-size:.82rem;font-weight:800;color:var(--jade);padding:9px 12px;background:var(--pale);border-radius:var(--r-sm);list-style:none;user-select:none;">
+          ✅ تم اتخاذ إجراء (${wkAr(closedList.length)}) — اضغط للعرض
+        </summary>
+        <div style="margin-top:9px;">${wSplit.closed.map(warnItem).join('')}${aSplit.closed.map(alertItem).join('')}</div>
+      </details>` : '';
+
+    const openCount = wSplit.open.length + aSplit.open.length;
+    const empty = (!r.warnings.length && !r.alerts.length);
+    return `<div class="card" style="margin-bottom:0;border-top:3px solid ${cfg.accent};">
+      <div class="card-head" style="background:${cfg.bg};display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div class="card-title" style="display:flex;align-items:center;gap:8px;font-size:1.02rem;">
+          شعبة ${b}
+          ${wSplit.open.length?`<span class="badge bg-red">${wkAr(wSplit.open.length)} إنذار</span>`:''}
+          <span class="badge bg-gray">${wkAr(openCount)} مفتوح</span>
+          ${closedList.length?`<span class="badge bg-green">${wkAr(closedList.length)} ✅</span>`:''}
+        </div>
+
+      </div>
+      <div style="padding:14px;">
+        ${empty ? '<div class="empty" style="padding:18px;"><span class="empty-icon">✅</span>لا توجد تنبيهات هذا الأسبوع — كل شيء على ما يرام</div>'
+          : ((openHtml || '<div class="empty" style="padding:16px;"><span class="empty-icon">👏</span>كل التنبيهات اتخذ فيها إجراء</div>') + closedHtml)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+
+// ══ التنقل ══
+const PAGE_TITLES={ home:'🏠 الرئيسية', students:'👨‍🎓 الطلاب والطالبات', walerts:'🔔 التنبيهات الأسبوعية', settings:'⚙️ الإعدادات' };
+function nav(el, pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const pg=$('page-'+pageId)||$('page-home'); pg.classList.add('active');
+  const it=el||document.querySelector(`.sb-item[onclick*="'${pageId}'"]`); if(it) it.classList.add('active');
+  $('tb-title').textContent=PAGE_TITLES[pageId]||'';
+  toggleSide(false); window.scrollTo(0,0);
+  if(pageId==='home') renderHome();
+  if(pageId==='students') renderStudents();
+  if(pageId==='walerts'){ $('wa-branches').innerHTML='<div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري حساب التنبيهات…</div>';
+    renderWAlerts().catch(e=>{ loadWarn(e); $('wa-branches').innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ التنبيهات ما اتحسبتش — اعمل تحديث</div>'; }); }
+}
+function navPage(pageId){ nav(document.querySelector(`.sb-item[onclick*="'${pageId}'"]`), pageId); }
+
+async function changeMyPassword(){
+  const a=$('np1').value, b=$('np2').value;
+  if(a.length<6){ showToast('كلمة المرور لازم ٦ على الأقل'); return; }
+  if(a!==b){ showToast('كلمتين المرور مش متطابقين'); return; }
+  const btn=$('np-btn'); btn.disabled=true;
+  try{ const {error}=await db.auth.updateUser({password:a}); if(error) throw error; showToast('✅ كلمة المرور اتغيّرت'); $('np1').value=''; $('np2').value=''; }
+  catch(e){ console.warn(e); showToast('⚠️ ما اتغيّرتش — جرّب تاني'); }
+  finally{ btn.disabled=false; }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ['modal-stu','modal-sf','modal-wa-action','modal-wa-detail'].forEach(closeModal); toggleSide(false); } });
+
+// ══ الإقلاع ══
+async function init(){
+  ME=await verifyMe(['employee','admin']); if(!ME) return;
+  await loadTerms(); termRenderSelect();
+  const title=(ME.job_title?ME.job_title+'/ ':'')+cleanName(ME.full_name||'');
+  $('sb-uname').textContent=title; $('sb-avatar').textContent=(cleanName(ME.full_name||'م').replace(/^أم\s+/,'')||'م').charAt(0);
+  $('w-hello').textContent='أهلاً، '+title; $('set-login').textContent=String(ME.username||'').replace('@tawheed.edu','');
+  await loadBase(); stFillBranches(); renderHome();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>

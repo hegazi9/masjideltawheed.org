@@ -3012,6 +3012,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="addCpRow()">➕ صف جديد</button>
+        <button class="btn btn-outline btn-sm" onclick="fillCpTerm()" title="يضيف كل أيام حلقات الدورة الناقصة">📅 كل أيام الدورة</button>
         <button class="btn btn-primary btn-sm" onclick="saveCpAll()">💾 حفظ التعديلات</button>
       </div>
     </div>
@@ -4869,8 +4870,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- ══ FOOTER ══ -->
-<div style="text-align:center;padding:20px 28px;border-top:1px solid var(--border);margin-top:auto;font-size:.78rem;color:var(--light);display:flex;align-items:center;justify-content:space-between;">
-  <span>جميع الحقوق محفوظة © ٢٠٢٤ مدرسة التوحيد القرآنية.</span>
+<div style="text-align:center;padding:20px 28px;border-top:1px solid var(--border);margin-top:auto;font-size:.78rem;color:var(--light);display:flex;align-items:center;justify-content:center;">
   <span style="display:flex;align-items:center;gap:5px;">برمجة وتطوير: <strong style="color:var(--jade);">فريق التطوير</strong> <span style="color:#e25555;">♥️</span></span>
 </div>
 
@@ -5832,39 +5832,70 @@ const BRANCH_DATA = {
 function getStudentData(key) { return {}; }
 function saveStudentData(key, obj) { /* لا تخزين محلي */ }
 
-function buildStudentRow(s, i, key, d, color, safeId) {
+function buildStudentRow(s, i, key, d, color, safeId, sid) {
   const sEsc = s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  return `<tr
-    oncontextmenu="showStudentMenu(event,'${key}','${sEsc}','${safeId}');return false;"
-    ontouchstart="startLongPress(event,'${key}','${sEsc}','${safeId}')"
+  const c = 'padding:6px;text-align:center;';
+  return `<tr data-sid="${sid||''}"
+    oncontextmenu="_ctxSid='${sid||''}';showStudentMenu(event,'${key}','${sEsc}','${safeId}');return false;"
+    ontouchstart="_ctxSid='${sid||''}';startLongPress(event,'${key}','${sEsc}','${safeId}')"
     ontouchend="clearLongPress()"
     ontouchmove="clearLongPress()"
+    ondblclick="_ctxSid='${sid||''}';ctxEditStudent()"
     style="border-bottom:1px solid var(--border);cursor:pointer;"
-    onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
+    onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''" title="كليك يمين أو دبل كليك: تعديل البيانات">
     <td style="padding:6px 10px;color:var(--light);font-size:.75rem;text-align:center;">${i+1}</td>
-    <td style="padding:6px 10px;font-weight:600;">${s}</td>
-    <td style="padding:6px;text-align:center;">${d.age || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.mem || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.dad || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.mom || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.dob || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.pts || '—'}</td>
-    <td style="padding:6px;text-align:center;">${d.lvl || '—'}</td>
+    <td style="padding:6px 10px;font-weight:600;" data-f="name">${s}</td>
+    <td style="${c}" data-f="age">—</td>
+    <td style="${c}" data-f="mem">—</td>
+    <td style="${c}direction:ltr;" data-f="dad">—</td>
+    <td style="${c}direction:ltr;" data-f="mom">—</td>
+    <td style="${c}" data-f="dob">—</td>
+    <td style="${c}" data-f="pts">—</td>
+    <td style="${c}" data-f="lvl">—</td>
   </tr>`;
+}
+let _ctxSid = '';
+// يملا الجدول الطلابي من القاعدة (students_sheet) — مصدر واحد لكل اللوحات
+async function stuSheetFill(root){
+  root = root || document;
+  const trs = [...root.querySelectorAll('tr[data-sid]')].filter(tr => tr.dataset.sid);
+  if (!trs.length) return;
+  let M = {};
+  try { M = await stuEdSheet(trs.map(tr => tr.dataset.sid)); } catch(e){ loadWarn(e); return; }
+  trs.forEach(tr => {
+    const r = M[tr.dataset.sid]; if (!r) return;
+    const set = (f, v) => { const td = tr.querySelector('[data-f="'+f+'"]'); if (td) td.textContent = (v===null||v===undefined||v==='') ? '—' : v; };
+    const age = stuEdAge(r.date_of_birth);
+    set('name', r.full_name);
+    set('age', age==null ? '' : stuEdAr(age));
+    set('mem', r.memorized_parts ? stuEdAr(+r.memorized_parts) + ' جزء' : '');
+    set('dad', r.dad || r.parent_phone || '');
+    set('mom', r.mom);
+    set('dob', stuEdDob(r.date_of_birth));
+    set('pts', stuEdAr(r.total_points || 0));
+    set('lvl', r.level);
+  });
+}
+// بعد أي تعديل: حدّث القوايم + الجدول الطلابي
+async function stuAfterSave(){
+  try{ if (typeof refreshSupervisorData === 'function') await refreshSupervisorData(); }catch(e){ loadWarn(e); }
+  try{ if (typeof hydrateBranchDataFromDB === 'function') await hydrateBranchDataFromDB(); }catch(e){ loadWarn(e); }
+  const pg = document.querySelector('.page.active'); const br = pg ? BRANCH_BY_PAGE[pg.id.replace('page-','')] : null;
+  if (br) await renderBranchGrid(br);
 }
 
 
 // ══════════════════════════════════════
 // KEBAR CIRCLE CARD (اسم + هاتف فقط)
 // ══════════════════════════════════════
-function buildCircleCard(teacher, students, color, isFemale) {
+function buildCircleCard(teacher, students, color, isFemale, ids) {
   const safeId = teacher.replace(/\s+/g,'_');
   const prefix = isFemale ? 'المعلمة' : 'المعلم';
   const icon = isFemale ? '👩‍🏫' : '👨‍🏫';
   const rows = students.map((s, i) => {
     const key = safeId + '_' + i;
     const d = getStudentData(key);
-    return buildStudentRow(s, i, key, d, color, safeId);
+    return buildStudentRow(s, i, key, d, color, safeId, (ids||[])[i]);
   }).join('');
 
   return `
@@ -5946,8 +5977,9 @@ function refreshCircleCard(safeId) {
     tbody.innerHTML = circle.students.map((s, i) => {
       const key = safeId + '_' + i;
       const d = getStudentData(key);
-      return buildStudentRow(s, i, key, d, circle.color, safeId);
+      return buildStudentRow(s, i, key, d, circle.color, safeId, (circle.studentIds||[])[i]);
     }).join('');
+    stuSheetFill(tbody);
     return;
   }
 }
@@ -5992,7 +6024,8 @@ async function renderBranchGrid(branchName) {
   }
 
   if (!circles.length) { grid.innerHTML = bgState('لا توجد حلقات في هذه الشعبة ضمن نطاقك'); return; }
-  grid.innerHTML = circles.map(c => buildCircleCard(c.teacher, c.students || [], c.color, isFemale)).join('');
+  grid.innerHTML = circles.map(c => buildCircleCard(c.teacher, c.students || [], c.color, isFemale, c.studentIds || [])).join('');
+  stuSheetFill(grid);
 }
 
 function openBranch(branchName) {
@@ -8170,6 +8203,7 @@ function editStudentFromView() {
 }
 
 function editStudent(id) {
+  if (id) { stuEdOpen(id, stuAfterSave, { canStatus:true }); return; }
   const s = STUDENTS.find(s => s.id === id);
   if (!s) return;
   const parts = s.name.split(' ');
@@ -9460,57 +9494,41 @@ openModal = function(id) {
 // CURRICULUM (الخطط والمقررات) — live من Supabase
 // ══════════════════════════════════════
 let CP_ROWS = [];
-let CP_COURSE = 'الدورة الصيفية 2026 م';
+let CP_COURSE = '';
 let CP_SECTION = 'boys';
 const CP_SECT_TITLE = { boys:'شعبة البنون — الأبطال والرواد', banat:'شعبة البنات — الملكات والأميرات' };
-let CP_SECT_DAY = { boys:'الاثنين', banat:'السبت' };
+const CP_SECT_BR = { boys:['الأبطال','الرواد'], banat:['الملكات','الأميرات'] };
+const CP_FIELDS = ['day','date','tajweed','kunooz','talqeen','activity'];
+let CP_DIRTY = {}, CP_SAVE_T = {}, CP_CHAIN = Promise.resolve(), CP_LOAD_ERR = false;
+function cpTerm(){ return VIEW_TERM||CUR_TERM; }
 function cpSyncTerm(){
-  const t=VIEW_TERM||CUR_TERM; if(!t) return;
-  CP_COURSE=t.name;
-  CP_SECT_DAY={ boys:termDayNames(t,'الأبطال')[0]||'', banat:termDayNames(t,'الملكات')[0]||'' };
-  document.querySelectorAll('.cp-term-name').forEach(e=>{ e.textContent=CP_COURSE; });
+  const t=cpTerm(); CP_COURSE=t?t.name:'';
+  document.querySelectorAll('.cp-term-name').forEach(e=>{ e.textContent=CP_COURSE||'—'; });
+}
+function cpDayName(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); return isNaN(d)?'':TERM_DAYS_AR[d.getDay()]; }
+// كل أيام حلقات القسم في الدورة (اتحاد شعب القسم: الأبطال+الرواد أو الملكات+الأميرات) من غير أيام الاختبارات
+function cpSessionDates(){
+  const t=cpTerm(); if(!t) return [];
+  const days=new Set(); CP_SECT_BR[CP_SECTION].forEach(b=>termDays(t,b).forEach(d=>days.add(d)));
+  const ex=new Set((((t.settings||{}).exams||{}).dated||[]).filter(e=>(e.branches||[]).some(b=>CP_SECT_BR[CP_SECTION].includes(b))).map(e=>e.date));
+  const out=[]; const d=new Date(t.start_date+'T00:00:00'), end=new Date(t.end_date+'T00:00:00');
+  for(;d<=end;d.setDate(d.getDate()+1)){ const iso=localISO(d); if(days.has(d.getDay())&&!ex.has(iso)) out.push(iso); }
+  return out;
 }
 
-// نطاق المشرف: ذكور→البنون فقط، إناث→البنات فقط، غير محدد/مدير→الكل
-function cpAllowedSections(){
-  if (MY_GENDER === 'إناث') return ['banat'];
-  if (MY_GENDER === 'ذكور') return ['boys'];
-  return ['boys','banat'];
-}
-function cpApplyScope(){
-  const allow = cpAllowedSections();
-  ['boys','banat'].forEach(function(sec){
-    const el = document.getElementById('cp-card-'+sec);
-    if (el) el.style.display = allow.indexOf(sec) > -1 ? '' : 'none';
-  });
-  if (allow.indexOf(CP_SECTION) === -1) CP_SECTION = allow[0];
-}
-
-async function loadCurriculum(){
-  cpSyncTerm();
-  cpApplyScope();
-  const { data, error } = await db.from('curriculum_plan')
-    .select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('sort_order', { ascending:true });
-  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
-  else CP_ROWS = data || [];
-  renderCpTable();
-  loadCpCounts();
-}
+async function loadCurriculum(){ cpSyncTerm(); loadCpCounts(); if(document.getElementById('cp-detail')?.style.display==='block') await loadCurriculumRows(); }
 async function loadCpCounts(){
   for (const sec of ['boys','banat']){
     try{
-      const { count } = await db.from('curriculum_plan')
-        .select('id', { count:'exact', head:true }).eq('course', CP_COURSE).eq('section', sec);
+      const { count, error } = await db.from('curriculum_plan').select('id', { count:'exact', head:true }).eq('course', CP_COURSE).eq('section', sec);
+      if(error) throw error;
       const el = document.getElementById('cp-card-count-'+sec);
-      if (el) el.textContent = (count||0) || '\u0660';
+      if (el) el.textContent = stuEdAr(count||0);
     }catch(e){ loadWarn(e); }
   }
 }
-
 function openCourse(section){
-  section = (section==='banat') ? 'banat' : 'boys';
-  if (cpAllowedSections().indexOf(section) === -1) return; // خارج نطاق المشرف
-  CP_SECTION = section;
+  CP_SECTION = (section==='banat') ? 'banat' : 'boys';
   cpSyncTerm();
   document.getElementById('cp-courses').style.display = 'none';
   document.getElementById('cp-detail').style.display = 'block';
@@ -9518,85 +9536,128 @@ function openCourse(section){
   loadCurriculumRows();
 }
 async function loadCurriculumRows(){
-  const { data, error } = await db.from('curriculum_plan')
-    .select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('sort_order', { ascending:true });
-  if (error){ console.error('curriculum:', error); CP_ROWS = []; }
+  CP_DIRTY = {}; CP_LOAD_ERR=false;
+  const tb=document.getElementById('cp-tbody'); if(tb) tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;">⏳ جارٍ التحميل…</td></tr>';
+  const { data, error } = await selectAll(db.from('curriculum_plan').select('*').eq('course', CP_COURSE).eq('section', CP_SECTION).order('date', { ascending:true, nullsFirst:false }).order('sort_order', { ascending:true }));
+  if (error){ loadWarn(error); CP_ROWS = []; CP_LOAD_ERR=true; }
   else CP_ROWS = data || [];
   renderCpTable();
 }
 function closeCourse(){
+  if(Object.keys(CP_DIRTY).length && !confirm('فيه تعديلات لسه ما اتحفظتش — تخرج من غير حفظ؟')) return;
   const d = document.getElementById('cp-detail'), c = document.getElementById('cp-courses');
   if (d) d.style.display = 'none';
   if (c) c.style.display = 'block';
-  cpApplyScope();
   loadCpCounts();
 }
-
 function cpCell(id, field, val){
-  const v = (val == null ? '' : String(val)).replace(/"/g,'&quot;');
-  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'">'+v+'</textarea></td>';
+  return '<td><textarea data-id="'+id+'" data-field="'+field+'" rows="1" oninput="cpEdit(this)" style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-family:Tajawal;font-size:.8rem;resize:vertical;background:var(--white);color:var(--ink);min-height:34px;">'+esc(val==null?'':val)+'</textarea></td>';
 }
-
 function renderCpTable(){
-  const tb = document.getElementById('cp-tbody');
-  if (!tb) return;
+  const tb = document.getElementById('cp-tbody'); if (!tb) return;
+  if (CP_LOAD_ERR){ tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--red);padding:30px;font-weight:700;">⚠️ الخطة ما اتحمّلتش — اعمل تحديث (التعديل مقفول عشان مايتكتبش فوق المحفوظ)</td></tr>'; return; }
   if (!CP_ROWS.length){
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">\ud83d\udcd6</span>\u0644\u0645 \u062a\u064f\u0633\u062c\u0651\u0644 \u062e\u0637\u0629 \u0628\u0639\u062f \u2014 \u0627\u0636\u063a\u0637 \u00ab\u2795 \u0635\u0641 \u062c\u062f\u064a\u062f\u00bb</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:30px;"><span style="font-size:1.8rem;display:block;opacity:.4;margin-bottom:6px;">📖</span>لم تُسجَّل خطة بعد — اضغط «➕ صف جديد» أو «📅 كل أيام الدورة»</td></tr>';
     return;
   }
   tb.innerHTML = CP_ROWS.map(function(r,i){ return ''
-    + '<tr>'
-    + '<td style="text-align:center;font-weight:700;">'+(i+1)+'</td>'
-    + cpCell(r.id,'day',r.day)
-    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+(r.date||'')+'" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
+    + '<tr data-row="'+r.id+'">'
+    + '<td style="text-align:center;font-weight:700;">'+stuEdAr(i+1)+'<div class="cp-st" id="cp-st-'+r.id+'" style="font-size:.62rem;font-weight:700;margin-top:2px;"></div></td>'
+    + '<td><input data-id="'+r.id+'" data-field="day" value="'+esc(r.day||'')+'" readonly style="width:80px;border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.8rem;background:var(--bg);font-weight:700;color:var(--forest);"></td>'
+    + '<td><input type="date" data-id="'+r.id+'" data-field="date" value="'+esc(r.date||'')+'" onchange="cpDateChange(this)" style="border:1px solid var(--border);border-radius:7px;padding:5px 6px;font-family:Tajawal;font-size:.78rem;direction:ltr;"></td>'
     + cpCell(r.id,'tajweed',r.tajweed)
     + cpCell(r.id,'kunooz',r.kunooz)
     + cpCell(r.id,'talqeen',r.talqeen)
     + cpCell(r.id,'activity',r.activity)
-    + '<td style="text-align:center;"><button title="\u062d\u0630\u0641" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);display:inline-flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background=\'var(--red-pale)\'" onmouseout="this.style.background=\'none\'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>'
+    + '<td style="text-align:center;"><button title="حذف" onclick="deleteCpRow(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:var(--red);font-size:1rem;">🗑️</button></td>'
     + '</tr>';
   }).join('');
+  tb.querySelectorAll('textarea').forEach(t=>{ t.style.height='auto'; t.style.height=Math.max(34,t.scrollHeight)+'px'; });
 }
-
-async function addCpRow(){
-  const maxOrder = CP_ROWS.reduce(function(m,r){ return Math.max(m, r.sort_order||0); }, 0);
-  const { data, error } = await db.from('curriculum_plan')
-    .insert({ course: CP_COURSE, section: CP_SECTION, day: CP_SECT_DAY[CP_SECTION], date:null, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
-    .select().single();
-  if (error){ showToast('\u274c '+error.message); return; }
-  CP_ROWS.push(data);
-  renderCpTable();
-  showToast('\u2795 \u0623\u064f\u0636\u064a\u0641 \u0635\u0641 \u2014 \u0627\u0645\u0644\u0623\u0647 \u062b\u0645 \u0627\u062d\u0641\u0638');
+// كل تعديل بيتحفظ لوحده بعد ثانية (والزرار «حفظ» بيحفظ أي حاجة فاضلة)
+function cpRowVals(id){
+  const o={}; document.querySelectorAll('#cp-tbody [data-id="'+id+'"]').forEach(el=>{ o[el.dataset.field]=el.value; });
+  if(o.date==='') o.date=null; return o;
 }
-
-async function deleteCpRow(id){
-  if (!confirm('\u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0635\u0641\u061f')) return;
-  const { error } = await db.from('curriculum_plan').delete().eq('id', id);
-  if (error){ showToast('\u274c '+error.message); return; }
-  CP_ROWS = CP_ROWS.filter(function(r){ return r.id !== id; });
-  renderCpTable();
-  showToast('\ud83d\uddd1\ufe0f \u062a\u0645 \u0627\u0644\u062d\u0630\u0641');
+function cpSt(id,st){ const el=document.getElementById('cp-st-'+id); if(!el) return; el.textContent=st==='busy'?'⏳':st==='ok'?'✅ محفوظ':st==='err'?'⚠️ لم يُحفظ':st==='dirty'?'✏️':''; el.style.color=st==='err'?'var(--red)':st==='ok'?'var(--jade)':'var(--gold)'; }
+function cpEdit(el){
+  el.style.height='auto'; el.style.height=Math.max(34,el.scrollHeight)+'px';
+  const id=el.dataset.id; CP_DIRTY[id]=1; cpSt(id,'dirty');
+  clearTimeout(CP_SAVE_T[id]); CP_SAVE_T[id]=setTimeout(()=>cpSaveRow(id),1200);
 }
-
+function cpDateChange(el){
+  const id=el.dataset.id, d=el.value;
+  if(d && CP_ROWS.some(r=>r.id!==id && r.date===d)){ showToast('⚠️ التاريخ ده موجود في صف تاني'); }
+  const day=document.querySelector('#cp-tbody [data-id="'+id+'"][data-field="day"]'); if(day) day.value=cpDayName(d);
+  cpEdit(el);
+}
+function cpSaveRow(id){
+  clearTimeout(CP_SAVE_T[id]);
+  const patch=cpRowVals(id); cpSt(id,'busy');
+  CP_CHAIN=CP_CHAIN.then(async()=>{
+    const { data, error } = await db.from('curriculum_plan').update(patch).eq('id', id).select('id');
+    if(error||!data||data.length!==1) throw (error||new Error('لم يُحفظ (صلاحيات)'));
+    const r=CP_ROWS.find(x=>x.id===id); if(r) Object.assign(r,patch);
+    delete CP_DIRTY[id]; cpSt(id,'ok'); setTimeout(()=>{ if(!CP_DIRTY[id]) cpSt(id,''); },2500);
+  }).catch(e=>{ console.warn('[cp]',e); cpSt(id,'err'); showToast('⚠️ صف ما اتحفظش: '+(e.message||e.code||'')); });
+  return CP_CHAIN;
+}
 async function saveCpAll(){
-  const map = {};
-  document.querySelectorAll('#cp-tbody [data-id]').forEach(function(el){
-    const id = el.dataset.id, f = el.dataset.field;
-    (map[id] = map[id] || {})[f] = el.value;
-  });
-  const ids = Object.keys(map);
-  if (!ids.length){ showToast('\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0627 \u064a\u064f\u062d\u0641\u0638'); return; }
-  showToast('\u23f3 \u062c\u0627\u0631\u064d \u0627\u0644\u062d\u0641\u0638...');
-  let ok = 0, fail = 0;
-  for (const id of ids){
-    const patch = map[id];
-    if (patch.date === '') patch.date = null;
-    const { error } = await db.from('curriculum_plan').update(patch).eq('id', id);
-    if (error){ fail++; console.error(error); } else ok++;
-  }
-  await loadCurriculum();
-  showToast(fail ? ('\u26a0\ufe0f \u062d\u064f\u0641\u0638 '+ok+' \u0648\u0641\u0634\u0644 '+fail) : ('\u2705 \u062d\u064f\u0641\u0638\u062a \u0643\u0644 \u0627\u0644\u062a\u0639\u062f\u064a\u0644\u0627\u062a ('+ok+')'));
+  if(CP_LOAD_ERR){ showToast('⚠️ الخطة ما اتحمّلتش — اعمل تحديث'); return; }
+  const ids=[...document.querySelectorAll('#cp-tbody tr[data-row]')].map(tr=>tr.dataset.row);
+  if (!ids.length){ showToast('لا يوجد ما يُحفظ'); return; }
+  showToast('⏳ جارٍ الحفظ...');
+  ids.forEach(id=>cpSaveRow(id));
+  await CP_CHAIN;
+  const bad=ids.filter(id=>CP_DIRTY[id]).length;
+  showToast(bad?('⚠️ '+stuEdAr(bad)+' صف ما اتحفظش — جرّب تاني'):('✅ اتحفظت كل الصفوف ('+stuEdAr(ids.length)+')'));
+  loadCpCounts();
 }
+// صف جديد = أول يوم حلقة بعد آخر تاريخ (أيام القسم كلها مش الجمعة بس) — ومن غير ما يمسح اللي اتكتب
+async function addCpRow(){
+  if(CP_LOAD_ERR){ showToast('⚠️ الخطة ما اتحمّلتش — اعمل تحديث'); return; }
+  if(!CP_COURSE){ showToast('⚠️ مفيش دورة محددة'); return; }
+  // احفظ أي تعديل مفتوح الأول
+  Object.keys(CP_DIRTY).forEach(id=>cpSaveRow(id)); await CP_CHAIN;
+  const used=new Set(CP_ROWS.map(r=>r.date).filter(Boolean));
+  const last=CP_ROWS.map(r=>r.date).filter(Boolean).sort().pop()||'';
+  const all=cpSessionDates();
+  const next=all.find(d=>d>last&&!used.has(d)) || all.find(d=>!used.has(d)) || null;
+  const maxOrder = CP_ROWS.reduce((m,r)=>Math.max(m, r.sort_order||0), 0);
+  const { data, error } = await db.from('curriculum_plan')
+    .insert({ course: CP_COURSE, section: CP_SECTION, day: cpDayName(next), date: next, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order: maxOrder+1 })
+    .select().single();
+  if (error){ showToast('❌ '+(error.message||'')); return; }
+  CP_ROWS.push(data); CP_ROWS.sort((a,b)=>(a.date||'9')<(b.date||'9')?-1:((a.date||'9')>(b.date||'9')?1:(a.sort_order||0)-(b.sort_order||0)));
+  renderCpTable(); loadCpCounts();
+  showToast(next?('➕ اتضاف '+cpDayName(next)+' '+stuEdAr(next.split('-').reverse().join('/'))):'➕ اتضاف صف — اختار التاريخ');
+}
+// يضيف كل أيام حلقات الدورة اللي لسه مالهاش صف (مرة واحدة)
+async function fillCpTerm(){
+  if(CP_LOAD_ERR||!CP_COURSE) return;
+  const used=new Set(CP_ROWS.map(r=>r.date).filter(Boolean));
+  const miss=cpSessionDates().filter(d=>!used.has(d));
+  if(!miss.length){ showToast('✅ كل أيام الدورة موجودة بالفعل'); return; }
+  if(!confirm('إضافة '+miss.length+' يوم ناقص لخطة '+CP_SECT_TITLE[CP_SECTION]+'؟')) return;
+  Object.keys(CP_DIRTY).forEach(id=>cpSaveRow(id)); await CP_CHAIN;
+  let so=CP_ROWS.reduce((m,r)=>Math.max(m, r.sort_order||0), 0);
+  const rows=miss.map(d=>({ course:CP_COURSE, section:CP_SECTION, day:cpDayName(d), date:d, tajweed:'', kunooz:'', talqeen:'', activity:'', sort_order:++so }));
+  const { data, error } = await db.from('curriculum_plan').insert(rows).select('id');
+  if(error||!data||data.length!==rows.length){ showToast('⚠️ الإضافة ما كملتش: '+((error&&error.message)||'')); }
+  else showToast('✅ اتضاف '+stuEdAr(rows.length)+' يوم');
+  await loadCurriculumRows(); loadCpCounts();
+}
+async function deleteCpRow(id){
+  if (!confirm('حذف هذا الصف؟')) return;
+  Object.keys(CP_DIRTY).filter(x=>x!==id).forEach(x=>cpSaveRow(x)); await CP_CHAIN;
+  const { data, error } = await db.from('curriculum_plan').delete().eq('id', id).select('id');
+  if (error||!data||!data.length){ showToast('❌ ما اتحذفش '+((error&&error.message)||'')); return; }
+  delete CP_DIRTY[id];
+  CP_ROWS = CP_ROWS.filter(r => r.id !== id);
+  renderCpTable(); loadCpCounts();
+  showToast('🗑️ تم الحذف');
+}
+
 
 // ── NAVIGATION ──
 // ══════════════ معرض المكتبة (قراءة فقط) ══════════════
@@ -12985,6 +13046,103 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 </script>
 
+
+<script>
+/* ══════════ (دفعة ١٤) تعديل بيانات الطالب — نافذة موحّدة stuEd* ══════════
+   نفس النافذة في لوحة المدير والمشرف والموظفين — الحفظ عبر RPC student_update_full
+   والقراءة عبر students_sheet ← أي تعديل يظهر في كل اللوحات (المعلم/ولي الأمر/الملف). */
+const STUED={ id:null, onSaved:null, canStatus:true, row:null };
+function stuEdAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function stuEdE(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function stuEdAge(dob){
+  if(!dob) return null; const b=new Date(String(dob).slice(0,10)+'T00:00:00'); if(isNaN(b)) return null;
+  const n=new Date(); let a=n.getFullYear()-b.getFullYear(); if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--; return a>=0?a:null;
+}
+function stuEdDob(d){ if(!d) return ''; const p=String(d).slice(0,10).split('-'); return p.length===3?stuEdAr(p[2]+'/'+p[1]+'/'+p[0]):''; }
+async function stuEdSheet(ids){
+  ids=[...new Set((ids||[]).filter(Boolean).map(String))]; const out={};
+  for(let i=0;i<ids.length;i+=150){
+    const {data,error}=await db.rpc('students_sheet',{p_ids:ids.slice(i,i+150)});
+    if(error) throw error; (data||[]).forEach(r=>{ out[String(r.id)]=r; });
+  }
+  return out;
+}
+function stuEdEnsure(){
+  if(document.getElementById('stued-ov')) return;
+  const inp='width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--border,#dce8e0);border-radius:9px;font-family:Tajawal,sans-serif;font-size:.88rem;background:var(--bg,#f5f7f5);color:var(--ink,#1a1a1a);outline:none;';
+  const lb='display:block;font-size:.78rem;font-weight:700;color:var(--forest,#0f2318);margin-bottom:5px;';
+  const f=(id,label,type,extra)=>'<div style="margin-bottom:12px;'+(extra||'')+'"><label style="'+lb+'">'+label+'</label><input id="'+id+'" type="'+(type||'text')+'" style="'+inp+(type==='tel'?'direction:ltr;text-align:right;':'')+'"></div>';
+  const ov=document.createElement('div'); ov.id='stued-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,35,24,.5);z-index:10050;display:none;align-items:center;justify-content:center;padding:14px;font-family:Tajawal,sans-serif;direction:rtl;';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:600px;max-height:92vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318));color:#fff;position:sticky;top:0;z-index:1;">'
+    +'<div style="font-weight:800;">✏️ تعديل بيانات الطالب</div><button type="button" onclick="stuEdClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
+    +'<div style="padding:18px 20px;" id="stued-body">'
+    +'<div id="stued-msg" style="display:none;"></div>'
+    +f('stued-name','الاسم الكامل *','text')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">'
+    +f('stued-dad','📞 هاتف الأب','tel')+f('stued-mom','📞 هاتف الأم','tel')
+    +'<div style="margin-bottom:12px;"><label style="'+lb+'">تاريخ الميلاد</label><input id="stued-dob" type="date" style="'+inp+'" oninput="stuEdAgeLbl()"><div id="stued-age" style="font-size:.74rem;color:var(--mid,#4a5e52);margin-top:4px;"></div></div>'
+    +f('stued-mem','الحفظ (عدد الأجزاء)','number')
+    +f('stued-level','المستوى','text')+f('stued-phone','هاتف الطالب (اختياري)','tel')
+    +f('stued-dadedu','تعليم الأب','text')+f('stued-momedu','تعليم الأم','text')
+    +'</div>'
+    +f('stued-addr','العنوان','text')
+    +'<div style="margin-bottom:12px;" id="stued-st-wrap"><label style="'+lb+'">الحالة</label><select id="stued-status" style="'+inp+'"><option value="true">نشط</option><option value="false">موقوف</option></select></div>'
+    +'<div style="margin-bottom:6px;"><label style="'+lb+'">ملاحظات</label><textarea id="stued-notes" rows="3" style="'+inp+'resize:vertical;"></textarea></div>'
+    +'<div id="stued-pp" style="font-size:.74rem;color:var(--light,#8ea598);"></div>'
+    +'</div>'
+    +'<div style="padding:12px 20px 18px;display:flex;gap:10px;justify-content:flex-start;border-top:1px solid var(--border,#dce8e0);">'
+    +'<button type="button" id="stued-save" onclick="stuEdSave()" style="padding:10px 22px;background:linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318));color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:800;">💾 حفظ التعديلات</button>'
+    +'<button type="button" onclick="stuEdClose()" style="padding:10px 20px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.86rem;">إلغاء</button></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov) stuEdClose(); });
+}
+function stuEdAgeLbl(){ const a=stuEdAge(document.getElementById('stued-dob').value); document.getElementById('stued-age').textContent=a==null?'':('العمر: '+stuEdAr(a)+' سنة'); }
+function stuEdClose(){ const o=document.getElementById('stued-ov'); if(o) o.style.display='none'; }
+// opts: { canStatus:bool }
+async function stuEdOpen(studentId, onSaved, opts){
+  if(!studentId){ if(typeof showToast==='function') showToast('⚠️ الطالب مش متحدد'); return; }
+  stuEdEnsure(); opts=opts||{};
+  STUED.id=String(studentId); STUED.onSaved=onSaved||null; STUED.canStatus=opts.canStatus!==false; STUED.row=null;
+  const ov=document.getElementById('stued-ov'), btn=document.getElementById('stued-save'), msg=document.getElementById('stued-msg');
+  ['name','dad','mom','dob','mem','level','phone','dadedu','momedu','addr','notes'].forEach(k=>{ const el=document.getElementById('stued-'+k); el.value=''; el.disabled=true; });
+  document.getElementById('stued-st-wrap').style.display=STUED.canStatus?'':'none';
+  document.getElementById('stued-age').textContent=''; document.getElementById('stued-pp').textContent='';
+  msg.style.display='block'; msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--light,#8ea598);font-size:.82rem;'; msg.textContent='⏳ جارٍ تحميل بيانات الطالب…';
+  btn.disabled=true; ov.style.display='flex';
+  try{
+    const m=await stuEdSheet([STUED.id]); const r=m[STUED.id]; if(!r) throw new Error('الطالب مش في نطاقك');
+    STUED.row=r;
+    const set=(k,v)=>{ const el=document.getElementById('stued-'+k); el.value=v==null?'':v; el.disabled=false; };
+    set('name',r.full_name); set('dad',r.dad); set('mom',r.mom); set('dob',r.date_of_birth?String(r.date_of_birth).slice(0,10):'');
+    set('mem',r.memorized_parts==null?'':+r.memorized_parts); set('level',r.level); set('phone',r.phone);
+    set('dadedu',r.dad_edu); set('momedu',r.mom_edu); set('addr',r.addr); set('notes',r.notes);
+    document.getElementById('stued-status').value=String(r.is_active!==false);
+    document.getElementById('stued-pp').textContent=r.parent_phone?('📱 رقم حساب ولي الأمر (لوحة ولي الأمر): '+r.parent_phone):'';
+    stuEdAgeLbl(); msg.style.display='none'; btn.disabled=false;
+  }catch(e){ msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--red,#c0392b);font-size:.84rem;font-weight:700;'; msg.textContent='⚠️ البيانات ما اتحمّلتش — مينفعش تعدّل دلوقتي ('+(e.message||e.code||'')+')'; }
+}
+async function stuEdSave(){
+  const v=k=>document.getElementById('stued-'+k).value.trim();
+  const name=v('name'); if(!name){ showToast('⚠️ اكتب اسم الطالب'); return; }
+  const mem=v('mem'); if(mem!==''&&(isNaN(+mem)||+mem<0||+mem>30)){ showToast('⚠️ الحفظ من ٠ لـ ٣٠ جزء'); return; }
+  const digits=x=>x.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const p={ full_name:name, dad:digits(v('dad')), mom:digits(v('mom')), date_of_birth:v('dob')||null,
+            level:v('level'), phone:digits(v('phone')), dadEdu:v('dadedu'), momEdu:v('momedu'), addr:v('addr'), notes:v('notes') };
+  if(mem!=='') p.memorized_parts=+mem;
+  if(STUED.canStatus) p.is_active=document.getElementById('stued-status').value==='true';
+  const btn=document.getElementById('stued-save'); btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
+  try{
+    const {data,error}=await db.rpc('student_update_full',{p_student:STUED.id,p_data:p});
+    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
+    stuEdClose(); showToast('✅ بيانات الطالب اتحفظت — وهتظهر في كل اللوحات');
+    if(typeof STUED.onSaved==='function'){ try{ await STUED.onSaved(STUED.id,p); }catch(e){ console.warn('[stued] after save',e); } }
+  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
+  finally{ btn.disabled=false; btn.textContent='💾 حفظ التعديلات'; }
+}
+</script>
+
 <!-- ══ EDIT STUDENT MODAL ══ -->
 <div id="overlay-edit-student" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Tajawal;direction:rtl;">
@@ -13078,6 +13236,7 @@ function clearLongPress() {
 // ─────────────────────────────────────
 function ctxEditStudent() {
   hideStudentMenu();
+  if (_ctxSid) { stuEdOpen(_ctxSid, stuAfterSave, { canStatus:true }); return; }
   // فتح نافذة الإضافة بعد ملء بياناته
   const d = getStudentData(_ctxKey);
   // reset form first
@@ -17841,6 +18000,7 @@ function _finSubCell(r){
 
 async function loadFinSubs(){
   const tb = document.getElementById('fin-subs-tbody'); if(!tb) return;
+  if (typeof kfRender === 'function') kfRender();   // ⭐ المكفولون (دفعة ١٤)
   tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
   try{
     const { data, error } = await selectAll(db.from('fin_subscriptions').select('*').order('created_at',{ascending:true}));
@@ -18589,5 +18749,137 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(refreshTrPoints,15
 </script>
 
 <script src="messages.js"></script>
+
+<script>
+/* ══════════ (دفعة ١٤) الطلاب المكفولون في كشف الاشتراكات — kf* ══════════
+   • اختيار المكفولين من الكشف (fin_set_sponsored → students.is_sponsored) — المدير والمشرف
+   • الكفالة شهرية: كل شهر من شهور الدورة صف في fin_sponsorships (term_id + month_no) ← مدفوعة / لأ */
+const KF={ stu:null, rows:[], term:null, pick:{}, err:false };
+const KF_PAY={ cash:'نقدي', vodafone_cash:'فودافون كاش', instapay:'انستاباي' };
+function kfAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function kfE(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function kfMonths(){ const t=KF.term; return +(((t&&t.settings)||{}).subs_months||3); }
+async function kfLoadStudents(force){
+  if(KF.stu&&!force) return KF.stu;
+  const [rb,rc,rs]=await Promise.all([
+    db.from('branches').select('id,name'),
+    db.from('circles').select('id,name,branch_id'),
+    selectAll(db.from('students').select('id,circle_id,branch_id,is_sponsored,users!students_user_id_fkey(full_name)').eq('is_active',true).order('id'))
+  ]);
+  [rb,rc,rs].forEach(r=>{ if(r.error) throw r.error; });
+  const bn={}; (rb.data||[]).forEach(b=>bn[b.id]=b.name);
+  const cm={}; (rc.data||[]).forEach(c=>cm[c.id]=c);
+  KF.stu=(rs.data||[]).map(s=>{ const c=cm[s.circle_id]; return { id:s.id, name:(s.users&&s.users.full_name)||'طالب', sp:!!s.is_sponsored,
+      circle:c?c.name:'—', branch:c?(bn[c.branch_id]||'—'):(bn[s.branch_id]||'—') }; }).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  return KF.stu;
+}
+function kfBox(){
+  let box=document.getElementById('fin-kf-box'); if(box) return box;
+  const pg=document.getElementById('page-fin-subs'); if(!pg) return null;
+  const card=pg.querySelector('.card'); box=document.createElement('div'); box.id='fin-kf-box'; box.style.marginBottom='18px';
+  pg.insertBefore(box, card); return box;
+}
+async function kfRender(){
+  const box=kfBox(); if(!box) return;
+  KF.term=(typeof VIEW_TERM!=='undefined'&&VIEW_TERM)||(typeof CUR_TERM!=='undefined'&&CUR_TERM)||null;
+  box.innerHTML='<div class="card"><div class="card-body" style="text-align:center;color:var(--light);">⏳ جارٍ تحميل المكفولين…</div></div>';
+  KF.err=false;
+  try{
+    await kfLoadStudents(true);
+    const r=await selectAll(db.from('fin_sponsorships').select('*').order('date').order('id'));
+    if(r.error) throw r.error; KF.rows=r.data||[];
+  }catch(e){ KF.err=true; loadWarn(e); box.innerHTML='<div class="card"><div class="card-body" style="text-align:center;color:var(--red);font-weight:700;">⚠️ المكفولين ما اتحمّلوش — اعمل تحديث</div></div>'; return; }
+  const M=kfMonths(), sp=KF.stu.filter(s=>s.sp), tid=KF.term?KF.term.id:null;
+  const live=KF.rows.filter(x=>!x.reversed&&!x.reversal_of);
+  const cell=(s,m)=>{ const p=live.find(x=>x.student_id===s.id&&x.term_id===tid&&+x.month_no===m);
+    if(p) return '<td style="text-align:center;background:var(--pale);"><div style="color:var(--jade);font-weight:800;">✅ '+kfAr(p.amount)+' ج.م</div><div style="font-size:.66rem;color:var(--mid);">'+kfE(p.sponsor_name||'')+' • '+kfE(KF_PAY[p.pay_method]||'')+'</div><div style="font-size:.64rem;color:var(--light);">'+kfAr(String(p.date||'').split('-').reverse().join('/'))+'</div></td>';
+    return '<td style="text-align:center;"><div style="color:var(--red);font-weight:800;font-size:.78rem;">❌ لم تُدفع</div>'+(tid?'<button class="btn btn-outline btn-xs" style="margin-top:4px;" onclick="kfPayOpen(\''+s.id+'\','+m+')">💵 تسجيل</button>':'')+'</td>'; };
+  let paidN=0; sp.forEach(s=>{ for(let m=1;m<=M;m++) if(live.some(x=>x.student_id===s.id&&x.term_id===tid&&+x.month_no===m)) paidN++; });
+  const lastSponsor=id=>{ const L=KF.rows.filter(x=>x.student_id===id&&!x.reversed&&!x.reversal_of); return L.length?L[L.length-1].sponsor_name:''; };
+  box.innerHTML='<div class="card"><div class="card-head" style="flex-wrap:wrap;gap:8px;"><div class="card-title">⭐ الطلاب المكفولون — '+kfE(KF.term?KF.term.name:'')+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="badge bg-blue">'+kfAr(sp.length)+' مكفول</span><span class="badge bg-green">مدفوع '+kfAr(paidN)+'</span><span class="badge bg-red">لسه '+kfAr(sp.length*M-paidN)+'</span>'
+    +'<button class="btn btn-gold btn-sm" onclick="kfPickOpen()">⭐ اختيار المكفولين</button></div></div>'
+    +'<div class="card-body card-body-0" style="overflow-x:auto;">'
+    +(sp.length?'<table class="tbl" style="font-size:.78rem;"><thead><tr><th style="text-align:center;">م</th><th>الطالب</th><th>الكفيل</th>'
+      +Array.from({length:M},(_,i)=>'<th style="text-align:center;">كفالة '+(['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'][i]||('شهر '+(i+1)))+'</th>').join('')+'</tr></thead><tbody>'
+      +sp.map((s,i)=>'<tr><td style="text-align:center;color:var(--light);font-weight:700;">'+kfAr(i+1)+'</td><td><div style="font-weight:700;color:var(--forest);">⭐ '+kfE(s.name)+'</div><div style="font-size:.68rem;color:var(--light);">'+kfE(s.branch)+' • '+kfE(s.circle)+'</div></td>'
+        +'<td style="font-size:.78rem;">'+kfE(lastSponsor(s.id)||'—')+'</td>'+Array.from({length:M},(_,k)=>cell(s,k+1)).join('')+'</tr>').join('')+'</tbody></table>'
+     :'<div style="text-align:center;color:var(--light);padding:26px;">مفيش طلاب مكفولين — اضغط «⭐ اختيار المكفولين» واختارهم من الكشف</div>')
+    +'</div></div>';
+}
+// ── اختيار المكفولين من كشف الطلاب ──
+function kfPickOpen(){
+  if(KF.err||!KF.stu){ showToast('⚠️ القايمة ما اتحمّلتش'); return; }
+  KF.pick={}; KF.stu.forEach(s=>KF.pick[s.id]=s.sp);
+  let ov=document.getElementById('kf-pick'); if(!ov){ ov=document.createElement('div'); ov.id='kf-pick'; ov.className='overlay'; document.body.appendChild(ov); }
+  const brs=[...new Set(KF.stu.map(s=>s.branch).filter(b=>b&&b!=='—'))];
+  ov.innerHTML='<div class="modal" style="max-width:600px;"><div class="modal-head"><div class="modal-title">⭐ اختيار الطلاب المكفولين</div><button class="modal-close" onclick="closeModal(\'kf-pick\')">×</button></div>'
+    +'<div class="modal-body"><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;"><input type="text" id="kf-q" placeholder="🔍 ابحث باسم الطالب…" oninput="kfPickList()" style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;">'
+    +'<select id="kf-b" onchange="kfPickList()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;"><option value="">كل الشُّعب</option>'+brs.map(b=>'<option>'+kfE(b)+'</option>').join('')+'</select>'
+    +'<label style="font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="kf-only" onchange="kfPickList()"> المكفولين بس</label></div>'
+    +'<div id="kf-list" style="max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);"></div>'
+    +'<div id="kf-cnt" style="font-size:.78rem;color:var(--mid);margin-top:8px;"></div></div>'
+    +'<div class="modal-foot"><button class="btn btn-primary" id="kf-pick-save" onclick="kfPickSave()">💾 حفظ الاختيار</button><button class="btn btn-outline" onclick="closeModal(\'kf-pick\')">إلغاء</button></div></div>';
+  openModal('kf-pick'); kfPickList();
+}
+function kfN(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim(); }
+function kfPickList(){
+  const q=kfN(document.getElementById('kf-q').value), b=document.getElementById('kf-b').value, only=document.getElementById('kf-only').checked;
+  const L=KF.stu.filter(s=>(!q||kfN(s.name).includes(q))&&(!b||s.branch===b)&&(!only||KF.pick[s.id]));
+  document.getElementById('kf-list').innerHTML=L.length?L.map(s=>'<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;'+(KF.pick[s.id]?'background:var(--gold-pale);':'')+'"><input type="checkbox" '+(KF.pick[s.id]?'checked':'')+' onchange="KF.pick[\''+s.id+'\']=this.checked;kfPickList()" style="width:17px;height:17px;accent-color:var(--gold);">'
+      +'<span style="flex:1;"><b style="color:var(--forest);">'+kfE(s.name)+'</b><span style="font-size:.7rem;color:var(--light);"> — '+kfE(s.branch)+' • '+kfE(s.circle)+'</span></span>'+(KF.pick[s.id]?'<span>⭐</span>':'')+'</label>').join('')
+    :'<div style="padding:20px;text-align:center;color:var(--light);">مفيش نتايج</div>';
+  const ch=KF.stu.filter(s=>!!KF.pick[s.id]!==s.sp).length;
+  document.getElementById('kf-cnt').textContent='المكفولين: '+kfAr(KF.stu.filter(s=>KF.pick[s.id]).length)+(ch?' • تغييرات لسه ما اتحفظتش: '+kfAr(ch):'');
+}
+async function kfPickSave(){
+  const ch=KF.stu.filter(s=>!!KF.pick[s.id]!==s.sp);
+  if(!ch.length){ closeModal('kf-pick'); return; }
+  const b=document.getElementById('kf-pick-save'); b.disabled=true; let ok=0, bad=0;
+  for(const s of ch){
+    try{ const {data,error}=await db.rpc('fin_set_sponsored',{p_student:s.id,p_on:!!KF.pick[s.id]}); if(error||!data||!data.ok) throw (error||new Error('x')); s.sp=!!KF.pick[s.id]; ok++; }
+    catch(e){ bad++; console.warn('[kf]',e); }
+  }
+  b.disabled=false; closeModal('kf-pick');
+  showToast(bad?('⚠️ اتحفظ '+kfAr(ok)+' وفشل '+kfAr(bad)+' (ممكن مش في نطاقك)'):('✅ اتحفظ اختيار المكفولين ('+kfAr(ok)+' تغيير)'));
+  kfRender();
+}
+// ── تسجيل دفع كفالة شهر ──
+function kfPayOpen(sid,m){
+  const s=(KF.stu||[]).find(x=>x.id===sid); if(!s||!KF.term) return;
+  if(typeof finLockGuard==='function' && !finLockGuard()) return;
+  const last=KF.rows.filter(x=>x.student_id===sid&&!x.reversed&&!x.reversal_of).pop()||{};
+  const me=(typeof finMe==='function')?finMe():{name:''};
+  let ov=document.getElementById('kf-pay'); if(!ov){ ov=document.createElement('div'); ov.id='kf-pay'; ov.className='overlay'; document.body.appendChild(ov); }
+  const inp='width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:Tajawal;font-size:.88rem;';
+  ov.innerHTML='<div class="modal" style="max-width:480px;"><div class="modal-head"><div class="modal-title">💵 كفالة '+(['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'][m-1]||('شهر '+m))+' — '+kfE(s.name)+'</div><button class="modal-close" onclick="closeModal(\'kf-pay\')">×</button></div><div class="modal-body">'
+    +'<div class="fg"><label>اسم الكفيل *</label><input id="kf-sp" style="'+inp+'" value="'+kfE(last.sponsor_name||'')+'"></div>'
+    +'<div class="form-grid-2"><div class="fg"><label>المبلغ (ج.م) *</label><input id="kf-amt" type="number" min="1" style="'+inp+'" value="'+kfE(last.amount||'')+'"></div>'
+    +'<div class="fg"><label>وسيلة الدفع</label><select id="kf-pm" style="'+inp+'">'+Object.keys(KF_PAY).map(k=>'<option value="'+k+'"'+(last.pay_method===k?' selected':'')+'>'+KF_PAY[k]+'</option>').join('')+'</select></div>'
+    +'<div class="fg"><label>المستلم</label><input id="kf-rec" style="'+inp+'" value="'+kfE(me.name||'')+'"></div>'
+    +'<div class="fg"><label>التاريخ</label><input id="kf-dt" type="date" style="'+inp+'" value="'+localISO()+'"></div></div>'
+    +'<div class="fg"><label>ملاحظات</label><input id="kf-nt" style="'+inp+'"></div></div>'
+    +'<div class="modal-foot"><button class="btn btn-primary" id="kf-pay-btn" onclick="kfPaySave(\''+sid+'\','+m+')">💾 تسجيل الدفع</button><button class="btn btn-outline" onclick="closeModal(\'kf-pay\')">إلغاء</button></div></div>';
+  openModal('kf-pay');
+}
+async function kfPaySave(sid,m){
+  const s=KF.stu.find(x=>x.id===sid), t=KF.term; if(!s||!t) return;
+  const sp=document.getElementById('kf-sp').value.trim(), amt=+document.getElementById('kf-amt').value, pm=document.getElementById('kf-pm').value,
+        rec=document.getElementById('kf-rec').value.trim(), dt=document.getElementById('kf-dt').value||localISO(), nt=document.getElementById('kf-nt').value.trim();
+  if(!sp){ showToast('⚠️ اكتب اسم الكفيل'); return; }
+  if(!(amt>0)){ showToast('⚠️ اكتب المبلغ'); return; }
+  if(!rec){ showToast('⚠️ اكتب المستلم'); return; }
+  const b=document.getElementById('kf-pay-btn'); b.disabled=true;
+  try{
+    if(pm!=='cash' && typeof finEnsureClient==='function') await finEnsureClient(rec);
+    const me=(typeof finMe==='function')?finMe():{id:null};
+    const {data,error}=await db.from('fin_sponsorships').insert([{ amount:amt, sponsor_name:sp, student_id:s.id, student_name:s.name, student_branch:s.branch, student_circle:s.circle,
+      months:1, term_id:t.id, month_no:m, pay_method:pm, receiver:rec, notes:nt||null, date:dt, created_by:me.id, collected:pm==='cash' }]).select('id');
+    if(error) throw error; if(!data||data.length!==1) throw new Error('لم يُحفظ (صلاحيات)');
+    closeModal('kf-pay'); showToast('✅ اتسجّلت كفالة الشهر'); kfRender();
+  }catch(e){ showToast(String(e.code)==='23505'?'⚠️ الشهر ده متسجّل بالفعل':('⚠️ ما اتحفظش: '+(e.message||e.code||''))); b.disabled=false; }
+}
+</script>
+
 </body>
 </html>
