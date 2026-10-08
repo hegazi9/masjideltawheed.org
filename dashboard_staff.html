@@ -223,8 +223,8 @@ button{cursor:pointer;}
             <label style="font-size:.76rem;color:var(--mid);display:flex;gap:5px;align-items:center;"><input type="checkbox" id="st-inactive" onchange="renderStudents()"> الموقوفين</label>
           </div>
         </div>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>الشعبة</th><th>الحلقة / المعلم</th><th>النقاط</th><th></th></tr></thead>
-          <tbody id="st-body"><tr><td colspan="6"><div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div></td></tr></tbody></table></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>الشعبة</th><th>الحلقة / المعلم</th><th>العمر</th><th>هاتف الأب</th><th>هاتف الأم</th><th title="تلقائي من تقييم التجويد في ملف الطالب">مستوى التجويد</th><th>النقاط</th><th></th></tr></thead>
+          <tbody id="st-body"><tr><td colspan="10"><div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div></td></tr></tbody></table></div>
       </div>
     </div>
 
@@ -571,20 +571,56 @@ function stFillCircles(){
 function stGoBranch(b){ navPage('students'); $('st-branch').value=b; stFillCircles(); renderStudents(); }
 function renderStudents(){
   const body=$('st-body');
-  if(!BASE_OK){ body.innerHTML='<tr><td colspan="6"><div class="empty" style="padding:24px;color:var(--red);"><span class="empty-icon">⚠️</span>البيانات ما اتحمّلتش — اعمل تحديث</div></td></tr>'; return; }
+  if(!BASE_OK){ body.innerHTML='<tr><td colspan="10"><div class="empty" style="padding:24px;color:var(--red);"><span class="empty-icon">⚠️</span>البيانات ما اتحمّلتش — اعمل تحديث</div></td></tr>'; return; }
   const b=$('st-branch').value, c=$('st-circle').value, q=arNorm($('st-q').value), inact=$('st-inactive').checked;
   const list=STU.filter(s=>(inact?s.is_active===false:s.is_active!==false)&&(!b||s.bName===b)&&(!c||s.circle_id===c)&&(!q||arNorm(s.name).includes(q)));
   $('st-count').textContent=ar(list.length);
-  body.innerHTML=list.length? list.map((s,i)=>`<tr>
+  const cc='font-size:.78rem;text-align:center;white-space:nowrap;';
+  body.innerHTML=list.length? list.map((s,i)=>`<tr data-sid="${esc(s.id)}">
       <td style="color:var(--light);">${ar(i+1)}</td>
       <td style="font-weight:700;color:var(--forest);">${esc(s.name)}${s.is_active===false?' <span class="badge bg-red">موقوف</span>':''}</td>
       <td><span class="dot" style="background:${BR_COLOR[s.bName]||'#999'};"></span>${esc(s.bName||'—')}</td>
       <td style="font-size:.78rem;">${esc(s.tName||s.cName||'—')}</td>
-      <td style="font-weight:800;color:var(--gold);">${ar(s.total_points||0)}</td>
+      <td style="${cc}" data-f="age">—</td>
+      <td style="${cc}direction:ltr;" data-f="dad">—</td>
+      <td style="${cc}direction:ltr;" data-f="mom">—</td>
+      <td style="${cc}" data-f="lvl">—</td>
+      <td style="font-weight:800;color:var(--gold);" data-f="pts">${ar(s.total_points||0)}</td>
       <td style="white-space:nowrap;"><button class="btn btn-outline btn-xs" onclick="stuOpen('${s.id}')">✏️ البيانات</button>
         <button class="btn btn-gold btn-xs" onclick="sfOpen('${s.id}')">📁 الملف</button></td></tr>`).join('')
-    :'<tr><td colspan="6"><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>مفيش نتائج</div></td></tr>';
+    :'<tr><td colspan="10"><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>مفيش نتائج</div></td></tr>';
+  stSheetFill(list.map(s=>s.id), false);
 }
+// (دفعة ١٥) العمر + هواتف الأب والأم + مستوى التجويد + النقاط — من students_sheet (نفس مصدر المدير والمشرف)
+let ST_SHEET={};
+const ST_TJ_TOPIC=['أحكام النون الساكنة والتنوين','أحكام الميم الساكنة','أحكام المدود','مخارج الحروف','صفات الحروف','الوقف والابتداء','أحكام متقدمة'];
+function stAge(dob){ if(!dob) return null; const b=new Date(String(dob).slice(0,10)+'T00:00:00'); if(isNaN(b)) return null;
+  const n=new Date(); let a=n.getFullYear()-b.getFullYear(); if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--; return a>=0?a:null; }
+async function stSheetFill(ids, force){
+  const need=[...new Set((ids||[]).filter(Boolean).map(String))].filter(id=>force||!ST_SHEET[id]);
+  try{
+    for(let i=0;i<need.length;i+=150){
+      const {data,error}=await db.rpc('students_sheet',{p_ids:need.slice(i,i+150)});
+      if(error) throw error; (data||[]).forEach(r=>{ ST_SHEET[String(r.id)]=r; });
+    }
+  }catch(e){ loadWarn(e); }
+  document.querySelectorAll('#st-body tr[data-sid]').forEach(tr=>{
+    const r=ST_SHEET[tr.dataset.sid]; if(!r) return;
+    const set=(f,v)=>{ const td=tr.querySelector('[data-f="'+f+'"]'); if(td) td.textContent=(v===null||v===undefined||v==='')?'—':v; };
+    const a=stAge(r.date_of_birth);
+    set('age', a==null?'':ar(a)); set('dad', r.dad||r.parent_phone||''); set('mom', r.mom);
+    set('lvl', r.tajweed_level||r.level); set('pts', ar(r.total_points||0));
+    const lv=tr.querySelector('[data-f="lvl"]'); if(lv) lv.title=r.tajweed_level_no?(ST_TJ_TOPIC[r.tajweed_level_no-1]||'')+' — من تقييم التجويد':'';
+    const s=stuById(tr.dataset.sid); if(s) s.total_points=r.total_points;
+  });
+}
+function stSheetAuto(){
+  if(document.visibilityState!=='visible') return;
+  const pg=document.getElementById('page-students'); if(!pg||!pg.classList.contains('active')) return;
+  stSheetFill([...document.querySelectorAll('#st-body tr[data-sid]')].map(tr=>tr.dataset.sid), true);
+}
+setInterval(stSheetAuto, 60000);
+window.addEventListener('focus', stSheetAuto);
 function stuById(id){ return STU.find(s=>s.id===id)||null; }
 async function stuReload(id){
   try{
@@ -626,7 +662,7 @@ function stuRenderTab(){
         <div class="fg"><label>تاريخ الالتحاق</label><input class="inp" id="su-join" type="date" value="${esc(s.enrollment_date||'')}"></div>
         <div class="fg"><label>📞 هاتف الأب</label><input class="inp" id="su-dad" type="tel" dir="ltr" style="text-align:right;" value="${esc((C.sheet&&C.sheet.dad)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
         <div class="fg"><label>📞 هاتف الأم</label><input class="inp" id="su-mom" type="tel" dir="ltr" style="text-align:right;" value="${esc((C.sheet&&C.sheet.mom)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
-        <div class="fg"><label>المستوى</label><input class="inp" id="su-level" maxlength="100" value="${esc((C.sheet&&C.sheet.level)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
+        <div class="fg"><label>المستوى (يدوي — بيظهر لو مفيش تقييم تجويد)</label><input class="inp" id="su-level" maxlength="100" value="${esc((C.sheet&&C.sheet.level)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
         <div class="fg"><label>العنوان</label><input class="inp" id="su-addr" maxlength="200" value="${esc((C.sheet&&C.sheet.addr)||'')}" ${C.sheet&&!C.err.sheet?'':'disabled'}></div>
         <div style="grid-column:1/-1;font-size:.72rem;color:var(--light);" id="su-pp">${C.sheet&&C.sheet.parent_phone?'📱 رقم حساب ولي الأمر: '+esc(C.sheet.parent_phone):''}</div>
         <div class="fg" style="grid-column:1/-1;"><label>ملاحظات</label><textarea class="inp" id="su-notes" rows="3">${esc(s.notes||'')}</textarea></div>
@@ -698,6 +734,7 @@ async function stuSave(){
     const {data:r,error}=await db.rpc('student_update_full',{ p_student:C.id, p_data:data });
     if(error) throw error; if(!r||!r.ok) throw new Error('لم يُحفظ');
     await stuReload(C.id);
+    delete ST_SHEET[String(C.id)];   // (دفعة ١٥) الجدول يقرا البيانات الجديدة
     showToast('✅ اتحفظت البيانات — ظاهرة في كل اللوحات');
     $('stu-title').textContent='👤 '+(stuById(C.id)||s).name;
     renderStudents(); stuRenderTab();

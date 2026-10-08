@@ -365,17 +365,25 @@ function spTrack(plan,key,recs,asOf){
   const dueP=due.length?Math.max(...due.map(x=>x.p)):p0-1;
   const planned=Math.max(0,dueP-p0+1), plannedAll=pEnd-p0+1;
   const doneAll=covUpTo(asOf,pEnd);
+  // (دفعة ١٥) آخر آية وصلها الطالب لحد تاريخ معيّن (لحالة: أتم / سبق / لم يتم الخطة)
+  const reachTo=dLim=>{ let m=null; rs.forEach(y=>{ if(y.date<=dLim && y.sp[1]>=p0 && (m==null||y.sp[1]>m)) m=y.sp[1]; }); return m; };
+  const stOf=(rc,tp)=> (rc==null||rc<tp)?'behind':(rc>tp?'ahead':'done');
   const rows=ses.map(x=>{
-    const need=x.p-p0+1, got=covUpTo(x.date,x.p);
+    const need=x.p-p0+1, got=covUpTo(x.date,x.p), rc=reachTo(x.date);
     const day=rs.filter(y=>y.date===x.date).map(y=>spName(y.r.surah_to||y.r.surah_from)+' '+spAr(y.r.ayah_to||y.r.ayah_from||'')).join(' ، ');
-    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day };
+    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day,
+             reach:rc, st:(x.date>asOf?'future':stOf(rc,x.p)) };
   });
-  return { lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
+  const rcAll=reachTo(asOf);
+  return { st: due.length?stOf(rcAll,dueP):null, lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
            pct: planned?Math.min(100,Math.round(doneAll/planned*100)):null,
            pctAll: plannedAll?Math.min(100,Math.round(doneAll/plannedAll*100)):0, rows };
 }
 function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'var(--gold)':'var(--red)')); }
 function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
+// (دفعة ١٥) حالة الخطة: done = أتم • ahead = سبق • behind = لم يتم
+const SP_ST={ done:['✔ أتم الخطة','bg-green'], ahead:['⏫ سبق الخطة','bg-blue'], behind:['✖ لم يتم الخطة','bg-red'] };
+function spStBadge(st){ const m=SP_ST[st]; return m?'<span class="badge '+m[1]+'" style="white-space:nowrap;">'+m[0]+'</span>':''; }
 function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
 // ── HTML ملخّص الإنجاز لخطة واحدة ──
 function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
@@ -386,10 +394,11 @@ function spProgressHtml(plan,recs,asOf){
     +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
     +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
       +'<div style="font-size:.72rem;color:var(--light);">لحد النهارده • '+spAr(T.done)+' من '+spAr(T.planned)+' آية</div></div>'+spBar(T.pct)
+      +(T.st?'<div style="margin-top:7px;">'+spStBadge(T.st)+'</div>':'')
       +'<div style="font-size:.7rem;color:var(--mid);margin-top:6px;">الفترة كلها: '+spAr(T.pctAll)+'٪ ('+spAr(T.plannedAll)+' آية)'+(T.lines?(' • '+spAr(T.lines)+' سطر/حلقة'):'')+' • البداية: '+spLbl(T.start)+'</div>')
      :'<div style="font-size:.76rem;color:var(--light);margin-top:8px;">مفيش خطة</div>')+'</div>';
   const map={}; (H?H.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).h=r; }); (R?R.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).r=r; });
-  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
+  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(spStBadge(x.st)+(x.st==='behind'?'<div style="font-size:.62rem;color:var(--light);margin-top:2px;">'+spAr(x.pct)+'٪ من المطلوب</div>':''));
     return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
   const dates=Object.keys(map).sort();
   const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th>'+(NR?'':'<th>هدف المراجعة</th><th>الإنجاز</th>')+'</tr></thead><tbody>'
@@ -1489,6 +1498,20 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 .rep-grp{font-size:.92rem;font-weight:800;color:var(--forest);margin:22px 0 9px;padding:7px 12px;background:var(--pale);border-right:4px solid var(--gold);border-radius:var(--r-sm);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .rep-grp .sub{font-size:.72rem;color:var(--mid);font-weight:700;}
 .srep-tbl{width:100%;border-collapse:collapse;font-size:.79rem;}
+/* (دفعة ١٥) ورقة التقرير المالي للقسم */
+#fin-report-sheet{background:#fff;}
+.rep-sec{font-size:.95rem;font-weight:800;color:var(--forest);margin:22px 0 10px;padding-right:10px;border-right:4px solid var(--gold);}
+.rep-tbl{width:100%;border-collapse:collapse;font-size:.8rem;}
+.rep-tbl th{background:var(--pale);color:var(--forest);font-weight:800;padding:9px 10px;border:1px solid var(--border);text-align:center;}
+.rep-tbl td{padding:8px 10px;border:1px solid var(--border);}
+.rep-tbl tbody tr:nth-child(even){background:#fafcfb;}
+.rep-tbl tfoot td{background:var(--forest);color:#fff;font-weight:800;border-color:var(--forest);}
+.rep-num{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;}
+.rep-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:6px;}
+.rep-k{border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;text-align:center;background:var(--bg);}
+.rep-k .l{font-size:.72rem;color:var(--mid);margin-bottom:5px;}
+.rep-k .v{font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;}
+@media (max-width:760px){ .rep-kpi{grid-template-columns:repeat(2,1fr);} }
 .srep-tbl th{background:var(--forest);color:#fff;font-weight:700;padding:8px 9px;border:1px solid var(--forest);text-align:center;}
 .srep-tbl td{padding:7px 9px;border:1px solid var(--border);}
 .srep-tbl tbody tr:nth-child(even){background:#fafcfb;}
@@ -4375,6 +4398,19 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         <div style="font-size:1.3rem;color:var(--red);">‹</div>
       </div>
     </div>
+    <div onclick="nav(null,'fin-report')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(200,146,10,.25);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">التقرير المالي</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">إيرادات شعب قسمك في فترة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -4426,6 +4462,19 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
           <div style="font-size:.78rem;color:var(--light);margin-top:3px;">كفالة طالب لمدة شهر أو أكثر</div>
         </div>
         <div style="font-size:1.3rem;color:var(--blue);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'rep-subs')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">متأخرات الاشتراكات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مين لسه ما دفعش — <span class="term-name-lbl">الدورة الحالية</span></div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
       </div>
     </div>
 
@@ -4810,6 +4859,39 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
   </div>
 </div>
+
+<!-- ══ PAGE: التقرير المالي للقسم (دفعة ١٥) ══ -->
+<div id="page-fin-report" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span><span>التقرير المالي</span>
+  </div>
+  <div class="section-title"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg> التقرير المالي للقسم</div>
+  <div style="font-size:.78rem;color:var(--light);margin:-6px 0 14px;">اشتراكات وكفالات طلاب شعب قسمك بس — الخزنة والمرتبات والمصروفات العامة للمدرسة في تقرير المدير.</div>
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head"><div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg> فترة التقرير</div></div>
+    <div class="card-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>من تاريخ *</label><input type="date" id="rep-from"></div>
+        <div class="fg"><label>إلى تاريخ *</label><input type="date" id="rep-to"></div>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 16px;">
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('m')">هذا الشهر</button>
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('pm')">الشهر الماضي</button>
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('q')">آخر ٣ شهور</button>
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('y')">هذا العام</button>
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('term')">الدورة المختارة</button>
+        <button class="btn btn-ghost btn-xs" onclick="repQuick('all')">كل الفترات</button>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="min-width:150px;" onclick="buildFinReport(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg> عرض التقرير</button>
+        <button class="btn btn-gold" id="rep-pdf-btn" style="min-width:150px;display:none;" onclick="rptExportPdf('fin-report-sheet','التقرير المالي — قسم المشرف')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 15h6"/><path d="M9 18h3"/></svg> تصدير PDF</button>
+      </div>
+    </div>
+  </div>
+  <div id="fin-report-sheet"></div>
+</div>
+
 
 <!-- ══ PAGE: WEBSITE ══ -->
 <div id="page-website" class="page">
@@ -5873,9 +5955,21 @@ async function stuSheetFill(root){
     set('mom', r.mom);
     set('dob', stuEdDob(r.date_of_birth));
     set('pts', stuEdAr(r.total_points || 0));
-    set('lvl', r.level);
+    // (دفعة ١٥) مستوى التجويد تلقائي من ملف الطالب — ولو مفيش تقييم: المستوى اليدوي
+    set('lvl', r.tajweed_level || r.level);
+    const lv = tr.querySelector('[data-f="lvl"]');
+    if (lv) lv.title = r.tajweed_level_no ? (STU_TJ_TOPIC[r.tajweed_level_no-1]||'') + ' — من تقييم التجويد في ملف الطالب' : (r.level ? 'مستوى مكتوب يدوي' : '');
   });
 }
+const STU_TJ_TOPIC=['أحكام النون الساكنة والتنوين','أحكام الميم الساكنة','أحكام المدود','مخارج الحروف','صفات الحروف','الوقف والابتداء','أحكام متقدمة (الترقيق والتفخيم / الراء / اللام)'];
+// (دفعة ١٥) الجدول الطلابي بيتحدّث من القاعدة كل دقيقة + لما ترجع للصفحة
+function stuSheetAutoRefresh(){
+  if (document.visibilityState !== 'visible') return;
+  const pg = document.querySelector('.page.active');
+  if (pg && pg.querySelector('tr[data-sid]')) stuSheetFill(pg);
+}
+setInterval(stuSheetAutoRefresh, 60000);
+window.addEventListener('focus', stuSheetAutoRefresh);
 // بعد أي تعديل: حدّث القوايم + الجدول الطلابي
 async function stuAfterSave(){
   try{ if (typeof refreshSupervisorData === 'function') await refreshSupervisorData(); }catch(e){ loadWarn(e); }
@@ -5918,7 +6012,7 @@ function buildCircleCard(teacher, students, color, isFemale, ids) {
               <th style="padding:8px 6px;text-align:center;white-space:nowrap;">هاتف الأم</th>
               <th style="padding:8px 6px;text-align:center;white-space:nowrap;">تاريخ الميلاد</th>
               <th style="padding:8px 6px;text-align:center;white-space:nowrap;">النقاط</th>
-              <th style="padding:8px 6px;text-align:center;white-space:nowrap;">المستوى</th>
+              <th style="padding:8px 6px;text-align:center;white-space:nowrap;" title="تلقائي من تقييم التجويد في ملف الطالب">مستوى التجويد</th>
             </tr>
           </thead>
           <tbody id="tbody-${safeId}" style="color:var(--ink);">
@@ -7962,7 +8056,7 @@ const PAGE_TITLES = {
   'fin-don':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> التبرعات','fin-spon':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg> الكفالات','fin-subs':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M21.42 10.92 12 6 2.58 10.92 12 15.84z"/><path d="M6 13.1V17c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.9"/><path d="M22 11v5"/></svg> اشتراكات الطلاب',
 'fin-food':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 2v7a3 3 0 0 0 3 3h1a3 3 0 0 0 3-3V2"/><path d="M6.5 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> طعام','fin-maint':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> صيانة',
   'fin-mot':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> تحفيز وترفيه','fin-purch':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/></svg> مشتريات','fin-mkt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> تسويق',
-  'fin-debt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون',
+  'fin-report':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg> التقرير المالي للقسم','fin-debt':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون',
   website:'🌐 الموقع الإلكتروني',announcements:'📢 الإعلانات',messages:'✉️ الرسائل',
   settings:'⚙️ الإعدادات',admins:'🛡️ المديرون',media:'🎬 المرئيات',
   training:'🎓 تأهيل المشرفين',
@@ -8190,7 +8284,10 @@ function viewStudent(id) {
       <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">الشعبة</span><span style="font-weight:700;">${s.circle}</span></div>
       <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">المعلم</span><span style="font-weight:700;">${s.teacher}</span></div>
       <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">الحفظ</span><span style="font-weight:800;color:var(--gold);">📖 ${s.mem} جزء</span></div>
-      <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">النقاط</span><span style="font-weight:800;color:var(--purple);">⭐ ${s.points} نقطة</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">النقاط</span><span style="font-weight:800;color:var(--purple);">⭐ ${s.points} نقطة</span>
+        <span style="width:100%;display:flex;gap:6px;justify-content:flex-end;">
+          <button class="btn btn-primary btn-xs" onclick="stPtOpen('${s.id}',cleanName('${cleanName(s.name)}'),1,${+s.points||0},b=>{ stPtAfter('${s.id}',b); viewStudent('${s.id}'); })">➕ إضافة النقاط</button>
+          <button class="btn btn-danger btn-xs" onclick="stPtOpen('${s.id}',cleanName('${cleanName(s.name)}'),-1,${+s.points||0},b=>{ stPtAfter('${s.id}',b); viewStudent('${s.id}'); })">➖ حذف النقاط</button></span></div>
       <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">رقم ولي الأمر</span><span style="font-weight:700;">${s.phone}</span></div>
       ${s.notes ? '<div style="padding:10px 14px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.82rem;border-right:3px solid var(--gold);">' +esc(s.notes)+ '</div>' : ''}
     </div>`;
@@ -9838,6 +9935,7 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'fin-purch') loadFinExp('purchases');
   if (pageId === 'fin-mkt')   loadFinExp('marketing');
   if (pageId === 'fin-debt')  loadFinDebts();
+  if (pageId === 'fin-report') initFinReport();   // (دفعة ١٥)
   if (pageId === 'dashboard') loadSupervisorDashboard();
   if (pageId === 'training') loadTraining();
   if (pageId === 'weekly') renderWeekly();
@@ -11037,21 +11135,24 @@ async function svSaveSessionData(date, teacher, obj, branch){
     done:         !!obj.done,
     saved_at:     new Date().toISOString(),
   };
+  if(!String(b||'').trim()){ showToast('⚠️ شعبة المعلم مش متحددة — اعمل تحديث للصفحة'); return false; }
   try{
-    // بحث عن صف قائم لنفس (التاريخ + المعلم + الشعبة) — بلا اعتماد على قيد فريد
-    const { data: rows, error: selErr } = await selectAll(db.from('supervisory_sessions')
-      .select('id,branch').eq('session_date',date).eq('teacher_name',teacher).order('id'));
-    if(selErr){ console.log('sess sel:', selErr.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
-    let target = (rows||[]).find(r=> String(r.branch||'').trim()===String(b||'').trim());
-    if(!target)   target = (rows||[]).find(r=> !r.branch);   // صف قديم بلا شعبة → رقّيه لهذه الشعبة
-    if(!target && (rows||[]).length===1) target = rows[0];   // صف وحيد لنفس المعلم/التاريخ → حدّثه بدل تكراره
-    let error;
-    if(target){
-      ({ error } = await db.from('supervisory_sessions').update(row).eq('id', target.id));
-    } else {
-      ({ error } = await db.from('supervisory_sessions').insert(row));
+    // (دفعة ١٥) صف لكل (التاريخ + المعلم + الشعبة) — قيد فريد في القاعدة.
+    // المعلم اللي في شعبتين (محمد سيف / مصطفى محمد): حضوره وجلسته في الأبطال منفصلين تماماً عن الرواد
+    // ممنوع نلمس صف شعبة تانية (كان بيتكتب فوقه لو ده الصف الوحيد في نفس اليوم)
+    const upd = () => db.from('supervisory_sessions').update(row)
+      .eq('session_date',date).eq('teacher_name',teacher).eq('branch',b).select('id');
+    let { data: u1, error: e1 } = await upd();
+    if(e1){ console.log('save session:', e1.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
+    if(!u1 || !u1.length){
+      const { data: ins, error: e2 } = await db.from('supervisory_sessions').insert(row).select('id');
+      if(e2 && String(e2.code)==='23505'){            // اتسجّل في نفس اللحظة من جهاز تاني → حدّثه
+        const r3 = await upd();
+        if(r3.error || !r3.data || !r3.data.length){ showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
+      } else if(e2 || !ins || !ins.length){
+        console.log('save session:', e2 && e2.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false;
+      }
     }
-    if(error){ console.log('save session:', error.message); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
     return true;
   }catch(e){ console.log('save session ex:', e); showToast('⚠️ تعذّر الحفظ على السيرفر'); return false; }
 }
@@ -11256,6 +11357,7 @@ async function svDoSaveSession(){
   rec.other   = ot ? ot.value : '';
   if(!ctx.pillarKey) rec.done = true;      // الجلسة الكاملة فقط تُعلَّم "تمت"
   rec.pillars = Object.assign({}, rec.pillars||{});
+  if(!ctx.pillarKey) rec.pillars.full = true;   // (دفعة ١٥) نوع الجلسة بيتسجّل صراحة
   if(ctx.pillarKey){ rec.pillars[ctx.pillarKey] = true; rec.done = true; }  // حفظ ركن من التقويم → "تمت" في جدول المعلمين
   rec.savedAt = new Date().toISOString();
   closeModal('modal-sv-confirm');
@@ -11353,7 +11455,7 @@ function svBuildSessionsSchedule(branches){
 // ══════════════════════════════════════════════════════
 // تقارير الجلسات الإشرافية (live من supervisory_sessions)
 // ══════════════════════════════════════════════════════
-const SV_PILLAR_NAMES = { hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة' };
+const SV_PILLAR_NAMES = { hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة', full:'جلسة كاملة' };
 const SV_RATE_AR = { yes:'نعم', partial:'جزئياً', no:'لا' };
 window.SV_REPORTS_CACHE = window.SV_REPORTS_CACHE || [];
 
@@ -11403,6 +11505,20 @@ async function loadReports(){
   svRenderReportsTable(rows);
 }
 
+// (دفعة ١٥) نوع الجلسة الإشرافية: جلسة كاملة / ركن واحد (+ البنود اللي اتقيّمت فعلاً) / حضور بس
+function svSessType(r){
+  r = r || {}; const pil = r.pillars || {}, sc = r.scores || {};
+  const keys = Object.keys(pil).filter(k => pil[k] && k !== 'full');
+  const full = !!pil.full || (!!r.done && !keys.length);
+  const secs = SV_EVAL_SECTIONS.filter(s => Object.keys(sc).some(k => k.indexOf(s.key+'_') === 0 && sc[k])).map(s => s.key);
+  let h = '';
+  if(full) h += '<span class="badge bg-green" style="font-size:.66rem;margin:1px;">📋 جلسة كاملة</span>';
+  h += keys.map(k => '<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">ركن: '+(SV_PILLAR_NAMES[k]||k)+'</span>').join('');
+  if(!h) return '<span class="badge bg-gray" style="font-size:.64rem;">حضور بس — من غير جلسة</span>';
+  if(full && secs.length && secs.length < SV_EVAL_SECTIONS.length)
+    h += '<div style="font-size:.64rem;color:var(--light);margin-top:2px;">اتقيّم: '+secs.map(k => SV_PILLAR_NAMES[k]||k).join('، ')+'</div>';
+  return h;
+}
 function svPillarBadges(pil){
   const keys = Object.keys(pil||{}).filter(k=>pil[k]);
   if(!keys.length) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
@@ -11417,7 +11533,7 @@ function svRenderReportsTable(rows){
     <td style="padding:10px;font-weight:700;color:var(--forest);">${esc(r.teacher_name||'—')}</td>
     <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${r.branch||'—'}</td>
     <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
-    <td style="padding:10px;text-align:center;">${svPillarBadges(r.pillars)}</td>
+    <td style="padding:10px;text-align:center;">${svSessType(r)}</td>
     <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
     <td style="padding:10px;text-align:center;"><button class="btn btn-outline btn-xs" onclick="svViewReport(${i})">👁️ عرض</button></td>
   </tr>`).join('');
@@ -11428,7 +11544,7 @@ function svRenderReportsTable(rows){
       <th style="padding:11px;text-align:right;font-size:.76rem;color:var(--mid);">المعلم</th>
       <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الشعبة</th>
       <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">المشرف</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الأركان المُقيَّمة</th>
+      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">نوع الجلسة</th>
       <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الحضور</th>
       <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">التفاصيل</th>
     </tr></thead>
@@ -11457,7 +11573,8 @@ function svViewReport(i){
     `<span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
      <span class="badge bg-gray">👤 المشرف: ${r.supervisor_name||'—'}</span>
      <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
-     <span class="badge ${r.attendance==='غائب'?'bg-red':'bg-green'}">الحضور: ${r.attendance||'—'}${r.attendance==='متأخر'&&r.late_min?(' ('+r.late_min+'د)'):''}</span>`;
+     <span class="badge ${r.attendance==='غائب'?'bg-red':'bg-green'}">الحضور: ${r.attendance||'—'}${r.attendance==='متأخر'&&r.late_min?(' ('+r.late_min+'د)'):''}</span>
+     <div style="width:100%;margin-top:4px;font-size:.74rem;color:var(--mid);">نوع الجلسة: ${svSessType(r)}</div>`;
   document.getElementById('rep-detail-body').innerHTML =
     (sections || '<div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا توجد بنود مُقيَّمة في هذه الجلسة</div>')
     + (r.other ? `<div style="margin-top:8px;padding:11px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.82rem;color:var(--forest);"><strong>ملاحظات:</strong> ${esc(r.other||'')}</div>` : '');
@@ -11572,12 +11689,14 @@ async function svFetchCircleLive(branchName, teacherName){
   (attData||[]).forEach(a => { attMap[a.student_id] = a.status; lateMap[a.student_id] = a.late_minutes||0; });
 
   // 5) التسميع لهذا اليوم (حفظ + مراجعة)
-  const { data: memData } = await selectAll(db.from('memorization')
-    .select('student_id, type, grade').in('student_id', allIds).eq('date', date).order('date').order('student_id').order('type'));
-  const memMap = {}, revMap = {};
+  const mq = cols => selectAll(db.from('memorization')
+    .select(cols).in('student_id', allIds).eq('date', date).order('date').order('student_id').order('type'));
+  let { data: memData, error: mErr } = await mq('student_id, type, grade, plan_status');
+  if(mErr && /plan_status/.test(mErr.message||'')) ({ data: memData } = await mq('student_id, type, grade'));
+  const memMap = {}, revMap = {}, memSt = {}, revSt = {};
   (memData||[]).forEach(m => {
-    if(m.type==='review') revMap[m.student_id] = m.grade;
-    else memMap[m.student_id] = m.grade;
+    if(m.type==='review'){ revMap[m.student_id] = m.grade; revSt[m.student_id] = m.plan_status||null; }
+    else { memMap[m.student_id] = m.grade; memSt[m.student_id] = m.plan_status||null; }
   });
 
   const gradeAr = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'حاول مرة أخرى' };
@@ -11607,8 +11726,8 @@ async function svFetchCircleLive(branchName, teacherName){
     const mem = (att==='غائب') ? '—' : (memG ? (gradeAr[memG]||memG) : '—');
     const rev = (att==='غائب') ? '—' : (revG ? (gradeAr[revG]||revG) : '—');
     return { name:s.name, att, mem, rev, pts: ptsMap[s.id]||0,
-      memPlan: memG ? (memG==='retry'?'لم يتم':'تم') : 'لم يتم',
-      revPlan: revG ? (revG==='retry'?'لم يتم':'تم') : 'لم يتم',
+      memPlan: memSt[s.id] ? WK_PLAN_ST[memSt[s.id]] : (memG ? (memG==='retry'?'لم يتم':'تم') : 'لم يتم'),
+      revPlan: revSt[s.id] ? WK_PLAN_ST[revSt[s.id]] : (revG ? (revG==='retry'?'لم يتم':'تم') : 'لم يتم'),
       _guest: !!s._guest, guestTeacher: s.guestTeacher || '' };
   });
 
@@ -11618,9 +11737,7 @@ async function svFetchCircleLive(branchName, teacherName){
 // ── رسم جدول الحلقة (يُستخدم للحقيقي والتقديري) ──
 function svRenderCircleTable(rows, status, isLive, dailyReport){
   const body = document.getElementById('svc-body');
-  const planBadge = (v)=> v==='تم'
-    ? '<span style="font-size:.7rem;font-weight:700;color:#1a7a4a;background:#e8f5ee;padding:2px 9px;border-radius:99px;">تم</span>'
-    : '<span style="font-size:.7rem;font-weight:700;color:#c0392b;background:#fdf0ef;padding:2px 9px;border-radius:99px;">لم يتم</span>';
+  const planBadge = (v)=> wkPlanPill(v,'font-size:.7rem;padding:2px 9px;');
 
   const trs = rows.map((r,i)=>{
     let attCol, attBg;
@@ -11787,18 +11904,28 @@ async function wkLoadRealData(wkIdx){
   }catch(e){ console.log('wk att:', e); }
   try{
     const gMap = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'إعادة' };
-    const { data:mem } = await selectAll(db.from('memorization')
-      .select('student_id,date,type,grade').gte('date',isoStart).lte('date',isoEnd).order('date').order('student_id').order('type'));
+    const mq = cols => selectAll(db.from('memorization')
+      .select(cols).gte('date',isoStart).lte('date',isoEnd).order('date').order('student_id').order('type'));
+    let { data:mem, error:mErr } = await mq('student_id,date,type,grade,plan_status');
+    if(mErr && /plan_status/.test(mErr.message||'')) ({ data:mem } = await mq('student_id,date,type,grade'));
     (mem||[]).forEach(r=>{
       const nm=id2name[r.student_id]; if(!nm) return;
       const k=r.date+'|'+nm; window.WK_REAL[k]=window.WK_REAL[k]||{};
       const g=gMap[r.grade]||r.grade;
-      if(r.type==='review') window.WK_REAL[k].rev=g; else window.WK_REAL[k].mem=g;
+      if(r.type==='review'){ window.WK_REAL[k].rev=g; window.WK_REAL[k].revSt=r.plan_status||null; }
+      else { window.WK_REAL[k].mem=g; window.WK_REAL[k].memSt=r.plan_status||null; }
     });
   }catch(e){ console.log('wk mem:', e); }
   window._WK_LOADED_WEEKS[wk]=true;
 }
 
+// (دفعة ١٥) حالة الخطة في المتابعة: أتم / سبق / لم يتم الخطة (من خطة الطالب) — وإلا «تم / لم يتم» القديمة
+const WK_PLAN_ST={ done:'أتم الخطة', ahead:'سبق الخطة', behind:'لم يتم الخطة' };
+function wkPlanPill(v, css){
+  const map={'تم':['#1a7a4a','#e8f5ee'],'أتم الخطة':['#1a7a4a','#e8f5ee'],'سبق الخطة':['#1d6fa4','#e8f2fb']};
+  const c=map[v]||['#c0392b','#fdf0ef'];
+  return '<span style="'+css+'font-weight:700;color:'+c[0]+';background:'+c[1]+';border-radius:99px;white-space:nowrap;">'+(v||'لم يتم')+'</span>';
+}
 function wkCircleRows(branchName, teacherName, iso){
   const circle = (BRANCH_DATA[branchName]||[]).find(c=>c.teacher===teacherName);
   const students = (circle&&circle.students)?circle.students:[];
@@ -11809,8 +11936,8 @@ function wkCircleRows(branchName, teacherName, iso){
     const rev = d.rev || '—';
     const bad = (v)=> v==='—' || v==='حاول مرة أخرى' || v==='إعادة';
     return { name:s, att, mem, rev,
-      memPlan:(att==='غائب'||bad(mem))?'لم يتم':'تم',
-      revPlan:(att==='غائب'||bad(rev))?'لم يتم':'تم' };
+      memPlan: d.memSt ? WK_PLAN_ST[d.memSt] : ((att==='غائب'||bad(mem))?'لم يتم':'تم'),
+      revPlan: d.revSt ? WK_PLAN_ST[d.revSt] : ((att==='غائب'||bad(rev))?'لم يتم':'تم') };
   });
 }
 
@@ -11945,9 +12072,7 @@ function _weeklyOpenDayRender(branchName, iso, dayLabel){
 // ── جدول حلقة (HTML string بنفس ستايل svRenderCircleTable) ──
 function wkCircleTableHTML(teacherName, rows){
   const NR=wkNoRev();
-  const planBadge=(v)=> v==='تم'
-    ? '<span style="font-size:.68rem;font-weight:700;color:#1a7a4a;background:#e8f5ee;padding:2px 8px;border-radius:99px;">تم</span>'
-    : '<span style="font-size:.68rem;font-weight:700;color:#c0392b;background:#fdf0ef;padding:2px 8px;border-radius:99px;">لم يتم</span>';
+  const planBadge=(v)=> wkPlanPill(v,'font-size:.68rem;padding:2px 8px;');
   const trs = rows.map((r,i)=>{
     let attCol, attBg;
     if(r.att==='حاضر'){ attCol='#1a7a4a'; attBg='#e8f5ee'; }
@@ -12008,9 +12133,7 @@ function wkPdfCirclePage(branchName, teacher, iso, weekIdx, supName){
   const weekStr  = WK_AR_NUM[weekIdx] || wkAr(weekIdx+1);
   const rows     = wkCircleRows(branchName, teacher, iso);
 
-  const planBadge=(v)=> v==='تم'
-    ? '<span style="font-size:12px;font-weight:700;color:#1a7a4a;background:#e8f5ee;padding:3px 12px;border-radius:99px;">تم</span>'
-    : '<span style="font-size:12px;font-weight:700;color:#c0392b;background:#fdf0ef;padding:3px 12px;border-radius:99px;">لم يتم</span>';
+  const planBadge=(v)=> wkPlanPill(v,'font-size:12px;padding:3px 12px;');
 
   const trs = rows.map((r,i)=>{
     let attCol, attBg;
@@ -13084,13 +13207,14 @@ function stuEdEnsure(){
     +f('stued-dad','📞 هاتف الأب','tel')+f('stued-mom','📞 هاتف الأم','tel')
     +'<div style="margin-bottom:12px;"><label style="'+lb+'">تاريخ الميلاد</label><input id="stued-dob" type="date" style="'+inp+'" oninput="stuEdAgeLbl()"><div id="stued-age" style="font-size:.74rem;color:var(--mid,#4a5e52);margin-top:4px;"></div></div>'
     +f('stued-mem','الحفظ (عدد الأجزاء)','number')
-    +f('stued-level','المستوى','text')+f('stued-phone','هاتف الطالب (اختياري)','tel')
+    +f('stued-level','المستوى (يدوي — بيظهر لو مفيش تقييم تجويد)','text')+f('stued-phone','هاتف الطالب (اختياري)','tel')
     +f('stued-dadedu','تعليم الأب','text')+f('stued-momedu','تعليم الأم','text')
     +'</div>'
     +f('stued-addr','العنوان','text')
     +'<div style="margin-bottom:12px;" id="stued-st-wrap"><label style="'+lb+'">الحالة</label><select id="stued-status" style="'+inp+'"><option value="true">نشط</option><option value="false">موقوف</option></select></div>'
     +'<div style="margin-bottom:6px;"><label style="'+lb+'">ملاحظات</label><textarea id="stued-notes" rows="3" style="'+inp+'resize:vertical;"></textarea></div>'
     +'<div id="stued-pp" style="font-size:.74rem;color:var(--light,#8ea598);"></div>'
+    +'<div id="stued-pts"></div>'
     +'</div>'
     +'<div style="padding:12px 20px 18px;display:flex;gap:10px;justify-content:flex-start;border-top:1px solid var(--border,#dce8e0);">'
     +'<button type="button" id="stued-save" onclick="stuEdSave()" style="padding:10px 22px;background:linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318));color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:800;">💾 حفظ التعديلات</button>'
@@ -13108,7 +13232,7 @@ async function stuEdOpen(studentId, onSaved, opts){
   const ov=document.getElementById('stued-ov'), btn=document.getElementById('stued-save'), msg=document.getElementById('stued-msg');
   ['name','dad','mom','dob','mem','level','phone','dadedu','momedu','addr','notes'].forEach(k=>{ const el=document.getElementById('stued-'+k); el.value=''; el.disabled=true; });
   document.getElementById('stued-st-wrap').style.display=STUED.canStatus?'':'none';
-  document.getElementById('stued-age').textContent=''; document.getElementById('stued-pp').textContent='';
+  document.getElementById('stued-age').textContent=''; document.getElementById('stued-pp').textContent=''; document.getElementById('stued-pts').innerHTML='';
   msg.style.display='block'; msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--light,#8ea598);font-size:.82rem;'; msg.textContent='⏳ جارٍ تحميل بيانات الطالب…';
   btn.disabled=true; ov.style.display='flex';
   try{
@@ -13121,6 +13245,7 @@ async function stuEdOpen(studentId, onSaved, opts){
     document.getElementById('stued-status').value=String(r.is_active!==false);
     document.getElementById('stued-pp').textContent=r.parent_phone?('📱 رقم حساب ولي الأمر (لوحة ولي الأمر): '+r.parent_phone):'';
     stuEdAgeLbl(); msg.style.display='none'; btn.disabled=false;
+    STUED.pts=+r.total_points||0; STUED.name=r.full_name||''; stuEdPtsRender();
   }catch(e){ msg.style.cssText='display:block;text-align:center;padding:8px;color:var(--red,#c0392b);font-size:.84rem;font-weight:700;'; msg.textContent='⚠️ البيانات ما اتحمّلتش — مينفعش تعدّل دلوقتي ('+(e.message||e.code||'')+')'; }
 }
 async function stuEdSave(){
@@ -13140,6 +13265,104 @@ async function stuEdSave(){
     if(typeof STUED.onSaved==='function'){ try{ await STUED.onSaved(STUED.id,p); }catch(e){ console.warn('[stued] after save',e); } }
   }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
   finally{ btn.disabled=false; btn.textContent='💾 حفظ التعديلات'; }
+}
+
+/* ══════════ (دفعة ١٥) إضافة / حذف نقاط بسبب — RPC student_points_adjust ══════════
+   المدير ومشرف الطالب بس • السبب إجباري • بيوصل إشعار لولي الأمر في لوحته • الرصيد بيتحدّث من القاعدة */
+const STPT={ id:null, sign:1, bal:null, after:null };
+function stPtAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function stPtEnsure(){
+  if(document.getElementById('stpt-ov')) return;
+  const inp='width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--border,#dce8e0);border-radius:9px;font-family:Tajawal,sans-serif;font-size:.9rem;background:var(--bg,#f5f7f5);color:var(--ink,#1a1a1a);outline:none;';
+  const lb='display:block;font-size:.78rem;font-weight:700;color:var(--forest,#0f2318);margin-bottom:5px;';
+  const ov=document.createElement('div'); ov.id='stpt-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,35,24,.55);z-index:10060;display:none;align-items:center;justify-content:center;padding:14px;font-family:Tajawal,sans-serif;direction:rtl;';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.3);overflow:hidden;">'
+    +'<div id="stpt-head" style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;color:#fff;">'
+    +'<div style="font-weight:800;" id="stpt-title">—</div><button type="button" onclick="stPtClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
+    +'<div style="padding:16px 18px;">'
+    +'<div id="stpt-sub" style="font-size:.8rem;color:var(--mid,#4a5e52);margin-bottom:12px;line-height:1.8;"></div>'
+    +'<div style="margin-bottom:10px;"><label style="'+lb+'">عدد النقاط *</label><input id="stpt-n" type="number" min="1" max="1000" step="1" style="'+inp+'text-align:center;font-weight:800;font-size:1.05rem;"></div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+[5,10,15,20,50,100].map(v=>'<button type="button" onclick="document.getElementById(\'stpt-n\').value='+v+'" style="flex:1;min-width:46px;padding:6px 0;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">'+stPtAr(v)+'</button>').join('')+'</div>'
+    +'<div><label style="'+lb+'">السبب * <span style="font-weight:500;color:var(--light,#8ea598);">(هيظهر لولي الأمر في الإشعارات)</span></label><textarea id="stpt-r" rows="3" maxlength="300" style="'+inp+'resize:vertical;" placeholder="اكتب سبب الإضافة أو الحذف…"></textarea></div>'
+    +'</div>'
+    +'<div style="padding:12px 18px 16px;display:flex;gap:10px;border-top:1px solid var(--border,#dce8e0);">'
+    +'<button type="button" id="stpt-ok" onclick="stPtSave()" style="flex:1;padding:10px 18px;color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:800;">تأكيد</button>'
+    +'<button type="button" onclick="stPtClose()" style="padding:10px 18px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;">إلغاء</button></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov) stPtClose(); });
+}
+// sign: 1 = إضافة • -1 = حذف — after(balance) بعد النجاح
+function stPtOpen(id, name, sign, bal, after){
+  if(!id){ showToast('⚠️ الطالب مش متحدد'); return; }
+  stPtEnsure();
+  STPT.id=String(id); STPT.sign=sign<0?-1:1; STPT.bal=(bal==null||isNaN(+bal))?null:+bal; STPT.after=after||null;
+  const add=STPT.sign>0, col=add?'linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318))':'linear-gradient(135deg,#c0392b,#8e2a1f)';
+  document.getElementById('stpt-head').style.background=col; document.getElementById('stpt-ok').style.background=col;
+  document.getElementById('stpt-title').textContent=add?'➕ إضافة النقاط':'➖ حذف النقاط';
+  document.getElementById('stpt-ok').textContent=add?'✅ إضافة':'🗑 حذف';
+  document.getElementById('stpt-sub').innerHTML='الطالب: <b>'+stuEdE(name||'')+'</b>'+(STPT.bal!=null?' • الرصيد الحالي: <b>'+stPtAr(STPT.bal)+'</b> نقطة':'');
+  document.getElementById('stpt-n').value=''; document.getElementById('stpt-r').value='';
+  document.getElementById('stpt-ov').style.display='flex';
+  setTimeout(()=>{ const n=document.getElementById('stpt-n'); if(n) n.focus(); },60);
+}
+function stPtClose(){ const o=document.getElementById('stpt-ov'); if(o) o.style.display='none'; }
+async function stPtSave(){
+  const digits=x=>String(x||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const n=parseInt(digits(document.getElementById('stpt-n').value),10);
+  const reason=document.getElementById('stpt-r').value.trim();
+  if(!n||n<1||n>1000){ showToast('⚠️ عدد النقاط من ١ لـ ١٠٠٠'); return; }
+  if(reason.length<2){ showToast('⚠️ اكتب السبب'); return; }
+  if(STPT.sign<0 && STPT.bal!=null && n>STPT.bal){ showToast('⚠️ رصيد الطالب '+stPtAr(STPT.bal)+' نقطة بس'); return; }
+  const btn=document.getElementById('stpt-ok'), lbl=btn.textContent; btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
+  try{
+    const {data,error}=await db.rpc('student_points_adjust',{p_student:STPT.id, p_points:STPT.sign*n, p_reason:reason});
+    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
+    stPtClose();
+    showToast('✅ '+(STPT.sign>0?'اتضافت ':'اتحذفت ')+stPtAr(n)+' نقطة • الرصيد: '+stPtAr(data.balance)+(data.notified?' • وصل إشعار لولي الأمر':' • الطالب مش مربوط بحساب ولي أمر'));
+    if(typeof STPT.after==='function'){ try{ await STPT.after(data.balance); }catch(e){ console.warn('[stpt] after',e); } }
+  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
+  finally{ btn.disabled=false; btn.textContent=lbl; }
+}
+async function stPtLog(id, limit){
+  const {data,error}=await db.from('student_point_adjustments').select('id,points,reason,by_name,balance_after,created_at')
+    .eq('student_id',id).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(limit||6);
+  if(error) throw error; return data||[];
+}
+function stPtLogHtml(rows){
+  if(!rows.length) return '<div style="font-size:.74rem;color:var(--light,#8ea598);padding:6px 0;">مفيش إضافات أو حذف يدوي لسه</div>';
+  return rows.map(r=>{ const add=r.points>0, d=new Date(r.created_at);
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--border,#dce8e0);font-size:.76rem;">'
+      +'<b style="min-width:52px;text-align:center;color:'+(add?'var(--jade,#2d7a50)':'var(--red,#c0392b)')+';">'+(add?'+':'−')+stPtAr(Math.abs(r.points))+'</b>'
+      +'<div style="flex:1;"><div style="color:var(--forest,#0f2318);">'+stuEdE(r.reason||'')+'</div>'
+      +'<div style="color:var(--light,#8ea598);font-size:.68rem;">'+stuEdE(r.by_name||'')+' • '+stPtAr(d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear())+(r.balance_after!=null?' • الرصيد بعدها: '+stPtAr(r.balance_after):'')+'</div></div></div>'; }).join('');
+}
+// قسم النقاط جوه نافذة «تعديل بيانات الطالب»
+function stuEdPtsRender(){
+  const box=document.getElementById('stued-pts'); if(!box||!STUED.id) return;
+  const bs='padding:7px 12px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:800;';
+  box.innerHTML='<div style="border:1.5px solid var(--border,#dce8e0);border-radius:12px;padding:12px 14px;margin-top:12px;background:var(--bg,#f5f7f5);">'
+    +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+    +'<div style="font-weight:800;color:var(--forest,#0f2318);">⭐ رصيد النقاط: <span style="color:var(--gold,#c8920a);font-size:1.05rem;">'+stPtAr(STUED.pts)+'</span></div>'
+    +'<div style="margin-right:auto;display:flex;gap:6px;flex-wrap:wrap;">'
+    +'<button type="button" onclick="stuEdPts(1)" style="'+bs+'background:var(--jade,#2d7a50);color:#fff;border:none;">➕ إضافة النقاط</button>'
+    +'<button type="button" onclick="stuEdPts(-1)" style="'+bs+'background:#fff;color:var(--red,#c0392b);border:1.5px solid var(--red,#c0392b);">➖ حذف النقاط</button></div></div>'
+    +'<div id="stued-pts-log" style="margin-top:6px;font-size:.74rem;color:var(--light,#8ea598);">⏳ آخر الحركات…</div></div>';
+  const sid=STUED.id;
+  stPtLog(sid,5).then(rows=>{ if(STUED.id!==sid) return; const l=document.getElementById('stued-pts-log'); if(l) l.innerHTML=stPtLogHtml(rows); })
+    .catch(e=>{ const l=document.getElementById('stued-pts-log'); if(l) l.innerHTML='<span style="color:var(--red,#c0392b);">⚠️ سجل النقاط ما اتحمّلش</span>'; });
+}
+function stuEdPts(sign){
+  const sid=STUED.id;
+  stPtOpen(sid, STUED.name, sign, STUED.pts, async bal=>{
+    if(STUED.id===sid){ STUED.pts=+bal||0; stuEdPtsRender(); }
+    stPtAfter(sid, bal);
+  });
+}
+// بعد أي تعديل نقاط: حدّث الجداول الظاهرة (الجدول الطلابي + قايمة الطلاب)
+function stPtAfter(sid, bal){
+  try{ if(typeof STUDENTS!=='undefined'&&Array.isArray(STUDENTS)){ const s=STUDENTS.find(x=>String(x.id)===String(sid)); if(s) s.points=bal; } }catch(e){}
+  try{ if(typeof stuSheetFill==='function') stuSheetFill(document); }catch(e){}
 }
 </script>
 
@@ -16352,7 +16575,7 @@ async function rptRunTeacher(){
     const srows = sess.map((s,i)=>`<tr>
       <td style="white-space:nowrap;font-weight:700;color:var(--forest);">${svFmtReportDate(s.session_date)}</td>
       <td style="color:var(--emerald);font-weight:700;">${s.supervisor_name||'—'}</td>
-      <td>${svPillarBadges(s.pillars)}</td>
+      <td>${svSessType(s)}</td>
       <td><span class="badge ${s.attendance==='غائب'?'bg-red':'bg-green'}" style="font-size:.66rem;">${s.attendance||'—'}</span></td>
       <td style="text-align:center;"><button class="btn btn-outline btn-xs" onclick="rptTcSess(${i})">👁️ عرض</button></td>
     </tr>`).join('');
@@ -16940,30 +17163,37 @@ async function statsTeachersRun(){
   const teachers=R.teachers.filter(t=>{ if(!grp) return true; const bs=tBranches[t.id];
     if(bs){ for(const b of bs) if(grp.has(b)) return true; return false; } return grp.has(t.branch_name); });
   if(!teachers.length){ out.innerHTML='<div class="empty" style="padding:40px;"><span class="empty-icon">📭</span>لا يوجد معلمون في هذا الاختيار</div>'; return; }
-  const tset=new Set(teachers.map(t=>t.id)), stTeacher={}, ids=[];
-  R.circles.forEach(c=>{ if(c.teacher_id && tset.has(c.teacher_id)) c.students.forEach(s=>{ stTeacher[s.id]=c.teacher_id; ids.push(s.id); }); });
+  // (دفعة ١٥) المعلم اللي في أكتر من شعبة = صف منفصل لكل شعبة (حضوره وجلساته وطلابه في كل شعبة لوحدها)
+  const units=[];
+  teachers.forEach(t=>{ const bs=tBranches[t.id]?[...tBranches[t.id]]:[t.branch_name||''];
+    const keep=bs.filter(b=>!grp||grp.has(b)); (keep.length?keep:bs).forEach(b=> units.push({ key:t.id+'|'+(b||''), t, branch:b||'' })); });
+  const nUnits={}; units.forEach(u=> nUnits[u.t.id]=(nUnits[u.t.id]||0)+1);
+  const ukey=(tid,b)=> nUnits[tid]>1 ? tid+'|'+(b||'') : (units.find(u=>u.t.id===tid)||{}).key;
+  const tset=new Set(teachers.map(t=>t.id)), stTeacher={}, ids=[], cBranch={};
+  R.circles.forEach(c=>{ cBranch[c.id]=c.branch_name; if(c.teacher_id && tset.has(c.teacher_id)) c.students.forEach(s=>{ stTeacher[s.id]=ukey(c.teacher_id,c.branch_name); ids.push(s.id); }); });
   const uids=[...new Set(ids)];
   try{
     const agg = uids.length ? await ssAggStudents(uids,from,to) : {};
-    const tAgg={}; teachers.forEach(t=> tAgg[t.id]=ssBlank());
-    uids.forEach(id=>{ const tid=stTeacher[id]; if(tid && tAgg[tid]) ssAdd(tAgg[tid], agg[id]); });
+    const tAgg={}; units.forEach(u=> tAgg[u.key]=ssBlank());
+    uids.forEach(id=>{ const k=stTeacher[id]; if(k && tAgg[k]) ssAdd(tAgg[k], agg[id]); });
     // جلسات المشرف (حضور المعلم + تقييمات)
     const names=teachers.map(t=>t.name), sessByName={};
     const chunk=(a,n)=>{ const o=[]; for(let i=0;i<a.length;i+=n) o.push(a.slice(i,i+n)); return o; };
     for(const g of chunk(names,60)){
-      const {data}=await selectAll(db.from('supervisory_sessions').select('teacher_name,attendance,late_min,scores')
+      const {data}=await selectAll(db.from('supervisory_sessions').select('teacher_name,branch,attendance,late_min,scores')
         .in('teacher_name',g).gte('session_date',from).lte('session_date',to).order('id'));
       (data||[]).forEach(s=>{ (sessByName[s.teacher_name]=sessByName[s.teacher_name]||[]).push(s); });
     }
     // الدروس المحضّرة
     const lessCount={}; const tids=teachers.map(t=>t.id);
     for(const g of chunk(tids,80)){
-      const {data}=await selectAll(db.from('lesson_preps').select('teacher_id,status,date')
+      const {data}=await selectAll(db.from('lesson_preps').select('teacher_id,status,date,circle_id')
         .in('teacher_id',g).in('status',['submitted','returned','approved']).gte('date',from).lte('date',to).order('id'));
-      (data||[]).forEach(l=>{ lessCount[l.teacher_id]=(lessCount[l.teacher_id]||0)+1; });
+      (data||[]).forEach(l=>{ const k=nUnits[l.teacher_id]>1 ? ukey(l.teacher_id, cBranch[l.circle_id]) : ukey(l.teacher_id); if(k) lessCount[k]=(lessCount[k]||0)+1; });
     }
-    TC_ROWS=teachers.map(t=>{
-      const a=tAgg[t.id], sess=sessByName[t.name]||[];
+    TC_ROWS=units.map(u=>{
+      const t=u.t, multi=nUnits[t.id]>1;
+      const a=tAgg[u.key], sess=(sessByName[t.name]||[]).filter(s=> !multi || rptBranchMatch(s.branch, u.branch));
       let present=0,absent=0,lateMin=0;
       sess.forEach(s=>{ if(s.attendance==='غائب') absent++;
         else if(s.attendance==='حاضر'||s.attendance==='متأخر'){ present++; if(s.attendance==='متأخر') lateMin+=(parseInt(s.late_min)||0); } });
@@ -16972,11 +17202,11 @@ async function statsTeachersRun(){
       const evals=[eHifz,eManhaj,eTalqin,eAmma].filter(x=>x!=null);
       const avgEval=evals.length? evals.reduce((s,x)=>s+x,0)/evals.length : 0;
       const comp=Math.round(0.3*presPct + 0.4*avgEval + 0.3*ssGradeQuality(a));
-      const br=(tBranches[t.id]?[...tBranches[t.id]].join('، '):t.branch_name)||'—';
-      return { id:t.id, name:t.name, branch:br,
+      const br=multi ? u.branch : ((tBranches[t.id]?[...tBranches[t.id]].join('، '):t.branch_name)||'—');
+      return { id:u.key, name:t.name+(multi?' — '+u.branch:''), branch:br,
         presPct, absPct, lateMin, hExc:a.h_exc, rExc:a.r_exc, hVg:a.h_vg, rVg:a.r_vg,
         hGood:a.h_good, rGood:a.r_good, hRetry:a.h_retry, rRetry:a.r_retry, vHifz:a.vHifz, vRev:a.vRev,
-        lessons:lessCount[t.id]||0, eHifz, eManhaj, eTalqin, eAmma, comp };
+        lessons:lessCount[u.key]||0, eHifz, eManhaj, eTalqin, eAmma, comp };
     });
     tcRender();
   }catch(e){ out.innerHTML='<div class="empty" style="padding:40px;color:var(--red);"><span class="empty-icon">⚠️</span>تعذّر التحميل: '+(e.message||e.code||'')+'</div>'; }
@@ -17653,12 +17883,19 @@ async function loadSubsRep(force){
     for(let i=0; i<ids.length; i+=200){
       const chunk = ids.slice(i, i+200);
       const { data, error } = await selectAll(db.from('fin_subscriptions')
-        .select('student_id,month_no,amount,reversed,reversal_of,term_id')
+        .select('student_id,month_no,amount,reversed,reversal_of,term_id,pay_method,collected')
         .in('student_id', chunk).order('id'));
       if(error) throw error;
       (data||[]).filter(r => !r.reversed && !r.reversal_of && termRowMatch(r)).forEach(r => {
-        (paid[r.student_id] = paid[r.student_id] || {})[r.month_no] = Number(r.amount||0);
+        (paid[r.student_id] = paid[r.student_id] || {})[r.month_no] =
+          { amt:Number(r.amount||0), pay:r.pay_method, unc:(r.pay_method !== 'cash' && !r.collected) };
       });
+    }
+    // ⭐ «مكفول» من ملف الطالب (students.is_sponsored) — زي متأخرات المدير
+    const sponFlag = {};
+    for(let i=0; i<ids.length; i+=200){
+      const { data:sf } = await db.from('students').select('id,is_sponsored').in('id', ids.slice(i, i+200));
+      (sf||[]).forEach(x => { if(x.is_sponsored) sponFlag[x.id] = true; });
     }
 
     // تجميع حسب المعلم/الحلقة
@@ -17667,10 +17904,10 @@ async function loadSubsRep(force){
       const key = (st.circle_id || 'x') + '|' + (st.teacher_name || '—');
       if(!gmap[key]) gmap[key] = { teacher: st.teacher_name||'—', circle: st.circle_name||'—', branch: st.branch_name||'—', rows: [] };
       const p = paid[st.id] || {};
-      const months = [1,2,3].map(m => ({ m, amt: (p[m] != null ? p[m] : null) }));
+      const months = [1,2,3].map(m => ({ m, amt: (p[m] != null ? p[m].amt : null), pay: p[m] ? p[m].pay : null, unc: p[m] ? p[m].unc : false }));
       const paidCnt = months.filter(x => x.amt != null).length;
-      const sponsor = sponMap[st.id] || null;
-      gmap[key].rows.push({ id: st.id, name: st.name, branch: st.branch_name||'—', months,
+      const sponsor = sponMap[st.id] || (sponFlag[st.id] ? 'مكفول' : null);
+      gmap[key].rows.push({ id: st.id, name: st.name, branch: st.branch_name||'—', months, flag: !!sponFlag[st.id],
                             price: finPrice(st.branch_name), sponsor,
                             paidCnt, dueCnt: sponsor ? 0 : (3 - paidCnt),
                             paidSum: months.reduce((a,x)=>a+(x.amt||0),0) });
@@ -17728,7 +17965,8 @@ function renderSubsRep(){
 
   const myBr = (typeof finMyBranches === 'function') ? finMyBranches().join(' + ') : '';
   const cell = (x, r) => x.amt != null
-    ? '<td class="srep-num"><span class="srep-p">✓ دفع</span>'+(x.amt?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(x.amt)+'</div>':'')+'</td>'
+    ? '<td class="srep-num"><span class="srep-p">✓ دفع</span>'+(x.amt?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(x.amt)+'</div>':'')
+      + (x.pay ? '<div><span class="badge '+(FIN_PAY_BADGE[x.pay]||'bg-gray')+'" style="font-size:.6rem;margin-top:2px;">'+(FIN_PAY_AR[x.pay]||x.pay)+'</span></div>' : '')+'</td>'
     : (r.sponsor
         ? '<td class="srep-num"><span style="color:var(--gold);font-weight:800;">مكفول</span></td>'
         : '<td class="srep-num"><span class="srep-d">متأخر</span>'+(r.price>0?'<div style="font-size:.66rem;color:var(--light);">'+finMoney(r.price)+'</div>':'')+'</td>');
@@ -17765,7 +18003,8 @@ function renderSubsRep(){
                 : '<span class="badge bg-red">'+finAr(r.dueCnt)+' متأخر</span>');
           return '<tr><td class="srep-num" style="color:var(--light);font-weight:700;">'+finAr(i+1)+'</td>'
             + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.name)
-            +   (r.sponsor ? '<div style="font-size:.65rem;color:var(--gold);font-weight:700;">كفيل: '+finEsc(r.sponsor)+'</div>' : '')+'</td>'
+            +   ' <button data-html2canvas-ignore class="btn btn-ghost btn-xs rpt-noprint" style="padding:1px 8px;font-size:.66rem;'+(r.flag?'color:var(--red);':'color:var(--gold);')+'" onclick="finToggleSponsor(\''+r.id+'\','+(r.flag?'false':'true')+',this)">'+(r.flag?'✖ إلغاء «مكفول»':'⭐ مكفول')+'</button>'
+            +   (r.sponsor && r.sponsor !== 'مكفول' ? '<div style="font-size:.65rem;color:var(--gold);font-weight:700;">كفيل: '+finEsc(r.sponsor)+'</div>' : '')+'</td>'
             + r.months.map(x => cell(x, r)).join('')
             + '<td class="srep-num">'+stTxt+'</td></tr>';
         }).join('')
@@ -17776,6 +18015,137 @@ function renderSubsRep(){
 
   html += '</div>';
   document.getElementById('subsrep-sheet').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════
+   (دفعة ١٥) التقرير المالي للقسم — لوحة المشرف
+   اشتراكات وكفالات طلاب شعب القسم بس (بنين: الأبطال + الرواد • بنات: الملكات + الأميرات)
+   الخزنة والمرتبات والمصروفات العامة والموازنة = تقرير المدير
+══════════════════════════════════════════════════════ */
+function repISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function initFinReport(){
+  const f = document.getElementById('rep-from');
+  if(f && !f.value) repQuick('term');
+}
+function repQuick(k){
+  const now = new Date();
+  let from, to = new Date();
+  if(k === 'm')       from = new Date(now.getFullYear(), now.getMonth(), 1);
+  else if(k === 'pm'){ from = new Date(now.getFullYear(), now.getMonth()-1, 1); to = new Date(now.getFullYear(), now.getMonth(), 0); }
+  else if(k === 'q')   from = new Date(now.getFullYear(), now.getMonth()-2, 1);
+  else if(k === 'y')   from = new Date(now.getFullYear(), 0, 1);
+  else if(k === 'term'){
+    const t = (typeof VIEW_TERM !== 'undefined' && VIEW_TERM) || (typeof CUR_TERM !== 'undefined' && CUR_TERM) || null;
+    if(t){ document.getElementById('rep-from').value = t.start_date; const td = repISO(now);
+           document.getElementById('rep-to').value = t.end_date < td ? t.end_date : td; return; }
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  else               { from = new Date(2020, 0, 1); }
+  document.getElementById('rep-from').value = repISO(from);
+  document.getElementById('rep-to').value   = repISO(to);
+}
+async function buildFinReport(btn){
+  const from = document.getElementById('rep-from').value;
+  const to   = document.getElementById('rep-to').value;
+  if(!from || !to){ showToast('⚠️ اختر تاريخ البداية والنهاية'); return; }
+  if(from > to){ showToast('⚠️ تاريخ «من» بعد تاريخ «إلى»'); return; }
+  const sheet = document.getElementById('fin-report-sheet');
+  const pdfBtn = document.getElementById('rep-pdf-btn');
+  sheet.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--light);">جاري تجميع البيانات…</div></div>';
+  if(btn) btn.disabled = true;
+  try{
+    const [subsR, sponR] = await Promise.all([
+      selectAll(db.from('fin_subscriptions').select('*').order('id')),
+      selectAll(db.from('fin_sponsorships').select('*').order('id')),
+    ]);
+    if(subsR.error) throw subsR.error; if(sponR.error) throw sponR.error;
+    const mine = a => (a.data||[]).filter(r => !r.reversed && finInMySection(r.student_branch));   // القيد العكسي يفضل بالسالب
+    const SUBS = mine(subsR), SPON = mine(sponR);
+    const dOf = r => r.paid_date || r.date;
+    const inR = (d,a,b) => d && d >= a && d <= b;
+    const sum = a => a.reduce((x,r) => x + Number(r.amount||0), 0);
+
+    // الفترة السابقة بنفس الطول
+    const days = Math.round((new Date(to+'T00:00:00') - new Date(from+'T00:00:00'))/86400000) + 1;
+    const pTo = new Date(new Date(from+'T00:00:00').getTime() - 86400000);
+    const pFrom = new Date(pTo.getTime() - (days-1)*86400000);
+    const pf = repISO(pFrom), pt = repISO(pTo);
+    const calc = (a,b) => {
+      const s = SUBS.filter(r => inR(dOf(r),a,b)), p = SPON.filter(r => inR(dOf(r),a,b));
+      return { s, p, sT:sum(s), pT:sum(p), tot:sum(s)+sum(p) };
+    };
+    const C = calc(from,to), Pv = calc(pf,pt);
+    const delta = (c,p) => {
+      if(!p) return c ? '<span style="color:var(--emerald);font-weight:700;">جديد</span>' : '<span style="color:var(--light);">—</span>';
+      const d = (c-p)/Math.abs(p)*100, up = d >= 0;
+      return '<span style="color:'+(up?'var(--emerald)':'var(--red)')+';font-weight:700;">'+(up?'▲':'▼')+' '+finAr(Math.abs(d).toFixed(1))+'٪</span>';
+    };
+    const all = C.s.concat(C.p);
+    const pend = sum(all.filter(r => r.pay_method !== 'cash' && !r.collected));
+
+    // حسب الشعبة
+    const brRows = finMyBranches().map(b => {
+      const s = C.s.filter(r => finNorm(r.student_branch) === finNorm(b)), p = C.p.filter(r => finNorm(r.student_branch) === finNorm(b));
+      return '<tr><td style="font-weight:700;color:var(--forest);">'+finEsc(b)+'</td>'
+        + '<td class="rep-num">'+finAr(s.length)+'</td><td class="rep-num" style="color:var(--emerald);">'+finMoney(sum(s))+'</td>'
+        + '<td class="rep-num">'+finAr(p.length)+'</td><td class="rep-num" style="color:var(--blue);">'+finMoney(sum(p))+'</td>'
+        + '<td class="rep-num" style="font-weight:800;">'+finMoney(sum(s)+sum(p))+'</td></tr>';
+    }).join('');
+    // حسب وسيلة الدفع
+    const payRows = ['cash','vodafone_cash','instapay'].map(k => {
+      const g = all.filter(r => (r.pay_method||'cash') === k), u = g.filter(r => k !== 'cash' && !r.collected);
+      return '<tr><td style="font-weight:700;"><span class="badge '+(FIN_PAY_BADGE[k]||'bg-gray')+'">'+FIN_PAY_AR[k]+'</span></td>'
+        + '<td class="rep-num">'+finAr(g.length)+'</td><td class="rep-num">'+finMoney(sum(g))+'</td>'
+        + '<td class="rep-num" style="color:'+(sum(u)?'var(--gold)':'var(--light)')+';">'+(k==='cash'?'—':finMoney(sum(u)))+'</td></tr>';
+    }).join('');
+    // اشتراكات حسب الشهر
+    const monRows = [1,2,3].map(m => {
+      const g = C.s.filter(r => +r.month_no === m);
+      return '<tr><td style="font-weight:700;">'+(FIN_MONTH_AR[m]||('الشهر '+finAr(m)))+'</td><td class="rep-num">'+finAr(g.length)+'</td><td class="rep-num">'+finMoney(sum(g))+'</td></tr>';
+    }).join('');
+
+    const me = finMe();
+    sheet.innerHTML =
+      '<div class="rep-sheet">'
+      + '<div class="rep-head"><div><div class="rep-h1">مدرسة التوحيد القرآنية</div>'
+      +   '<div class="rep-h2">إصلاح حياة — التقرير المالي لقسم '+finEsc(finMyBranches().join(' + '))+'</div></div>'
+      +   '<div class="rep-meta"><div>الفترة: من <strong>'+finDateAr(from)+'</strong> إلى <strong>'+finDateAr(to)+'</strong></div>'
+      +     '<div>المقارنة مع: '+finDateAr(pf)+' — '+finDateAr(pt)+'</div>'
+      +     '<div>تاريخ الإصدار: '+finDateAr(finTodayISO())+' • أعدّه: '+finEsc(me.name)+'</div></div></div>'
+      + '<div class="rep-kpi">'
+      +   '<div class="rep-k"><div class="l">اشتراكات الطلاب</div><div class="v" style="color:var(--emerald);">'+finMoney(C.sT)+'</div><div style="font-size:.68rem;margin-top:3px;">'+delta(C.sT,Pv.sT)+'</div></div>'
+      +   '<div class="rep-k"><div class="l">الكفالات</div><div class="v" style="color:var(--blue);">'+finMoney(C.pT)+'</div><div style="font-size:.68rem;margin-top:3px;">'+delta(C.pT,Pv.pT)+'</div></div>'
+      +   '<div class="rep-k"><div class="l">إجمالي إيرادات القسم</div><div class="v" style="color:var(--forest);">'+finMoney(C.tot)+'</div><div style="font-size:.68rem;margin-top:3px;">'+delta(C.tot,Pv.tot)+'</div></div>'
+      +   '<div class="rep-k"><div class="l">في محافظ العملاء (لسه ما اتحصّلش)</div><div class="v" style="color:var(--gold);">'+finMoney(pend)+'</div></div>'
+      + '</div>'
+      + '<div class="rep-sec">الإيرادات حسب الشعبة</div>'
+      + '<table class="rep-tbl"><thead><tr><th>الشعبة</th><th>عدد الاشتراكات</th><th>الاشتراكات</th><th>عدد الكفالات</th><th>الكفالات</th><th>الإجمالي</th></tr></thead><tbody>'+brRows+'</tbody>'
+      +   '<tfoot><tr><td>الإجمالي</td><td class="rep-num">'+finAr(C.s.length)+'</td><td class="rep-num">'+finMoney(C.sT)+'</td><td class="rep-num">'+finAr(C.p.length)+'</td><td class="rep-num">'+finMoney(C.pT)+'</td><td class="rep-num">'+finMoney(C.tot)+'</td></tr></tfoot></table>'
+      + '<div class="rep-sec">حسب وسيلة الدفع</div>'
+      + '<table class="rep-tbl"><thead><tr><th>الوسيلة</th><th>العدد</th><th>المبلغ</th><th>غير محصَّل</th></tr></thead><tbody>'+payRows+'</tbody></table>'
+      + '<div class="rep-sec">اشتراكات الطلاب حسب الشهر</div>'
+      + '<table class="rep-tbl"><thead><tr><th>الشهر</th><th>العدد</th><th>المبلغ</th></tr></thead><tbody>'+monRows+'</tbody></table>'
+      + '<div style="font-size:.72rem;color:var(--light);margin-top:14px;">ℹ️ المتأخرات بالتفصيل في «متأخرات الاشتراكات» • الخزنة والمرتبات والمصروفات العامة على مستوى المدرسة في التقرير المالي للمدير.</div>'
+      + '</div>';
+    if(pdfBtn) pdfBtn.style.display = '';
+  }catch(e){
+    sheet.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--red);">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</div></div>';
+  }
+  if(btn) btn.disabled = false;
+}
+
+// ⭐ تعليم الطالب «مكفول» (students.is_sponsored) — مابيتحسبش عليه متأخرات (دفعة ١٥: زي متأخرات المدير)
+async function finToggleSponsor(id, on, btn){
+  if(btn) btn.disabled = true;
+  try{
+    const { data, error } = await db.rpc('fin_set_sponsored', { p_student:id, p_on:!!on });
+    if(error) throw error; if(!data || !data.ok) throw new Error('لم يُحفظ');
+    showToast(on ? '⭐ الطالب اتعلّم «مكفول»' : '✅ اتلغى «مكفول»');
+    (SUBSREP.groups||[]).forEach(g => g.rows.forEach(r => { if(String(r.id) === String(id)){
+      r.flag = !!on; if(on){ r.sponsor = r.sponsor || 'مكفول'; r.dueCnt = 0; } else { if(r.sponsor === 'مكفول') r.sponsor = null; r.dueCnt = r.sponsor ? 0 : (3 - r.paidCnt); }
+    } }));
+    renderSubsRep();
+  }catch(e){ showToast('❌ ما اتحفظش: '+(e.message||e.code||'')); if(btn) btn.disabled = false; }
 }
 
 function openDonModal(){
@@ -17992,8 +18362,10 @@ async function saveSubscription(btn){
 function _finSubCell(r){
   if(!r) return '<td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;">—</td><td class="fin-cell-none" style="text-align:center;border-left:2px solid var(--border);">—</td>';
   const u = finUnc(r) ? ' fin-unc-c' : '';
-  return '<td style="text-align:center;" class="fin-cell-amt'+u+'">'+finMoney(r.amount)+'</td>'
-    + '<td style="text-align:center;" class="'+u.trim()+'"><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'+finUncBadge(r)+'</td>'
+  // (دفعة ١٥) طريقة الاشتراك واضحة دايماً (نقدي / فودافون كاش / انستاباي) — حتى لو لسه في محفظة العميل
+  return '<td style="text-align:center;" class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+    + '<td style="text-align:center;"><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'" style="font-size:.7rem;">✓ '+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'
+    +   (finUnc(r) ? '<div style="font-size:.6rem;color:var(--light);margin-top:2px;">في محفظة العميل — لسه ما اتحصّلش للخزنة</div>' : '')+'</td>'
     + '<td style="text-align:center;font-size:.74rem;" class="'+u.trim()+'">'+finEsc(r.receiver||'—')+'</td>'
     + '<td style="text-align:center;border-left:2px solid var(--border);" class="'+u.trim()+'">'+finDateAr(r.paid_date)+'</td>';
 }

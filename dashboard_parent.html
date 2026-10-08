@@ -300,7 +300,7 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
     <div class="tb-title" id="tb-title">الرئيسية</div>
     <div class="tb-sp"></div>
     <select class="tb-term" id="term-sel" onchange="changeTerm(this.value)" title="الدورة"></select>
-    <button class="tb-btn" onclick="navPage('inbox')" title="الرسائل"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="tb-dot" style="display:none;"></span></button>
+    <button class="tb-btn" onclick="navPage('notifs')" title="الإشعارات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="tb-dot" style="display:none;"></span></button>
   </header>
 
   <div class="wrap">
@@ -328,6 +328,8 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
     <section class="page" id="page-subs"></section>
     <!-- الإعلانات والرسائل -->
     <section class="page" id="page-inbox"></section>
+    <!-- الإشعارات (دفعة ١٥) -->
+    <section class="page" id="page-notifs"></section>
     <!-- الإعدادات -->
     <section class="page" id="page-settings"></section>
   </div>
@@ -531,17 +533,25 @@ function spTrack(plan,key,recs,asOf){
   const dueP=due.length?Math.max(...due.map(x=>x.p)):p0-1;
   const planned=Math.max(0,dueP-p0+1), plannedAll=pEnd-p0+1;
   const doneAll=covUpTo(asOf,pEnd);
+  // (دفعة ١٥) آخر آية وصلها الطالب لحد تاريخ معيّن (لحالة: أتم / سبق / لم يتم الخطة)
+  const reachTo=dLim=>{ let m=null; rs.forEach(y=>{ if(y.date<=dLim && y.sp[1]>=p0 && (m==null||y.sp[1]>m)) m=y.sp[1]; }); return m; };
+  const stOf=(rc,tp)=> (rc==null||rc<tp)?'behind':(rc>tp?'ahead':'done');
   const rows=ses.map(x=>{
-    const need=x.p-p0+1, got=covUpTo(x.date,x.p);
+    const need=x.p-p0+1, got=covUpTo(x.date,x.p), rc=reachTo(x.date);
     const day=rs.filter(y=>y.date===x.date).map(y=>spName(y.r.surah_to||y.r.surah_from)+' '+spAr(y.r.ayah_to||y.r.ayah_from||'')).join(' ، ');
-    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day };
+    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day,
+             reach:rc, st:(x.date>asOf?'future':stOf(rc,x.p)) };
   });
-  return { lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
+  const rcAll=reachTo(asOf);
+  return { st: due.length?stOf(rcAll,dueP):null, lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
            pct: planned?Math.min(100,Math.round(doneAll/planned*100)):null,
            pctAll: plannedAll?Math.min(100,Math.round(doneAll/plannedAll*100)):0, rows };
 }
 function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'var(--gold)':'var(--red)')); }
 function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
+// (دفعة ١٥) حالة الخطة: done = أتم • ahead = سبق • behind = لم يتم
+const SP_ST={ done:['✔ أتم الخطة','bg-green'], ahead:['⏫ سبق الخطة','bg-blue'], behind:['✖ لم يتم الخطة','bg-red'] };
+function spStBadge(st){ const m=SP_ST[st]; return m?'<span class="badge '+m[1]+'" style="white-space:nowrap;">'+m[0]+'</span>':''; }
 function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
 // ── HTML ملخّص الإنجاز لخطة واحدة ──
 function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
@@ -552,10 +562,11 @@ function spProgressHtml(plan,recs,asOf){
     +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
     +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
       +'<div style="font-size:.72rem;color:var(--light);">لحد النهارده • '+spAr(T.done)+' من '+spAr(T.planned)+' آية</div></div>'+spBar(T.pct)
+      +(T.st?'<div style="margin-top:7px;">'+spStBadge(T.st)+'</div>':'')
       +'<div style="font-size:.7rem;color:var(--mid);margin-top:6px;">الفترة كلها: '+spAr(T.pctAll)+'٪ ('+spAr(T.plannedAll)+' آية)'+(T.lines?(' • '+spAr(T.lines)+' سطر/حلقة'):'')+' • البداية: '+spLbl(T.start)+'</div>')
      :'<div style="font-size:.76rem;color:var(--light);margin-top:8px;">مفيش خطة</div>')+'</div>';
   const map={}; (H?H.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).h=r; }); (R?R.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).r=r; });
-  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
+  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(spStBadge(x.st)+(x.st==='behind'?'<div style="font-size:.62rem;color:var(--light);margin-top:2px;">'+spAr(x.pct)+'٪ من المطلوب</div>':''));
     return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
   const dates=Object.keys(map).sort();
   const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th>'+(NR?'':'<th>هدف المراجعة</th><th>الإنجاز</th>')+'</tr></thead><tbody>'
@@ -623,13 +634,13 @@ const AR=spAr;
 const BR_COL={'الأبطال':['#1d6fa4','#e8f2fb'],'الرواد':['#2d7a50','#e8f5ee'],'الملكات':['#6b3fa0','#f0ebfa'],'الأميرات':['#c2417a','#fcebf3']};
 function brCol(b){ return BR_COL[b]||['#1e5c36','#e8f5ee']; }
 const GRADE_AR={excellent:['ممتاز','p-green'],very_good:['جيد جداً','p-blue'],good:['جيد','p-gold'],retry:['إعادة','p-red']};
-const PAY_AR={cash:'نقدي',vodafone_cash:'فودافون كاش',instapay:'إنستا باي',bank:'تحويل بنكي'};
+const PAY_AR={cash:'نقدي',vodafone_cash:'فودافون كاش',instapay:'انستاباي',bank:'تحويل بنكي'};
 const STF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['participation','المشاركة'],['cleanliness','النظافة والهندام'],['cooperation','التعاون']];
 const STF_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
 const NAV=[
   ['home','الرئيسية','home'],['prayers','الصلوات','moon'],['attendance','الحضور','calcheck'],['recitation','التسميع','book'],
   ['plan','خطة الطالب','target'],['file','ملف الطالب','folder'],['points','النقاط ولوحة الشرف','trophy'],['exams','الاختبارات','award'],['behavior','التقييم السلوكي','smile'],
-  ['subs','الاشتراك','wallet'],['inbox','الإعلانات والرسائل','mail'],['settings','الإعدادات','lock']
+  ['subs','الاشتراك','wallet'],['notifs','الإشعارات','bell'],['inbox','الإعلانات والرسائل','mail'],['settings','الإعدادات','lock']
 ];
 const BNAV=[['home','الرئيسية','home'],['prayers','الصلوات','moon'],['recitation','التسميع','book'],['points','النقاط','star'],['more','المزيد','grid']];
 let ME=null, KIDS=[], KID=null, D=null, PAGE='home', LOAD_SEQ=0;
@@ -670,10 +681,11 @@ async function init(){
   navPage(pg);
   await loadKid();
   loadInbox();
+  loadNotifs();
 }
 function showPageErr(){ document.querySelector('.wrap').innerHTML='<div class="card">'+errBox()+'</div>'; }
 function buildNav(){
-  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(n[0]==='inbox'?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+'</button>').join('');
+  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(n[0]==='notifs'?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+(n[0]==='notifs'?'<span class="cnt" id="sb-ncnt" style="display:none;"></span>':'')+'</button>').join('');
   $('bnav').innerHTML=BNAV.map(n=>'<button class="bn" data-p="'+n[0]+'" onclick="'+(n[0]==='more'?'toggleSide(true)':'navPage(\''+n[0]+'\')')+'">'+ic(n[2])+'<span>'+n[1]+'</span></button>').join('');
 }
 function buildTermSel(){
@@ -690,8 +702,8 @@ function navPage(p){
   const inB=BNAV.some(b=>b[0]===p);
   document.querySelectorAll('.bn').forEach(x=>x.classList.toggle('active',x.dataset.p===p||(!inB&&x.dataset.p==='more')));
   const n=NAV.find(x=>x[0]===p); $('tb-title').textContent=n?n[1]:'';
-  $('term-sel').style.display=(p==='prayers'||p==='inbox'||p==='settings')?'none':'';
-  $('kids').style.display=(p==='inbox'||p==='settings'||KIDS.length<2)?'none':'';
+  $('term-sel').style.display=(p==='prayers'||p==='inbox'||p==='notifs'||p==='settings')?'none':'';
+  $('kids').style.display=(p==='inbox'||p==='notifs'||p==='settings'||KIDS.length<2)?'none':'';
   toggleSide(false); window.scrollTo({top:0,behavior:'smooth'});
   renderPage();
 }
@@ -713,6 +725,7 @@ async function loadKid(){
     mem:  ()=>selectAll(db.from('memorization').select('id,student_id,date,type,surah_from,ayah_from,surah_to,ayah_to,surah_name,from_verse,to_verse,errors,errors_count,grade,points,points_earned,notes').eq('student_id',k.id).gte('date',from).lte('date',to).order('date',{ascending:false}).order('id')),
     memPts:()=>selectAll(db.from('memorization').select('id,points').eq('student_id',k.id).order('id')),
     cards:()=>selectAll(db.from('points_cards').select('id,card_type,points,is_exchange,reason,date').eq('student_id',k.id).order('date',{ascending:false}).order('id')),
+    adj:  ()=>selectAll(db.from('student_point_adjustments').select('id,points,reason,by_name,balance_after,created_at').eq('student_id',k.id).order('created_at',{ascending:false}).order('id')),
     ppts: ()=>selectAll(db.from('prayer_points').select('id,week_start,points,note,awarded_by_name').eq('student_id',k.id).order('week_start',{ascending:false}).order('id')),
     plans:()=>t?selectAll(db.from('student_plans').select('*').eq('student_id',k.id).eq('term_id',t.id).order('period_no').order('id')):Promise.resolve({data:[]}),
     file: ()=>db.from('student_files').select('data').eq('student_id',k.id).maybeSingle(),
@@ -727,7 +740,7 @@ async function loadKid(){
   D=X; renderPage();
 }
 function renderPage(){
-  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,file:rFile,points:rPoints,exams:rExams,behavior:rBeh,subs:rSubs,inbox:rInbox,settings:rSettings}[PAGE];
+  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,file:rFile,points:rPoints,exams:rExams,behavior:rBeh,subs:rSubs,notifs:rNotifs,inbox:rInbox,settings:rSettings}[PAGE];
   if(f) f();
 }
 function pg(id){ return $('page-'+id); }
@@ -1040,12 +1053,14 @@ function rPoints(){
   const memAll=(D.memPts||[]).reduce((s,r)=>s+(+r.points||0),0);
   const big=(D.cards||[]).filter(c=>!c.is_exchange&&(+c.points||0)>=50), bigSum=big.reduce((s,c)=>s+(+c.points||0),0);
   const pp=(D.ppts||[]).reduce((s,r)=>s+(+r.points||0),0);
+  const adj=(D.adj||[]).reduce((s,r)=>s+(+r.points||0),0);   // (دفعة ١٥) إضافة / حذف من الإدارة
   const CARD={diamond:['ماسي','#6b3fa0'],gold:['ذهبي','#c8920a'],silver:['فضي','#90a4ae'],green:['أخضر','#2d7a50'],blue:['أزرق','#1d6fa4'],yellow:['أصفر','#d4a017']};
   let h='<div class="hero" style="margin-bottom:16px;"><div class="hero-top"><div class="hero-av">'+ic('star','xl')+'</div><div><div class="hero-n">رصيد النقاط</div><div class="hero-s">تراكمي عبر كل الدورات</div></div><div class="hero-pts"><b>'+AR(KID.total_points||0)+'</b><small>نقطة</small></div></div></div>';
-  h+='<div class="stats" style="grid-template-columns:repeat(3,1fr);">'
+  h+='<div class="stats">'
     +'<div class="st t-blue"><div class="st-i">'+ic('book')+'</div><div class="st-v">'+(D.err.memPts?'!':AR(memAll))+'</div><div class="st-l">نقاط التسميع</div></div>'
     +'<div class="st t-gold"><div class="st-i">'+ic('gift')+'</div><div class="st-v">'+(D.err.cards?'!':AR(bigSum))+'</div><div class="st-l">كروت المكافأة</div><div class="st-s">'+AR(big.length)+' كارت</div></div>'
-    +'<div class="st t-purple"><div class="st-i">'+ic('moon')+'</div><div class="st-v">'+(D.err.ppts?'!':AR(pp))+'</div><div class="st-l">تحفيز الصلوات</div></div></div>';
+    +'<div class="st t-purple"><div class="st-i">'+ic('moon')+'</div><div class="st-v">'+(D.err.ppts?'!':AR(pp))+'</div><div class="st-l">تحفيز الصلوات</div></div>'
+    +'<div class="st '+(adj<0?'t-red':'t-green')+'" onclick="navPage(\'notifs\')"><div class="st-i">'+ic('award')+'</div><div class="st-v">'+(D.err.adj?'!':(adj<0?'−':(adj?'+':''))+AR(Math.abs(adj)))+'</div><div class="st-l">إضافة / حذف الإدارة</div><div class="st-s">'+AR((D.adj||[]).length)+' حركة</div></div></div>';
   const B=D.board;
   h+='<div class="grid2"><div class="card">'+cardH('trophy','لوحة الشرف',B&&B.total?('ترتيب '+esc(first(KID.name))+': '+AR(B.rank||'—')+' من '+AR(B.total)+' في الحلقة'):'الحلقة',null,['var(--gold-pale)','var(--gold)']);
   if(D.err.board) h+=errBox();
@@ -1056,6 +1071,9 @@ function rPoints(){
   h+='<div class="card">'+cardH('gift','الكروت',null,null,['var(--gold-pale)','var(--gold)'])+'<div class="list">'
     +(D.err.cards?errBox():((D.cards||[]).length?D.cards.slice(0,30).map(c=>{ const m=CARD[c.card_type]||[c.card_type||'كارت','#8ea598']; const isBig=(+c.points||0)>=50;
       return '<div class="li"><div class="li-i" style="background:'+m[1]+'1f;color:'+m[1]+';">'+ic('card')+'</div><div class="li-m"><div class="li-t">كارت '+esc(m[0])+'</div><div class="li-s">'+fmtD(c.date)+(c.reason?' • '+esc(c.reason):'')+'</div></div><div class="li-e"><b style="color:'+m[1]+';">'+AR(c.points||0)+'</b><div style="font-size:.66rem;color:var(--light);">'+(isBig?(c.is_exchange?'تبديل':'مكافأة'):'تسليم')+'</div></div></div>'; }).join(''):emptyBox('gift','مفيش كروت لسه')))+'</div></div>';
+  h+='<div class="card">'+cardH('award','إضافة وحذف النقاط','من المشرف أو الإدارة — بالسبب',null,['var(--pale)','var(--jade)'])+'<div class="list">'
+    +(D.err.adj?errBox():((D.adj||[]).length?D.adj.slice(0,30).map(a=>{ const add=(+a.points||0)>0;
+      return '<div class="li"><div class="li-i" style="background:'+(add?'var(--pale)':'var(--red-pale)')+';color:'+(add?'var(--jade)':'var(--red)')+';">'+ic(add?'star':'alert')+'</div><div class="li-m"><div class="li-t">'+(add?'إضافة نقاط':'حذف نقاط')+'</div><div class="li-s" style="white-space:normal;">'+esc(a.reason||'')+'</div><div class="li-s">'+fmtDT(a.created_at)+(a.by_name?' • '+esc(a.by_name):'')+'</div></div><div class="li-e"><b style="color:'+(add?'var(--jade)':'var(--red)')+';">'+(add?'+':'−')+AR(Math.abs(+a.points||0))+'</b></div></div>'; }).join(''):emptyBox('award','مفيش إضافة أو حذف نقاط لحد دلوقتي')))+'</div></div>';
   h+='<div class="card">'+cardH('moon','نقاط تحفيز الصلوات',null,null,['var(--purple-pale)','var(--purple)'])+'<div class="list">'
     +(D.err.ppts?errBox():((D.ppts||[]).length?D.ppts.map(p=>'<div class="li"><div class="li-i" style="background:var(--purple-pale);color:var(--purple);">'+ic('gift')+'</div><div class="li-m"><div class="li-t">أسبوع '+fmtD(p.week_start)+'</div><div class="li-s">'+esc(p.awarded_by_name||'')+(p.note?' • '+esc(p.note):'')+'</div></div><div class="li-e"><b style="color:var(--purple);">+'+AR(p.points)+'</b></div></div>').join(''):emptyBox('moon','مفيش نقاط تحفيز لسه')))+'</div></div>';
   h+='</div></div>';
@@ -1108,13 +1126,15 @@ function rSubs(){
   const t=D.t, months=+((t&&t.settings&&t.settings.subs_months)||3);
   const rows=(D.subs||[]).filter(r=>!r.reversed&&!r.reversal_of&&(+r.amount||0)>0&&termRowMatch(r,t));
   const paid=new Set(rows.map(r=>+r.month_no));
+  const byM={}; rows.forEach(r=>{ byM[+r.month_no]=r; });   // (دفعة ١٥) طريقة الاشتراك لكل شهر
+  const methods=[...new Set(rows.map(r=>PAY_AR[r.pay_method]||r.pay_method).filter(Boolean))];
   const SPON=!!(D.stu&&D.stu.is_sponsored);   // ⭐ مكفول — الاشتراك متغطّي
   const MLBL=['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس'];
   let h=(SPON?'<div class="lock-note" style="background:var(--pale);color:var(--emerald);">'+ic('star','sm')+' '+kidWord('الطالب','الطالبة')+' «مكفول'+kidWord('','ة')+'» — الاشتراك متغطّي، مفيش مطلوب منك دفع</div>':'')
-    +'<div class="card">'+cardH('wallet','اشتراك '+(t?esc(t.name):'الدورة'),SPON?'مكفول':AR(paid.size)+' من '+AR(months)+' شهور مدفوعة',null,['var(--gold-pale)','var(--gold)'])
+    +'<div class="card">'+cardH('wallet','اشتراك '+(t?esc(t.name):'الدورة'),SPON?'مكفول':AR(paid.size)+' من '+AR(months)+' شهور مدفوعة'+(methods.length?' • طريقة الاشتراك: '+esc(methods.join(' / ')):''),null,['var(--gold-pale)','var(--gold)'])
     +'<div class="card-b"><div style="display:grid;grid-template-columns:repeat('+Math.min(months,3)+',1fr);gap:10px;">';
   for(let m=1;m<=months;m++){ const ok=paid.has(m);
-    h+='<div style="border-radius:14px;padding:14px 10px;text-align:center;border:2px solid '+(ok?'var(--jade)':'var(--border)')+';background:'+(ok?'var(--pale)':'var(--white)')+';"><div style="color:'+(ok?'var(--jade)':'var(--light)')+';">'+ic(ok?'check':'clock','lg')+'</div><div style="font-weight:800;font-size:.84rem;margin-top:4px;">'+(MLBL[m-1]||('شهر '+AR(m)))+'</div><div style="font-size:.7rem;color:'+(ok?'var(--jade)':'var(--light)')+';font-weight:700;">'+(ok?'مدفوع':(SPON?'مكفول':'لم يُسدَّد'))+'</div></div>'; }
+    h+='<div style="border-radius:14px;padding:14px 10px;text-align:center;border:2px solid '+(ok?'var(--jade)':'var(--border)')+';background:'+(ok?'var(--pale)':'var(--white)')+';"><div style="color:'+(ok?'var(--jade)':'var(--light)')+';">'+ic(ok?'check':'clock','lg')+'</div><div style="font-weight:800;font-size:.84rem;margin-top:4px;">'+(MLBL[m-1]||('شهر '+AR(m)))+'</div>'+(ok&&byM[m]?'<div style="font-size:.72rem;font-weight:800;color:var(--emerald);margin-top:3px;">'+esc(PAY_AR[byM[m].pay_method]||byM[m].pay_method||'')+(byM[m].amount?' • '+AR(byM[m].amount)+' ج.م':'')+'</div>':'')+'<div style="font-size:.7rem;color:'+(ok?'var(--jade)':'var(--light)')+';font-weight:700;">'+(ok?'مدفوع':(SPON?'مكفول':'لم يُسدَّد'))+'</div></div>'; }
   h+='</div></div></div>';
   h+='<div class="card">'+cardH('receipt','سجل المدفوعات')+'<div class="list">'+(rows.length?rows.map(r=>'<div class="li"><div class="li-i" style="background:var(--pale);color:var(--jade);">'+ic('check')+'</div><div class="li-m"><div class="li-t">'+(MLBL[(+r.month_no||1)-1]||'شهر')+'</div><div class="li-s">'+fmtD(r.paid_date)+' • '+esc(PAY_AR[r.pay_method]||r.pay_method||'')+'</div></div><div class="li-e"><b style="color:var(--emerald);">'+AR(r.amount)+'</b> <small style="color:var(--light);">ج.م</small></div></div>').join(''):emptyBox('wallet','مفيش مدفوعات مسجّلة للدورة دي'))+'</div></div>';
   h+='<div style="font-size:.72rem;color:var(--light);text-align:center;">لو فيه أي ملاحظة على الاشتراك تواصل مع إدارة المدرسة</div>';
@@ -1136,7 +1156,60 @@ async function loadInbox(){
 }
 function inboxBadge(){
   const n=(INBOX.msgs||[]).filter(x=>String(x.to_id)===String(ME.id)&&!x.is_read).length;
-  [$('tb-dot'),$('sb-cnt')].forEach(el=>{ if(!el) return; el.style.display=n?'':'none'; el.textContent=AR(n); });
+  const nn=(NTF.rows||[]).filter(x=>!x.is_read).length;
+  const set=(el,v)=>{ if(!el) return; el.style.display=v?'':'none'; el.textContent=AR(v); };
+  set($('sb-cnt'),n); set($('sb-ncnt'),nn); set($('tb-dot'),n+nn);
+}
+
+// ══ 🔔 الإشعارات (دفعة ١٥) — إضافة / حذف نقاط من الإدارة وغيرها ══
+let NTF={rows:null, err:false};
+const NTF_ICON={points_add:['star','var(--pale)','var(--jade)'], points_remove:['alert','var(--red-pale)','var(--red)']};
+async function loadNotifs(){
+  try{
+    const {data,error}=await db.from('notifications').select('id,type,title,body,link,meta,is_read,created_at,actor_name')
+      .eq('user_id',ME.id).order('created_at',{ascending:false}).order('id').limit(150);
+    if(error) throw error;
+    const prevTop=NTF.top, rows=data||[];
+    NTF={rows, err:false, top:rows.length?String(rows[0].id):null};
+    // إشعار نقاط جديد وصل والصفحة مفتوحة → حدّث رصيد الابن من القاعدة
+    if(prevTop!==undefined && NTF.top && NTF.top!==prevTop && /^points_/.test(rows[0].type||'') && KID) loadKid();
+  }catch(e){ NTF.err=true; NTF.rows=NTF.rows||[]; loadWarn(e); }
+  inboxBadge(); if(PAGE==='notifs') rNotifs();
+}
+setInterval(()=>{ if(ME && document.visibilityState==='visible') loadNotifs(); }, 90000);
+function rNotifs(){
+  const el=pg('notifs');
+  if(NTF.err&&!(NTF.rows||[]).length){ el.innerHTML='<div class="card">'+errBox()+'</div>'; return; }
+  if(!NTF.rows){ el.innerHTML=skel(5); return; }
+  const un=NTF.rows.filter(x=>!x.is_read).length;
+  let h='<div class="card">'+cardH('bell','الإشعارات',un?AR(un)+' إشعار جديد':'كل الإشعارات مقروءة',un?'<button class="btn btn-o btn-sm" onclick="ntfReadAll()">'+ic('checks','sm')+' تعليم الكل كمقروء</button>':'',['var(--gold-pale)','var(--gold)'])+'<div class="list">';
+  h+=NTF.rows.length?NTF.rows.map(n=>{ const m=NTF_ICON[n.type]||['bell','var(--blue-pale)','var(--blue)'], pts=n.meta&&n.meta.points;
+    return '<div class="msg'+(n.is_read?'':' unread')+'" onclick="ntfOpen(\''+esc(String(n.id))+'\')"><div class="li-i" style="background:'+m[1]+';color:'+m[2]+';">'+ic(m[0])+'</div>'
+      +'<div class="li-m"><div class="li-t">'+esc(AR(n.title||'إشعار'))+'</div><div class="li-s" style="white-space:normal;">'+esc(AR(n.body||''))+'</div>'
+      +'<div class="li-s">'+fmtDT(n.created_at)+(n.actor_name?' • '+esc(n.actor_name):'')+'</div></div>'
+      +'<div class="li-e">'+(pts?'<b style="font-size:1.05rem;color:'+(pts>0?'var(--jade)':'var(--red)')+';">'+(pts>0?'+':'−')+AR(Math.abs(pts))+'</b>':'')+(n.is_read?'':'<div><span class="pill p-green" style="margin-top:4px;">جديد</span></div>')+'</div></div>'; }).join('')
+    :emptyBox('bell','مفيش إشعارات لحد دلوقتي');
+  h+='</div></div>';
+  const um=(INBOX.msgs||[]).filter(x=>String(x.to_id)===String(ME.id)&&!x.is_read).length;
+  if(um) h+='<div class="lock-note" style="cursor:pointer;" onclick="INB_TAB=\'msg\';navPage(\'inbox\')">'+ic('mail','sm')+' عندك '+AR(um)+' رسالة جديدة — اضغط للفتح</div>';
+  el.innerHTML=h;
+}
+async function ntfOpen(id){
+  const n=(NTF.rows||[]).find(x=>String(x.id)===String(id)); if(!n) return;
+  if(!n.is_read){
+    try{ const {data,error}=await db.from('notifications').update({is_read:true}).eq('id',n.id).eq('user_id',ME.id).select('id');
+      if(!error&&data&&data.length){ n.is_read=true; inboxBadge(); if(PAGE==='notifs') rNotifs(); } }catch(e){ console.warn(e); }
+  }
+  if(n.link==='points'){
+    const sid=n.meta&&n.meta.student_id; if(sid&&KID&&KID.id!==sid&&KIDS.some(k=>k.id===sid)) await pickKid(sid);
+    navPage('points');
+  }
+}
+async function ntfReadAll(){
+  const ids=(NTF.rows||[]).filter(x=>!x.is_read).map(x=>x.id); if(!ids.length) return;
+  try{ const {data,error}=await db.from('notifications').update({is_read:true}).in('id',ids).eq('user_id',ME.id).select('id');
+    if(error) throw error; const ok=new Set((data||[]).map(x=>String(x.id))); NTF.rows.forEach(x=>{ if(ok.has(String(x.id))) x.is_read=true; });
+    inboxBadge(); rNotifs(); }catch(e){ console.warn(e); showToast('⚠️ ما اتحدّثتش — جرّب تاني'); }
 }
 function rInbox(){
   const el=pg('inbox');

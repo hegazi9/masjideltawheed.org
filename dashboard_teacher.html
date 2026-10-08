@@ -2012,17 +2012,25 @@ function spTrack(plan,key,recs,asOf){
   const dueP=due.length?Math.max(...due.map(x=>x.p)):p0-1;
   const planned=Math.max(0,dueP-p0+1), plannedAll=pEnd-p0+1;
   const doneAll=covUpTo(asOf,pEnd);
+  // (دفعة ١٥) آخر آية وصلها الطالب لحد تاريخ معيّن (لحالة: أتم / سبق / لم يتم الخطة)
+  const reachTo=dLim=>{ let m=null; rs.forEach(y=>{ if(y.date<=dLim && y.sp[1]>=p0 && (m==null||y.sp[1]>m)) m=y.sp[1]; }); return m; };
+  const stOf=(rc,tp)=> (rc==null||rc<tp)?'behind':(rc>tp?'ahead':'done');
   const rows=ses.map(x=>{
-    const need=x.p-p0+1, got=covUpTo(x.date,x.p);
+    const need=x.p-p0+1, got=covUpTo(x.date,x.p), rc=reachTo(x.date);
     const day=rs.filter(y=>y.date===x.date).map(y=>spName(y.r.surah_to||y.r.surah_from)+' '+spAr(y.r.ayah_to||y.r.ayah_from||'')).join(' ، ');
-    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day };
+    return { date:x.date, tgt:x.tgt, need, got, pct:need?Math.min(100,Math.round(got/need*100)):0, future:x.date>asOf, recited:day,
+             reach:rc, st:(x.date>asOf?'future':stOf(rc,x.p)) };
   });
-  return { lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
+  const rcAll=reachTo(asOf);
+  return { st: due.length?stOf(rcAll,dueP):null, lines:tr.lines||null, start:tr.start, planned, plannedAll, done:doneAll,
            pct: planned?Math.min(100,Math.round(doneAll/planned*100)):null,
            pctAll: plannedAll?Math.min(100,Math.round(doneAll/plannedAll*100)):0, rows };
 }
 function spColor(p){ return p==null?'var(--light)':(p>=90?'var(--jade)':(p>=60?'var(--gold)':'var(--red)')); }
 function spBadge(p){ return p==null?'<span style="color:var(--light);">—</span>':'<span style="font-weight:800;color:'+spColor(p)+';">'+spAr(p)+'٪</span>'; }
+// (دفعة ١٥) حالة الخطة: done = أتم • ahead = سبق • behind = لم يتم
+const SP_ST={ done:['✔ أتم الخطة','bg-green'], ahead:['⏫ سبق الخطة','bg-blue'], behind:['✖ لم يتم الخطة','bg-red'] };
+function spStBadge(st){ const m=SP_ST[st]; return m?'<span class="badge '+m[1]+'" style="white-space:nowrap;">'+m[0]+'</span>':''; }
 function spBar(p){ const v=p==null?0:p; return '<div style="height:7px;background:var(--border);border-radius:4px;margin-top:6px;"><div style="height:7px;border-radius:4px;width:'+v+'%;background:'+spColor(p)+';"></div></div>'; }
 // ── HTML ملخّص الإنجاز لخطة واحدة ──
 function termNoReview(t){ return !!(t&&t.settings&&t.settings.no_review); }
@@ -2033,10 +2041,11 @@ function spProgressHtml(plan,recs,asOf){
     +'<div style="font-size:.8rem;font-weight:800;color:var(--forest);">'+ttl+'</div>'
     +(T?('<div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;"><div style="font-size:1.5rem;font-weight:900;color:'+spColor(T.pct)+';">'+(T.pct==null?'—':spAr(T.pct)+'٪')+'</div>'
       +'<div style="font-size:.72rem;color:var(--light);">لحد النهارده • '+spAr(T.done)+' من '+spAr(T.planned)+' آية</div></div>'+spBar(T.pct)
+      +(T.st?'<div style="margin-top:7px;">'+spStBadge(T.st)+'</div>':'')
       +'<div style="font-size:.7rem;color:var(--mid);margin-top:6px;">الفترة كلها: '+spAr(T.pctAll)+'٪ ('+spAr(T.plannedAll)+' آية)'+(T.lines?(' • '+spAr(T.lines)+' سطر/حلقة'):'')+' • البداية: '+spLbl(T.start)+'</div>')
      :'<div style="font-size:.76rem;color:var(--light);margin-top:8px;">مفيش خطة</div>')+'</div>';
   const map={}; (H?H.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).h=r; }); (R?R.rows:[]).forEach(r=>{ (map[r.date]=map[r.date]||{}).r=r; });
-  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(x.pct>=100?'<span class="badge bg-green">✔ وصل</span>':spBadge(x.pct));
+  const cell=x=>{ if(!x) return '<td>—</td><td>—</td>'; const st=x.future?'<span style="color:var(--light);">قادمة</span>':(spStBadge(x.st)+(x.st==='behind'?'<div style="font-size:.62rem;color:var(--light);margin-top:2px;">'+spAr(x.pct)+'٪ من المطلوب</div>':''));
     return '<td style="white-space:nowrap;">'+spLbl(x.tgt)+(x.recited?'<div style="font-size:.66rem;color:var(--light);">سمّع: '+esc(x.recited)+'</div>':'')+'</td><td>'+st+'</td>'; };
   const dates=Object.keys(map).sort();
   const tbl=dates.length?('<div style="overflow-x:auto;margin-top:12px;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>هدف الحفظ</th><th>الإنجاز</th>'+(NR?'':'<th>هدف المراجعة</th><th>الإنجاز</th>')+'</tr></thead><tbody>'
@@ -2404,6 +2413,7 @@ async function spEvalHint(sid,type){
 }
 // لحظة الحفظ: لو فيه هدف للنهارده → تم = وصل للهدف (والدرجة مش «إعادة»)
 function spAutoPlanDone(sid,type,grade){
+  _evPlanSt=null;
   const E=SP_EVAL; if(!E||E.sid!==sid||E.type!==type) return null;
   const v=id=>document.getElementById(id).value;
   const sf=+v('ev-sfrom'), stt=+v('ev-sto');
@@ -2412,10 +2422,14 @@ function spAutoPlanDone(sid,type,grade){
     surah_to:SP_SURAH[stt]?SP_SURAH[stt][0]:'', ayah_to:+v('ev-ato')||null };
   const T=spTrack(E.plan,E.key,E.recs.concat([rec]),D());
   const row=T&&T.rows.find(r=>r.date===D()); if(!row) return null;
-  const done=grade!=='retry'&&row.got>=row.need;
+  // (دفعة ١٥) آخر آية وصلها مقارنةً بهدف النهارده: وصل بالظبط = أتم • عدّاه = سبق • موصلش = لم يتم
+  const st=grade==='retry'?'behind':(row.st==='ahead'?'ahead':(row.st==='done'?'done':'behind'));
+  _evPlanSt=st;
+  const done=st!=='behind';
   setPlan(done);
   return done;
 }
+let _evPlanSt=null;   // حالة الخطة للتسميع اللي بيتحفظ دلوقتي (null = يدوي / مفيش هدف)
 // ── بعد حفظ التسميع: نسبة الوصول للهدف ──
 async function spAfterRecitation(sid,type){
   try{
@@ -2424,7 +2438,7 @@ async function spAfterRecitation(sid,type){
     if(!data) return;
     const recs=await spLoadRecs([sid],data.period_from,data.period_to);
     const T=spTrack(data,type==='new'?'h':'r',recs,D());
-    if(T&&T.pct!=null){ const tr=T.rows.find(r=>r.date===D()); setTimeout(()=>showToast('🎯 '+(type==='new'?'خطة الحفظ':'خطة المراجعة')+': '+spAr(T.pct)+'٪ من المطلوب لحد النهارده'+(tr?(tr.got>=tr.need?' • ✅ وصل لهدف النهارده':' • ❌ ما وصلش لهدف النهارده'):'')),1800); }
+    if(T&&T.pct!=null){ const tr=T.rows.find(r=>r.date===D()); setTimeout(()=>showToast('🎯 '+(type==='new'?'خطة الحفظ':'خطة المراجعة')+': '+spAr(T.pct)+'٪ من المطلوب لحد النهارده'+(tr?(tr.st==='ahead'?' • ⏫ سبق الخطة':(tr.st==='done'?' • ✅ أتم الخطة':' • ❌ لم يتم الخطة')):'')),1800); }
   }catch(e){}
 }
 
@@ -3819,15 +3833,19 @@ function evalCellBtn(sid,type){
   const lbl = type==='new'?'مستوى الحفظ':'مستوى المراجعة';
   return `<button class="btn btn-ghost btn-xs" onclick="openEval('${sid}','${type}')">📝 ${lbl}</button>`;
 }
-function planBadge(done){ return done
-  ? '<span style="font-size:.7rem;font-weight:700;color:#1a7a4a;background:#e8f5ee;padding:2px 9px;border-radius:99px;">تم</span>'
-  : '<span style="font-size:.7rem;font-weight:700;color:#c0392b;background:#fdf0ef;padding:2px 9px;border-radius:99px;">لم يتم</span>'; }
+function planBadge(done, st){
+  // (دفعة ١٥) لو التسميع مربوط بخطة: أتم / سبق / لم يتم الخطة — وإلا «تم / لم يتم» اليدوي
+  const pill=(t,c,b)=>'<span style="font-size:.7rem;font-weight:700;color:'+c+';background:'+b+';padding:2px 9px;border-radius:99px;white-space:nowrap;">'+t+'</span>';
+  if(st==='ahead')  return pill('سبق الخطة','#1d6fa4','#e8f2fb');
+  if(st==='done')   return pill('أتم الخطة','#1a7a4a','#e8f5ee');
+  if(st==='behind') return pill('لم يتم الخطة','#c0392b','#fdf0ef');
+  return done ? pill('تم','#1a7a4a','#e8f5ee') : pill('لم يتم','#c0392b','#fdf0ef'); }
 function reflectRow(sid){
   const st=REC_STATE[sid]||{};
   const mc=document.getElementById('memcell-'+sid); if(mc) mc.innerHTML=evalCellBtn(sid,'new');
   const rc=document.getElementById('revcell-'+sid); if(rc) rc.innerHTML=evalCellBtn(sid,'review');
-  const mp=document.getElementById('memplan-'+sid); if(mp) mp.innerHTML=st.new?planBadge(st.new.plan_done):'—';
-  const rp=document.getElementById('revplan-'+sid); if(rp) rp.innerHTML=st.review?planBadge(st.review.plan_done):'—';
+  const mp=document.getElementById('memplan-'+sid); if(mp) mp.innerHTML=st.new?planBadge(st.new.plan_done,st.new.plan_status):'—';
+  const rp=document.getElementById('revplan-'+sid); if(rp) rp.innerHTML=st.review?planBadge(st.review.plan_done,st.review.plan_status):'—';
   const nc=document.getElementById('note-'+sid); if(nc) nc.innerHTML=noteCellBtn(sid);
 }
 
@@ -3864,8 +3882,8 @@ function collectReport(c,list){
       student_id: (s._static || (s._guest && String(s.id).startsWith('guest_')))?null:s.id, name:s.name,
       is_guest: !!s._guest, guest_teacher: s._guest?(s.teacher||null):null, guest_branch: s._guest?(s.branch||null):null,
       attendance: st.att||null, late_minutes: st.late_minutes||null,
-      mem_grade: st.new?st.new.grade:null, mem_plan: st.new?!!st.new.plan_done:null,
-      rev_grade: st.review?st.review.grade:null, rev_plan: st.review?!!st.review.plan_done:null,
+      mem_grade: st.new?st.new.grade:null, mem_plan: st.new?!!st.new.plan_done:null, mem_plan_status: st.new?(st.new.plan_status||null):null,
+      rev_grade: st.review?st.review.grade:null, rev_plan: st.review?!!st.review.plan_done:null, rev_plan_status: st.review?(st.review.plan_status||null):null,
       behavior_note: st.behavior_note||null
     };
   });
@@ -4100,6 +4118,7 @@ async function saveEval(){
     surah_from:+document.getElementById('ev-sfrom').value, ayah_from:+document.getElementById('ev-afrom').value||null,
     surah_to:+document.getElementById('ev-sto').value, ayah_to:+document.getElementById('ev-ato').value||null,
     errors, faces, grade, points:pts, notes:document.getElementById('ev-notes').value.trim(), plan_done:_evPlan,
+    plan_status:_evPlanSt,
   };
   const prev=(REC_STATE[sid]&&REC_STATE[sid][type])||null;
   const delta = pts - (prev?prev.points:0);
@@ -4108,12 +4127,15 @@ async function saveEval(){
   if((!s._static && !s._guest) || guestReal){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
-      notes:rec.notes, plan_done:rec.plan_done, recorded_by:cu.id };
+      notes:rec.notes, plan_done:rec.plan_done, plan_status:rec.plan_status||null, recorded_by:cu.id };
     // النقاط الكلية (students.total_points) بتتحدّث في القاعدة بتريجر على memorization — العميل مش بيكتبها
     const btn=document.getElementById('ev-save-btn'); _evSaving=true; if(btn) btn.disabled=true;
     try{
       if(!(await ensureFreshSession())) throw new Error('JWT expired');
-      const {data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id');
+      let {data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id');
+      if(error && /plan_status/.test(error.message||'')){   // لو SQL دفعة ١٥ لسه ما اتشغّلش
+        delete payload.plan_status; ({data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id'));
+      }
       if(error) throw error; if(!data||!data.length) throw new Error('RLS');
     }catch(e){ showToast('❌ لم يُحفظ التسميع — '+recFriendlyErr(e)); return; }
     finally{ _evSaving=false; if(btn) btn.disabled=false; }
@@ -4137,10 +4159,12 @@ async function loadTodayRecitation(list){
     (data||[]).forEach(a=>{ REC_STATE[a.student_id]=REC_STATE[a.student_id]||{}; setAttUI(a.student_id,a.status,a.late_minutes); });
   }catch(e){ loadWarn(e); }
   try{
-    const {data,error}=await db.from('memorization').select('student_id,type,grade,errors,points,plan_done,notes,surah_from,ayah_from,surah_to,ayah_to').in('student_id',ids).eq('date',D());
+    const MCOLS='student_id,type,grade,errors,points,plan_done,notes,surah_from,ayah_from,surah_to,ayah_to';
+    let {data,error}=await db.from('memorization').select(MCOLS+',plan_status').in('student_id',ids).eq('date',D());
+    if(error && /plan_status/.test(error.message||'')) ({data,error}=await db.from('memorization').select(MCOLS).in('student_id',ids).eq('date',D()));
     if(error) throw error;
     const sIdx=n=>{ const i=SURAHS.findIndex(x=>x[0]===n); return i<0?0:i; };
-    (data||[]).forEach(m=>{ REC_STATE[m.student_id]=REC_STATE[m.student_id]||{}; REC_STATE[m.student_id][m.type]={grade:m.grade,errors:m.errors,points:m.points,plan_done:m.plan_done!==false&&m.grade!=='retry',notes:m.notes||'',
+    (data||[]).forEach(m=>{ REC_STATE[m.student_id]=REC_STATE[m.student_id]||{}; REC_STATE[m.student_id][m.type]={grade:m.grade,errors:m.errors,points:m.points,plan_done:m.plan_done!==false&&m.grade!=='retry',plan_status:m.plan_status||null,notes:m.notes||'',
       surah_from:sIdx(m.surah_from),ayah_from:m.ayah_from,surah_to:sIdx(m.surah_to),ayah_to:m.ayah_to}; });
     real.forEach(s=>reflectRow(s.id));
   }catch(e){ showToast('⚠️ تعذّر تحميل تسميع اليوم — '+recFriendlyErr(e)); }
@@ -5935,9 +5959,10 @@ function mrShowPersonalTab(t,el){
   if(active){ active.classList.remove('btn-outline'); active.classList.add('btn-primary'); }
   if(t==='sessions') mrLoadSessions(); else mrLoadAlerts();
 }
-const MR_PILLAR_NAMES={ hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة' };
-function mrPillarBadges(pil){
+const MR_PILLAR_NAMES={ hifz:'الحفظ والمراجعة', manhaj:'المنهج المصاحب', talqin:'التلقين', amma:'النقاط العامة', full:'📋 جلسة كاملة' };
+function mrPillarBadges(pil, done){
   const keys=Object.keys(pil||{}).filter(k=>pil[k]);
+  if(!keys.length && done) return '<span class="badge bg-green" style="font-size:.64rem;margin:1px;">📋 جلسة كاملة</span>';
   if(!keys.length) return '<span style="color:var(--light);font-size:.72rem;">—</span>';
   return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${MR_PILLAR_NAMES[k]||k}</span>`).join('');
 }
@@ -5958,7 +5983,7 @@ async function mrLoadSessions(){
       <td style="${MR_TD}">${mrDayName(s.session_date)}</td>
       <td style="${MR_TD}"><span class="badge ${attBg[att]||'bg-gray'}" style="font-size:.68rem;">${att}</span></td>
       <td style="${MR_TD}">${lm?mrAr(lm)+' دقيقة':'—'}</td>
-      <td style="${MR_TD}text-align:right;">${mrPillarBadges(s.pillars)}</td></tr>`;
+      <td style="${MR_TD}text-align:right;">${mrPillarBadges(s.pillars, s.done)}</td></tr>`;
   }).join('');
   const totalAbs=sess.filter(s=>s.attendance==='غائب').length;
   const totalLate=sess.reduce((a,s)=>a+mrArToInt(s.late_min),0);
