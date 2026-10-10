@@ -6,12 +6,13 @@
   ════════════════════════════════════════════════════════════════
      الدور: employee (المشرفة/ أم خديجة • المشرفة/ أم أسماء)
      ┌─ الصفحات (id="page-XXX") ──────────────────────────────────
-     │  home · students · walerts · settings
+     │  home · students · walerts · messages · settings
      └────────────────────────────────────────────────────────────
      • القراءة: RLS (emp_*_sel) — كل الطلاب والطالبات + الحضور + التسميع
      • التعديل: RPC بس — emp_update_student / emp_save_student_file (دمج على السيرفر)
      • التنبيهات الأسبوعية: نفس محرّك لوحة المشرف (نفس الـ id) → weekly_alert_actions
      • قفل RESTRICTIVE zz_emp_* (دفعة ١٣)
+     • الرسائل (دفعة ١٨): رسائل أولياء الأمور للموظفة + الرد — zz_emp_sel/ins/upd على messages (mx*)
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -120,6 +121,16 @@ button{cursor:pointer;}
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
 .empty{text-align:center;color:var(--light);font-size:.86rem;}
 .empty-icon{display:block;font-size:1.8rem;margin-bottom:6px;}
+/* ── الرسائل (دفعة ١٨) ── */
+.mx-row{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+.mx-row:hover{background:#fafcfb;}
+.mx-row.unread{background:linear-gradient(90deg,transparent,rgba(232,245,238,.7));}
+.mx-row.unread .mx-n{color:var(--emerald);}
+.mx-av{width:38px;height:38px;border-radius:50%;background:var(--pale);color:var(--emerald);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
+.mx-n{font-size:.86rem;font-weight:800;color:var(--forest);}
+.mx-s{font-size:.76rem;color:var(--mid);margin-top:3px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.mx-d{font-size:.68rem;color:var(--light);white-space:nowrap;margin-right:auto;text-align:left;}
+.mx-body{white-space:pre-wrap;line-height:1.9;font-size:.9rem;background:var(--bg);border-radius:var(--r-sm);padding:14px;}
 /* ── Tables ── */
 .tbl-wrap{overflow-x:auto;}
 .tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
@@ -184,6 +195,8 @@ button{cursor:pointer;}
     <div class="sb-item" onclick="nav(this,'students')"><span class="sb-icon">👨‍🎓</span> الطلاب والطالبات</div>
     <div class="sb-section">المتابعة</div>
     <div class="sb-item" onclick="nav(this,'walerts')"><span class="sb-icon">🔔</span> التنبيهات الأسبوعية <span class="sb-badge" id="sb-wa-badge" style="display:none;"></span></div>
+    <div class="sb-section">التواصل</div>
+    <div class="sb-item" onclick="nav(this,'messages')"><span class="sb-icon">✉️</span> رسائل أولياء الأمور <span class="sb-badge" id="sb-mx-badge" style="display:none;"></span></div>
     <div class="sb-section">الحساب</div>
     <div class="sb-item" onclick="nav(this,'settings')"><span class="sb-icon">⚙️</span> الإعدادات</div>
   </nav>
@@ -244,6 +257,22 @@ button{cursor:pointer;}
       <div class="stats-row" id="wa-stats" style="margin-bottom:18px;"><div class="empty" style="padding:24px;grid-column:1/-1;"><span class="empty-icon">⏳</span>جاري التحميل...</div></div>
       <div id="wa-progress" style="margin-bottom:18px;display:none;"></div>
       <div id="wa-branches" style="display:flex;flex-direction:column;gap:18px;"></div>
+    </div>
+
+    <!-- ══ رسائل أولياء الأمور (دفعة ١٨) ══ -->
+    <div id="page-messages" class="page">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">✉️ رسائل أولياء الأمور <span class="badge bg-gray" id="mx-count">—</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" id="mx-t-in" onclick="mxTab('in')">📥 الوارد</button>
+            <button class="btn btn-sm btn-ghost" id="mx-t-out" onclick="mxTab('out')">📤 المرسل</button>
+            <button class="btn btn-sm btn-ghost" onclick="mxLoad(true)" title="تحديث">🔄</button>
+          </div>
+        </div>
+        <div class="card-body" id="mx-list" style="padding:0;"><div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div></div>
+      </div>
+      <div style="font-size:.74rem;color:var(--light);text-align:center;">ولي الأمر بيراسل من لوحته «الإدارة ومشرفات أولياء الأمور» — والرد بيوصله في «الإعلانات والرسائل» + إشعار</div>
     </div>
 
     <!-- ══ الإعدادات ══ -->
@@ -328,6 +357,14 @@ button{cursor:pointer;}
     <div class="modal-head"><div class="modal-title" id="wa-detail-title" style="line-height:1.6;">بيان التنبيه</div><button class="modal-close" onclick="closeModal('modal-wa-detail')">×</button></div>
     <div class="modal-body" id="wa-detail-body" style="max-height:60vh;overflow-y:auto;"></div>
     <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-wa-detail')">إغلاق</button></div>
+  </div>
+</div>
+
+<!-- ══ مودال: رسالة (دفعة ١٨) ══ -->
+<div class="overlay" id="modal-mx">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-head"><div class="modal-title" id="mx-mt">✉️ رسالة</div><button class="modal-close" onclick="closeModal('modal-mx')">×</button></div>
+    <div class="modal-body" id="mx-mb"></div>
   </div>
 </div>
 
@@ -1415,7 +1452,7 @@ async function renderWAlerts(){
 
 
 // ══ التنقل ══
-const PAGE_TITLES={ home:'🏠 الرئيسية', students:'👨‍🎓 الطلاب والطالبات', walerts:'🔔 التنبيهات الأسبوعية', settings:'⚙️ الإعدادات' };
+const PAGE_TITLES={ home:'🏠 الرئيسية', students:'👨‍🎓 الطلاب والطالبات', walerts:'🔔 التنبيهات الأسبوعية', messages:'✉️ رسائل أولياء الأمور', settings:'⚙️ الإعدادات' };
 function nav(el, pageId){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -1425,6 +1462,7 @@ function nav(el, pageId){
   toggleSide(false); window.scrollTo(0,0);
   if(pageId==='home') renderHome();
   if(pageId==='students') renderStudents();
+  if(pageId==='messages') mxRender();
   if(pageId==='walerts'){ $('wa-branches').innerHTML='<div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري حساب التنبيهات…</div>';
     renderWAlerts().catch(e=>{ loadWarn(e); $('wa-branches').innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ التنبيهات ما اتحسبتش — اعمل تحديث</div>'; }); }
 }
@@ -1439,7 +1477,72 @@ async function changeMyPassword(){
   catch(e){ console.warn(e); showToast('⚠️ ما اتغيّرتش — جرّب تاني'); }
   finally{ btn.disabled=false; }
 }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ['modal-stu','modal-sf','modal-wa-action','modal-wa-detail'].forEach(closeModal); toggleSide(false); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ['modal-stu','modal-sf','modal-wa-action','modal-wa-detail','modal-mx'].forEach(closeModal); toggleSide(false); } });
+
+// ══ ✉️ رسائل أولياء الأمور (دفعة ١٨) — الوارد للموظفة + الرد ══
+let MX={rows:null, err:false, tab:'in'};
+function mxFmt(ts){ if(!ts) return ''; try{ const d=new Date(ts); return ar(d.getDate())+'/'+ar(d.getMonth()+1)+'/'+ar(d.getFullYear())+' • '+d.toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
+const MX_ROLE={parent:'ولي أمر',admin:'الإدارة',supervisor:'مشرف',employee:'الموظفون',teacher:'معلم'};
+async function mxLoad(show){
+  if(!ME) return;
+  try{
+    const {data,error}=await selectAll(db.from('messages').select('id,subject,body,sender_id,sender_name,sender_role,to_id,to_name,to_role,is_read,created_at,is_draft,deleted')
+      .or('to_id.eq.'+ME.id+',sender_id.eq.'+ME.id).order('created_at',{ascending:false}).order('id'));
+    if(error) throw error;
+    MX.rows=(data||[]).filter(m=>!m.is_draft&&!m.deleted); MX.err=false;
+  }catch(e){ MX.err=true; if(show) loadWarn(e); else console.warn('[mx]',e); }
+  mxBadge(); if($('page-messages').classList.contains('active')) mxRender();
+}
+function mxBadge(){
+  const n=(MX.rows||[]).filter(m=>String(m.to_id)===String(ME.id)&&!m.is_read).length, b=$('sb-mx-badge');
+  if(b){ b.style.display=n?'':'none'; b.textContent=ar(n); }
+}
+function mxTab(t){ MX.tab=t; $('mx-t-in').className='btn btn-sm '+(t==='in'?'btn-primary':'btn-ghost'); $('mx-t-out').className='btn btn-sm '+(t==='out'?'btn-primary':'btn-ghost'); mxRender(); }
+function mxRender(){
+  const box=$('mx-list'); if(!box) return;
+  if(MX.rows==null){ if(MX.err){ box.innerHTML='<div class="empty" style="padding:24px;color:var(--red);">⚠️ الرسائل ما اتحمّلتش — <button class="btn btn-xs btn-outline" onclick="mxLoad(true)">إعادة المحاولة</button></div>'; }
+    else{ box.innerHTML='<div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>'; mxLoad(true); } return; }
+  const mine=m=>String(m.sender_id)===String(ME.id);
+  const list=MX.rows.filter(m=>MX.tab==='in'?!mine(m):mine(m));
+  const un=MX.rows.filter(m=>!mine(m)&&!m.is_read).length;
+  $('mx-count').textContent=un?ar(un)+' جديدة':ar(MX.rows.length);
+  if(!list.length){ box.innerHTML='<div class="empty" style="padding:28px;"><span class="empty-icon">📭</span>'+(MX.tab==='in'?'مفيش رسائل واردة لحد دلوقتي':'مفيش رسائل مرسلة')+'</div>'; return; }
+  box.innerHTML=list.map(m=>{ const o=mine(m), nm=o?(m.to_name||''):(m.sender_name||''), rl=MX_ROLE[o?m.to_role:m.sender_role]||'', unread=!o&&!m.is_read;
+    return '<div class="mx-row'+(unread?' unread':'')+'" onclick="mxOpen('+(+m.id)+')"><div class="mx-av">'+esc(cleanName(nm).charAt(0)||'؟')+'</div>'
+      +'<div style="flex:1;min-width:0;"><div class="mx-n">'+(o?'إلى: ':'')+esc(nm)+(rl?' <span class="badge bg-gray">'+esc(rl)+'</span>':'')+(unread?' <span class="badge bg-green">جديدة</span>':'')+'</div>'
+      +'<div class="mx-s"><b>'+esc(m.subject||'(بدون موضوع)')+'</b> — '+esc(String(m.body||'').slice(0,140))+'</div></div>'
+      +'<div class="mx-d">'+mxFmt(m.created_at)+'</div></div>'; }).join('');
+}
+async function mxOpen(id){
+  const m=(MX.rows||[]).find(x=>+x.id===+id); if(!m) return;
+  const o=String(m.sender_id)===String(ME.id);
+  $('mx-mt').textContent='✉️ '+(m.subject||'(بدون موضوع)');
+  $('mx-mb').innerHTML='<div style="font-size:.8rem;color:var(--mid);margin-bottom:10px;">'+(o?'إلى: <b>'+esc(m.to_name||'')+'</b>':'من: <b>'+esc(m.sender_name||'')+'</b>'+(MX_ROLE[m.sender_role]?' ('+esc(MX_ROLE[m.sender_role])+')':''))+' • '+mxFmt(m.created_at)+'</div>'
+    +'<div class="mx-body">'+esc(m.body||'')+'</div>'
+    +(o?'':'<div class="fg" style="margin-top:14px;"><label>الرد</label><textarea class="inp" id="mx-reply" rows="5" maxlength="2000" placeholder="اكتب ردّك…"></textarea></div>'
+      +'<button class="btn btn-primary" style="width:100%;" id="mx-send" onclick="mxReply('+(+m.id)+')">📤 إرسال الرد</button>');
+  openModal('modal-mx');
+  if(!o&&!m.is_read){
+    try{ const {data,error}=await db.from('messages').update({is_read:true}).eq('id',m.id).eq('to_id',String(ME.id)).select('id');
+      if(!error&&data&&data.length){ m.is_read=true; mxBadge(); mxRender(); } }catch(e){ console.warn(e); }
+  }
+}
+async function mxReply(id){
+  const m=(MX.rows||[]).find(x=>+x.id===+id); if(!m) return;
+  const body=($('mx-reply').value||'').trim(); if(!body){ showToast('اكتب الرد'); return; }
+  const b=$('mx-send'); b.disabled=true;
+  try{
+    const subj=(/^رد:/.test(m.subject||'')?'':'رد: ')+(m.subject||'');
+    const row={subject:subj.slice(0,120)||'(بدون موضوع)', body, sender_id:String(ME.id), sender_name:ME.full_name, sender_role:ME.role||'employee',
+               to_id:String(m.sender_id), to_name:m.sender_name||'', to_role:m.sender_role||'parent', is_read:false, starred:false, urgent:false, is_draft:false, deleted:false};
+    const {data,error}=await db.from('messages').insert(row).select('id,created_at');
+    if(error||!data||data.length!==1) throw (error||new Error('rls'));
+    closeModal('modal-mx'); showToast('✅ الرد اتبعت');
+    MX.rows.unshift(Object.assign(row,data[0])); mxRender();
+  }catch(e){ console.warn(e); showToast('⚠️ الرد ما اتبعتش — جرّب تاني'); }
+  finally{ b.disabled=false; }
+}
+setInterval(()=>{ if(ME && document.visibilityState==='visible') mxLoad(false); }, 90000);
 
 // ══ الإقلاع ══
 async function init(){
@@ -1449,6 +1552,7 @@ async function init(){
   $('sb-uname').textContent=title; $('sb-avatar').textContent=(cleanName(ME.full_name||'م').replace(/^أم\s+/,'')||'م').charAt(0);
   $('w-hello').textContent='أهلاً، '+title; $('set-login').textContent=String(ME.username||'').replace('@tawheed.edu','');
   await loadBase(); stFillBranches(); renderHome();
+  mxLoad(false);   // (دفعة ١٨) عدّاد رسائل أولياء الأمور
 }
 document.addEventListener('DOMContentLoaded', init);
 

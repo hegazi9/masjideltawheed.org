@@ -874,15 +874,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     <div class="qs-card" onclick="navPage('training')"><div class="qs-icon">🎓</div><div><div class="qs-val" id="qs-train">—</div><div class="qs-lbl">تأهيل المعلمين</div></div></div>
   </div>
 
-  <div class="card">
-    <div class="card-head"><div class="card-title">⚡ بدء الحلقة</div></div>
-    <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="navPage('students')">👨‍🎓 فتح جدول الحلقة والتسميع</button>
-      <button class="btn btn-gold" onclick="navPage('tasks')">✅ المهام اليومية</button>
-      <button class="btn btn-outline" onclick="navPage('lessonprep')">📝 تحضير الدروس</button>
-    </div>
-  </div>
-
   <div class="grid-2">
     <div class="card" style="cursor:pointer;margin:0;" onclick="navPage('tasks')">
       <div class="card-body" style="display:flex;align-items:center;gap:14px;">
@@ -954,6 +945,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
           <th style="text-align:center;" id="th-revlvl">مستوى المراجعة</th>
           <th style="text-align:center;" id="th-memplan">خطة الحفظ</th>
           <th style="text-align:center;" id="th-revplan">خطة المراجعة</th>
+          <th style="text-align:center;">⭐ النقاط</th>
           <th style="text-align:center;">ملف الطالب</th>
           <th style="text-align:center;">ملاحظات</th>
         </tr></thead>
@@ -1618,7 +1610,8 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
         <div class="fg"><label>حتى الآية</label><input type="number" min="1" id="ev-ato" placeholder="رقم الآية" oninput="evAutoFaces()"></div>
       </div>
 
-      <div class="form-grid-2">
+      <div id="ev-pages-box" style="display:none;margin-bottom:12px;"></div>
+      <div class="form-grid-2" id="ev-err-grid">
         <div class="fg"><label>عدد الأخطاء (الإجمالي)</label>
           <input type="number" min="0" id="ev-errors" placeholder="اكتب عدد الأخطاء" oninput="evGrade()">
         </div>
@@ -1648,10 +1641,21 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
 
 <!-- ══ MODAL: درجة اختبار (قرآن/منهج/تجويد/نشاط/حفظ/مراجعة) ══ -->
 <div class="overlay" id="modal-exam">
-  <div class="modal" style="max-width:480px;">
+  <div class="modal" style="max-width:560px;">
     <div class="modal-head"><div class="modal-title" id="ex-title">📝 الدرجة</div><button class="modal-close" onclick="closeModal('modal-exam')">×</button></div>
-    <div class="modal-body">
-      <div class="fg"><label>عدد الأخطاء الظاهرة</label>
+    <div class="modal-body" style="max-height:76vh;overflow-y:auto;">
+      <div id="ex-pg-wrap" style="display:none;">
+        <div id="ex-pg-hint" style="font-size:.78rem;margin:0 0 10px;padding:8px 11px;border-radius:8px;background:var(--gold-pale);color:#7a5200;font-weight:700;line-height:1.8;">⏳ جاري تحميل خطة الطالب…</div>
+        <div class="form-grid-2">
+          <div class="fg"><label>من سورة</label><select id="ex-sfrom" onchange="ayahMax('ex-sfrom','ex-afrom');exPagesBuild()"></select></div>
+          <div class="fg"><label>من الآية</label><input type="number" min="1" id="ex-afrom" placeholder="رقم الآية" oninput="exPagesBuild()"></div>
+          <div class="fg"><label>إلى سورة</label><select id="ex-sto" onchange="ayahMax('ex-sto','ex-ato');exPagesBuild()"></select></div>
+          <div class="fg"><label>حتى الآية</label><input type="number" min="1" id="ex-ato" placeholder="رقم الآية" oninput="exPagesBuild()"></div>
+        </div>
+        <div id="ex-pages" style="margin-bottom:12px;"></div>
+        <div style="font-size:.72rem;color:var(--light);margin:-4px 0 8px;">كل وجه بيتقيّم لوحده (٠–٢ ممتاز ١٥ • ٣–٤ جيد جداً ١٠ • ٥–٦ جيد ٥ • +٦ إعادة ٠) • الدرجة = متوسط درجات الأوجه ÷ ١٥ × الدرجة الكاملة</div>
+      </div>
+      <div class="fg" id="ex-err-box"><label>عدد الأخطاء الظاهرة</label>
         <input type="number" min="0" id="ex-errors" placeholder="اكتب عدد الأخطاء" oninput="exCalc()">
         <div style="font-size:.72rem;color:var(--light);margin-top:4px;">يُخصم كل خطأ درجة واحدة من الدرجة الكاملة</div>
       </div>
@@ -2108,6 +2112,7 @@ function spReadPos(id){ const s=+(document.getElementById(id+'-s')||{}).value||0
 // فتح المحرّر: st = {id, name, branch} • term = الدورة
 async function spOpen(st,term,periodNo){
   spEnsureUI();
+  const _sb=document.getElementById('sp-save-btn'); if(_sb) _sb.style.display='';
   if(!term){ showToast('⚠️ مفيش دورة محددة'); return; }
   const periods=spPeriods(term,st.branch);
   if(!periods.length){ showToast('⚠️ مفيش فترات للدورة دي'); return; }
@@ -2158,9 +2163,6 @@ function spRender(){
     +'<div class="sp-row">البداية من '+spPosInputs('sp-h-start',(d.hifz||{}).start)+'</div></div>'
     +(NR?'':'<div class="sp-box"><h4>🔁 المراجعة</h4><div class="sp-row">عدد الأسطر في الحلقة <input class="sp-in" id="sp-r-lines" type="number" min="1" style="width:70px;" value="'+(((d.rev||{}).lines)||'')+'"></div>'
     +'<div class="sp-row">البداية من '+spPosInputs('sp-r-start',(d.rev||{}).start)+'</div></div>')+'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;padding:9px 12px;border-radius:var(--r-sm);background:var(--gold-pale);">'
-    +'<button class="btn btn-gold btn-sm" type="button" onclick="spAutoFill()">⚡ وزّع الأهداف تلقائياً</button>'
-    +'<span style="font-size:.72rem;color:#7a5200;">من «البداية» + «عدد الأسطر» (١٥ سطر = وجه) — تقريبي، عدّل اللي محتاج وبعدين احفظ</span></div>'
     +'<div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;">الهدف في كل حلقة: <b>إلى</b> سورة / آية</div>'
     +'<div style="overflow-x:auto;"><table class="sp-tbl"><thead><tr><th>الحلقة</th><th>الحفظ إلى</th>'+(NR?'':'<th>المراجعة إلى</th>')+'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>'
     +'<div class="sp-row" style="margin-top:10px;">ملاحظات <input class="sp-in" id="sp-notes" style="flex:1;min-width:200px;" value="'+esc(d.notes||'')+'"></div>'
@@ -2278,6 +2280,31 @@ function spOnSaved(sid){
   const pg=document.getElementById('page-splans'); if(pg&&pg.classList.contains('active')) renderStudentPlans();
   const pd=document.getElementById('page-dashboard'); if(pd&&pd.classList.contains('active')) spDashBanner();
 }
+// ── (دفعة ١٦) خطة الطالب الضيف — عرض بس للمعلم المضيف (التعديل لمعلمه الأصلي) ──
+async function spViewGuest(sid){
+  const s=findStu(sid); if(!s||!guestRealId(sid)) return;
+  spEnsureUI();
+  const t=termOf(D())||CUR_TERM;
+  document.getElementById('sp-title').textContent='🎯 خطة الطالب (ضيف) — '+s.name;
+  const body=document.getElementById('sp-body');
+  const sb=document.getElementById('sp-save-btn'), nb=document.getElementById('sp-next-btn');
+  if(sb) sb.style.display='none'; if(nb) nb.style.display='none';
+  body.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل…</div>';
+  openModal('modal-splan');
+  if(!t||termIsLegacy(t)){ body.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>مفيش خطة للدورة دي</div>'; return; }
+  try{
+    const {data,error}=await db.from('student_plans').select('*').eq('student_id',sid).eq('term_id',t.id).lte('period_from',D()).gte('period_to',D()).maybeSingle();
+    if(error) throw error;
+    if(!data){ body.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>معلمه ('+esc(s.teacher||'—')+') لسه ما عملش خطة للفترة دي</div>'; return; }
+    const recs=await spLoadRecs([sid],data.period_from,data.period_to);
+    const ses=((data.data||{}).sessions||[]).find(x=>x.date===D()&&x.h&&x.h.s);
+    const hs=((data.data||{}).hifz||{}).start, dir=data.direction||'forward';
+    const tg=ses?('<div style="padding:9px 12px;border-radius:var(--r-sm);background:var(--gold-pale);color:#7a5200;font-weight:700;font-size:.8rem;margin-bottom:12px;">🎯 المطلوب النهارده (تراكمي): من '
+      +spLbl(hs&&hs.s?spCumStart(dir,hs,ses.h):ses.h)+' إلى '+spLbl(ses.h)+'</div>'):'<div style="font-size:.78rem;color:var(--light);margin-bottom:12px;">مفيش هدف محدد للنهارده في خطته</div>';
+    body.innerHTML='<div class="sp-row">معلمه: <b>'+esc(s.teacher||'—')+'</b> • الفترة '+spAr(data.period_no)+': '+spFmt(data.period_from)+' ← '+spFmt(data.period_to)+' • '+esc(SP_DIR_AR[dir]||'')+' • <span style="color:var(--light);">للعرض بس</span></div>'
+      +tg+spProgressHtml(data,recs,D());
+  }catch(e){ body.innerHTML='<div class="empty" style="padding:30px;color:var(--red);"><span class="empty-icon">⚠️</span>الخطة ما اتحمّلتش — '+esc(recFriendlyErr(e))+'</div>'; }
+}
 // ── «حفظ ← التالي»: أول طالب بعده من غير خطة (وإلا اللي بعده على طول) ──
 let SPT_QUEUE=null;
 function spNextStudent(){
@@ -2292,52 +2319,6 @@ async function spSaveNext(){
   const ok=await spSave(); if(!ok) return;
   if(!nx){ closeModal('modal-splan'); showToast('✅ خلصت خطط الحلقة'); return; }
   spOpen({id:nx.id, name:nx.name, branch:nx.branch}, C.term, C.period.no);
-}
-// ── ⚡ توزيع الأهداف تلقائياً (البداية + عدد الأسطر/حلقة) — المصحف المدني ١٥ سطر للوجه ──
-let SP_W=null;
-function spWeights(){
-  if(SP_W) return SP_W;
-  const cnt={}, pg=[];
-  SP_SURAH.forEach((x,i)=>{ pg[i]=[]; for(let a=1;a<=x[1];a++){ const p=(typeof madaniPageOf==='function')?madaniPageOf(i+1,a):null; pg[i][a]=p; if(p) cnt[p]=(cnt[p]||0)+1; } });
-  SP_W=(s,a)=>{ const p=(pg[s-1]||[])[a]; return (p&&cnt[p])?1/cnt[p]:1/15; };   // نصيب الآية من الوجه
-  return SP_W;
-}
-function spFillTrack(dir,start,lines,dates){
-  const W=spWeights(), step=lines/15, out={};
-  let cur=null, acc=0, end=false;
-  dates.forEach((dt,k)=>{
-    if(end) return;
-    const tgt=step*(k+1); let moved=false;
-    do{
-      const n=cur?spNextPos(dir,cur):{s:start.s,a:start.a};
-      if(cur&&n.s===cur.s&&n.a===cur.a){ end=true; break; }
-      cur=n; acc+=W(cur.s,cur.a); moved=true;
-    }while(acc<tgt-1e-9);
-    if(moved) out[dt]={s:cur.s,a:cur.a};
-  });
-  return out;
-}
-function spAutoFill(){
-  const C=SP_CTX; if(!C||C.loadFailed) return;
-  const P=C.period, dates=spSessionDates(C.term,C.st.branch,P.from,P.to);
-  if(!dates.length){ showToast('⚠️ مفيش حلقات في الفترة دي'); return; }
-  const dir=document.getElementById('sp-dir').value==='backward'?'backward':'forward';
-  const NR=termNoReview(C.term);
-  const tracks=[['h','الحفظ']].concat(NR?[]:[['r','المراجعة']]).map(([k,lbl])=>{
-    const ln=+((document.getElementById('sp-'+k+'-lines')||{}).value)||0, st=spReadPos('sp-'+k+'-start');
-    return {k,lbl,ln,st};
-  });
-  const ready=tracks.filter(t=>t.ln>0&&t.st);
-  if(!ready.length){ showToast('⚠️ اختار «البداية من» واكتب «عدد الأسطر» الأول'); return; }
-  const filled=dates.some(dt=>ready.some(t=>spReadPos('sp-'+t.k+'-'+dt)));
-  if(filled&&!confirm('فيه أهداف مكتوبة — هيتكتب فوقها. تكمّل؟')) return;
-  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v; };
-  ready.forEach(t=>{
-    const out=spFillTrack(dir,t.st,t.ln,dates);
-    dates.forEach(dt=>{ const p=out[dt]; set('sp-'+t.k+'-'+dt+'-s',p?p.s:''); set('sp-'+t.k+'-'+dt+'-a',p?p.a:''); });
-  });
-  const skip=tracks.filter(t=>!(t.ln>0&&t.st)).map(t=>t.lbl);
-  showToast('✅ اتوزّعت الأهداف'+(skip.length?(' (ماعدا '+skip.join(' و')+' — ناقص البداية أو الأسطر)'):'')+' — راجعها واحفظ');
 }
 // ── تنبيه لوحة القيادة: طلاب من غير خطة في الفترة الحالية ──
 async function spDashBanner(){
@@ -2380,27 +2361,37 @@ async function spEvalHint(sid,type){
   SP_EVAL=null; spPlanManualUI(true);
   let box=document.getElementById('ev-sp-hint');
   if(!box){ const h=document.getElementById('ev-scale-hint'); if(!h) return; box=document.createElement('div'); box.id='ev-sp-hint';
-    box.style.cssText='font-size:.78rem;margin:0 0 8px;padding:7px 10px;border-radius:8px;background:var(--gold-pale);color:#7a5200;font-weight:700;display:none;';
-    h.parentNode.insertBefore(box,h); }
+    box.style.cssText='font-size:.78rem;margin:0 0 8px;padding:7px 10px;border-radius:8px;background:var(--gold-pale);color:#7a5200;font-weight:700;display:none;line-height:1.8;';
+    const top=document.querySelector('#modal-eval .modal-body'); if(top) top.insertBefore(box,top.firstChild); else h.parentNode.insertBefore(box,h); }
   box.style.display='none';
-  const s=findStu(sid); if(!s||s._static||s._guest) return;
+  evRetryHint();
+  const s=findStu(sid); if(!s||s._static||(s._guest&&!guestRealId(sid))) return;
   const t=termOf(D())||CUR_TERM; if(!t||termIsLegacy(t)) return;
+  const same=()=>REC_CTX&&REC_CTX.sid===sid&&REC_CTX.type===type;
   try{
     const {data,error}=await db.from('student_plans').select('*').eq('student_id',sid).eq('term_id',t.id).lte('period_from',D()).gte('period_to',D()).maybeSingle();
-    if(error||!data) return;
-    if(!REC_CTX||REC_CTX.sid!==sid||REC_CTX.type!==type) return;
+    if(error) throw error;
+    if(!same()) return;
+    // التسميع اللي قبل النهارده (للتراكمي + الأوجه اللي محتاجة إعادة + حالة الخطة)
+    const recs=await evLoadPrev(sid, data?data.period_from:t.start_date);
+    if(!same()) return;
+    if(type==='new'){ EV_PG.retry=evPendingRetry(recs); evRetryHint(); }
+    if(!data){ if(type==='new'){ evPagesBuild(); evGrade(); } return; }
     const key=type==='new'?'h':'r', tr=(data.data||{})[type==='new'?'hifz':'rev']||{}, dir=data.direction||'forward';
     const ses=((data.data||{}).sessions||[]).filter(x=>x[key]&&x[key].s).sort((a,b)=>a.date<b.date?-1:1);
     const today=ses.find(x=>x.date===D());
-    if(!today){ box.textContent='🎯 مفيش هدف '+(type==='new'?'حفظ':'مراجعة')+' محدد للنهارده في الخطة'; box.style.display=''; return; }
+    if(!today){ box.textContent='🎯 مفيش هدف '+(type==='new'?'حفظ':'مراجعة')+' محدد للنهارده في الخطة'; box.style.display=''; if(type==='new'){ evPagesBuild(); evGrade(); } return; }
     const prev=ses.filter(x=>x.date<D()).pop();
-    const from=prev?spNextPos(dir,prev[key]):(tr.start||null);
-    box.textContent='🎯 هدف النهارده: من '+(from?spLbl(from):'—')+' إلى '+spLbl(today[key])+(tr.lines?(' • '+spAr(tr.lines)+' سطر'):'');
+    const newFrom=prev?spNextPos(dir,prev[key]):(tr.start||null);
+    // ★ (دفعة ١٦) الحفظ تراكمي من أول خطة الفترة — آخر ٤ أوجه كاملة (+ الوجه اللي لسه ما اكتملش)
+    const from=(type==='new'&&tr.start&&tr.start.s)?spCumStart(dir,tr.start,today[key]):newFrom;
+    const nU=(type==='new'&&from)?spUnits(dir,from,today[key]).length:0;
+    box.innerHTML='🎯 المطلوب النهارده'+(type==='new'?' (تراكمي)':'')+': من <b>'+spLbl(from)+'</b> إلى <b>'+spLbl(today[key])+'</b>'
+      +(nU?' • '+toAr(nU)+' '+(nU>2&&nU<11?'أوجه':'وجه'):'')
+      +(type==='new'&&newFrom&&!spSame(newFrom,from)?'<br><span style="font-weight:600;">📖 الجديد: من '+spLbl(newFrom)+'</span>':'')
+      +(tr.lines?(' • '+spAr(tr.lines)+' سطر'):'');
     box.style.display='';
-    // تسميع الفترة (من غير النهارده) — عشان «تم/لم يتم» يتحسب لحظة الحفظ
-    const recs=(await spLoadRecs([sid],data.period_from,data.period_to)).filter(r=>r.date!==D());
-    if(!REC_CTX||REC_CTX.sid!==sid||REC_CTX.type!==type) return;
-    SP_EVAL={sid,type,plan:data,key,recs};
+    SP_EVAL={sid,type,plan:data,key,recs,prevTgt:prev?prev[key]:null};
     spPlanManualUI(false,'🤖 «تم / لم يتم» تلقائي: هيتحسب من المدى المُسمَّع مقارنةً بهدف النهارده ('+spLbl(today[key])+')');
     const st=(REC_STATE[sid]||{})[type]||{};
     if(!st.grade&&from){
@@ -2408,11 +2399,123 @@ async function spEvalHint(sid,type){
       set('ev-sfrom',from.s-1); ayahMax('ev-sfrom','ev-afrom'); set('ev-afrom',from.a);
       set('ev-sto',today[key].s-1); ayahMax('ev-sto','ev-ato'); set('ev-ato',today[key].a);
       if(typeof evAutoFaces==='function') evAutoFaces();
-    }
-  }catch(e){ SP_EVAL=null; spPlanManualUI(true); }
+    } else if(type==='new'){ evPagesBuild(); evGrade(); }
+  }catch(e){ SP_EVAL=null; spPlanManualUI(true); if(type==='new'){ evPagesBuild(); evGrade(); } }
+}
+// ── (دفعة ١٦) أدوات الأوجه: تقسيم المدى على صفحات المصحف المدني (بترتيب الحفظ) ──
+const SP_CUM_PAGES=4;   // التراكمي: آخر ٤ أوجه كاملة
+function spPg(s,a){ return (typeof madaniPageOf==='function')?(madaniPageOf(s,a)||0):0; }
+function spSame(x,y){ return !!(x&&y&&x.s===y.s&&x.a===y.a); }
+function spUnits(dir,from,to){
+  const out=[]; if(!from||!to||!from.s||!to.s) return out;
+  const tp=spPos(dir,to.s,to.a); let p={s:from.s,a:Math.max(1,Math.min(+from.a||1,SP_SURAH[from.s-1][1]))}, cur=null, g=0;
+  if(spPos(dir,p.s,p.a)>tp) return out;
+  while(g++<7000){
+    const pg=spPg(p.s,p.a);
+    if(!cur||cur.pg!==pg){ cur={pg, f:{s:p.s,a:p.a}, t:{s:p.s,a:p.a}}; out.push(cur); } else cur.t={s:p.s,a:p.a};
+    if(spPos(dir,p.s,p.a)>=tp) break;
+    const n=spNextPos(dir,p); if(spSame(n,p)||spPos(dir,n.s,n.a)>tp) break;
+    p=n;
+  }
+  return out;
+}
+function spEndsPage(dir,pt){ const n=spNextPos(dir,pt); return spSame(n,pt) || spPg(n.s,n.a)!==spPg(pt.s,pt.a); }
+// بداية التسميع التراكمي: من أول الخطة لحد ما يكمّل ٤ أوجه — ولما يكمّل الخامس يتشال الأول وهكذا
+function spCumStart(dir,start,target){
+  const u=spUnits(dir,start,target); if(!u.length) return start;
+  const keep=spEndsPage(dir,target)?SP_CUM_PAGES:SP_CUM_PAGES+1;
+  return u[Math.max(0,u.length-keep)].f;
+}
+function pgKey(r){ return r.pg+':'+r.f.s+':'+r.f.a; }
+function pgLbl(r){ return spName(r.f.s)+' '+toAr(r.f.a)+'–'+(r.f.s===r.t.s?toAr(r.t.a):spName(r.t.s)+' '+toAr(r.t.a)); }
+// التقدير العام = متوسط درجات الأوجه (١٥/١٠/٥/٠) — لازم المتوسط يوصل للحد
+function pgAvgGrade(avg){ return avg>=15?'excellent':(avg>=10?'very_good':(avg>=5?'good':'retry')); }
+function pgRowsHtml(rows,pre,val,oninp){
+  return rows.map((r,i)=>{ const v=val[pgKey(r)];
+    return '<div id="'+pre+'row-'+i+'" style="display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;">'
+      +'<span style="min-width:58px;font-weight:800;color:var(--forest);font-size:.8rem;">ص '+toAr(r.pg)+'</span>'
+      +'<span style="flex:1;font-size:.74rem;color:var(--mid);">'+pgLbl(r)+(r.carried?' <b style="color:var(--red);white-space:nowrap;">🔁 إعادة</b>':'')+'</span>'
+      +'<input type="number" min="0" inputmode="numeric" id="'+pre+i+'" value="'+(v==null?'':esc(v))+'" placeholder="أخطاء" oninput="'+oninp+'" style="width:66px;padding:5px 6px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.82rem;text-align:center;">'
+      +'<span id="'+pre+'g-'+i+'" style="min-width:74px;font-size:.72rem;text-align:center;"></span></div>'; }).join('');
+}
+function pgSaveVals(rows,pre,val){ rows.forEach((r,i)=>{ const el=document.getElementById(pre+i); if(el) val[pgKey(r)]=el.value; }); }
+function pgCalc(rows,pre){
+  if(!rows.length) return {empty:true, ok:false};
+  const out=[]; let sum=0, tot=0, miss=0;
+  rows.forEach((r,i)=>{ const el=document.getElementById(pre+i), raw=el?String(el.value).trim():'', e=parseInt(raw);
+    if(raw===''||isNaN(e)||e<0){ miss++; return; }
+    const g=errorsToGrade(e); sum+=GRADE_PTS[g]; tot+=e;
+    const x={p:r.pg, f:r.f, t:r.t, e, g}; if(r.carried) x.r=true; out.push(x); });
+  if(miss) return {ok:false, miss, total:tot};
+  const avg=sum/out.length;
+  return {ok:true, pages:out, total:tot, avg, grade:pgAvgGrade(avg)};
+}
+function pgPaint(rows,pre,retryNote){
+  rows.forEach((r,i)=>{ const el=document.getElementById(pre+i), b=document.getElementById(pre+'g-'+i), row=document.getElementById(pre+'row-'+i); if(!el||!b) return;
+    const raw=String(el.value).trim(), e=parseInt(raw);
+    if(raw===''||isNaN(e)||e<0){ b.innerHTML=''; if(row) row.style.background=''; return; }
+    const g=errorsToGrade(e);
+    b.innerHTML='<span style="font-weight:800;color:'+GRADE_COLOR[g]+';">'+GRADE_AR[g]+'</span>'+(g==='retry'&&retryNote?'<div style="font-size:.6rem;color:var(--red);">يتعاد مع الجديد</div>':'');
+    if(row) row.style.background=g==='retry'?'var(--red-pale)':''; });
+}
+function pgFillZero(pre,n){ for(let i=0;i<n;i++){ const el=document.getElementById(pre+i); if(el&&String(el.value).trim()==='') el.value=0; } }
+// ── مودال التسميع: صف لكل وجه ──
+let EV_PG={ rows:[], val:{}, retry:[] };
+function evReadRange(){
+  const v=id=>document.getElementById(id).value;
+  const f={s:(+v('ev-sfrom')||0)+1, a:parseInt(v('ev-afrom'))||1};
+  const t={s:(+v('ev-sto')||0)+1, a:parseInt(v('ev-ato'))||0};
+  if(!t.a) t.a=(t.s===f.s)?f.a:SP_SURAH[t.s-1][1];
+  return {f,t};
+}
+function evRangeDir(f,t){
+  if(SP_EVAL&&SP_EVAL.plan&&REC_CTX&&SP_EVAL.sid===REC_CTX.sid) return SP_EVAL.plan.direction||'forward';
+  return spPos('forward',f.s,f.a)<=spPos('forward',t.s,t.a)?'forward':'backward';
+}
+function evPagesBuild(){
+  const box=document.getElementById('ev-pages-box'); if(!box) return;
+  if(evIsReview()){ box.style.display='none'; return; }
+  pgSaveVals(EV_PG.rows,'evp-',EV_PG.val);
+  const {f,t}=evReadRange(); const dir=evRangeDir(f,t);
+  let rows=spUnits(dir,f,t); if(!rows.length) rows=spUnits(dir==='forward'?'backward':'forward',f,t);
+  if(rows.length>60){ EV_PG.rows=[]; box.style.display=''; box.innerHTML='<div style="padding:10px;border-radius:8px;background:var(--red-pale);color:var(--red);font-size:.8rem;font-weight:700;">⚠️ المدى كبير قوي ('+toAr(rows.length)+' وجه) — راجع «من / إلى»</div>'; return; }
+  const R=EV_PG.retry||[], have=new Set(rows.map(r=>r.pg));
+  rows.forEach(r=>{ if(R.some(x=>x.pg===r.pg)) r.carried=true; });
+  EV_PG.rows=R.filter(x=>!have.has(x.pg)).map(x=>({pg:x.pg,f:x.f,t:x.t,carried:true})).concat(rows);
+  box.style.display='';
+  box.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;">'
+    +'<div style="font-size:.82rem;font-weight:800;color:var(--forest);">✍️ أخطاء كل وجه على حدة</div>'
+    +'<span class="badge bg-green" style="font-size:.66rem;">'+toAr(EV_PG.rows.length)+' '+(EV_PG.rows.length>2&&EV_PG.rows.length<11?'أوجه':'وجه')+'</span>'
+    +(EV_PG.rows.length>1?'<button type="button" class="btn btn-ghost btn-xs" style="margin-right:auto;" onclick="pgFillZero(\'evp-\','+EV_PG.rows.length+');evGrade()">٠ أخطاء للباقي</button>':'')+'</div>'
+    +(EV_PG.rows.length?pgRowsHtml(EV_PG.rows,'evp-',EV_PG.val,'evGrade()'):'<div style="font-size:.78rem;color:var(--light);">حدّد «من / إلى» الأول</div>');
+}
+function evRetryHint(){
+  let el=document.getElementById('ev-retry-hint');
+  if(!el){ const h=document.getElementById('ev-pages-box'); if(!h) return; el=document.createElement('div'); el.id='ev-retry-hint';
+    el.style.cssText='font-size:.78rem;margin:0 0 10px;padding:8px 11px;border-radius:8px;background:var(--red-pale);color:var(--red);font-weight:700;display:none;line-height:1.8;';
+    h.parentNode.insertBefore(el,h); }
+  const R=(!evIsReview()&&EV_PG.retry)||[];
+  if(!R.length){ el.style.display='none'; return; }
+  el.innerHTML='🔁 لازم '+(R.length>1?'تتعاد الأوجه دي':'يتعاد الوجه ده')+' مع القدر الجديد (كان فيه أكتر من ٦ أخطاء): '+R.map(x=>'ص '+toAr(x.pg)+' ('+pgLbl(x)+')').join('، ');
+  el.style.display='';
+}
+// تسميع الحفظ اللي قبل النهارده — بالأوجه (لو العمود موجود)
+async function evLoadPrev(sid,from){
+  const C='student_id,date,type,grade,surah_from,ayah_from,surah_to,ayah_to';
+  let {data,error}=await db.from('memorization').select(C+',pages').eq('student_id',sid).gte('date',from).lt('date',D()).order('date');
+  if(error && /pages/.test(error.message||'')) ({data,error}=await db.from('memorization').select(C).eq('student_id',sid).gte('date',from).lt('date',D()).order('date'));
+  if(error) throw error; return data||[];
+}
+// الأوجه اللي اتسمّعت بأكتر من ٦ أخطاء ولسه ما اتعادتش صح
+function evPendingRetry(recs){
+  const pend={};
+  (recs||[]).filter(r=>r.type==='new').sort((a,b)=>a.date<b.date?-1:1).forEach(r=>{
+    (Array.isArray(r.pages)?r.pages:[]).forEach(x=>{ if(!x||!x.p||!x.f||!x.t) return; if(x.g==='retry') pend[x.p]=x; else delete pend[x.p]; });
+  });
+  return Object.values(pend).map(x=>({pg:x.p, f:x.f, t:x.t}));
 }
 // لحظة الحفظ: لو فيه هدف للنهارده → تم = وصل للهدف (والدرجة مش «إعادة»)
-function spAutoPlanDone(sid,type,grade){
+function spAutoPlanDone(sid,type,grade,pages){
   _evPlanSt=null;
   const E=SP_EVAL; if(!E||E.sid!==sid||E.type!==type) return null;
   const v=id=>document.getElementById(id).value;
@@ -2423,7 +2526,13 @@ function spAutoPlanDone(sid,type,grade){
   const T=spTrack(E.plan,E.key,E.recs.concat([rec]),D());
   const row=T&&T.rows.find(r=>r.date===D()); if(!row) return null;
   // (دفعة ١٥) آخر آية وصلها مقارنةً بهدف النهارده: وصل بالظبط = أتم • عدّاه = سبق • موصلش = لم يتم
-  const st=grade==='retry'?'behind':(row.st==='ahead'?'ahead':(row.st==='done'?'done':'behind'));
+  let st=grade==='retry'?'behind':(row.st==='ahead'?'ahead':(row.st==='done'?'done':'behind'));
+  // (دفعة ١٦) لو وجه فيه حفظ جديد (بعد هدف الحلقة اللي فاتت) اتقيّم «إعادة» → لم يتم الخطة
+  if(st!=='behind' && Array.isArray(pages) && pages.length){
+    const dir=E.plan.direction||'forward', tr=(E.plan.data||{})[type==='new'?'hifz':'rev']||{};
+    const prevP=E.prevTgt?spPos(dir,E.prevTgt.s,E.prevTgt.a):((tr.start&&tr.start.s)?spPos(dir,tr.start.s,tr.start.a)-1:0);
+    if(pages.some(x=>x.g==='retry'&&x.t&&spPos(dir,x.t.s,x.t.a)>prevP)) st='behind';
+  }
   _evPlanSt=st;
   const done=st!=='behind';
   setPlan(done);
@@ -2463,7 +2572,8 @@ function prWeekStart(branch,iso){
 function prWeekDays(ws){ const a=[]; for(let i=0;i<7;i++) a.push(prAddDays(ws,i)); return a; }
 function prCell(v,girls){
   const m={ mosque:['🕌','في المسجد','var(--jade)','var(--pale)'], home:['🏠','في البيت','var(--blue)','var(--blue-pale)'],
-            prayed:['✅',girls?'صلّت':'صلّى','var(--jade)','var(--pale)'], missed:['❌',girls?'لم تصلِّ':'لم يصلِّ','var(--red)','var(--red-pale)'] }[v];
+            prayed:['✅',girls?'صلّت':'صلّى','var(--jade)','var(--pale)'], missed:['❌',girls?'لم تصلِّ':'لم يصلِّ','var(--red)','var(--red-pale)'],
+            excused:['🌸','عذر شرعي (بيتحسب صلّت)','var(--purple)','var(--purple-pale)'] }[v];   // (دفعة ١٨) البنات
   if(!m) return '<span style="color:var(--light);" title="لم يُسجَّل">—</span>';
   return '<span title="'+m[1]+'" style="display:inline-block;min-width:30px;padding:2px 6px;border-radius:7px;background:'+m[3]+';color:'+m[2]+';font-size:.8rem;">'+m[0]+'</span>';
 }
@@ -2542,7 +2652,7 @@ async function prRender(){
   const tbl='<div style="overflow-x:auto;"><table class="pr-tbl"><thead><tr><th>اليوم</th>'+PR_KEYS.map(k=>'<th>'+k[1]+'</th>').join('')+'</tr></thead><tbody>'
     +days.map(d=>{ const r=byD[d]||{}; return '<tr'+(d===localISO()?' style="background:var(--gold-pale);"':'')+'><td style="white-space:nowrap;font-weight:700;">'+prFmt(d)+'</td>'+PR_KEYS.map(k=>'<td>'+prCell(r[k[0]],girls)+'</td>').join('')+'</tr>'; }).join('')
     +'</tbody></table></div>';
-  const legend='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">'+(prIsAbtal(C.st.branch)?'🕌 في المسجد • 🏠 في البيت • ':'✅ '+(girls?'صلّت':'صلّى')+' • ')+'❌ '+(girls?'لم تصلِّ':'لم يصلِّ')+' • — لم يُسجَّل من ولي الأمر</div>';
+  const legend='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">'+(prIsAbtal(C.st.branch)?'🕌 في المسجد • 🏠 في البيت • ':'✅ '+(girls?'صلّت':'صلّى')+' • ')+'❌ '+(girls?'لم تصلِّ':'لم يصلِّ')+' • '+(girls?'🌸 عذر شرعي (بيتحسب صلّت) • ':'')+'— لم يُسجَّل من ولي الأمر</div>';
   const ptsHtml='<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">'
     +'<div style="font-weight:800;color:var(--forest);margin-bottom:8px;">⭐ نقاط التحفيز للأسبوع ده</div>'
     +(pts?'<div style="font-size:.8rem;color:var(--mid);margin-bottom:8px;">المسجّل: <b style="color:var(--gold);">'+prAr(pts.points)+' نقطة</b>'+(pts.awarded_by_name?' — بواسطة '+esc(pts.awarded_by_name):'')+(pts.note?' — '+esc(pts.note):'')+'</div>':'<div style="font-size:.78rem;color:var(--light);margin-bottom:8px;">لسه ما اتدّاش نقاط الأسبوع ده</div>')
@@ -2698,6 +2808,8 @@ function studentsOf(circle){
   let base = byId.length ? byId : MY_STUDENTS.filter(s=>!s.circle_id && s.branch===circle.branch);
   return base.concat(guestsOf(circle));   // الضيوف في الآخر
 }
+// الضيف اللي ليه معرّف حقيقي في القاعدة (students.id) — مش ضيف محلي
+function guestRealId(id){ return !!id && !String(id).startsWith('guest_'); }
 function findStu(id){
   let s=MY_STUDENTS.find(x=>x.id===id);
   if(s) return s;
@@ -3085,6 +3197,9 @@ const DAILY_TASKS=[
   'بعد انتهاء الطالب من التسميع ينتقل إلى منصة النقاط لاستلام النقاط ثم مغادرة المسجد فورًا.',
   'رد مستلزمات الحلقة إلى أماكنها مع نظافة المكان.',
 ];
+// (دفعة ١٦) بند «التلقين الجماعي» (رقم ٦) اتشال من العرض — مكانه في done_items بيتحفظ «تم» دايماً (الـ RPC بتعدّ ١٠ بنود)
+const TASK_HIDDEN=[5];
+function tskVisible(){ return DAILY_TASKS.map((_,i)=>i).filter(i=>!TASK_HIDDEN.includes(i)); }
 let TASK_STATE={done:[],completed:false,awarded:0,_row:null};
 async function renderTasks(){
   const c=activeCircle();
@@ -3106,15 +3221,21 @@ async function renderTasks(){
     listEl.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>تعذّر تحميل المهام — '+esc(recFriendlyErr(e))+'<br><button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="renderTasks()">🔄 إعادة المحاولة</button></div>';
     document.getElementById('tsk-progress').innerHTML=''; return;
   }
-  listEl.innerHTML=DAILY_TASKS.map((t,i)=>`
+  const _hidFix=TASK_HIDDEN.some(i=>!TASK_STATE.done[i]);
+  TASK_HIDDEN.forEach(i=>{ TASK_STATE.done[i]=true; });
+  listEl.innerHTML=tskVisible().map((i,k)=>{ const t=DAILY_TASKS[i]; return `
     <label style="display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:${TASK_STATE.done[i]?'var(--pale)':'var(--bg)'};border:1.5px solid ${TASK_STATE.done[i]?'var(--mint)':'var(--border)'};border-radius:var(--r-sm);cursor:pointer;transition:all .15s;" id="tsk-lbl-${i}">
       <input type="checkbox" ${TASK_STATE.done[i]?'checked':''} onchange="toggleTask(${i},this.checked)" style="width:19px;height:19px;margin-top:2px;flex-shrink:0;">
-      <span style="font-size:.86rem;font-weight:600;color:var(--ink);line-height:1.5;">${toAr(i+1)}. ${t}</span>
-    </label>`).join('');
+      <span style="font-size:.86rem;font-weight:600;color:var(--ink);line-height:1.5;">${toAr(k+1)}. ${t}</span>
+    </label>`; }).join('');
   updateTaskProgress();
+  // كان مخلّص كل البنود الظاهرة قبل التعديل → احفظ واحسب النقاط
+  if(_hidFix && TASK_STATE._row && TASK_STATE.done.every(Boolean) && (TASK_STATE.awarded||0)<20){
+    _tskChain=_tskChain.then(async()=>{ tskSaveState('saving'); const ok=await saveTasks(true); tskSaveState(ok?'saved':'error'); if(ok) await awardTaskPoints(); }).catch(()=>{});
+  }
 }
 function updateTaskProgress(){
-  const done=TASK_STATE.done.filter(Boolean).length, all=DAILY_TASKS.length;
+  const _v=tskVisible(), done=_v.filter(i=>TASK_STATE.done[i]).length, all=_v.length;
   const pct=Math.round(done/all*100);
   const pts=TASK_STATE.awarded||0;
   document.getElementById('tsk-progress').innerHTML=`
@@ -3588,7 +3709,7 @@ function renderStudents(){
   const c=activeCircle(); document.getElementById('st-circle-name').textContent=c?c.name+' — '+c.branch:'—';
   reflectReportDay();
   const tb=document.getElementById('students-body');
-  if(!c){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--light);padding:36px;">🔒 لا توجد حلقة اليوم — تظهر طلاب الحلقة في مواعيدها المحددة فقط</td></tr>'; return; }
+  if(!c){ tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--light);padding:36px;">🔒 لا توجد حلقة اليوم — تظهر طلاب الحلقة في مواعيدها المحددة فقط</td></tr>'; return; }
   const q=(document.getElementById('st-search')?.value||'').trim();
   let list=studentsOf(c); if(q) list=list.filter(s=>s.name.includes(q));
   // ── وضع الاختبار (الجمعة للأبطال/الرواد • السبت 15أغسطس و12سبتمبر للبنات) ──
@@ -3601,12 +3722,12 @@ function renderStudents(){
   const thRL=document.getElementById('th-revlvl'); if(thRL) thRL.style.display=NR?'none':'';
   const thM=document.getElementById('th-memplan'); if(thM) thM.style.display=showPlan?'':'none';
   const thR=document.getElementById('th-revplan'); if(thR) thR.style.display=(showPlan&&!NR)?'':'none';
-  if(!list.length){ tb.innerHTML='<tr><td colspan="'+(showPlan?9:7)+'" style="text-align:center;color:var(--light);padding:30px;">لا يوجد طلاب في هذه الحلقة</td></tr>'; return; }
+  if(!list.length){ tb.innerHTML='<tr><td colspan="'+(showPlan?10:8)+'" style="text-align:center;color:var(--light);padding:30px;">لا يوجد طلاب في هذه الحلقة</td></tr>'; return; }
   tb.innerHTML=list.map((s,i)=>{
     if(!REC_STATE[s.id]) REC_STATE[s.id]={};
     const g=!!s._guest;
     const rowStyle=g?'background:var(--gold-pale);':'';
-    const nameTag=g?` <span style="font-size:.62rem;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold-l);padding:1px 7px;border-radius:99px;">ضيف · معلمه: ${s.teacher||'—'}</span>`:'';
+    const nameTag=g?` <span style="font-size:.62rem;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold-l);padding:1px 7px;border-radius:99px;">ضيف · معلمه: ${s.teacher||'—'}</span>${guestRealId(s.id)?` <button class="btn btn-xs btn-outline" style="padding:1px 8px;font-size:.66rem;" onclick="spViewGuest('${s.id}')">🎯 خطته</button>`:''}`:'';
     const avColor=g?'background:linear-gradient(135deg,var(--gold),var(--gold-l));':'';
     return `<tr id="rrow-${s.id}" style="${rowStyle}">
       <td style="text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
@@ -3626,11 +3747,114 @@ function renderStudents(){
       <td style="text-align:center;${NR?'display:none;':''}" id="revcell-${s.id}">${evalCellBtn(s.id,'review')}</td>
       <td style="text-align:center;${showPlan?'':'display:none;'}" id="memplan-${s.id}">—</td>
       <td style="text-align:center;${(showPlan&&!NR)?'':'display:none;'}" id="revplan-${s.id}">—</td>
+      <td style="text-align:center;white-space:nowrap;" id="pts-${s.id}">${tPtsCell(s)}</td>
       <td style="text-align:center;"><button class="btn btn-ghost btn-xs" onclick="openStudentFile('${s.id}')">📁 الملف</button></td>
       <td style="text-align:center;" id="note-${s.id}">${noteCellBtn(s.id)}${g?`<br><button class="btn btn-xs btn-danger" style="margin-top:5px;" onclick="removeGuest('${s.id}')">× إزالة</button>`:''}</td>
     </tr>`;
   }).join('');
   loadTodayRecitation(list);
+  tPtsRefresh(); tPtsAuto();
+}
+// ══ (دفعة ١٦) ⭐ نقاط الطالب: الرصيد (بيتحدّث تلقائي) + إضافة / حذف بسبب — نفس RPC المدير والمشرف ══
+function tPtsCell(s){
+  if(!s||s._guest||s._static) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
+  return '<div style="font-weight:800;color:var(--gold);font-size:.9rem;" id="ptsv-'+s.id+'">⭐ '+toAr(s.points||0)+'</div>'
+    +'<div style="display:inline-flex;gap:4px;margin-top:4px;">'
+    +'<button class="btn btn-xs btn-primary" title="إضافة النقاط" onclick="tPts(\''+s.id+'\',1)">➕ إضافة</button>'
+    +'<button class="btn btn-xs btn-danger" title="حذف النقاط" onclick="tPts(\''+s.id+'\',-1)">➖ حذف</button></div>';
+}
+function tPtsPaint(sid){ const s=findStu(sid); const el=document.getElementById('ptsv-'+sid); if(el&&s) el.textContent='⭐ '+toAr(s.points||0); }
+function tPts(sid,sign){
+  const s=MY_STUDENTS.find(x=>x.id===sid); if(!s){ showToast('⚠️ الطالب مش من حلقتك'); return; }
+  stPtOpen(sid, s.name, sign, s.points, async bal=>{ s.points=+bal||0; tPtsPaint(sid); });
+}
+async function tPtsRefresh(){
+  const c=activeCircle(); if(!c) return;
+  const ids=studentsOf(c).filter(x=>!x._static&&!x._guest).map(x=>x.id); if(!ids.length) return;
+  try{
+    const {data,error}=await db.from('students').select('id,total_points').in('id',ids);
+    if(error) throw error;
+    (data||[]).forEach(r=>{ const st=MY_STUDENTS.find(x=>x.id===r.id); if(st){ st.points=r.total_points||0; tPtsPaint(r.id); } });
+  }catch(e){ console.warn('[pts]',e); }
+}
+let _tPtsTimer=null;
+function tPtsAuto(){
+  if(_tPtsTimer) return;
+  _tPtsTimer=setInterval(()=>{ const pg=document.getElementById('page-students'); if(document.visibilityState==='visible'&&pg&&pg.classList.contains('active')) tPtsRefresh(); },45000);
+}
+const STPT={ id:null, sign:1, bal:null, after:null };
+function stPtAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function stPtEnsure(){
+  if(document.getElementById('stpt-ov')) return;
+  const inp='width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--border,#dce8e0);border-radius:9px;font-family:Tajawal,sans-serif;font-size:.9rem;background:var(--bg,#f5f7f5);color:var(--ink,#1a1a1a);outline:none;';
+  const lb='display:block;font-size:.78rem;font-weight:700;color:var(--forest,#0f2318);margin-bottom:5px;';
+  const ov=document.createElement('div'); ov.id='stpt-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(15,35,24,.55);z-index:10060;display:none;align-items:center;justify-content:center;padding:14px;font-family:Tajawal,sans-serif;direction:rtl;';
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">'
+    +'<div id="stpt-head" style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;color:#fff;">'
+    +'<div style="font-weight:800;" id="stpt-title">—</div><button type="button" onclick="stPtClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
+    +'<div style="padding:16px 18px;">'
+    +'<div id="stpt-sub" style="font-size:.8rem;color:var(--mid,#4a5e52);margin-bottom:12px;line-height:1.8;"></div>'
+    +'<div style="margin-bottom:10px;"><label style="'+lb+'">عدد النقاط *</label><input id="stpt-n" type="number" min="1" max="10000" step="1" style="'+inp+'text-align:center;font-weight:800;font-size:1.05rem;"></div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+[5,10,15,20,50,100].map(v=>'<button type="button" onclick="document.getElementById(\'stpt-n\').value='+v+'" style="flex:1;min-width:46px;padding:6px 0;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">'+stPtAr(v)+'</button>').join('')+'</div>'
+    +'<div><label style="'+lb+'">السبب * <span style="font-weight:500;color:var(--light,#8ea598);">(هيظهر لولي الأمر في الإشعارات)</span></label><textarea id="stpt-r" rows="3" maxlength="300" style="'+inp+'resize:vertical;" placeholder="اكتب سبب الإضافة أو الحذف…"></textarea></div>'
+    +'<div id="stpt-log" style="margin-top:10px;font-size:.74rem;color:var(--light,#8ea598);"></div>'
+    +'</div>'
+    +'<div style="padding:12px 18px 16px;display:flex;gap:10px;border-top:1px solid var(--border,#dce8e0);">'
+    +'<button type="button" id="stpt-ok" onclick="stPtSave()" style="flex:1;padding:10px 18px;color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:800;">تأكيد</button>'
+    +'<button type="button" onclick="stPtClose()" style="padding:10px 18px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;">إلغاء</button></div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov) stPtClose(); });
+}
+// sign: 1 = إضافة • -1 = حذف — after(balance) بعد النجاح
+function stPtOpen(id, name, sign, bal, after){
+  if(!id){ showToast('⚠️ الطالب مش متحدد'); return; }
+  stPtEnsure();
+  STPT.id=String(id); STPT.sign=sign<0?-1:1; STPT.bal=(bal==null||isNaN(+bal))?null:+bal; STPT.after=after||null;
+  const add=STPT.sign>0, col=add?'linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318))':'linear-gradient(135deg,#c0392b,#8e2a1f)';
+  document.getElementById('stpt-head').style.background=col; document.getElementById('stpt-ok').style.background=col;
+  document.getElementById('stpt-title').textContent=add?'➕ إضافة النقاط':'➖ حذف النقاط';
+  document.getElementById('stpt-ok').textContent=add?'✅ إضافة':'🗑 حذف';
+  document.getElementById('stpt-sub').innerHTML='الطالب: <b>'+esc(name||'')+'</b>'+(STPT.bal!=null?' • الرصيد الحالي: <b>'+stPtAr(STPT.bal)+'</b> نقطة':'');
+  document.getElementById('stpt-n').value=''; document.getElementById('stpt-r').value='';
+  const lg=document.getElementById('stpt-log'); if(lg) lg.innerHTML='⏳ آخر الحركات…';
+  document.getElementById('stpt-ov').style.display='flex';
+  setTimeout(()=>{ const n=document.getElementById('stpt-n'); if(n) n.focus(); },60);
+  const sid=STPT.id;
+  stPtLog(sid,4).then(rows=>{ if(STPT.id!==sid) return; const l=document.getElementById('stpt-log'); if(l) l.innerHTML=(rows.length?'<div style="font-weight:800;color:var(--forest,#0f2318);margin-bottom:2px;">آخر الإضافات والحذف</div>':'')+stPtLogHtml(rows); })
+    .catch(e=>{ const l=document.getElementById('stpt-log'); if(l) l.innerHTML=''; });
+}
+function stPtClose(){ const o=document.getElementById('stpt-ov'); if(o) o.style.display='none'; }
+async function stPtSave(){
+  const digits=x=>String(x||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const n=parseInt(digits(document.getElementById('stpt-n').value),10);
+  const reason=document.getElementById('stpt-r').value.trim();
+  if(!n||n<1||n>10000){ showToast('⚠️ عدد النقاط من ١ لـ ١٠٠٠٠'); return; }   // (دفعة ١٩) الحد ١٠٠٠٠
+  if(reason.length<2){ showToast('⚠️ اكتب السبب'); return; }
+  if(STPT.sign<0 && STPT.bal!=null && n>STPT.bal){ showToast('⚠️ رصيد الطالب '+stPtAr(STPT.bal)+' نقطة بس'); return; }
+  const btn=document.getElementById('stpt-ok'), lbl=btn.textContent; btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
+  try{
+    if(!(await ensureFreshSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
+    const {data,error}=await db.rpc('student_points_adjust',{p_student:STPT.id, p_points:STPT.sign*n, p_reason:reason});
+    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
+    stPtClose();
+    showToast('✅ '+(STPT.sign>0?'اتضافت ':'اتحذفت ')+stPtAr(n)+' نقطة • الرصيد: '+stPtAr(data.balance)+(data.notified?' • وصل إشعار لولي الأمر':' • الطالب مش مربوط بحساب ولي أمر'));
+    if(typeof STPT.after==='function'){ try{ await STPT.after(data.balance); }catch(e){ console.warn('[stpt] after',e); } }
+  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
+  finally{ btn.disabled=false; btn.textContent=lbl; }
+}
+async function stPtLog(id, limit){
+  const {data,error}=await db.from('student_point_adjustments').select('id,points,reason,by_name,balance_after,created_at')
+    .eq('student_id',id).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(limit||6);
+  if(error) throw error; return data||[];
+}
+function stPtLogHtml(rows){
+  if(!rows.length) return '<div style="font-size:.74rem;color:var(--light,#8ea598);padding:6px 0;">مفيش إضافات أو حذف يدوي لسه</div>';
+  return rows.map(r=>{ const add=r.points>0, d=new Date(r.created_at);
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--border,#dce8e0);font-size:.76rem;">'
+      +'<b style="min-width:52px;text-align:center;color:'+(add?'var(--jade,#2d7a50)':'var(--red,#c0392b)')+';">'+(add?'+':'−')+stPtAr(Math.abs(r.points))+'</b>'
+      +'<div style="flex:1;"><div style="color:var(--forest,#0f2318);">'+esc(r.reason||'')+'</div>'
+      +'<div style="color:var(--light,#8ea598);font-size:.68rem;">'+esc(r.by_name||'')+' • '+stPtAr(d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear())+(r.balance_after!=null?' • الرصيد بعدها: '+stPtAr(r.balance_after):'')+'</div></div></div>'; }).join('');
 }
 function noteCellBtn(sid){
   const n=REC_STATE[sid]&&REC_STATE[sid].behavior_note;
@@ -3737,6 +3961,10 @@ function reflectExamRow(sid){
 
 // ── مودال درجة الاختبار + مسجّل صوت مستقل ──
 let EX_CTX={sid:null,col:null,max:0,lbl:''};
+// (دفعة ١٦) درجة القرآن/الحفظ في الاختبار = تقييم كل وجه من خطة الفترة (من أول الشهر لآخره)
+const EX_PG_COLS=['quran','hifz'];
+let EXP={ rows:[], val:{}, dir:'forward' };
+function exIsPg(){ return EX_PG_COLS.includes(EX_CTX.col); }
 function openExamGrade(sid,col){
   if(!EXAM_CFG) return;
   const cfg=EXAM_CFG.cols.find(x=>x[0]===col); if(!cfg) return;
@@ -3745,10 +3973,84 @@ function openExamGrade(sid,col){
   document.getElementById('ex-title').textContent='📝 '+lbl+' — '+(s?s.name:'');
   const g=examScoreOf(sid,col);
   document.getElementById('ex-errors').value=(g&&g.errors!=null)?g.errors:'';
+  const pgm=exIsPg();
+  document.getElementById('ex-pg-wrap').style.display=pgm?'':'none';
+  document.getElementById('ex-err-box').style.display=pgm?'none':'';
+  if(pgm){
+    EXP={ rows:[], val:{}, dir:'forward' };
+    (g&&Array.isArray(g.pages)?g.pages:[]).forEach(x=>{ if(x&&x.p&&x.f) EXP.val[x.p+':'+x.f.s+':'+x.f.a]=x.e; });
+    ['ex-sfrom','ex-sto'].forEach(id=>document.getElementById(id).innerHTML=surahOptions());
+    const rg=g&&g.range;
+    exSetRange(rg&&rg.f?rg.f:{s:1,a:''}, rg&&rg.t?rg.t:{s:1,a:''});
+    if(rg&&rg.dir) EXP.dir=rg.dir;
+    document.getElementById('ex-pg-hint').textContent='⏳ جاري تحميل خطة الطالب…';
+    exPagesBuild();
+    exLoadPlan(sid, !(rg&&rg.f));
+  }
   exCalc();
   openModal('modal-exam');
 }
+function exSetRange(f,t){
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v; };
+  set('ex-sfrom',(f.s||1)-1); ayahMax('ex-sfrom','ex-afrom'); set('ex-afrom',f.a||'');
+  set('ex-sto',(t.s||1)-1); ayahMax('ex-sto','ex-ato'); set('ex-ato',t.a||'');
+}
+function exReadRange(){
+  const v=id=>document.getElementById(id).value;
+  const f={s:(+v('ex-sfrom')||0)+1, a:parseInt(v('ex-afrom'))||1};
+  const t={s:(+v('ex-sto')||0)+1, a:parseInt(v('ex-ato'))||0};
+  if(!t.a) t.a=(t.s===f.s)?f.a:SP_SURAH[t.s-1][1];
+  return {f,t};
+}
+// خطة الفترة اللي بتنتهي بالاختبار ده: من «البداية» لآخر هدف حفظ فيها
+async function exLoadPlan(sid,fill){
+  const hint=document.getElementById('ex-pg-hint');
+  const date=(EXAM_CFG&&EXAM_CFG.date)||D(), t=termOf(date)||CUR_TERM;
+  const s=findStu(sid);
+  if(!s||s._static||(s._guest&&!guestRealId(sid))||!t||termIsLegacy(t)){ hint.textContent='📌 حدّد مدى الاختبار (من / إلى) وأدخل أخطاء كل وجه'; return; }
+  try{
+    const {data,error}=await db.from('student_plans').select('*').eq('student_id',sid).eq('term_id',t.id).lte('period_from',date).gte('period_to',date).maybeSingle();
+    if(error) throw error;
+    if(!EX_CTX||EX_CTX.sid!==sid) return;
+    const tr=((data&&data.data)||{}).hifz||{};
+    const ses=(((data&&data.data)||{}).sessions||[]).filter(x=>x.h&&x.h.s);
+    if(!data||!tr.start||!tr.start.s||!ses.length){ hint.textContent='📌 مفيش خطة حفظ للطالب في الفترة دي — حدّد مدى الاختبار (من / إلى) بإيدك'; return; }
+    const dir=data.direction||'forward';
+    const end=ses.reduce((m,x)=>(!m||spPos(dir,x.h.s,x.h.a)>spPos(dir,m.s,m.a))?x.h:m,null);
+    EXP.dir=dir;
+    const nU=spUnits(dir,tr.start,end).length;
+    hint.innerHTML='📖 المطلوب في الاختبار: خطة الفترة '+spAr(data.period_no)+' كلها — من <b>'+spLbl(tr.start)+'</b> إلى <b>'+spLbl(end)+'</b> ('+toAr(nU)+' '+(nU>2&&nU<11?'أوجه':'وجه')+')';
+    if(fill){ exSetRange(tr.start,end); exPagesBuild(); exCalc(); }
+  }catch(e){ hint.textContent='⚠️ خطة الطالب ما اتحمّلتش — حدّد المدى بإيدك'; }
+}
+function exPagesBuild(){
+  const box=document.getElementById('ex-pages'); if(!box) return;
+  pgSaveVals(EXP.rows,'exp-',EXP.val);
+  const {f,t}=exReadRange();
+  let dir=EXP.dir||'forward', rows=spUnits(dir,f,t);
+  if(!rows.length){ dir=dir==='forward'?'backward':'forward'; rows=spUnits(dir,f,t); if(rows.length) EXP.dir=dir; }
+  if(rows.length>80){ EXP.rows=[]; box.innerHTML='<div style="padding:10px;border-radius:8px;background:var(--red-pale);color:var(--red);font-size:.8rem;font-weight:700;">⚠️ المدى كبير قوي ('+toAr(rows.length)+' وجه) — راجع «من / إلى»</div>'; exCalc(); return; }
+  EXP.rows=rows;
+  box.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;">'
+    +'<div style="font-size:.82rem;font-weight:800;color:var(--forest);">✍️ أخطاء كل وجه على حدة</div>'
+    +'<span class="badge bg-green" style="font-size:.66rem;">'+toAr(rows.length)+' '+(rows.length>2&&rows.length<11?'أوجه':'وجه')+'</span>'
+    +(rows.length>1?'<button type="button" class="btn btn-ghost btn-xs" style="margin-right:auto;" onclick="pgFillZero(\'exp-\','+rows.length+');exCalc()">٠ أخطاء للباقي</button>':'')+'</div>'
+    +(rows.length?pgRowsHtml(rows,'exp-',EXP.val,'exCalc()'):'<div style="font-size:.78rem;color:var(--light);">حدّد «من / إلى» الأول</div>');
+  exCalc();
+}
+// الدرجة = متوسط درجات الأوجه ÷ ١٥ × الدرجة الكاملة
+function exPgScore(C,mx){ return Math.max(0,Math.min(mx,Math.round(C.avg/15*mx))); }
 function exCalc(){
+  if(exIsPg()){
+    const mx=EX_CTX.max, box=document.getElementById('ex-result');
+    pgPaint(EXP.rows,'exp-',false);
+    const C=pgCalc(EXP.rows,'exp-');
+    if(C.empty){ box.innerHTML='النتيجة: <span style="color:var(--light);">— حدّد المدى</span>'; return; }
+    if(!C.ok){ box.innerHTML='النتيجة: <span style="color:var(--light);font-size:.9rem;">أدخل أخطاء كل الأوجه (باقي '+toAr(C.miss)+')</span>'; return; }
+    box.innerHTML='التقدير العام: <span style="color:'+GRADE_COLOR[C.grade]+';">'+GRADE_AR[C.grade]+'</span> • الدرجة: <span style="color:var(--emerald);">'+toAr(exPgScore(C,mx))+' / '+toAr(mx)+'</span>'
+      +'<div style="font-size:.74rem;font-family:Tajawal;color:var(--mid);font-weight:600;">'+toAr(C.pages.length)+' '+(C.pages.length>2&&C.pages.length<11?'أوجه':'وجه')+' • '+toAr(C.total)+' خطأ إجمالي</div>';
+    return;
+  }
   const mx=EX_CTX.max, e=parseInt(document.getElementById('ex-errors').value);
   const box=document.getElementById('ex-result');
   if(isNaN(e)){ box.innerHTML='النتيجة: <span style="color:var(--light);">—/'+toAr(mx)+'</span>'; return; }
@@ -3757,20 +4059,31 @@ function exCalc(){
 }
 async function saveExamGrade(){
   const {sid,col,max,lbl}=EX_CTX; const s=findStu(sid); if(!s) return;
-  const e=parseInt(document.getElementById('ex-errors').value);
-  if(isNaN(e)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
-  const score=Math.max(0,max-e), date=(EXAM_CFG&&EXAM_CFG.date)||D();
+  let e, score, extra={};
+  if(exIsPg()){
+    pgSaveVals(EXP.rows,'exp-',EXP.val);
+    const C=pgCalc(EXP.rows,'exp-');
+    if(C.empty){ showToast('⚠️ حدّد مدى الاختبار'); return; }
+    if(!C.ok){ showToast('⚠️ أدخل أخطاء كل الأوجه (باقي '+toAr(C.miss)+')'); return; }
+    const rg=exReadRange();
+    e=C.total; score=exPgScore(C,max); extra={ grade:C.grade, pages:C.pages, range:{f:rg.f, t:rg.t, dir:EXP.dir} };
+  } else {
+    e=parseInt(document.getElementById('ex-errors').value);
+    if(isNaN(e)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
+    score=Math.max(0,max-e);
+  }
+  const date=(EXAM_CFG&&EXAM_CFG.date)||D();
   const audioUrl=null, audioMsg='';   // التسجيل الصوتي اتلغى نهائياً
   // حدّث الكاش
   EXAM_GR[sid]=EXAM_GR[sid]||{};
-  EXAM_GR[sid][col]={ errors:e, score, max, audio_url:audioUrl };
+  EXAM_GR[sid][col]=Object.assign({ errors:e, score, max, audio_url:audioUrl }, extra);
   // احفظ في ملف الطالب (دمج غير متلف لباقي البيانات)
   if(!s._static&&!s._guest){
     try{
       const {data:row,error:rErr}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
       if(rErr) throw rErr;   // لو القراية فشلت ما نكتبش فوق الملف
       const d=(row&&row.data)||{}; d.exams=d.exams||{}; d.exams[date]=d.exams[date]||{};
-      d.exams[date][col]={ errors:e, score, max, label:lbl, kind:EXAM_CFG.kind, audio_url:audioUrl };
+      d.exams[date][col]=Object.assign({ errors:e, score, max, label:lbl, kind:EXAM_CFG.kind, audio_url:audioUrl }, extra);
       d.exams[date]._meta={ kind:EXAM_CFG.kind, total:EXAM_CFG.total };
       let err;
       let res;
@@ -3781,7 +4094,7 @@ async function saveExamGrade(){
   }
   reflectExamRow(sid);
   closeModal('modal-exam');
-  showToast('✅ '+lbl+': '+toAr(score)+'/'+toAr(max)+audioMsg);
+  showToast('✅ '+lbl+': '+toAr(score)+'/'+toAr(max)+(extra.grade?' — '+GRADE_AR[extra.grade]:'')+audioMsg);
 }
 
 // ══ ATTENDANCE ══
@@ -3941,7 +4254,7 @@ async function confirmGuest(){
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
   if(GUEST_STUDENTS[key].some(g=>g.name===_guestPick.name)){ showToast('الطالب مضاف بالفعل'); closeModal('modal-guest'); return; }
-  const gid=_guestPick.id || ('guest_'+Date.now());   // معرّف الطالب الحقيقي (users.id)
+  const gid=_guestPick.id || ('guest_'+Date.now());   // معرّف الطالب الحقيقي (students.id)
   GUEST_STUDENTS[key].push({ id:gid, name:_guestPick.name, branch:_guestPick.branch, teacher:_guestPick.teacher, mem:0, points:0, notes:'', _guest:true });
   REC_STATE[gid]={};
   // اكتب الزائر في circle_guests ليظهر عند المشرف (تقرير آخر التسميع + المتابعة الأسبوعية)
@@ -3952,7 +4265,7 @@ async function confirmGuest(){
       if(!exist){
         const {error}=await db.from('circle_guests').insert([{
           student_id:_guestPick.id, student_name:_guestPick.rawName||_guestPick.name,
-          student_teacher:_guestPick.teacher||null, added_by:cu.id, guest_date:D()
+          student_teacher:_guestPick.teacher||null, added_by:cu.id, guest_date:D(), circle_id:c.id
         }]);
         if(error) throw error;
       }
@@ -3966,10 +4279,13 @@ async function confirmGuest(){
 async function loadTodayGuests(){
   const c=activeCircle(); if(!c) return;
   try{
-    const {data,error}=await db.from('circle_guests').select('student_id,student_name,student_teacher').eq('added_by',cu.id).eq('guest_date',D());
+    const {data,error}=await db.from('circle_guests').select('student_id,student_name,student_teacher,circle_id').eq('added_by',cu.id).eq('guest_date',D());
     if(error) throw error;
-    const key=guestKey(c); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
-    (data||[]).forEach(g=>{ if(!g.student_id || GUEST_STUDENTS[key].some(x=>x.id===g.student_id)) return;
+    (data||[]).forEach(g=>{
+      // كل ضيف في حلقته (القديم من غير circle_id → الحلقة الحالية)
+      const gc=(g.circle_id && MY_CIRCLES.find(x=>x.id===g.circle_id)) || c;
+      const key=guestKey(gc); GUEST_STUDENTS[key]=GUEST_STUDENTS[key]||[];
+      if(!g.student_id || GUEST_STUDENTS[key].some(x=>x.id===g.student_id)) return;
       GUEST_STUDENTS[key].push({ id:g.student_id, name:cleanName(g.student_name||'طالب'), branch:'—', teacher:cleanName(g.student_teacher||'—'), mem:0, points:0, notes:'', _guest:true });
       REC_STATE[g.student_id]=REC_STATE[g.student_id]||{}; });
   }catch(e){ showToast('⚠️ تعذّر تحميل ضيوف اليوم'); }
@@ -4010,7 +4326,7 @@ function setAtt(sid,val){
 }
 function setLate(sid){ const m=parseInt(document.getElementById('latemin-'+sid).value)||null; REC_STATE[sid].late_minutes=m; saveAtt(sid,'late',m); }
 async function saveAtt(sid,status,mins){
-  const s=findStu(sid); if(s&&(s._static||s._guest)){ showToast('📌 سُجّل محلياً'); return; }
+  const s=findStu(sid); if(s&&(s._static||(s._guest&&!guestRealId(sid)))){ showToast('📌 سُجّل محلياً'); return; }
   try{
     const {data,error}=await db.from('attendance').upsert([{student_id:sid,date:D(),status,late_minutes:mins,recorded_by:cu.id}],{onConflict:'student_id,date'}).select('student_id');
     if(error) throw error; if(!data||!data.length) throw new Error('RLS');
@@ -4034,13 +4350,17 @@ function openEval(sid,type){
   document.getElementById('ev-ato').value=st.ayah_to??'';
   document.getElementById('ev-errors').value=st.errors??'';
   document.getElementById('ev-faces').value=st.faces??1;
+  // (دفعة ١٦) الحفظ: أخطاء كل وجه — المحفوظ قبل كده بيتملا تاني
+  EV_PG={ rows:[], val:{}, retry:[] };
+  (Array.isArray(st.pages)?st.pages:[]).forEach(x=>{ if(x&&x.p&&x.f) EV_PG.val[x.p+':'+x.f.s+':'+x.f.a]=x.e; });
+  const _eg=document.getElementById('ev-err-grid'); if(_eg) _eg.style.display=isNew?'none':'';
   document.getElementById('ev-notes').value=st.notes??'';
   // ── تعديل ١٠: المراجعة بالحساب القديم (إجمالي الأخطاء) — نخفي خانة الأوجه ──
   const _fbox=document.getElementById('ev-faces-box'), _shint=document.getElementById('ev-scale-hint');
   const _errLbl=document.querySelector('label[for="ev-errors"]');
   if(_fbox) _fbox.style.display = isNew ? '' : 'none';
   if(_shint) _shint.innerHTML = '٠–٢ ممتاز (١٥) • ٣–٤ جيد جداً (١٠) • ٥–٦ جيد (٥) • +٦ إعادة (٠) — '
-    + (isNew ? 'يُحسب على <b>متوسط الأخطاء في الوجه الواحد</b>' : 'يُحسب على <b>إجمالي الأخطاء</b>');
+    + (isNew ? 'كل وجه بيتقيّم لوحده • <b>التقدير العام = متوسط درجات الأوجه</b> • الوجه اللي فيه +٦ بيتعاد مع القدر الجديد'+((!Array.isArray(st.pages)&&st.errors!=null)?'<br><span style="color:var(--gold);">المسجّل قبل كده: '+toAr(st.errors)+' خطأ إجمالي</span>':'') : 'يُحسب على <b>إجمالي الأخطاء</b>');
   if(!isNew) document.getElementById('ev-faces').value=1;
   evAutoFaces();
   evGrade();
@@ -4053,6 +4373,19 @@ function openEval(sid,type){
 function evIsReview(){ return !!(REC_CTX && REC_CTX.type==='review'); }
 function evFacesVal(){ return evIsReview() ? 1 : Math.max(1,parseInt(document.getElementById('ev-faces').value)||1); }
 function evGrade(){
+  if(!evIsReview()){
+    // (دفعة ١٦) الحفظ: تقدير كل وجه + التقدير العام = متوسط درجات الأوجه
+    const box=document.getElementById('ev-grade');
+    pgPaint(EV_PG.rows,'evp-',true);
+    const C=pgCalc(EV_PG.rows,'evp-');
+    if(C.empty){ box.innerHTML='<span style="color:var(--light);">— حدّد مدى التسميع</span>'; return; }
+    if(!C.ok){ box.innerHTML='<span style="color:var(--light);">— أدخل أخطاء كل الأوجه (باقي '+toAr(C.miss)+')</span>'; return; }
+    const nR=C.pages.filter(x=>x.g==='retry').length;
+    box.innerHTML='التقدير العام: '+gradeBadge(C.grade)+(C.pages.length>1?' <span style="font-size:.74rem;color:var(--mid);">— '+toAr(C.pages.length)+' أوجه • '+toAr(C.total)+' خطأ</span>':'')
+      +(nR?'<div style="font-size:.74rem;color:var(--red);font-weight:700;margin-top:4px;">🔁 '+toAr(nR)+' '+(nR>1?'أوجه هتتعاد':'وجه هيتعاد')+' مع القدر الجديد الحلقة الجاية — وهيوصل لولي الأمر</div>':'');
+    setPlan(C.grade!=='retry');
+    return;
+  }
   const v=parseInt(document.getElementById('ev-errors').value);
   const f=evFacesVal();
   const box=document.getElementById('ev-grade');
@@ -4065,7 +4398,7 @@ function evGrade(){
 // حساب عدد الأوجه تلقائياً من المصحف المدني حسب مدى التسميع
 function evAutoFaces(){
   if(evIsReview()){ evGrade(); return; }   // المراجعة بالحساب القديم — لا أوجه
-  if(typeof madaniFaces!=='function') return;
+  if(typeof madaniFaces!=='function'){ evPagesBuild(); evGrade(); return; }
   const sF=+document.getElementById('ev-sfrom').value+1;   // رقم السورة = الفهرس+1
   const aF=parseInt(document.getElementById('ev-afrom').value)||1;
   const sT=+document.getElementById('ev-sto').value+1;
@@ -4075,6 +4408,7 @@ function evAutoFaces(){
   const p1=madaniPageOf(sF,aF), p2=madaniPageOf(sT,aT);
   const hint=document.getElementById('ev-faces-hint');
   if(hint) hint.innerHTML=`من صفحة ${toAr(Math.min(p1,p2))} إلى صفحة ${toAr(Math.max(p1,p2))} = <b style="color:var(--jade);">${toAr(faces)}</b> وجه`;
+  evPagesBuild();
   evGrade();
 }
 let _evPlan=true;
@@ -4109,37 +4443,51 @@ let _evSaving=false;
 async function saveEval(){
   if(_evSaving) return;
   const {sid,type}=REC_CTX; const s=findStu(sid); if(!s) return;
-  const errors=parseInt(document.getElementById('ev-errors').value);
-  if(isNaN(errors)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
-  const faces=(type==='review')?1:Math.max(1,parseInt(document.getElementById('ev-faces').value)||1);
-  const grade=errorsToGrade(errors/faces), pts=GRADE_PTS[grade];
-  spAutoPlanDone(sid,type,grade);   // 🤖 «تم/لم يتم» تلقائي من خطة الطالب
+  let errors, faces, grade, pagesArr=null;
+  if(type==='new'){
+    // (دفعة ١٦) أخطاء كل وجه على حدة → التقدير العام تلقائي
+    pgSaveVals(EV_PG.rows,'evp-',EV_PG.val);
+    const C=pgCalc(EV_PG.rows,'evp-');
+    if(C.empty){ showToast('⚠️ حدّد مدى التسميع'); return; }
+    if(!C.ok){ showToast('⚠️ أدخل أخطاء كل الأوجه (باقي '+toAr(C.miss)+')'); return; }
+    errors=C.total; faces=C.pages.length; grade=C.grade; pagesArr=C.pages;
+  } else {
+    errors=parseInt(document.getElementById('ev-errors').value);
+    if(isNaN(errors)){ showToast('⚠️ أدخل عدد الأخطاء'); return; }
+    faces=1; grade=errorsToGrade(errors);
+  }
+  const pts=GRADE_PTS[grade];
+  spAutoPlanDone(sid,type,grade,pagesArr);   // 🤖 «تم/لم يتم» تلقائي من خطة الطالب
   const rec={
     surah_from:+document.getElementById('ev-sfrom').value, ayah_from:+document.getElementById('ev-afrom').value||null,
     surah_to:+document.getElementById('ev-sto').value, ayah_to:+document.getElementById('ev-ato').value||null,
     errors, faces, grade, points:pts, notes:document.getElementById('ev-notes').value.trim(), plan_done:_evPlan,
-    plan_status:_evPlanSt,
+    plan_status:_evPlanSt, pages:pagesArr,
   };
   const prev=(REC_STATE[sid]&&REC_STATE[sid][type])||null;
   const delta = pts - (prev?prev.points:0);
   // حفظ في قاعدة البيانات — الزائر بمعرّف حقيقي يُسجَّل تسميعه ليظهر عند المشرف
-  const guestReal = s._guest && sid && !String(sid).startsWith('guest_');
+  const guestReal = s._guest && guestRealId(sid);
   if((!s._static && !s._guest) || guestReal){
     const payload={ student_id:sid, date:D(), type, grade, errors, points:pts,
       surah_from:SURAHS[rec.surah_from][0], ayah_from:rec.ayah_from, surah_to:SURAHS[rec.surah_to][0], ayah_to:rec.ayah_to,
       notes:rec.notes, plan_done:rec.plan_done, plan_status:rec.plan_status||null, recorded_by:cu.id };
+    if(type==='new') payload.pages=pagesArr;
     // النقاط الكلية (students.total_points) بتتحدّث في القاعدة بتريجر على memorization — العميل مش بيكتبها
     const btn=document.getElementById('ev-save-btn'); _evSaving=true; if(btn) btn.disabled=true;
     try{
       if(!(await ensureFreshSession())) throw new Error('JWT expired');
       let {data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id');
+      if(error && /pages/.test(error.message||'')){   // لو SQL دفعة ١٦ لسه ما اتشغّلش
+        delete payload.pages; ({data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id'));
+      }
       if(error && /plan_status/.test(error.message||'')){   // لو SQL دفعة ١٥ لسه ما اتشغّلش
         delete payload.plan_status; ({data,error}=await db.from('memorization').upsert([payload],{onConflict:'student_id,date,type'}).select('student_id'));
       }
       if(error) throw error; if(!data||!data.length) throw new Error('RLS');
     }catch(e){ showToast('❌ لم يُحفظ التسميع — '+recFriendlyErr(e)); return; }
     finally{ _evSaving=false; if(btn) btn.disabled=false; }
-    await refreshStudentPoints(s);
+    await refreshStudentPoints(s); tPtsPaint(sid);
   } else { s.points+=delta; }
   // تحديث الحالة المحلية والجدول
   REC_STATE[sid]=REC_STATE[sid]||{}; REC_STATE[sid][type]=rec;
@@ -4147,12 +4495,12 @@ async function saveEval(){
   reflectRow(sid);
   closeModal('modal-eval');
   showToast('✅ '+(type==='new'?'حُفظ التسميع':'حُفظت المراجعة')+' — '+GRADE_AR[grade]+' (+'+pts+' نقطة)');
-  if((!s._static && !s._guest)) spAfterRecitation(sid,type);   // 🎯 نسبة الخطة
+  if(!s._static && (!s._guest || guestRealId(sid))) spAfterRecitation(sid,type);   // 🎯 نسبة الخطة (والضيف كمان)
 }
 
 // ── تحميل تسميع اليوم المسجّل مسبقاً (مزامنة) ──
 async function loadTodayRecitation(list){
-  const real=list.filter(s=>!s._static && !s._guest); if(!real.length) return;
+  const real=list.filter(s=>!s._static && (!s._guest || guestRealId(s.id))); if(!real.length) return;
   const ids=real.map(s=>s.id);
   try{
     const {data}=await db.from('attendance').select('student_id,status,late_minutes').in('student_id',ids).eq('date',D());
@@ -4160,12 +4508,12 @@ async function loadTodayRecitation(list){
   }catch(e){ loadWarn(e); }
   try{
     const MCOLS='student_id,type,grade,errors,points,plan_done,notes,surah_from,ayah_from,surah_to,ayah_to';
-    let {data,error}=await db.from('memorization').select(MCOLS+',plan_status').in('student_id',ids).eq('date',D());
-    if(error && /plan_status/.test(error.message||'')) ({data,error}=await db.from('memorization').select(MCOLS).in('student_id',ids).eq('date',D()));
+    let {data,error}=await db.from('memorization').select(MCOLS+',plan_status,pages').in('student_id',ids).eq('date',D());
+    if(error && /plan_status|pages/.test(error.message||'')) ({data,error}=await db.from('memorization').select(MCOLS).in('student_id',ids).eq('date',D()));
     if(error) throw error;
     const sIdx=n=>{ const i=SURAHS.findIndex(x=>x[0]===n); return i<0?0:i; };
     (data||[]).forEach(m=>{ REC_STATE[m.student_id]=REC_STATE[m.student_id]||{}; REC_STATE[m.student_id][m.type]={grade:m.grade,errors:m.errors,points:m.points,plan_done:m.plan_done!==false&&m.grade!=='retry',plan_status:m.plan_status||null,notes:m.notes||'',
-      surah_from:sIdx(m.surah_from),ayah_from:m.ayah_from,surah_to:sIdx(m.surah_to),ayah_to:m.ayah_to}; });
+      surah_from:sIdx(m.surah_from),ayah_from:m.ayah_from,surah_to:sIdx(m.surah_to),ayah_to:m.ayah_to,pages:Array.isArray(m.pages)?m.pages:null}; });
     real.forEach(s=>reflectRow(s.id));
   }catch(e){ showToast('⚠️ تعذّر تحميل تسميع اليوم — '+recFriendlyErr(e)); }
 }

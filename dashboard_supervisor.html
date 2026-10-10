@@ -587,7 +587,8 @@ function prWeekStart(branch,iso){
 function prWeekDays(ws){ const a=[]; for(let i=0;i<7;i++) a.push(prAddDays(ws,i)); return a; }
 function prCell(v,girls){
   const m={ mosque:['🕌','في المسجد','var(--jade)','var(--pale)'], home:['🏠','في البيت','var(--blue)','var(--blue-pale)'],
-            prayed:['✅',girls?'صلّت':'صلّى','var(--jade)','var(--pale)'], missed:['❌',girls?'لم تصلِّ':'لم يصلِّ','var(--red)','var(--red-pale)'] }[v];
+            prayed:['✅',girls?'صلّت':'صلّى','var(--jade)','var(--pale)'], missed:['❌',girls?'لم تصلِّ':'لم يصلِّ','var(--red)','var(--red-pale)'],
+            excused:['🌸','عذر شرعي (بيتحسب صلّت)','var(--purple)','var(--purple-pale)'] }[v];   // (دفعة ١٨) البنات
   if(!m) return '<span style="color:var(--light);" title="لم يُسجَّل">—</span>';
   return '<span title="'+m[1]+'" style="display:inline-block;min-width:30px;padding:2px 6px;border-radius:7px;background:'+m[3]+';color:'+m[2]+';font-size:.8rem;">'+m[0]+'</span>';
 }
@@ -666,7 +667,7 @@ async function prRender(){
   const tbl='<div style="overflow-x:auto;"><table class="pr-tbl"><thead><tr><th>اليوم</th>'+PR_KEYS.map(k=>'<th>'+k[1]+'</th>').join('')+'</tr></thead><tbody>'
     +days.map(d=>{ const r=byD[d]||{}; return '<tr'+(d===localISO()?' style="background:var(--gold-pale);"':'')+'><td style="white-space:nowrap;font-weight:700;">'+prFmt(d)+'</td>'+PR_KEYS.map(k=>'<td>'+prCell(r[k[0]],girls)+'</td>').join('')+'</tr>'; }).join('')
     +'</tbody></table></div>';
-  const legend='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">'+(prIsAbtal(C.st.branch)?'🕌 في المسجد • 🏠 في البيت • ':'✅ '+(girls?'صلّت':'صلّى')+' • ')+'❌ '+(girls?'لم تصلِّ':'لم يصلِّ')+' • — لم يُسجَّل من ولي الأمر</div>';
+  const legend='<div style="font-size:.7rem;color:var(--light);margin-top:6px;">'+(prIsAbtal(C.st.branch)?'🕌 في المسجد • 🏠 في البيت • ':'✅ '+(girls?'صلّت':'صلّى')+' • ')+'❌ '+(girls?'لم تصلِّ':'لم يصلِّ')+' • '+(girls?'🌸 عذر شرعي (بيتحسب صلّت) • ':'')+'— لم يُسجَّل من ولي الأمر</div>';
   const ptsHtml='<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">'
     +'<div style="font-weight:800;color:var(--forest);margin-bottom:8px;">⭐ نقاط التحفيز للأسبوع ده</div>'
     +(pts?'<div style="font-size:.8rem;color:var(--mid);margin-bottom:8px;">المسجّل: <b style="color:var(--gold);">'+prAr(pts.points)+' نقطة</b>'+(pts.awarded_by_name?' — بواسطة '+esc(pts.awarded_by_name):'')+(pts.note?' — '+esc(pts.note):'')+'</div>':'<div style="font-size:.78rem;color:var(--light);margin-bottom:8px;">لسه ما اتدّاش نقاط الأسبوع ده</div>')
@@ -13282,7 +13283,7 @@ function stPtEnsure(){
     +'<div style="font-weight:800;" id="stpt-title">—</div><button type="button" onclick="stPtClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
     +'<div style="padding:16px 18px;">'
     +'<div id="stpt-sub" style="font-size:.8rem;color:var(--mid,#4a5e52);margin-bottom:12px;line-height:1.8;"></div>'
-    +'<div style="margin-bottom:10px;"><label style="'+lb+'">عدد النقاط *</label><input id="stpt-n" type="number" min="1" max="1000" step="1" style="'+inp+'text-align:center;font-weight:800;font-size:1.05rem;"></div>'
+    +'<div style="margin-bottom:10px;"><label style="'+lb+'">عدد النقاط *</label><input id="stpt-n" type="number" min="1" max="10000" step="1" style="'+inp+'text-align:center;font-weight:800;font-size:1.05rem;"></div>'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+[5,10,15,20,50,100].map(v=>'<button type="button" onclick="document.getElementById(\'stpt-n\').value='+v+'" style="flex:1;min-width:46px;padding:6px 0;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">'+stPtAr(v)+'</button>').join('')+'</div>'
     +'<div><label style="'+lb+'">السبب * <span style="font-weight:500;color:var(--light,#8ea598);">(هيظهر لولي الأمر في الإشعارات)</span></label><textarea id="stpt-r" rows="3" maxlength="300" style="'+inp+'resize:vertical;" placeholder="اكتب سبب الإضافة أو الحذف…"></textarea></div>'
     +'</div>'
@@ -13311,7 +13312,7 @@ async function stPtSave(){
   const digits=x=>String(x||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
   const n=parseInt(digits(document.getElementById('stpt-n').value),10);
   const reason=document.getElementById('stpt-r').value.trim();
-  if(!n||n<1||n>1000){ showToast('⚠️ عدد النقاط من ١ لـ ١٠٠٠'); return; }
+  if(!n||n<1||n>10000){ showToast('⚠️ عدد النقاط من ١ لـ ١٠٠٠٠'); return; }   // (دفعة ١٩) الحد ١٠٠٠٠
   if(reason.length<2){ showToast('⚠️ اكتب السبب'); return; }
   if(STPT.sign<0 && STPT.bal!=null && n>STPT.bal){ showToast('⚠️ رصيد الطالب '+stPtAr(STPT.bal)+' نقطة بس'); return; }
   const btn=document.getElementById('stpt-ok'), lbl=btn.textContent; btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
