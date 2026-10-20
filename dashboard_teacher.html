@@ -15,6 +15,9 @@
      • التنقل: nav(this,"pageId") / navPage("pageId").
      • Supabase: window.db | الثيمات: theme.js | Toast: showToast().
      • Modals: openModal(id)/closeModal(id) | خروج: confirmLogout().
+     • دفعة ٢٤: التجويد ٧ مستويات (مستوى شهري لكل طالب — tajweed_t) • نقاط التسميع ظاهرة قبل الحفظ
+       • إضافة / حذف النقاط اليدوي + نقاط تحفيز الصلوات + الكروت الكبيرة «المكافأة» = للمشرف والمدير بس
+         (المعلم: الرصيد + آخر الحركات + نقاط التحفيز عرض بس • الكارت الكبير عنده «تبديل» بس)
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2656,43 +2659,14 @@ async function prRender(){
   const ptsHtml='<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);">'
     +'<div style="font-weight:800;color:var(--forest);margin-bottom:8px;">⭐ نقاط التحفيز للأسبوع ده</div>'
     +(pts?'<div style="font-size:.8rem;color:var(--mid);margin-bottom:8px;">المسجّل: <b style="color:var(--gold);">'+prAr(pts.points)+' نقطة</b>'+(pts.awarded_by_name?' — بواسطة '+esc(pts.awarded_by_name):'')+(pts.note?' — '+esc(pts.note):'')+'</div>':'<div style="font-size:.78rem;color:var(--light);margin-bottom:8px;">لسه ما اتدّاش نقاط الأسبوع ده</div>')
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
-    +'<input class="pr-in" id="pr-pts" type="number" min="1" max="500" placeholder="عدد النقاط" style="width:110px;" value="'+(pts?pts.points:'')+'">'
-    +'<input class="pr-in" id="pr-note" placeholder="ملاحظة (اختياري)" style="flex:1;min-width:180px;" value="'+esc(pts&&pts.note||'')+'">'
-    +'<button class="btn btn-gold btn-sm" id="pr-save" onclick="prSavePts()">'+(pts?'💾 تعديل النقاط':'⭐ إضافة النقاط')+'</button>'
-    +(pts?'<button class="btn btn-danger btn-sm" onclick="prDelPts()">🗑️ إلغاء</button>':'')
-    +'</div><div style="font-size:.68rem;color:var(--light);margin-top:6px;">النقاط بتتضاف لرصيد الطالب (مكافأة) — ولو اتعدّلت أو اتلغت الرصيد بيتظبط لوحده.</div></div>';
+    +'<div style="font-size:.7rem;color:var(--light);margin-top:4px;line-height:1.7;">نقاط تحفيز الصلوات بيحطها المشرف أو المدير وبتتضاف لرصيد الطالب — لو طالب يستاهل كلّم مشرفك.</div></div>';   // (دفعة ٢٤) عرض بس
   body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap;">'
       +'<button class="btn btn-ghost btn-sm" onclick="prShift(-1)">→ الأسبوع اللي فات</button>'
       +'<div style="font-weight:800;color:var(--forest);">'+prFmt(days[0])+' ← '+prFmt(days[6])+'</div>'
       +'<button class="btn btn-ghost btn-sm" onclick="prShift(1)">الأسبوع الجاي ←</button></div>'
     +prSumHtml(S,C.st.branch)+'<div style="margin-top:12px;">'+tbl+legend+'</div>'+ptsHtml;
 }
-async function prSavePts(){
-  const C=PR_CTX; if(!C||C.fail) return;
-  const n=parseInt(document.getElementById('pr-pts').value);
-  if(!n||n<1||n>500){ showToast('⚠️ اكتب عدد نقاط من ١ لـ ٥٠٠'); return; }
-  const note=document.getElementById('pr-note').value.trim()||null;
-  const btn=document.getElementById('pr-save'); if(btn) btn.disabled=true;
-  try{
-    const {data,error}=await db.from('prayer_points').upsert([{student_id:C.st.id, week_start:C.ws, points:n, note}],{onConflict:'student_id,week_start'}).select('id');
-    if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
-    showToast('⭐ اتسجّلت '+prAr(n)+' نقطة للطالب');
-    if(typeof prOnSaved==='function') prOnSaved(C.st.id);
-    await prRender();
-  }catch(e){ showToast('❌ النقاط ما اتسجّلتش — '+(e.message||e.code||'')); if(btn) btn.disabled=false; }
-}
-async function prDelPts(){
-  const C=PR_CTX; if(!C||!C.pts) return;
-  if(!confirm('إلغاء نقاط الأسبوع ده؟ هتتخصم من رصيد الطالب.')) return;
-  try{
-    const {data,error}=await db.from('prayer_points').delete().eq('id',C.pts.id).select('id');
-    if(error) throw error; if(!data||!data.length) throw new Error('مرفوض من الصلاحيات (RLS)');
-    showToast('🗑️ اتلغت النقاط');
-    if(typeof prOnSaved==='function') prOnSaved(C.st.id);
-    await prRender();
-  }catch(e){ showToast('❌ ما اتلغتش — '+(e.message||e.code||'')); }
-}
+// (دفعة ٢٤) إضافة / تعديل / إلغاء نقاط تحفيز الصلوات = المشرف والمدير بس (دوال الحفظ والإلغاء اتشالت من لوحة المعلم)
 // ── قسم «تقرير الصلوات» في تقرير الطالب (المدير/المشرف) ──
 async function prAppendReport(out,s,rg){
   prEnsureUI();
@@ -2908,6 +2882,8 @@ let MEDIA_VIDEOS = [];
 let _curMedia = null;
 function mediaAr(n){ return String(n==null?'':n).replace(/[0-9]/g,function(d){ return '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[+d]; }); }
 
+// (دفعة ٢٧) المصدر: drive = جوجل درايف • youtube = يوتيوب (المدير بيضيف من لوحته)
+function mediaThumb(v){ var id=encodeURIComponent(v.drive_id||''); return v.source==='youtube' ? 'https://img.youtube.com/vi/'+id+'/hqdefault.jpg' : 'https://drive.google.com/thumbnail?id='+id+'&sz=w640'; }
 async function renderMediaPage(){
   const grid = document.getElementById('media-grid');
   const cnt = document.getElementById('media-count');
@@ -2938,9 +2914,9 @@ async function renderMediaPage(){
     var titleAttr = (v.title || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;');
     return '<div style="cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;"'
       + ' onmouseenter="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--shadow-lg)\'" onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'var(--shadow)\'"'
-      + ' onclick="playMedia(\'' + v.drive_id + '\',\'' + titleAttr + '\')">'
+      + ' onclick="playMedia(\'' + v.drive_id + '\',\'' + titleAttr + '\',\'' + (v.source==='youtube'?'youtube':'drive') + '\')">'
       +   '<div style="position:relative;padding-top:56.25%;background:linear-gradient(135deg,#1a2a20,#0f2318);">'
-      +     '<img src="https://drive.google.com/thumbnail?id=' + v.drive_id + '&sz=w640" alt="" loading="lazy"'
+      +     '<img src="' + mediaThumb(v) + '" alt="" loading="lazy"'
       +       ' onerror="this.style.display=\'none\'"'
       +       ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'
       +     '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.08);">'
@@ -2948,15 +2924,15 @@ async function renderMediaPage(){
       +     '</div>'
       +     '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;">' + mediaAr(i+1) + '</div>'
       +   '</div>'
-      +   '<div style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">' + title + '</div>'
+      +   '<div style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">' + title + ((v.description&&String(v.description).trim())?'<div style="font-size:.74rem;font-weight:500;color:var(--mid);margin-top:3px;">'+String(v.description).trim().replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>':'') + '</div>'
       + '</div>';
   }).join('');
 }
 
-function playMedia(driveId, title){
+function playMedia(driveId, title, source){
   _curMedia = driveId;
   var f = document.getElementById('media-vid-frame');
-  if (f) f.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+  if (f) f.src = source==='youtube' ? 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(driveId) + '?rel=0&autoplay=1' : 'https://drive.google.com/file/d/' + driveId + '/preview';
   var pt = document.getElementById('media-vid-title');
   if (pt) pt.textContent = '\u25b6\ufe0f ' + (title && title.trim() ? title : '\u0645\u0642\u0637\u0639 \u0645\u0631\u0626\u064a');
   openModal('modal-media-video');
@@ -3755,18 +3731,16 @@ function renderStudents(){
   loadTodayRecitation(list);
   tPtsRefresh(); tPtsAuto();
 }
-// ══ (دفعة ١٦) ⭐ نقاط الطالب: الرصيد (بيتحدّث تلقائي) + إضافة / حذف بسبب — نفس RPC المدير والمشرف ══
+// ══ ⭐ نقاط الطالب: الرصيد (بيتحدّث تلقائي) + آخر الحركات — (دفعة ٢٤) الإضافة والحذف للمشرف والمدير بس ══
 function tPtsCell(s){
   if(!s||s._guest||s._static) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
   return '<div style="font-weight:800;color:var(--gold);font-size:.9rem;" id="ptsv-'+s.id+'">⭐ '+toAr(s.points||0)+'</div>'
-    +'<div style="display:inline-flex;gap:4px;margin-top:4px;">'
-    +'<button class="btn btn-xs btn-primary" title="إضافة النقاط" onclick="tPts(\''+s.id+'\',1)">➕ إضافة</button>'
-    +'<button class="btn btn-xs btn-danger" title="حذف النقاط" onclick="tPts(\''+s.id+'\',-1)">➖ حذف</button></div>';
+    +'<button class="btn btn-xs btn-ghost" style="margin-top:4px;" title="آخر إضافات وحذف النقاط" onclick="tPtsLog(\''+s.id+'\')">📜 الحركات</button>';
 }
 function tPtsPaint(sid){ const s=findStu(sid); const el=document.getElementById('ptsv-'+sid); if(el&&s) el.textContent='⭐ '+toAr(s.points||0); }
-function tPts(sid,sign){
+function tPtsLog(sid){
   const s=MY_STUDENTS.find(x=>x.id===sid); if(!s){ showToast('⚠️ الطالب مش من حلقتك'); return; }
-  stPtOpen(sid, s.name, sign, s.points, async bal=>{ s.points=+bal||0; tPtsPaint(sid); });
+  stPtOpen(sid, s.name, s.points);
 }
 async function tPtsRefresh(){
   const c=activeCircle(); if(!c) return;
@@ -3782,67 +3756,36 @@ function tPtsAuto(){
   if(_tPtsTimer) return;
   _tPtsTimer=setInterval(()=>{ const pg=document.getElementById('page-students'); if(document.visibilityState==='visible'&&pg&&pg.classList.contains('active')) tPtsRefresh(); },45000);
 }
-const STPT={ id:null, sign:1, bal:null, after:null };
+const STPT={ id:null };
 function stPtAr(n){ return String(n==null?'':n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
 function stPtEnsure(){
   if(document.getElementById('stpt-ov')) return;
-  const inp='width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--border,#dce8e0);border-radius:9px;font-family:Tajawal,sans-serif;font-size:.9rem;background:var(--bg,#f5f7f5);color:var(--ink,#1a1a1a);outline:none;';
-  const lb='display:block;font-size:.78rem;font-weight:700;color:var(--forest,#0f2318);margin-bottom:5px;';
   const ov=document.createElement('div'); ov.id='stpt-ov';
   ov.style.cssText='position:fixed;inset:0;background:rgba(15,35,24,.55);z-index:10060;display:none;align-items:center;justify-content:center;padding:14px;font-family:Tajawal,sans-serif;direction:rtl;';
   ov.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:420px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">'
-    +'<div id="stpt-head" style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;color:#fff;">'
-    +'<div style="font-weight:800;" id="stpt-title">—</div><button type="button" onclick="stPtClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;color:#fff;background:linear-gradient(135deg,var(--gold,#c8920a),#8a6000);">'
+    +'<div style="font-weight:800;">⭐ نقاط الطالب</div><button type="button" onclick="stPtClose()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1.1rem;">×</button></div>'
     +'<div style="padding:16px 18px;">'
-    +'<div id="stpt-sub" style="font-size:.8rem;color:var(--mid,#4a5e52);margin-bottom:12px;line-height:1.8;"></div>'
-    +'<div style="margin-bottom:10px;"><label style="'+lb+'">عدد النقاط *</label><input id="stpt-n" type="number" min="1" max="10000" step="1" style="'+inp+'text-align:center;font-weight:800;font-size:1.05rem;"></div>'
-    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+[5,10,15,20,50,100].map(v=>'<button type="button" onclick="document.getElementById(\'stpt-n\').value='+v+'" style="flex:1;min-width:46px;padding:6px 0;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">'+stPtAr(v)+'</button>').join('')+'</div>'
-    +'<div><label style="'+lb+'">السبب * <span style="font-weight:500;color:var(--light,#8ea598);">(هيظهر لولي الأمر في الإشعارات)</span></label><textarea id="stpt-r" rows="3" maxlength="300" style="'+inp+'resize:vertical;" placeholder="اكتب سبب الإضافة أو الحذف…"></textarea></div>'
-    +'<div id="stpt-log" style="margin-top:10px;font-size:.74rem;color:var(--light,#8ea598);"></div>'
+    +'<div id="stpt-sub" style="font-size:.82rem;color:var(--mid,#4a5e52);margin-bottom:10px;line-height:1.8;"></div>'
+    +'<div id="stpt-log" style="font-size:.76rem;color:var(--light,#8ea598);"></div>'
+    +'<div style="margin-top:12px;padding:9px 11px;border-radius:9px;background:var(--gold-pale,#fdf3dc);color:#7a5200;font-size:.74rem;line-height:1.8;">نقاط التسميع بتتضاف تلقائي مع التقدير • إضافة أو حذف نقاط يدوي (مسابقة • مكافأة • خصم) ونقاط تحفيز الصلوات من المشرف أو المدير</div>'
     +'</div>'
-    +'<div style="padding:12px 18px 16px;display:flex;gap:10px;border-top:1px solid var(--border,#dce8e0);">'
-    +'<button type="button" id="stpt-ok" onclick="stPtSave()" style="flex:1;padding:10px 18px;color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:800;">تأكيد</button>'
-    +'<button type="button" onclick="stPtClose()" style="padding:10px 18px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;">إلغاء</button></div></div>';
+    +'<div style="padding:12px 18px 16px;border-top:1px solid var(--border,#dce8e0);"><button type="button" onclick="stPtClose()" style="width:100%;padding:10px 18px;border:1.5px solid var(--border,#dce8e0);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-weight:700;">إغلاق</button></div></div>';
   document.body.appendChild(ov);
   ov.addEventListener('click',e=>{ if(e.target===ov) stPtClose(); });
 }
-// sign: 1 = إضافة • -1 = حذف — after(balance) بعد النجاح
-function stPtOpen(id, name, sign, bal, after){
+// عرض بس: الرصيد + آخر الحركات
+function stPtOpen(id, name, bal){
   if(!id){ showToast('⚠️ الطالب مش متحدد'); return; }
-  stPtEnsure();
-  STPT.id=String(id); STPT.sign=sign<0?-1:1; STPT.bal=(bal==null||isNaN(+bal))?null:+bal; STPT.after=after||null;
-  const add=STPT.sign>0, col=add?'linear-gradient(135deg,var(--jade,#2d7a50),var(--forest,#0f2318))':'linear-gradient(135deg,#c0392b,#8e2a1f)';
-  document.getElementById('stpt-head').style.background=col; document.getElementById('stpt-ok').style.background=col;
-  document.getElementById('stpt-title').textContent=add?'➕ إضافة النقاط':'➖ حذف النقاط';
-  document.getElementById('stpt-ok').textContent=add?'✅ إضافة':'🗑 حذف';
-  document.getElementById('stpt-sub').innerHTML='الطالب: <b>'+esc(name||'')+'</b>'+(STPT.bal!=null?' • الرصيد الحالي: <b>'+stPtAr(STPT.bal)+'</b> نقطة':'');
-  document.getElementById('stpt-n').value=''; document.getElementById('stpt-r').value='';
+  stPtEnsure(); STPT.id=String(id);
+  document.getElementById('stpt-sub').innerHTML='الطالب: <b>'+esc(name||'')+'</b>'+((bal==null||isNaN(+bal))?'':' • الرصيد: <b>'+stPtAr(+bal)+'</b> نقطة');
   const lg=document.getElementById('stpt-log'); if(lg) lg.innerHTML='⏳ آخر الحركات…';
   document.getElementById('stpt-ov').style.display='flex';
-  setTimeout(()=>{ const n=document.getElementById('stpt-n'); if(n) n.focus(); },60);
   const sid=STPT.id;
-  stPtLog(sid,4).then(rows=>{ if(STPT.id!==sid) return; const l=document.getElementById('stpt-log'); if(l) l.innerHTML=(rows.length?'<div style="font-weight:800;color:var(--forest,#0f2318);margin-bottom:2px;">آخر الإضافات والحذف</div>':'')+stPtLogHtml(rows); })
-    .catch(e=>{ const l=document.getElementById('stpt-log'); if(l) l.innerHTML=''; });
+  stPtLog(sid,8).then(rows=>{ if(STPT.id!==sid) return; const l=document.getElementById('stpt-log'); if(l) l.innerHTML='<div style="font-weight:800;color:var(--forest,#0f2318);margin-bottom:2px;">آخر إضافات وحذف النقاط</div>'+stPtLogHtml(rows); })
+    .catch(e=>{ const l=document.getElementById('stpt-log'); if(l) l.innerHTML='<span style="color:var(--red,#c0392b);">⚠️ الحركات ما اتحمّلتش</span>'; });
 }
 function stPtClose(){ const o=document.getElementById('stpt-ov'); if(o) o.style.display='none'; }
-async function stPtSave(){
-  const digits=x=>String(x||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-  const n=parseInt(digits(document.getElementById('stpt-n').value),10);
-  const reason=document.getElementById('stpt-r').value.trim();
-  if(!n||n<1||n>10000){ showToast('⚠️ عدد النقاط من ١ لـ ١٠٠٠٠'); return; }   // (دفعة ١٩) الحد ١٠٠٠٠
-  if(reason.length<2){ showToast('⚠️ اكتب السبب'); return; }
-  if(STPT.sign<0 && STPT.bal!=null && n>STPT.bal){ showToast('⚠️ رصيد الطالب '+stPtAr(STPT.bal)+' نقطة بس'); return; }
-  const btn=document.getElementById('stpt-ok'), lbl=btn.textContent; btn.disabled=true; btn.textContent='⏳ جارٍ الحفظ…';
-  try{
-    if(!(await ensureFreshSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
-    const {data,error}=await db.rpc('student_points_adjust',{p_student:STPT.id, p_points:STPT.sign*n, p_reason:reason});
-    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
-    stPtClose();
-    showToast('✅ '+(STPT.sign>0?'اتضافت ':'اتحذفت ')+stPtAr(n)+' نقطة • الرصيد: '+stPtAr(data.balance)+(data.notified?' • وصل إشعار لولي الأمر':' • الطالب مش مربوط بحساب ولي أمر'));
-    if(typeof STPT.after==='function'){ try{ await STPT.after(data.balance); }catch(e){ console.warn('[stpt] after',e); } }
-  }catch(e){ showToast('⚠️ ما اتحفظش: '+(e.message||e.code||'')); }
-  finally{ btn.disabled=false; btn.textContent=lbl; }
-}
 async function stPtLog(id, limit){
   const {data,error}=await db.from('student_point_adjustments').select('id,points,reason,by_name,balance_after,created_at')
     .eq('student_id',id).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(limit||6);
@@ -4369,6 +4312,17 @@ function openEval(sid,type){
   openModal('modal-eval');
   spEvalHint(sid,type);   // 🎯 هدف النهارده من خطة الطالب
 }
+// (دفعة ٢٤) النقاط اللي هتتضاف للطالب تلقائي مع التقدير — ظاهرة قبل الحفظ
+function evPtsLine(g){
+  const pts=GRADE_PTS[g]||0, sid=REC_CTX&&REC_CTX.sid, s=sid?findStu(sid):null;
+  const prev=sid&&REC_STATE[sid]&&REC_STATE[sid][REC_CTX.type];
+  const old=(prev&&prev.points!=null&&prev.grade)?(+prev.points||0):null, delta=pts-(old||0);
+  let h='<div style="margin-top:8px;padding:7px 10px;border-radius:8px;background:var(--gold-pale);color:#7a5200;font-size:.82rem;font-weight:800;line-height:1.7;">⭐ '
+    +(pts?('+'+toAr(pts)+' نقطة للطالب — بتتضاف تلقائي مع الحفظ'):'مفيش نقاط (إعادة)');
+  if(old!=null&&old!==pts) h+='<div style="font-size:.72rem;font-weight:600;">كانت '+toAr(old)+' نقطة — الفرق '+(delta>0?'+':'−')+toAr(Math.abs(delta))+'</div>';
+  if(s&&!s._guest&&!s._static) h+='<div style="font-size:.72rem;font-weight:600;">الرصيد بعد الحفظ: '+toAr((+s.points||0)+delta)+' نقطة</div>';
+  return h+'</div>';
+}
 // ── المراجعة: حساب قديم على إجمالي الأخطاء (بدون أوجه) | الحفظ: متوسط الأخطاء في الوجه ──
 function evIsReview(){ return !!(REC_CTX && REC_CTX.type==='review'); }
 function evFacesVal(){ return evIsReview() ? 1 : Math.max(1,parseInt(document.getElementById('ev-faces').value)||1); }
@@ -4382,7 +4336,8 @@ function evGrade(){
     if(!C.ok){ box.innerHTML='<span style="color:var(--light);">— أدخل أخطاء كل الأوجه (باقي '+toAr(C.miss)+')</span>'; return; }
     const nR=C.pages.filter(x=>x.g==='retry').length;
     box.innerHTML='التقدير العام: '+gradeBadge(C.grade)+(C.pages.length>1?' <span style="font-size:.74rem;color:var(--mid);">— '+toAr(C.pages.length)+' أوجه • '+toAr(C.total)+' خطأ</span>':'')
-      +(nR?'<div style="font-size:.74rem;color:var(--red);font-weight:700;margin-top:4px;">🔁 '+toAr(nR)+' '+(nR>1?'أوجه هتتعاد':'وجه هيتعاد')+' مع القدر الجديد الحلقة الجاية — وهيوصل لولي الأمر</div>':'');
+      +(nR?'<div style="font-size:.74rem;color:var(--red);font-weight:700;margin-top:4px;">🔁 '+toAr(nR)+' '+(nR>1?'أوجه هتتعاد':'وجه هيتعاد')+' مع القدر الجديد الحلقة الجاية — وهيوصل لولي الأمر</div>':'')
+      +evPtsLine(C.grade);
     setPlan(C.grade!=='retry');
     return;
   }
@@ -4391,7 +4346,7 @@ function evGrade(){
   const box=document.getElementById('ev-grade');
   if(isNaN(v)){ box.innerHTML='<span style="color:var(--light);">— أدخل عدد الأخطاء</span>'; return; }
   const g=errorsToGrade(v/f);
-  box.innerHTML=gradeBadge(g)+((!evIsReview()&&f>1)?` <span style="font-size:.74rem;color:var(--mid);">— متوسط ${toAr(Math.round((v/f)*10)/10)} خطأ/وجه على ${toAr(f)} أوجه</span>`:'');
+  box.innerHTML=gradeBadge(g)+((!evIsReview()&&f>1)?` <span style="font-size:.74rem;color:var(--mid);">— متوسط ${toAr(Math.round((v/f)*10)/10)} خطأ/وجه على ${toAr(f)} أوجه</span>`:'')+evPtsLine(g);
   // اقترح حالة الخطة تلقائياً
   setPlan(g!=='retry');
 }
@@ -4538,7 +4493,7 @@ function renderArkan(c){
 function toggleArkan(cid,k,v){ const key='arkan_'+cid+'_'+D(); const st=JSON.parse(localStorage.getItem(key)||'{}'); st[k]=v; localStorage.setItem(key,JSON.stringify(st)); }
 
 // ══ POINTS / CARDS ══
-const CARDS=[['excellent','أخضر ١٥',15,'#1a7a4a'],['very_good','أزرق ١٠',10,'var(--blue)'],['good','أصفر ٥',5,'var(--gold)'],['silver','فضي ٥٠',50,'#8a8f98'],['gold','ذهبي ١٠٠',100,'#c8920a'],['diamond','ماسي ٢٠٠',200,'#6b3fa0']];
+const CARDS=[['excellent','أخضر ١٥',15,'#1a7a4a'],['very_good','أزرق ١٠',10,'var(--blue)'],['good','أصفر ٥',5,'var(--gold)'],['silver','فضي ٥٠',50,'#8a8f98'],['golden','ذهبي ١٠٠',100,'#c8920a'],['diamond','ماسي ٢٠٠',200,'#6b3fa0']];
 function renderPoints(){
   const c=activeCircle(); document.getElementById('pt-circle-name').textContent=c?c.name:'—';
   const list=studentsOf(c); const tb=document.getElementById('points-body');
@@ -4553,10 +4508,12 @@ let _gcBusy=false;
 async function grantCard(id,type,pts){
   const s=MY_STUDENTS.find(x=>x.id===id); if(!s||_gcBusy) return;
   // الكروت الصغيرة = تسليم نقاط التسميع نفسها (مش بتزوّد الرصيد) • الكبيرة: مكافأة (تزوّد) أو تبديل (ما تزوّدش)
-  const big=['silver','gold','diamond'].includes(type);
+  const big=['silver','golden','gold','diamond'].includes(type);   // (دفعة ٢٤) القاعدة بتقبل golden مش gold
   let isEx=false;
   if(big){
-    isEx=!confirm('الكارت ده «مكافأة إضافية»؟\n\nموافق = مكافأة (هيتضاف '+pts+' نقطة للرصيد)\nإلغاء = تبديل كروت صغيرة (مش هيزوّد الرصيد)');
+    // (دفعة ٢٤) الكارت الكبير «مكافأة» (بيزوّد الرصيد) من المشرف أو المدير بس — المعلم يسجّل «تبديل» بس
+    if(!confirm('تسجيل «تبديل» كروت صغيرة بالكارت ده؟\n\nمش هيزوّد الرصيد — الكارت «مكافأة» بيتسجّل من المشرف أو المدير بس')) return;
+    isEx=true;
   }
   _gcBusy=true;
   try{
@@ -4616,15 +4573,103 @@ async function saveNotes(id){ const v=document.getElementById('file-notes').valu
 // يُحفظ في جدول student_files (student_id, data jsonb) ليظهر في كل اللوحات.
 const STF_GR_Q=['ممتاز','جيد جداً','جيد','حاول مرة أخرى'];
 const STF_GR_T=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
-const STF_TJ=[
+// ══ 🎙️ التجويد (دفعة ٢٤) — ٧ مستويات • المعلم بيحدد مستوى الطالب كل شهر: المستوى + التقدير + ملاحظة ══
+//   student_files.data.tajweed_t[term_id] = { month1:{lvl,gr,note}, month2:{…}, month3:{…} }
+//   data.tajweed (مهارات المستويات القديمة) = أرشيف الدورة الصيفية — عرض بس ومابيتعدّلش
+const TJ_LEVELS=[
+  'مخرج الأحرف اللثوية ومخرج الجيم',
+  'التفخيم والترقيق — أحكام الراء ولام اسم الجلالة وألف المد',
+  'الهمس والقلقلة والشدة في الجيم وإتمام الحركات',
+  'الإدغام في المثلين والمتقاربين والمتجانسين • حرف الضاد • اللام الشمسية واللام القمرية',
+  'الإظهار والإدغام والإقلاب والإخفاء في النون الساكنة والتنوين',
+  'الإخفاء والإدغام والإظهار في الميم الساكنة • النون والميم المشددتين',
+  'المد الطبيعي والمتصل والمنفصل واللازم ومد العوض والبدل واللين'
+];
+const TJ_ORD=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'];
+const TJ_GR=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+const TJ_GR_COL={'ممتاز':'var(--jade)','جيد جداً':'var(--blue)','جيد':'var(--gold)','يحتاج تطوير':'var(--red)'};
+const TJ_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
+// المستويات القديمة (الصيف) — للأرشيف بس
+const TJ_OLD=[
   ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
   ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
   ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
   ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
   ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
   ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
-  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]],
+  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]]
 ];
+function tjEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function tjLvlName(n){ n=+n; return (n>=1&&n<=7)?('المستوى '+TJ_ORD[n-1]):''; }
+function tjIsLegacy(t){ return !t||!!(t.settings&&t.settings.legacy); }
+function tjOf(d,t){ const x=t&&d&&d.tajweed_t&&d.tajweed_t[t.id]; return (x&&typeof x==='object')?x:{}; }
+function tjLast(m){ for(let i=TJ_MONTHS.length-1;i>=0;i--){ const x=m&&m[TJ_MONTHS[i][0]]; if(x&&+x.lvl>=1&&+x.lvl<=7) return Object.assign({mlbl:TJ_MONTHS[i][1]},x); } return null; }
+function tjHasOld(d){ const tj=(d&&d.tajweed)||{}; return Object.keys(tj).some(k=>String(tj[k]==null?'':tj[k]).trim()!==''); }
+function tjRefHtml(open){
+  return '<details'+(open?' open':'')+' style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--forest);padding:8px 12px;background:var(--pale);border-radius:8px;">📚 مستويات التجويد السبعة</summary>'
+    +'<div style="padding:6px 4px 0;">'+TJ_LEVELS.map((s,i)=>'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 2px;border-bottom:1px dashed var(--border);font-size:.78rem;line-height:1.7;"><b style="min-width:96px;color:var(--emerald);white-space:nowrap;">'+tjLvlName(i+1)+'</b><span style="color:var(--mid);">'+tjEsc(s)+'</span></div>').join('')+'</div></details>';
+}
+function tjCurHtml(last){
+  if(!last) return '';
+  return '<div style="font-size:.82rem;margin-bottom:10px;padding:9px 12px;border-radius:8px;background:var(--pale);color:var(--forest);line-height:1.8;">🎯 المستوى الحالي: <b>'+tjLvlName(last.lvl)+'</b> — '+tjEsc(TJ_LEVELS[last.lvl-1])
+    +(last.gr?' • التقدير: <b style="color:'+(TJ_GR_COL[last.gr]||'inherit')+';">'+tjEsc(last.gr)+'</b>':'')+' <span style="color:var(--light);font-size:.74rem;">('+last.mlbl+')</span></div>';
+}
+// أرشيف الصيف (المهارات القديمة) — عرض بس
+function tjArchiveHtml(d,open){
+  if(!tjHasOld(d)) return '';
+  const tj=d.tajweed||{}, td='padding:5px 9px;border:1px solid var(--border);';
+  let rows='';
+  TJ_OLD.forEach(([lvl,skills])=>{ const has=skills.filter(([k])=>String(tj[k]||'').trim()||String(tj[k+'_note']||'').trim()); if(!has.length) return;
+    rows+='<tr style="background:var(--pale);"><td colspan="3" style="'+td+'font-weight:700;font-size:.76rem;color:var(--forest);">'+lvl+'</td></tr>'
+      +has.map(([k,l])=>'<tr><td style="'+td+'">'+l+'</td><td style="'+td+'text-align:center;font-weight:700;white-space:nowrap;color:'+(TJ_GR_COL[tj[k]]||'var(--mid)')+';">'+tjEsc(tj[k]||'—')+'</td><td style="'+td+'color:var(--mid);">'+tjEsc(tj[k+'_note']||'')+'</td></tr>').join(''); });
+  return '<details'+(open?' open':'')+' style="margin-top:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--mid);padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">📦 أرشيف الدورة الصيفية — المستويات القديمة (عرض بس)</summary>'
+    +'<div style="overflow-x:auto;margin-top:8px;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;"><thead><tr style="background:var(--pale);color:var(--forest);"><th style="'+td+'text-align:right;">المهارة</th><th style="'+td+'">التقدير</th><th style="'+td+'text-align:right;">ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>';
+}
+// نموذج الإدخال: شهر × (المستوى + التقدير + ملاحظة)
+function tjEditHtml(d,t,pre){
+  const m=tjOf(d,t), st='box-sizing:border-box;font-family:Tajawal,sans-serif;font-size:.8rem;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;outline:none;background:var(--white,#fff);color:var(--ink,#1a1a1a);';
+  return TJ_MONTHS.map(([k,l])=>{ const x=m[k]||{};
+    const lv='<option value="">— اختار المستوى —</option>'+TJ_LEVELS.map((s,i)=>'<option value="'+(i+1)+'"'+(+x.lvl===i+1?' selected':'')+'>'+tjLvlName(i+1)+' — '+tjEsc(s)+'</option>').join('');
+    const gr='<option value="">— التقدير —</option>'+TJ_GR.map(g=>'<option value="'+g+'"'+(g===x.gr?' selected':'')+'>'+g+'</option>').join('');
+    return '<div style="border:1.5px solid var(--border);border-right:4px solid var(--jade);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--white,#fff);">'
+      +'<div style="font-weight:800;color:var(--forest);font-size:.84rem;margin-bottom:8px;">📅 '+l+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+      +'<select id="'+pre+'-'+k+'-lvl" style="'+st+'flex:2 1 220px;min-width:0;max-width:100%;">'+lv+'</select>'
+      +'<select id="'+pre+'-'+k+'-gr" style="'+st+'flex:1 1 120px;min-width:0;">'+gr+'</select></div>'
+      +'<input id="'+pre+'-'+k+'-note" type="text" maxlength="300" placeholder="ملاحظة (اختياري)" value="'+tjEsc(x.note||'')+'" style="'+st+'width:100%;">'
+      +'</div>'; }).join('');
+}
+// null = مفيش نموذج (دورة قديمة) • bad = اسم الشهر اللي فيه تقدير/ملاحظة من غير مستوى
+function tjCollect(pre){
+  if(!document.getElementById(pre+'-month1-lvl')) return null;
+  const data={}; let bad=null;
+  TJ_MONTHS.forEach(([k,l])=>{
+    const v=f=>{ const e=document.getElementById(pre+'-'+k+'-'+f); return e?String(e.value||'').trim():''; };
+    const lvl=parseInt(v('lvl'),10), gr=v('gr'), note=v('note').slice(0,300);
+    if(!lvl&&!gr&&!note) return;
+    if(!(lvl>=1&&lvl<=7)){ if(!bad) bad=l; return; }
+    data[k]={ lvl, gr:TJ_GR.includes(gr)?gr:'', note };
+  });
+  return { data, bad };
+}
+function tjPaneHtml(d,t,pre){
+  const head='<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ التجويد — ٧ مستويات'+(t?' • '+tjEsc(t.name):'')+'</div>';
+  if(tjIsLegacy(t)) return head+'<div style="font-size:.78rem;color:#7a5200;background:var(--gold-pale);padding:9px 12px;border-radius:8px;margin-bottom:10px;line-height:1.8;">المستويات الجديدة بتبدأ من الدورة الخريفية — اللي تحت أرشيف للعرض بس</div>'
+    +(tjHasOld(d)?tjArchiveHtml(d,true):'<div style="text-align:center;color:var(--light);padding:18px;font-size:.82rem;">مفيش تقييم تجويد في الدورة دي</div>');
+  return head+tjCurHtml(tjLast(tjOf(d,t)))
+    +'<div style="font-size:.74rem;color:var(--light);margin-bottom:10px;line-height:1.7;">كل شهر: اختار مستوى الطالب وتقديره فيه (وملاحظة لو فيه) — وبيظهر لولي الأمر في ملف ابنه</div>'
+    +tjRefHtml(false)+tjEditHtml(d,t,pre)+tjArchiveHtml(d,false);
+}
+// دمج: بيانات الدورة دي في tajweed_t[term] من غير ما يلمس باقي الدورات ولا الأرشيف القديم
+function tjPack(prev,obj,t){
+  if(!obj||!Object.prototype.hasOwnProperty.call(obj,'_tj')) return obj;
+  const o=Object.assign({},obj), tj=o._tj; delete o._tj; delete o._tjBad;
+  if(tjIsLegacy(t)||!tj) return o;
+  const all=Object.assign({}, (prev&&prev.tajweed_t&&typeof prev.tajweed_t==='object')?prev.tajweed_t:{});
+  if(Object.keys(tj).length) all[t.id]=tj; else delete all[t.id];
+  o.tajweed_t=all;
+  return o;
+}
 const STF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['participation','المشاركة'],['cleanliness','النظافة والهندام'],['cooperation','التعاون']];
 const STF_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
 let _stfId=null;
@@ -4716,27 +4761,7 @@ function stfQMonth(idx,total){
 }
 function playRec(url){ const a=document.getElementById('recplay-audio'); a.src=url; openModal('modal-recplay'); setTimeout(()=>{ try{ a.play(); }catch(e){} },200); }
 function closeRec(){ const a=document.getElementById('recplay-audio'); try{ a.pause(); }catch(e){} a.src=''; closeModal('modal-recplay'); }
-function buildTajweedPane(d){
-  const tj=d.tajweed||{};
-  let rows='';
-  STF_TJ.forEach(([lvl,skills])=>{
-    rows+=`<tr style="background:var(--pale);"><td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">${lvl}</td></tr>`;
-    skills.forEach(([k,lbl])=>{
-      rows+=`<tr>
-        <td style="padding:7px 10px;border:1px solid var(--border);">${lbl}</td>
-        <td style="padding:7px;border:1px solid var(--border);"><select id="stf-tj-${k}" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">${stfSelOpts(STF_GR_T,tj[k]||'')}</select></td>
-        <td style="padding:7px;border:1px solid var(--border);"><input id="stf-tj-${k}-note" type="text" placeholder="ملاحظات" value="${(tj[k+'_note']||'').replace(/"/g,'&quot;')}" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-      </tr>`;
-    });
-  });
-  return `<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ سجل التجويد — 7 مستويات</div>
-    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
-      <thead><tr style="background:var(--pale);color:var(--forest);">
-        <th style="padding:7px 10px;border:1px solid var(--border);text-align:right;">المهارة</th>
-        <th style="padding:7px;border:1px solid var(--border);text-align:center;width:140px;">المستوى</th>
-        <th style="padding:7px;border:1px solid var(--border);text-align:right;">الملاحظات</th>
-      </tr></thead><tbody>${rows}</tbody></table></div>`;
-}
+function buildTajweedPane(d){ return tjPaneHtml(d, termOf(D())||CUR_TERM, 'stf-tj'); }   // (دفعة ٢٤)
 function buildBehaviorPane(d){
   const bh=termBh(d, termOf(D())||CUR_TERM);
   let html=`<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">📊 التقييم الأخلاقي والسلوكي</div>`;
@@ -4794,25 +4819,32 @@ async function openStudentFile(sid){
   openModal('modal-stfile');
 }
 function closeStfile(){ closeModal('modal-stfile'); }
-function askStfSave(){ openModal('modal-stfile-confirm'); }
+function askStfSave(){
+  const c=tjCollect('stf-tj');   // (دفعة ٢٤) تقدير/ملاحظة من غير مستوى = مايتحفظش
+  if(c&&c.bad){ switchStfTab(2); showToast('⚠️ اختار مستوى التجويد في «'+c.bad+'»'); return; }
+  openModal('modal-stfile-confirm');
+}
 function collectStf(){
-  const tajweed={};
-  STF_TJ.forEach(([,skills])=>skills.forEach(([k])=>{ tajweed[k]=document.getElementById('stf-tj-'+k)?.value||''; tajweed[k+'_note']=document.getElementById('stf-tj-'+k+'-note')?.value||''; }));
+  const tjc=tjCollect('stf-tj');   // (دفعة ٢٤) مستوى التجويد الشهري — القديم (tajweed) مابيتلمسش
   const behavior={};
   STF_MONTHS.forEach(([mo])=>{ behavior[mo+'From']=document.getElementById('stf-'+mo+'-from')?.value||''; behavior[mo+'To']=document.getElementById('stf-'+mo+'-to')?.value||'';
     STF_BH.forEach(([f])=>{ behavior[mo+f]=document.getElementById('stf-'+mo+'-'+f)?.value||''; behavior[mo+f+'Notes']=document.getElementById('stf-'+mo+'-'+f+'-notes')?.value||''; }); });
-  return { currentAchievement:document.getElementById('stf-current-achievement')?.value||'', tajweed, behavior };
+  const o={ currentAchievement:document.getElementById('stf-current-achievement')?.value||'', behavior };
+  if(tjc){ o._tj=tjc.data; if(tjc.bad) o._tjBad=tjc.bad; }
+  return o;
 }
 async function doStfSave(){
   const sid=_stfId; if(!sid){ closeModal('modal-stfile-confirm'); return; }
   const s=findStu(sid);
   if(s&&(s._static||s._guest)){ closeModal('modal-stfile-confirm'); closeModal('modal-stfile'); showToast('📌 حُفظ محلياً (طالب تجريبي)'); return; }
   const d=collectStf();
+  if(d._tjBad){ closeModal('modal-stfile-confirm'); switchStfTab(2); showToast('⚠️ اختار مستوى التجويد في «'+d._tjBad+'»'); return; }
   try{
     const {data:ex,error:rErr}=await db.from('student_files').select('id,data').eq('student_id',sid).maybeSingle();
     if(rErr) throw rErr;   // ما نكتبش فوق الملف لو القراية فشلت
     // دمج: نحافظ على درجات الاختبار (exams) وأي مفاتيح أخرى غير المُدارة هنا
-    const merged=Object.assign({}, (ex&&ex.data)||{}, termBhPack((ex&&ex.data)||{}, d, termOf(D())||CUR_TERM));
+    const _t=termOf(D())||CUR_TERM, _p=(ex&&ex.data)||{};
+    const merged=Object.assign({}, _p, tjPack(_p, termBhPack(_p, d, _t), _t));   // (دفعة ٢٤) التجويد في tajweed_t[الدورة]
     let error, res;
     if(ex&&ex.id){ ({data:res,error}=await db.from('student_files').update({data:merged}).eq('student_id',sid).select('id')); }
     else { ({data:res,error}=await db.from('student_files').insert({student_id:sid,data:merged}).select('id')); }

@@ -13,6 +13,7 @@
      • التنبيهات الأسبوعية: نفس محرّك لوحة المشرف (نفس الـ id) → weekly_alert_actions
      • قفل RESTRICTIVE zz_emp_* (دفعة ١٣)
      • الرسائل (دفعة ١٨): رسائل أولياء الأمور للموظفة + الرد — zz_emp_sel/ins/upd على messages (mx*)
+     • دفعة ٢٤: التجويد ٧ مستويات — مستوى شهري لكل دورة (tajweed_t — دمج على السيرفر) • القديم أرشيف للصيف
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -236,7 +237,7 @@ button{cursor:pointer;}
             <label style="font-size:.76rem;color:var(--mid);display:flex;gap:5px;align-items:center;"><input type="checkbox" id="st-inactive" onchange="renderStudents()"> الموقوفين</label>
           </div>
         </div>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>الشعبة</th><th>الحلقة / المعلم</th><th>العمر</th><th>هاتف الأب</th><th>هاتف الأم</th><th title="تلقائي من تقييم التجويد في ملف الطالب">مستوى التجويد</th><th>النقاط</th><th></th></tr></thead>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>الشعبة</th><th>الحلقة / المعلم</th><th>العمر</th><th>هاتف الأب</th><th>هاتف الأم</th><th title="آخر مستوى تجويد حدّده المعلم في ملف الطالب">مستوى التجويد</th><th>النقاط</th><th></th></tr></thead>
           <tbody id="st-body"><tr><td colspan="10"><div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل…</div></td></tr></tbody></table></div>
       </div>
     </div>
@@ -630,7 +631,7 @@ function renderStudents(){
 }
 // (دفعة ١٥) العمر + هواتف الأب والأم + مستوى التجويد + النقاط — من students_sheet (نفس مصدر المدير والمشرف)
 let ST_SHEET={};
-const ST_TJ_TOPIC=['أحكام النون الساكنة والتنوين','أحكام الميم الساكنة','أحكام المدود','مخارج الحروف','صفات الحروف','الوقف والابتداء','أحكام متقدمة'];
+const ST_TJ_TOPIC=['مخرج الأحرف اللثوية ومخرج الجيم','التفخيم والترقيق','الهمس والقلقلة والشدة في الجيم وإتمام الحركات','الإدغام (المثلين والمتقاربين والمتجانسين) • الضاد • اللام الشمسية والقمرية','أحكام النون الساكنة والتنوين','أحكام الميم الساكنة • النون والميم المشددتين','المدود'];   // (دفعة ٢٤)
 function stAge(dob){ if(!dob) return null; const b=new Date(String(dob).slice(0,10)+'T00:00:00'); if(isNaN(b)) return null;
   const n=new Date(); let a=n.getFullYear()-b.getFullYear(); if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate())) a--; return a>=0?a:null; }
 async function stSheetFill(ids, force){
@@ -647,7 +648,7 @@ async function stSheetFill(ids, force){
     const a=stAge(r.date_of_birth);
     set('age', a==null?'':ar(a)); set('dad', r.dad||r.parent_phone||''); set('mom', r.mom);
     set('lvl', r.tajweed_level||r.level); set('pts', ar(r.total_points||0));
-    const lv=tr.querySelector('[data-f="lvl"]'); if(lv) lv.title=r.tajweed_level_no?(ST_TJ_TOPIC[r.tajweed_level_no-1]||'')+' — من تقييم التجويد':'';
+    const lv=tr.querySelector('[data-f="lvl"]'); if(lv) lv.title=r.tajweed_level_no?(ST_TJ_TOPIC[r.tajweed_level_no-1]||'')+' — آخر مستوى حدّده المعلم':'';
     const s=stuById(tr.dataset.sid); if(s) s.total_points=r.total_points;
   });
 }
@@ -781,13 +782,103 @@ async function stuSave(){
 
 // ══ ملف الطالب (٧ أقسام) — الحفظ دمج على السيرفر (emp_save_student_file) ══
 const SF_LV=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
-const SF_TJ=[['L','المستوى الأول — أحكام نون الساكنة والتنوين'],['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء'],
-  ['L','المستوى الثاني — أحكام الميم الساكنة'],['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي'],
-  ['L','المستوى الثالث — أحكام المدود'],['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل'],
-  ['L','المستوى الرابع — مخارج الحروف'],['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية'],
-  ['L','المستوى الخامس — صفات الحروف'],['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة'],
-  ['L','المستوى السادس — الوقف والابتداء'],['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن'],
-  ['L','المستوى السابع — أحكام متقدمة'],['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']];
+// ══ 🎙️ التجويد (دفعة ٢٤) — ٧ مستويات • المعلم بيحدد مستوى الطالب كل شهر: المستوى + التقدير + ملاحظة ══
+//   student_files.data.tajweed_t[term_id] = { month1:{lvl,gr,note}, month2:{…}, month3:{…} }
+//   data.tajweed (مهارات المستويات القديمة) = أرشيف الدورة الصيفية — عرض بس ومابيتعدّلش
+const TJ_LEVELS=[
+  'مخرج الأحرف اللثوية ومخرج الجيم',
+  'التفخيم والترقيق — أحكام الراء ولام اسم الجلالة وألف المد',
+  'الهمس والقلقلة والشدة في الجيم وإتمام الحركات',
+  'الإدغام في المثلين والمتقاربين والمتجانسين • حرف الضاد • اللام الشمسية واللام القمرية',
+  'الإظهار والإدغام والإقلاب والإخفاء في النون الساكنة والتنوين',
+  'الإخفاء والإدغام والإظهار في الميم الساكنة • النون والميم المشددتين',
+  'المد الطبيعي والمتصل والمنفصل واللازم ومد العوض والبدل واللين'
+];
+const TJ_ORD=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'];
+const TJ_GR=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+const TJ_GR_COL={'ممتاز':'var(--jade)','جيد جداً':'var(--blue)','جيد':'var(--gold)','يحتاج تطوير':'var(--red)'};
+const TJ_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
+// المستويات القديمة (الصيف) — للأرشيف بس
+const TJ_OLD=[
+  ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
+  ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
+  ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
+  ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
+  ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
+  ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
+  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]]
+];
+function tjEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function tjLvlName(n){ n=+n; return (n>=1&&n<=7)?('المستوى '+TJ_ORD[n-1]):''; }
+function tjIsLegacy(t){ return !t||!!(t.settings&&t.settings.legacy); }
+function tjOf(d,t){ const x=t&&d&&d.tajweed_t&&d.tajweed_t[t.id]; return (x&&typeof x==='object')?x:{}; }
+function tjLast(m){ for(let i=TJ_MONTHS.length-1;i>=0;i--){ const x=m&&m[TJ_MONTHS[i][0]]; if(x&&+x.lvl>=1&&+x.lvl<=7) return Object.assign({mlbl:TJ_MONTHS[i][1]},x); } return null; }
+function tjHasOld(d){ const tj=(d&&d.tajweed)||{}; return Object.keys(tj).some(k=>String(tj[k]==null?'':tj[k]).trim()!==''); }
+function tjRefHtml(open){
+  return '<details'+(open?' open':'')+' style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--forest);padding:8px 12px;background:var(--pale);border-radius:8px;">📚 مستويات التجويد السبعة</summary>'
+    +'<div style="padding:6px 4px 0;">'+TJ_LEVELS.map((s,i)=>'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 2px;border-bottom:1px dashed var(--border);font-size:.78rem;line-height:1.7;"><b style="min-width:96px;color:var(--emerald);white-space:nowrap;">'+tjLvlName(i+1)+'</b><span style="color:var(--mid);">'+tjEsc(s)+'</span></div>').join('')+'</div></details>';
+}
+function tjCurHtml(last){
+  if(!last) return '';
+  return '<div style="font-size:.82rem;margin-bottom:10px;padding:9px 12px;border-radius:8px;background:var(--pale);color:var(--forest);line-height:1.8;">🎯 المستوى الحالي: <b>'+tjLvlName(last.lvl)+'</b> — '+tjEsc(TJ_LEVELS[last.lvl-1])
+    +(last.gr?' • التقدير: <b style="color:'+(TJ_GR_COL[last.gr]||'inherit')+';">'+tjEsc(last.gr)+'</b>':'')+' <span style="color:var(--light);font-size:.74rem;">('+last.mlbl+')</span></div>';
+}
+// أرشيف الصيف (المهارات القديمة) — عرض بس
+function tjArchiveHtml(d,open){
+  if(!tjHasOld(d)) return '';
+  const tj=d.tajweed||{}, td='padding:5px 9px;border:1px solid var(--border);';
+  let rows='';
+  TJ_OLD.forEach(([lvl,skills])=>{ const has=skills.filter(([k])=>String(tj[k]||'').trim()||String(tj[k+'_note']||'').trim()); if(!has.length) return;
+    rows+='<tr style="background:var(--pale);"><td colspan="3" style="'+td+'font-weight:700;font-size:.76rem;color:var(--forest);">'+lvl+'</td></tr>'
+      +has.map(([k,l])=>'<tr><td style="'+td+'">'+l+'</td><td style="'+td+'text-align:center;font-weight:700;white-space:nowrap;color:'+(TJ_GR_COL[tj[k]]||'var(--mid)')+';">'+tjEsc(tj[k]||'—')+'</td><td style="'+td+'color:var(--mid);">'+tjEsc(tj[k+'_note']||'')+'</td></tr>').join(''); });
+  return '<details'+(open?' open':'')+' style="margin-top:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--mid);padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">📦 أرشيف الدورة الصيفية — المستويات القديمة (عرض بس)</summary>'
+    +'<div style="overflow-x:auto;margin-top:8px;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;"><thead><tr style="background:var(--pale);color:var(--forest);"><th style="'+td+'text-align:right;">المهارة</th><th style="'+td+'">التقدير</th><th style="'+td+'text-align:right;">ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>';
+}
+// نموذج الإدخال: شهر × (المستوى + التقدير + ملاحظة)
+function tjEditHtml(d,t,pre){
+  const m=tjOf(d,t), st='box-sizing:border-box;font-family:Tajawal,sans-serif;font-size:.8rem;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;outline:none;background:var(--white,#fff);color:var(--ink,#1a1a1a);';
+  return TJ_MONTHS.map(([k,l])=>{ const x=m[k]||{};
+    const lv='<option value="">— اختار المستوى —</option>'+TJ_LEVELS.map((s,i)=>'<option value="'+(i+1)+'"'+(+x.lvl===i+1?' selected':'')+'>'+tjLvlName(i+1)+' — '+tjEsc(s)+'</option>').join('');
+    const gr='<option value="">— التقدير —</option>'+TJ_GR.map(g=>'<option value="'+g+'"'+(g===x.gr?' selected':'')+'>'+g+'</option>').join('');
+    return '<div style="border:1.5px solid var(--border);border-right:4px solid var(--jade);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--white,#fff);">'
+      +'<div style="font-weight:800;color:var(--forest);font-size:.84rem;margin-bottom:8px;">📅 '+l+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+      +'<select id="'+pre+'-'+k+'-lvl" style="'+st+'flex:2 1 220px;min-width:0;max-width:100%;">'+lv+'</select>'
+      +'<select id="'+pre+'-'+k+'-gr" style="'+st+'flex:1 1 120px;min-width:0;">'+gr+'</select></div>'
+      +'<input id="'+pre+'-'+k+'-note" type="text" maxlength="300" placeholder="ملاحظة (اختياري)" value="'+tjEsc(x.note||'')+'" style="'+st+'width:100%;">'
+      +'</div>'; }).join('');
+}
+// null = مفيش نموذج (دورة قديمة) • bad = اسم الشهر اللي فيه تقدير/ملاحظة من غير مستوى
+function tjCollect(pre){
+  if(!document.getElementById(pre+'-month1-lvl')) return null;
+  const data={}; let bad=null;
+  TJ_MONTHS.forEach(([k,l])=>{
+    const v=f=>{ const e=document.getElementById(pre+'-'+k+'-'+f); return e?String(e.value||'').trim():''; };
+    const lvl=parseInt(v('lvl'),10), gr=v('gr'), note=v('note').slice(0,300);
+    if(!lvl&&!gr&&!note) return;
+    if(!(lvl>=1&&lvl<=7)){ if(!bad) bad=l; return; }
+    data[k]={ lvl, gr:TJ_GR.includes(gr)?gr:'', note };
+  });
+  return { data, bad };
+}
+function tjPaneHtml(d,t,pre){
+  const head='<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ التجويد — ٧ مستويات'+(t?' • '+tjEsc(t.name):'')+'</div>';
+  if(tjIsLegacy(t)) return head+'<div style="font-size:.78rem;color:#7a5200;background:var(--gold-pale);padding:9px 12px;border-radius:8px;margin-bottom:10px;line-height:1.8;">المستويات الجديدة بتبدأ من الدورة الخريفية — اللي تحت أرشيف للعرض بس</div>'
+    +(tjHasOld(d)?tjArchiveHtml(d,true):'<div style="text-align:center;color:var(--light);padding:18px;font-size:.82rem;">مفيش تقييم تجويد في الدورة دي</div>');
+  return head+tjCurHtml(tjLast(tjOf(d,t)))
+    +'<div style="font-size:.74rem;color:var(--light);margin-bottom:10px;line-height:1.7;">كل شهر: اختار مستوى الطالب وتقديره فيه (وملاحظة لو فيه) — وبيظهر لولي الأمر في ملف ابنه</div>'
+    +tjRefHtml(false)+tjEditHtml(d,t,pre)+tjArchiveHtml(d,false);
+}
+// دمج: بيانات الدورة دي في tajweed_t[term] من غير ما يلمس باقي الدورات ولا الأرشيف القديم
+function tjPack(prev,obj,t){
+  if(!obj||!Object.prototype.hasOwnProperty.call(obj,'_tj')) return obj;
+  const o=Object.assign({},obj), tj=o._tj; delete o._tj; delete o._tjBad;
+  if(tjIsLegacy(t)||!tj) return o;
+  const all=Object.assign({}, (prev&&prev.tajweed_t&&typeof prev.tajweed_t==='object')?prev.tajweed_t:{});
+  if(Object.keys(tj).length) all[t.id]=tj; else delete all[t.id];
+  o.tajweed_t=all;
+  return o;
+}
 const SF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['participation','المشاركة'],['cleanliness','النظافة والهندام'],['cooperation','التعاون']];
 let SF=null;
 function sfOpenFromStu(){ if(STU_CTX){ const id=STU_CTX.id; closeModal('modal-stu'); sfOpen(id); } }
@@ -809,7 +900,7 @@ async function sfOpen(id){
   sfBuild(s); sfTab(1); $('sf-save').disabled=false;
 }
 function sfBuild(s){
-  const d=SF.d, tj=d.tajweed||{}, bh=termBh(d, VIEW_TERM||CUR_TERM);
+  const d=SF.d, bh=termBh(d, VIEW_TERM||CUR_TERM);
   const inp=(id,v,type,ph)=>'<input class="inp" id="'+id+'" type="'+(type||'text')+'"'+(ph?' placeholder="'+ph+'"':'')+' value="'+esc(v||'')+'">';
   const p1=`<div class="sec-h">👤 البيانات الأساسية</div><div class="form-grid-2">
       <div class="fg" style="grid-column:1/-1;"><label>اسم الطالب</label><input class="inp" value="${esc(s.name)}" disabled title="الاسم بيتعدّل من «البيانات»"></div>
@@ -827,9 +918,7 @@ function sfBuild(s){
       <div class="fg" style="grid-column:1/-1;"><label>ملاحظات عن البيئة الأسرية</label><textarea class="inp" id="sf-famnotes" rows="4">${esc(d.familyNotes||'')}</textarea></div></div>`;
   const p3=`<div class="sec-h">📖 السجل القرآني — بيتملا تلقائياً من تسميع المعلم</div>
       <div class="fg"><label>الإنجاز الحالي</label>${inp('sf-ach',d.currentAchievement,'text','مثال: تم حفظ جزء عم وجزء تبارك')}</div><div id="sf-quran"></div>`;
-  const p4=`<div class="sec-h">🎙️ سجل التجويد — ٧ مستويات</div><div class="tbl-wrap"><table class="mini"><thead><tr><th style="text-align:right;">المهارة</th><th style="width:140px;">مستوى الطالب</th><th>الملاحظات</th></tr></thead><tbody>`
-      +SF_TJ.map(([k,l])=>k==='L'?`<tr style="background:var(--pale);"><td colspan="3" style="font-weight:800;color:var(--forest);">${l}</td></tr>`
-        :`<tr><td>${l}</td><td>${sfLvl('data-tj="'+k+'"',tj[k])}</td><td><input data-tj="${k}_note" placeholder="ملاحظات" value="${esc(tj[k+'_note']||'')}"></td></tr>`).join('')+'</tbody></table></div>';
+  const p4=tjPaneHtml(d, VIEW_TERM||CUR_TERM, 'sf-tj');   // (دفعة ٢٤)
   const t=VIEW_TERM||CUR_TERM;
   const p5=`<div class="sec-h">📊 التقييم الأخلاقي والسلوكي — ${esc(t?t.name:'')}</div>`+['month1','month2','month3'].map((mo,i)=>`<div class="row-box">
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:.8rem;font-weight:800;color:var(--forest);">الشهر ${['الأول','الثاني','الثالث'][i]}
@@ -872,7 +961,8 @@ function sfTab(n){
 async function sfSave(){
   if(!SF||!SF.ok){ showToast('⚠️ الملف ما اتحمّلش — الحفظ مقفول'); return; }
   const v=id=>{ const e=$(id); return e?e.value:''; };
-  const tajweed={}; document.querySelectorAll('#sf-body [data-tj]').forEach(el=>{ tajweed[el.dataset.tj]=el.value; });
+  const tjc=tjCollect('sf-tj');   // (دفعة ٢٤) مستوى التجويد الشهري
+  if(tjc&&tjc.bad){ sfTab(4); showToast('⚠️ اختار مستوى التجويد في «'+tjc.bad+'»'); return; }
   const behavior={};
   ['month1','month2','month3'].forEach(mo=>{ behavior[mo+'From']=v('sf-'+mo+'-from'); behavior[mo+'To']=v('sf-'+mo+'-to');
     SF_BH.forEach(([f])=>{ behavior[mo+f]=v('sf-'+mo+'-'+f); behavior[mo+f+'Notes']=v('sf-'+mo+'-'+f+'-notes'); }); });
@@ -882,9 +972,10 @@ async function sfSave(){
     .filter(x=>x.date||x.problem||x.attended||x.result);
   const patch={ dob:v('sf-dob'), joinDate:v('sf-join'), dad:v('sf-dad').trim(), mom:v('sf-mom').trim(), addr:v('sf-addr').trim(), schoolType:v('sf-school'),
     familyStatus:v('sf-fam'), siblings:v('sf-sib'), dadEdu:v('sf-dadedu').trim(), momEdu:v('sf-momedu').trim(), familyNotes:v('sf-famnotes'),
-    currentAchievement:v('sf-ach').trim(), tajweed, interventions, parentCalls, strengths:v('sf-str'), needs:v('sf-needs') };
+    currentAchievement:v('sf-ach').trim(), interventions, parentCalls, strengths:v('sf-str'), needs:v('sf-needs') };
   const t=VIEW_TERM||CUR_TERM;
   if(!t||termIsLegacy(t)) patch.behavior=behavior; else patch.behavior_t={ [t.id]:behavior };
+  if(tjc&&t&&!termIsLegacy(t)) patch.tajweed_t={ [t.id]:tjc.data };   // (دفعة ٢٤) دمج بالدورة على السيرفر
   const btn=$('sf-save'); btn.disabled=true;
   try{
     const {data,error}=await db.rpc('emp_save_student_file',{ p_student:SF.id, p_patch:patch });

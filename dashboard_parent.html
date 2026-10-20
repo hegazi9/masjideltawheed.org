@@ -13,6 +13,9 @@
        • «عذر شرعي» للطالبات (excused = صلّت) • إشعارات تلقائية (parent_alerts_dispatch)
        • الرسائل: للإدارة ومشرفات أولياء الأمور بس (parent_contacts)
      • دفعة ١٩: اسم ولي الأمر تلقائي من أولاده (parent_refresh_name) • إشعار points_reset
+     • دفعة ٢٣: الموبايل: السايدبار من غير أيقونات الشريط السفلي (bn-dup) + خط أكبر • 🎨 الثيمات (نفس ثيمات المدير — set_my_theme / users.theme)
+     • دفعة ٢٤: التجويد ٧ مستويات — المستوى الشهري اللي بيحدده المعلم (tajweed_t) • القديم أرشيف للصيف
+     • دفعة ٣١: 🛒 سوق النقاط — منتجات شعبة الابن (store_products) + مشترياته (store_orders) + كارت في الرئيسية • إشعارات store_purchase / store_refund
      • دفعة ٢٢: رجوع تعديلات دفعة ١١ اللي ضاعت في نسخة ١/١٠ — الصلوات: يوم امبارح دايماً • رقم الموبايل في الإعدادات (parent_set_phone)
      └────────────────────────────────────────────────────────────
      • البيانات: RLS (my_child_ids) + RPC: parent_children / parent_circle_board / parent_contacts / parent_set_phone
@@ -67,21 +70,41 @@ button{cursor:pointer;border:none;background:none;color:inherit;}
 .ic.sm{width:16px;height:16px;} .ic.lg{width:26px;height:26px;} .ic.xl{width:34px;height:34px;}
 
 /* ══ Sidebar ══ */
-.sidebar{position:fixed;top:0;right:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#0f2318 0%,#143522 100%);color:#fff;display:flex;flex-direction:column;z-index:60;transition:transform .28s cubic-bezier(.22,1,.36,1);}
+.sidebar{position:fixed;top:0;right:0;bottom:0;width:var(--sidebar-w);background:var(--sb-bg,linear-gradient(180deg,#0f2318 0%,#143522 100%));color:#fff;display:flex;flex-direction:column;z-index:60;transition:transform .28s cubic-bezier(.22,1,.36,1);}
 .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 18px 18px;border-bottom:1px solid rgba(255,255,255,.07);}
 .sb-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(240,180,41,.35);}
 .sb-logo-title{font-family:'Amiri',serif;font-size:.98rem;font-weight:700;line-height:1.25;}
 .sb-logo-sub{font-size:.7rem;color:var(--gold-l);font-weight:700;}
 .sb-nav{flex:1;overflow-y:auto;padding:12px 10px;}
 .sb-sec{font-size:.66rem;color:rgba(255,255,255,.35);font-weight:800;padding:12px 12px 6px;letter-spacing:.3px;}
-.sb-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;color:rgba(255,255,255,.72);font-size:.88rem;font-weight:600;transition:.18s;position:relative;text-align:right;}
+.sb-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;color:var(--sb-text,rgba(255,255,255,.72));font-size:.88rem;font-weight:600;transition:.18s;position:relative;text-align:right;}
 .sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
-.sb-item.active{background:linear-gradient(135deg,rgba(82,168,118,.28),rgba(82,168,118,.10));color:#fff;box-shadow:inset -3px 0 0 var(--gold-l);}
+.sb-item.active{background:var(--sb-act,linear-gradient(135deg,rgba(82,168,118,.28),rgba(82,168,118,.10)));color:#fff;box-shadow:inset -3px 0 0 var(--gold-l);}
 .sb-item .cnt{margin-right:auto;background:var(--red);color:#fff;border-radius:99px;font-size:.66rem;padding:1px 7px;font-weight:800;}
 .sb-foot{padding:12px;border-top:1px solid rgba(255,255,255,.07);}
 .sb-user{display:flex;align-items:center;gap:10px;padding:8px;}
 .sb-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;}
 .sb-un{font-size:.8rem;font-weight:700;line-height:1.3;} .sb-ur{font-size:.68rem;color:rgba(255,255,255,.45);}
+.sb-out{background:rgba(255,255,255,.08)!important;color:#fff!important;}
+/* ══ 🎨 الثيمات الفاتحة (Sidebar أبيض) — دفعة ٢٣ ══ */
+html.th-light .sidebar{color:var(--ink);border-left:1px solid var(--border);box-shadow:-2px 0 16px rgba(0,0,0,.06);}
+html.th-light .sb-logo,html.th-light .sb-foot{border-color:var(--border);}
+html.th-light .sb-logo-title,html.th-light .sb-un{color:var(--forest);}
+html.th-light .sb-logo-sub{color:var(--gold);}
+html.th-light .sb-sec{color:#9ca3af;}
+html.th-light .sb-item:hover{background:var(--pale);color:var(--forest);}
+html.th-light .sb-item.active{color:#fff;box-shadow:none;}
+html.th-light .sb-ur{color:var(--mid);}
+html.th-light .sb-out{background:var(--pale)!important;color:var(--emerald)!important;}
+/* ══ 🎨 نافذة اختيار الثيم ══ */
+.th-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;}
+.th-card{border-radius:14px;padding:14px 8px;border:2.5px solid #e5e7eb;background:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;transition:.18s;text-align:center;}
+.th-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.th-card.on{border-color:var(--gold);background:rgba(200,146,10,.06);}
+.th-emo{font-size:1.8rem;line-height:1;} .th-name{font-size:.78rem;font-weight:800;color:var(--ink);}
+.th-dots{display:flex;gap:4px;} .th-dots i{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.th-cur{font-size:.66rem;color:#c8920a;font-weight:800;}
+.tb-theme{font-size:1.15rem;line-height:1;}
 .scrim{position:fixed;inset:0;background:rgba(10,20,14,.45);backdrop-filter:blur(2px);z-index:55;opacity:0;pointer-events:none;transition:.25s;}
 .scrim.show{opacity:1;pointer-events:auto;}
 
@@ -89,7 +112,7 @@ button{cursor:pointer;border:none;background:none;color:inherit;}
 .main{margin-right:var(--sidebar-w);min-height:100vh;padding-bottom:30px;}
 .topbar{position:sticky;top:0;z-index:40;height:62px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 22px;}
 .tb-menu{display:none;width:40px;height:40px;border-radius:12px;align-items:center;justify-content:center;color:var(--forest);background:var(--pale);}
-.tb-title{font-size:1.05rem;font-weight:800;color:var(--forest);}
+.tb-title{font-size:1.05rem;font-weight:800;color:var(--forest);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tb-sp{flex:1;}
 .tb-term{font-family:inherit;font-size:.78rem;font-weight:700;color:var(--emerald);background:var(--pale);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;max-width:190px;}
 .tb-btn{position:relative;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mid);background:var(--bg);}
@@ -108,7 +131,7 @@ button{cursor:pointer;border:none;background:none;color:inherit;}
 .kid-b{font-size:.68rem;font-weight:700;color:var(--c);}
 
 /* ══ Hero ══ */
-.hero{position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 20px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,var(--kc) 0%,#0f2318 70%);box-shadow:var(--shadow-lg);margin-bottom:16px;}
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 20px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,var(--kc) 0%,var(--forest) 70%);box-shadow:var(--shadow-lg);margin-bottom:16px;}
 .hero::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 1px,transparent 1px 22px),repeating-linear-gradient(-45deg,rgba(255,255,255,.035) 0 1px,transparent 1px 22px);pointer-events:none;}
 .hero-top{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
 .hero-av{width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;}
@@ -246,6 +269,43 @@ button{cursor:pointer;border:none;background:none;color:inherit;}
 .vid-frame{position:relative;padding-top:56.25%;background:#000;border-radius:14px;overflow:hidden;}
 .vid-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
 
+/* ══ 🛒 سوق النقاط (دفعة ٣١) ══ */
+.sto-hero{position:relative;overflow:hidden;border-radius:22px;padding:18px 20px;color:#3b2a00;background:linear-gradient(135deg,#ffe29a 0%,#f0b429 55%,#d99a06 100%);box-shadow:var(--shadow-lg);margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.sto-hero::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 1px,transparent 1px 22px);pointer-events:none;}
+.sto-hero .sh-i{font-size:2.6rem;line-height:1;position:relative;z-index:1;}
+.sto-hero .sh-t{font-family:'Amiri',serif;font-size:1.45rem;font-weight:700;line-height:1.2;}
+.sto-hero .sh-s{font-size:.8rem;font-weight:700;opacity:.85;margin-top:3px;line-height:1.6;}
+.sto-hero .sh-b{margin-right:auto;text-align:center;background:rgba(255,255,255,.6);border-radius:16px;padding:8px 16px;position:relative;z-index:1;}
+.sto-hero .sh-b b{display:block;font-size:1.7rem;font-weight:900;color:#7a4a00;line-height:1.1;}
+.sto-hero .sh-b small{font-size:.68rem;font-weight:800;}
+.in.sto-sort{width:auto;padding:9px 10px;font-size:.8rem;}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:16px;}
+.scard{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(220,232,224,.8);display:flex;flex-direction:column;transition:.2s;}
+.scard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.scard.out{opacity:.72;}
+.s-img{position:relative;aspect-ratio:1/1;background:linear-gradient(180deg,#fff,#f4f7f5);display:flex;align-items:center;justify-content:center;border-bottom:1px solid #eef3f0;}
+.s-img img{width:100%;height:100%;object-fit:contain;padding:10px;}
+.s-e{font-size:3.2rem;line-height:1;}
+.s-bd{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
+.s-bd span{font-size:.62rem;font-weight:900;padding:3px 8px;border-radius:6px;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.s-hot{background:linear-gradient(135deg,#e8590c,#c0392b);} .s-new{background:var(--blue);} .s-out{background:#4a5e52;}
+.s-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px;flex:1;}
+.s-n{font-weight:800;font-size:.86rem;color:var(--ink);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em;}
+.s-d{font-size:.7rem;color:var(--light);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.s-p{display:flex;align-items:baseline;gap:4px;color:var(--forest);}
+.s-p b{font-size:1.4rem;font-weight:900;line-height:1;} .s-p small{font-size:.72rem;font-weight:800;color:var(--gold);}
+.s-st{font-size:.7rem;font-weight:800;} .s-st.ok{color:var(--jade);} .s-st.low{color:#c2410c;} .s-st.out{color:var(--red);}
+.s-aff{margin-top:auto;padding-top:4px;}
+.s-ok{font-size:.72rem;font-weight:900;color:var(--jade);background:var(--pale);border-radius:9px;padding:6px 8px;text-align:center;}
+.s-need{font-size:.68rem;font-weight:800;color:var(--mid);margin-top:4px;text-align:center;}
+.sto-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px 16px;}
+.sto-mini{text-align:center;min-width:0;}
+.sm-i{aspect-ratio:1/1;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.8rem;}
+.sm-i img{width:100%;height:100%;object-fit:contain;padding:4px;}
+.sm-n{font-size:.68rem;font-weight:800;color:var(--forest);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sm-p{font-size:.7rem;font-weight:900;color:var(--gold);}
+.sto-teaser{cursor:pointer;}
+
 /* ══ Inbox ══ */
 .msg{display:flex;gap:12px;padding:13px 18px;border-bottom:1px solid #eef3f0;cursor:pointer;}
 .msg:hover{background:#fafcfb;}
@@ -293,20 +353,29 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
   .bnav{display:block;}
   .topbar{padding:0 14px;}
   .wrap{padding:14px 14px;}
+  /* (دفعة ٢٣) الصفحات اللي في الشريط السفلي مش بتتكرر في السايدبار */
+  .sb-item.bn-dup{display:none;}
+  .sb-logo-title{font-size:.9rem;}
+  /* (دفعة ٢٣) خط أكبر على الموبايل — كل المقاسات بالـ rem بتكبر مع بعض */
+  html{font-size:19.2px;}
+  .in,.lv-search input,textarea.in{font-size:16px;}
 }
 @media (max-width:520px){
   .lib-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .vid-grid{grid-template-columns:1fr;}
   .lv-search{max-width:none;}
-  .tb-title{font-size:.95rem;}
-  .tb-term{max-width:120px;font-size:.72rem;padding:6px 8px;}
+  .tb-title{font-size:.85rem;line-height:1.2;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .topbar{gap:8px;}
+  .tb-btn{width:38px;height:38px;}
+  .tb-term{max-width:100px;font-size:.66rem;padding:6px 6px;}
   .hero{padding:18px 16px;}
   .hero-n{font-size:1.25rem;}
   .hero-av{width:48px;height:48px;font-size:1.25rem;}
   .prow{flex-direction:column;align-items:stretch;gap:8px;}
   .prow-n{width:auto;}
   .seg{justify-content:stretch;}
-  .opt{flex:1;justify-content:center;padding:10px 6px;}
+  .opt{flex:1;justify-content:center;padding:10px 4px;gap:4px;white-space:nowrap;font-size:.74rem;}
+  .card-h{flex-wrap:wrap;row-gap:10px;}
   .st-v{font-size:1.25rem;}
 }
 </style>
@@ -324,7 +393,7 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
   <nav class="sb-nav" id="sb-nav"></nav>
   <div class="sb-foot">
     <div class="sb-user"><div class="sb-av" id="me-av">و</div><div style="min-width:0;flex:1;"><div class="sb-un" id="me-name">—</div><div class="sb-ur" id="me-code">ولي أمر</div></div>
-      <button class="tb-btn" style="background:rgba(255,255,255,.08);color:#fff;" title="خروج" onclick="confirmLogout()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button></div>
+      <button class="tb-btn sb-out" title="خروج" onclick="confirmLogout()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button></div>
   </div>
 </aside>
 
@@ -334,6 +403,7 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
     <div class="tb-title" id="tb-title">الرئيسية</div>
     <div class="tb-sp"></div>
     <select class="tb-term" id="term-sel" onchange="changeTerm(this.value)" title="الدورة"></select>
+    <button class="tb-btn tb-theme" onclick="thOpen()" title="تغيير الثيم" aria-label="تغيير الثيم">🎨</button>
     <button class="tb-btn" onclick="navPage('notifs')" title="الإشعارات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="tb-dot" style="display:none;"></span></button>
   </header>
 
@@ -354,6 +424,8 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
     <section class="page" id="page-file"></section>
     <!-- النقاط ولوحة الشرف -->
     <section class="page" id="page-points"></section>
+    <!-- 🛒 سوق النقاط (دفعة ٣١) -->
+    <section class="page" id="page-store"></section>
     <!-- الاختبارات -->
     <section class="page" id="page-exams"></section>
     <!-- التقييم السلوكي -->
@@ -385,6 +457,12 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
 <div class="overlay" id="modal-video" onclick="if(event.target===this) vidClose()"><div class="modal wide">
   <div class="modal-h"><div class="modal-t" id="vid-mt">مقطع مرئي</div><button class="modal-x" onclick="vidClose()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
   <div class="modal-b"><div class="vid-frame"><iframe id="vid-frame" src="about:blank" allow="autoplay; fullscreen" allowfullscreen title="مقطع مرئي"></iframe></div><div id="vid-desc" style="font-size:.82rem;color:var(--mid);line-height:1.9;margin-top:12px;white-space:pre-line;"></div></div>
+</div></div>
+
+<!-- مودال الثيم (دفعة ٢٣) -->
+<div class="overlay" id="modal-theme" onclick="if(event.target===this) closeModal('modal-theme')"><div class="modal">
+  <div class="modal-h"><div class="modal-t">🎨 اختر ثيمك الشخصي<div style="font-size:.72rem;color:var(--light);font-weight:600;margin-top:2px;">يتحفظ لحسابك على أي جهاز</div></div><button class="modal-x" onclick="closeModal('modal-theme')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="modal-b"><div class="th-grid" id="th-grid"></div></div>
 </div></div>
 
 <!-- مودال رسالة جديدة -->
@@ -680,6 +758,7 @@ ICONS.video='<rect x="2" y="5" width="15" height="14" rx="2.5"/><path d="m17 10 
 ICONS.play='<path d="M7 4.5v15l13-7.5z"/>';
 ICONS.search='<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>';
 ICONS.pause='<circle cx="12" cy="12" r="10"/><path d="M10 9v6M14 9v6"/>';
+ICONS.cart='<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.2a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.5L22 7H6"/>';
 function ic(n,cls){ return '<svg class="ic'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[n]||'')+'</svg>'; }
 const AR=spAr;
 const BR_COL={'الأبطال':['#1d6fa4','#e8f2fb'],'الرواد':['#2d7a50','#e8f5ee'],'الملكات':['#6b3fa0','#f0ebfa'],'الأميرات':['#c2417a','#fcebf3']};
@@ -690,7 +769,7 @@ const STF_BH=[['discipline','الانضباط'],['behavior','السلوك'],['pa
 const STF_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
 const NAV=[
   ['home','الرئيسية','home'],['prayers','الصلوات','moon'],['attendance','الحضور','calcheck'],['recitation','التسميع','book'],
-  ['plan','خطة الطالب','target'],['file','ملف الطالب','folder'],['points','النقاط ولوحة الشرف','trophy'],['exams','الاختبارات','award'],['behavior','التقييم السلوكي','smile'],
+  ['plan','خطة الطالب','target'],['file','ملف الطالب','folder'],['points','النقاط ولوحة الشرف','trophy'],['store','سوق النقاط','cart'],['exams','الاختبارات','award'],['behavior','التقييم السلوكي','smile'],
   ['subs','الاشتراك','wallet'],['library','المكتبة','library'],['videos','المرئيات','video'],
   ['notifs','الإشعارات','bell'],['inbox','الإعلانات والرسائل','mail'],['settings','الإعدادات','lock']
 ];
@@ -715,6 +794,7 @@ function pct(a,b){ return b?Math.round(a/b*100):null; }
 document.addEventListener('DOMContentLoaded', init);
 async function init(){
   ME=await verifyMe(['parent']); if(!ME) return;
+  thApply(ME.theme);   // (دفعة ٢٣) ثيم الحساب من القاعدة
   $('me-name').textContent=ME.full_name||'ولي الأمر';
   $('me-av').textContent=first(String(ME.full_name||'').replace(/^ولي أمر\s*/,'')).charAt(0)||'و';
   $('me-code').textContent='الكود: '+String(ME.username||'').split('@')[0];
@@ -737,7 +817,7 @@ async function init(){
 }
 function showPageErr(){ document.querySelector('.wrap').innerHTML='<div class="card">'+errBox()+'</div>'; }
 function buildNav(){
-  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(n[0]==='library'?'<div class="sb-sec">المكتبة والمرئيات</div>':'')+(n[0]==='notifs'?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+(n[0]==='notifs'?'<span class="cnt" id="sb-ncnt" style="display:none;"></span>':'')+'</button>').join('');
+  $('sb-nav').innerHTML='<div class="sb-sec">المتابعة</div>'+NAV.map((n,i)=>(n[0]==='library'?'<div class="sb-sec">المكتبة والمرئيات</div>':'')+(n[0]==='notifs'?'<div class="sb-sec">التواصل والحساب</div>':'')+'<button class="sb-item'+(BNAV.some(b=>b[0]===n[0])?' bn-dup':'')+'" data-p="'+n[0]+'" onclick="navPage(\''+n[0]+'\')">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='inbox'?'<span class="cnt" id="sb-cnt" style="display:none;"></span>':'')+(n[0]==='notifs'?'<span class="cnt" id="sb-ncnt" style="display:none;"></span>':'')+'</button>').join('');
   $('bnav').innerHTML=BNAV.map(n=>'<button class="bn" data-p="'+n[0]+'" onclick="'+(n[0]==='more'?'toggleSide(true)':'navPage(\''+n[0]+'\')')+'">'+ic(n[2])+'<span>'+n[1]+'</span></button>').join('');
 }
 function buildTermSel(){
@@ -755,7 +835,7 @@ function navPage(p){
   document.querySelectorAll('.bn').forEach(x=>x.classList.toggle('active',x.dataset.p===p||(!inB&&x.dataset.p==='more')));
   const n=NAV.find(x=>x[0]===p); $('tb-title').textContent=n?n[1]:'';
   const noKid=(p==='inbox'||p==='notifs'||p==='settings'||p==='library'||p==='videos');
-  $('term-sel').style.display=(p==='prayers'||noKid)?'none':'';
+  $('term-sel').style.display=(p==='prayers'||p==='store'||noKid)?'none':'';
   $('kids').style.display=(noKid||KIDS.length<2)?'none':'';
   toggleSide(false); window.scrollTo({top:0,behavior:'smooth'});
   renderPage();
@@ -786,6 +866,7 @@ async function loadKid(){
     subs: ()=>selectAll(db.from('fin_subscriptions').select('id,month_no,amount,pay_method,paid_date,reversed,reversal_of,term_id').eq('student_id',k.id).order('paid_date').order('id')),
     board:()=>db.rpc('parent_circle_board',{p_student:k.id}),
     kid:  ()=>db.rpc('parent_children'),
+    sord: ()=>selectAll(db.from('store_orders').select('id,order_no,total,items_count,created_at,refunded,store_order_items(product_name,qty)').eq('student_id',k.id).order('created_at',{ascending:false}).order('id')),   // (دفعة ٣١)
   };
   await Promise.all(Object.keys(jobs).map(async n=>{ try{ const r=await jobs[n](); if(r.error) throw r.error; X[n]=r.data; }catch(e){ X.err[n]=1; loadWarn(e); } }));
   if(seq!==LOAD_SEQ) return;
@@ -793,7 +874,7 @@ async function loadKid(){
   D=X; renderPage();
 }
 function renderPage(){
-  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,file:rFile,points:rPoints,exams:rExams,behavior:rBeh,subs:rSubs,library:rLib,videos:rVid,notifs:rNotifs,inbox:rInbox,settings:rSettings}[PAGE];
+  const f={home:rHome,prayers:rPrayers,attendance:rAtt,recitation:rRec,plan:rPlan,file:rFile,points:rPoints,store:rStore,exams:rExams,behavior:rBeh,subs:rSubs,library:rLib,videos:rVid,notifs:rNotifs,inbox:rInbox,settings:rSettings}[PAGE];
   if(f) f();
 }
 function pg(id){ return $('page-'+id); }
@@ -848,6 +929,7 @@ async function rHome(){
     +tile('t-purple','target',D.err.plans?'!':(hp==null?'—':AR(hp)+'٪'),'خطة الحفظ',(rp==null||pNR())?'':'المراجعة: '+AR(rp)+'٪','plan')
     +tile('t-gold','trophy',D.err.board||!B.rank?'—':AR(B.rank),'الترتيب في الحلقة',B.total?'من '+AR(B.total)+' '+kidWord('طالب','طالبة'):'','points')
     +'</div>';
+  h+='<div id="home-store"></div>';   // (دفعة ٣١) سوق النقاط
   // صلوات الأسبوع
   h+='<div class="grid2"><div class="card">'+cardH('moon','صلوات الأسبوع ده','سجّل صلوات '+kidWord('ابنك','بنتك')+' كل يوم','<button class="btn btn-p btn-sm" onclick="navPage(\'prayers\')">'+ic('edit','sm')+' سجّل</button>')+'<div class="card-b" id="home-pr">'+'<div class="skel"></div>'+'</div></div>';
   // آخر نشاط
@@ -858,6 +940,7 @@ async function rHome(){
   h+='<div class="card">'+cardH('activity','آخر النشاط','الحضور والتسميع')+'<div class="list">'
     +(act.length?act.slice(0,6).map(a=>a.k==='att'?liAtt(a.r):liMem(a.r)).join(''):emptyBox('activity','لسه مفيش نشاط في الدورة دي'))+'</div></div></div>';
   el.innerHTML=h;
+  stoTeaser();   // (دفعة ٣١)
   // ملخّص الصلوات
   const box=$('home-pr'); if(!box) return;
   try{
@@ -1042,6 +1125,103 @@ const STF_TJ=[
   ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
   ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]],
 ];
+// ══ 🎙️ التجويد (دفعة ٢٤) — ٧ مستويات • المعلم بيحدد مستوى الطالب كل شهر: المستوى + التقدير + ملاحظة ══
+//   student_files.data.tajweed_t[term_id] = { month1:{lvl,gr,note}, month2:{…}, month3:{…} }
+//   data.tajweed (مهارات المستويات القديمة) = أرشيف الدورة الصيفية — عرض بس ومابيتعدّلش
+const TJ_LEVELS=[
+  'مخرج الأحرف اللثوية ومخرج الجيم',
+  'التفخيم والترقيق — أحكام الراء ولام اسم الجلالة وألف المد',
+  'الهمس والقلقلة والشدة في الجيم وإتمام الحركات',
+  'الإدغام في المثلين والمتقاربين والمتجانسين • حرف الضاد • اللام الشمسية واللام القمرية',
+  'الإظهار والإدغام والإقلاب والإخفاء في النون الساكنة والتنوين',
+  'الإخفاء والإدغام والإظهار في الميم الساكنة • النون والميم المشددتين',
+  'المد الطبيعي والمتصل والمنفصل واللازم ومد العوض والبدل واللين'
+];
+const TJ_ORD=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'];
+const TJ_GR=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+const TJ_GR_COL={'ممتاز':'var(--jade)','جيد جداً':'var(--blue)','جيد':'var(--gold)','يحتاج تطوير':'var(--red)'};
+const TJ_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
+// المستويات القديمة (الصيف) — للأرشيف بس
+const TJ_OLD=[
+  ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
+  ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
+  ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
+  ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
+  ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
+  ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
+  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]]
+];
+function tjEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function tjLvlName(n){ n=+n; return (n>=1&&n<=7)?('المستوى '+TJ_ORD[n-1]):''; }
+function tjIsLegacy(t){ return !t||!!(t.settings&&t.settings.legacy); }
+function tjOf(d,t){ const x=t&&d&&d.tajweed_t&&d.tajweed_t[t.id]; return (x&&typeof x==='object')?x:{}; }
+function tjLast(m){ for(let i=TJ_MONTHS.length-1;i>=0;i--){ const x=m&&m[TJ_MONTHS[i][0]]; if(x&&+x.lvl>=1&&+x.lvl<=7) return Object.assign({mlbl:TJ_MONTHS[i][1]},x); } return null; }
+function tjHasOld(d){ const tj=(d&&d.tajweed)||{}; return Object.keys(tj).some(k=>String(tj[k]==null?'':tj[k]).trim()!==''); }
+function tjRefHtml(open){
+  return '<details'+(open?' open':'')+' style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--forest);padding:8px 12px;background:var(--pale);border-radius:8px;">📚 مستويات التجويد السبعة</summary>'
+    +'<div style="padding:6px 4px 0;">'+TJ_LEVELS.map((s,i)=>'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 2px;border-bottom:1px dashed var(--border);font-size:.78rem;line-height:1.7;"><b style="min-width:96px;color:var(--emerald);white-space:nowrap;">'+tjLvlName(i+1)+'</b><span style="color:var(--mid);">'+tjEsc(s)+'</span></div>').join('')+'</div></details>';
+}
+function tjCurHtml(last){
+  if(!last) return '';
+  return '<div style="font-size:.82rem;margin-bottom:10px;padding:9px 12px;border-radius:8px;background:var(--pale);color:var(--forest);line-height:1.8;">🎯 المستوى الحالي: <b>'+tjLvlName(last.lvl)+'</b> — '+tjEsc(TJ_LEVELS[last.lvl-1])
+    +(last.gr?' • التقدير: <b style="color:'+(TJ_GR_COL[last.gr]||'inherit')+';">'+tjEsc(last.gr)+'</b>':'')+' <span style="color:var(--light);font-size:.74rem;">('+last.mlbl+')</span></div>';
+}
+// أرشيف الصيف (المهارات القديمة) — عرض بس
+function tjArchiveHtml(d,open){
+  if(!tjHasOld(d)) return '';
+  const tj=d.tajweed||{}, td='padding:5px 9px;border:1px solid var(--border);';
+  let rows='';
+  TJ_OLD.forEach(([lvl,skills])=>{ const has=skills.filter(([k])=>String(tj[k]||'').trim()||String(tj[k+'_note']||'').trim()); if(!has.length) return;
+    rows+='<tr style="background:var(--pale);"><td colspan="3" style="'+td+'font-weight:700;font-size:.76rem;color:var(--forest);">'+lvl+'</td></tr>'
+      +has.map(([k,l])=>'<tr><td style="'+td+'">'+l+'</td><td style="'+td+'text-align:center;font-weight:700;white-space:nowrap;color:'+(TJ_GR_COL[tj[k]]||'var(--mid)')+';">'+tjEsc(tj[k]||'—')+'</td><td style="'+td+'color:var(--mid);">'+tjEsc(tj[k+'_note']||'')+'</td></tr>').join(''); });
+  return '<details'+(open?' open':'')+' style="margin-top:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--mid);padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">📦 أرشيف الدورة الصيفية — المستويات القديمة (عرض بس)</summary>'
+    +'<div style="overflow-x:auto;margin-top:8px;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;"><thead><tr style="background:var(--pale);color:var(--forest);"><th style="'+td+'text-align:right;">المهارة</th><th style="'+td+'">التقدير</th><th style="'+td+'text-align:right;">ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>';
+}
+// نموذج الإدخال: شهر × (المستوى + التقدير + ملاحظة)
+function tjEditHtml(d,t,pre){
+  const m=tjOf(d,t), st='box-sizing:border-box;font-family:Tajawal,sans-serif;font-size:.8rem;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;outline:none;background:var(--white,#fff);color:var(--ink,#1a1a1a);';
+  return TJ_MONTHS.map(([k,l])=>{ const x=m[k]||{};
+    const lv='<option value="">— اختار المستوى —</option>'+TJ_LEVELS.map((s,i)=>'<option value="'+(i+1)+'"'+(+x.lvl===i+1?' selected':'')+'>'+tjLvlName(i+1)+' — '+tjEsc(s)+'</option>').join('');
+    const gr='<option value="">— التقدير —</option>'+TJ_GR.map(g=>'<option value="'+g+'"'+(g===x.gr?' selected':'')+'>'+g+'</option>').join('');
+    return '<div style="border:1.5px solid var(--border);border-right:4px solid var(--jade);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--white,#fff);">'
+      +'<div style="font-weight:800;color:var(--forest);font-size:.84rem;margin-bottom:8px;">📅 '+l+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+      +'<select id="'+pre+'-'+k+'-lvl" style="'+st+'flex:2 1 220px;min-width:0;max-width:100%;">'+lv+'</select>'
+      +'<select id="'+pre+'-'+k+'-gr" style="'+st+'flex:1 1 120px;min-width:0;">'+gr+'</select></div>'
+      +'<input id="'+pre+'-'+k+'-note" type="text" maxlength="300" placeholder="ملاحظة (اختياري)" value="'+tjEsc(x.note||'')+'" style="'+st+'width:100%;">'
+      +'</div>'; }).join('');
+}
+// null = مفيش نموذج (دورة قديمة) • bad = اسم الشهر اللي فيه تقدير/ملاحظة من غير مستوى
+function tjCollect(pre){
+  if(!document.getElementById(pre+'-month1-lvl')) return null;
+  const data={}; let bad=null;
+  TJ_MONTHS.forEach(([k,l])=>{
+    const v=f=>{ const e=document.getElementById(pre+'-'+k+'-'+f); return e?String(e.value||'').trim():''; };
+    const lvl=parseInt(v('lvl'),10), gr=v('gr'), note=v('note').slice(0,300);
+    if(!lvl&&!gr&&!note) return;
+    if(!(lvl>=1&&lvl<=7)){ if(!bad) bad=l; return; }
+    data[k]={ lvl, gr:TJ_GR.includes(gr)?gr:'', note };
+  });
+  return { data, bad };
+}
+function tjPaneHtml(d,t,pre){
+  const head='<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ التجويد — ٧ مستويات'+(t?' • '+tjEsc(t.name):'')+'</div>';
+  if(tjIsLegacy(t)) return head+'<div style="font-size:.78rem;color:#7a5200;background:var(--gold-pale);padding:9px 12px;border-radius:8px;margin-bottom:10px;line-height:1.8;">المستويات الجديدة بتبدأ من الدورة الخريفية — اللي تحت أرشيف للعرض بس</div>'
+    +(tjHasOld(d)?tjArchiveHtml(d,true):'<div style="text-align:center;color:var(--light);padding:18px;font-size:.82rem;">مفيش تقييم تجويد في الدورة دي</div>');
+  return head+tjCurHtml(tjLast(tjOf(d,t)))
+    +'<div style="font-size:.74rem;color:var(--light);margin-bottom:10px;line-height:1.7;">كل شهر: اختار مستوى الطالب وتقديره فيه (وملاحظة لو فيه) — وبيظهر لولي الأمر في ملف ابنه</div>'
+    +tjRefHtml(false)+tjEditHtml(d,t,pre)+tjArchiveHtml(d,false);
+}
+// دمج: بيانات الدورة دي في tajweed_t[term] من غير ما يلمس باقي الدورات ولا الأرشيف القديم
+function tjPack(prev,obj,t){
+  if(!obj||!Object.prototype.hasOwnProperty.call(obj,'_tj')) return obj;
+  const o=Object.assign({},obj), tj=o._tj; delete o._tj; delete o._tjBad;
+  if(tjIsLegacy(t)||!tj) return o;
+  const all=Object.assign({}, (prev&&prev.tajweed_t&&typeof prev.tajweed_t==='object')?prev.tajweed_t:{});
+  if(Object.keys(tj).length) all[t.id]=tj; else delete all[t.id];
+  o.tajweed_t=all;
+  return o;
+}
 const STF_MLBL=['الشهر الأول','الشهر الثاني','الشهر الثالث','الشهر الرابع','الشهر الخامس','الشهر السادس','الشهر السابع','الشهر الثامن','الشهر التاسع','الشهر العاشر','الشهر الحادي عشر','الشهر الثاني عشر'];
 let FILE_TAB='quran', FILE_MON=null;
 function pNR(){ return termNoReview((D&&D.t)||VIEW_TERM); }
@@ -1051,11 +1231,13 @@ function rFile(){
   if(D.err.file||D.err.mem){ el.innerHTML='<div class="card">'+errBox()+'</div>'; return; }
   const k=D.k, d=(D.file&&D.file.data)||{}, t=D.t, A=attStats(D.att), mem=D.mem||[], NR=pNR();
   const exd=d.exams||{}, exDates=Object.keys(exd).filter(x=>!t||(x>=t.start_date&&x<=t.end_date)).sort();
+  const tjL=(t&&!termIsLegacy(t))?tjLast(tjOf(d,t)):null;   // (دفعة ٢٤)
   const tile=(tone,icon,val,lbl,sub,go)=>'<div class="st '+tone+'" onclick="navPage(\''+go+'\')"><div class="st-i">'+ic(icon)+'</div><div class="st-v">'+val+'</div><div class="st-l">'+lbl+'</div>'+(sub?'<div class="st-s">'+sub+'</div>':'')+'</div>';
   let h='<div class="card"><div class="card-b" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
     +'<div style="width:54px;height:54px;border-radius:16px;background:var(--kp);color:var(--kc);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;">'+esc(first(k.name).charAt(0))+'</div>'
     +'<div style="flex:1;min-width:180px;"><div style="font-family:Amiri,serif;font-size:1.25rem;font-weight:700;color:var(--forest);">'+esc(k.name)+'</div>'
     +'<div style="font-size:.76rem;color:var(--mid);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px;"><span>'+ic('flag','sm')+' '+esc(k.branch||'—')+'</span>'+(k.circle?'<span>'+ic('users','sm')+' '+esc(k.circle)+'</span>':'')+(k.teacher?'<span>'+ic('user','sm')+' '+kidWord('المعلم','المعلمة')+': '+esc(k.teacher)+'</span>':'')+'</div></div>'
+    +(tjL?'<span class="pill p-blue" style="cursor:pointer;" onclick="FILE_TAB=\'tajweed\';rFile();">🎙️ التجويد: '+tjLvlName(tjL.lvl)+'</span>':'')
     +'<span class="pill p-gray">'+ic('lock','sm')+' للعرض بس'+(t?' • '+esc(t.name):'')+'</span></div></div>';
   h+='<div class="stats">'
     +tile('t-green','calcheck',D.err.att?'!':(A.pct==null?'—':AR(A.pct)+'٪'),'الحضور',D.err.att?'':AR(A.present+A.late)+' من '+AR(A.total)+' حلقة','attendance')
@@ -1065,13 +1247,30 @@ function rFile(){
     +'</div>';
   h+='<div class="tabs">'+[['quran','السجل القرآني'],['tajweed','التجويد'],['behavior','التقييم السلوكي']].map(x=>'<button class="tab'+(FILE_TAB===x[0]?' on':'')+'" onclick="FILE_TAB=\''+x[0]+'\';rFile();">'+x[1]+'</button>').join('')+'</div>';
   if(FILE_TAB==='tajweed'){
+   // (دفعة ٢٤) ٧ مستويات — المعلم بيحدد المستوى كل شهر (tajweed_t) • الدورة الصيفية = أرشيف المستويات القديمة
+   if(t&&!termIsLegacy(t)){
+    const m=tjOf(d,t), last=tjLast(m), rows=TJ_MONTHS.filter(([k])=>m[k]&&+m[k].lvl>=1&&+m[k].lvl<=7);
+    if(!last) h+='<div class="card">'+emptyBox('book',kidWord('المعلم','المعلمة')+' لسه ما حدّدش مستوى التجويد في الدورة دي')+'</div>';
+    else{
+      h+='<div class="card">'+cardH('target','مستوى التجويد الحالي',last.mlbl+' • '+esc(t.name),null,['var(--blue-pale)','var(--blue)'])
+        +'<div class="card-b"><div style="font-size:1.2rem;font-weight:900;color:var(--forest);">'+tjLvlName(last.lvl)+'</div>'
+        +'<div style="font-size:.86rem;color:var(--mid);margin-top:4px;line-height:1.8;">'+esc(TJ_LEVELS[last.lvl-1])+'</div>'
+        +(last.gr?'<div style="margin-top:8px;">'+stfGrade(last.gr)+'</div>':'')
+        +(last.note?'<div style="font-size:.8rem;color:var(--mid);margin-top:8px;">📝 '+esc(last.note)+'</div>':'')+'</div></div>';
+      if(rows.length>1) h+='<div class="card">'+cardH('calendar','المستوى كل شهر',null,null,['var(--pale)','var(--jade)'])+'<div class="list">'
+        +rows.map(([k,l])=>{ const x=m[k]; return '<div class="li"><div class="li-m"><div class="li-t">'+l+' — '+tjLvlName(x.lvl)+'</div><div class="li-s">'+esc(TJ_LEVELS[x.lvl-1])+'</div>'+(x.note?'<div class="li-s">📝 '+esc(x.note)+'</div>':'')+'</div><div class="li-e">'+stfGrade(x.gr)+'</div></div>'; }).join('')+'</div></div>';
+    }
+    h+='<div class="card">'+cardH('book','مستويات التجويد السبعة',null,null,['var(--gold-pale)','var(--gold)'])+'<div class="list">'
+      +TJ_LEVELS.map((s,i)=>'<div class="li"><div class="li-m"><div class="li-t">'+tjLvlName(i+1)+'</div><div class="li-s">'+esc(s)+'</div></div>'+(last&&+last.lvl===i+1?'<div class="li-e"><span class="pill p-green">'+kidWord('مستواه','مستواها')+'</span></div>':'')+'</div>').join('')+'</div></div>';
+   }else{
     const tj=d.tajweed||{}, any=STF_TJ.some(([,sk])=>sk.some(([s])=>tj[s]));
-    if(!any){ h+='<div class="card">'+emptyBox('book','لسه مفيش تقييم تجويد مسجّل')+'</div>'; }
+    if(!any){ h+='<div class="card">'+emptyBox('book','مفيش تقييم تجويد في الدورة دي')+'</div>'; }
     else STF_TJ.forEach(([lvl,skills])=>{
       if(!skills.some(([s])=>tj[s]||tj[s+'_note'])) return;
-      h+='<div class="card">'+cardH('book',esc(lvl),null,null,['var(--blue-pale)','var(--blue)'])+'<div class="list">'
+      h+='<div class="card">'+cardH('book',esc(lvl),'أرشيف الدورة الصيفية — المستويات القديمة',null,['var(--bg)','var(--mid)'])+'<div class="list">'
         +skills.map(([s,l])=>'<div class="li"><div class="li-m"><div class="li-t">'+l+'</div>'+(tj[s+'_note']?'<div class="li-s">'+esc(tj[s+'_note'])+'</div>':'')+'</div><div class="li-e">'+stfGrade(tj[s])+'</div></div>').join('')+'</div></div>';
     });
+   }
   }else if(FILE_TAB==='behavior'){
     const bh=termBh(d,t); let any=false;
     STF_MONTHS.forEach(([mo,lbl])=>{
@@ -1113,13 +1312,13 @@ function rPoints(){
   const big=(D.cards||[]).filter(c=>!c.is_exchange&&(+c.points||0)>=50), bigSum=big.reduce((s,c)=>s+(+c.points||0),0);
   const pp=(D.ppts||[]).reduce((s,r)=>s+(+r.points||0),0);
   const adj=(D.adj||[]).reduce((s,r)=>s+(+r.points||0),0);   // (دفعة ١٥) إضافة / حذف من الإدارة
-  const CARD={diamond:['ماسي','#6b3fa0'],gold:['ذهبي','#c8920a'],silver:['فضي','#90a4ae'],green:['أخضر','#2d7a50'],blue:['أزرق','#1d6fa4'],yellow:['أصفر','#d4a017']};
+  const CARD={diamond:['ماسي','#6b3fa0'],gold:['ذهبي','#c8920a'],golden:['ذهبي','#c8920a'],excellent:['أخضر','#2d7a50'],very_good:['أزرق','#1d6fa4'],good:['أصفر','#d4a017'],silver:['فضي','#90a4ae'],green:['أخضر','#2d7a50'],blue:['أزرق','#1d6fa4'],yellow:['أصفر','#d4a017']};
   let h='<div class="hero" style="margin-bottom:16px;"><div class="hero-top"><div class="hero-av">'+ic('star','xl')+'</div><div><div class="hero-n">رصيد النقاط</div><div class="hero-s">تراكمي عبر كل الدورات</div></div><div class="hero-pts"><b>'+AR(KID.total_points||0)+'</b><small>نقطة</small></div></div></div>';
   h+='<div class="stats">'
     +'<div class="st t-blue"><div class="st-i">'+ic('book')+'</div><div class="st-v">'+(D.err.memPts?'!':AR(memAll))+'</div><div class="st-l">نقاط التسميع</div></div>'
     +'<div class="st t-gold"><div class="st-i">'+ic('gift')+'</div><div class="st-v">'+(D.err.cards?'!':AR(bigSum))+'</div><div class="st-l">كروت المكافأة</div><div class="st-s">'+AR(big.length)+' كارت</div></div>'
     +'<div class="st t-purple"><div class="st-i">'+ic('moon')+'</div><div class="st-v">'+(D.err.ppts?'!':AR(pp))+'</div><div class="st-l">تحفيز الصلوات</div></div>'
-    +'<div class="st '+(adj<0?'t-red':'t-green')+'" onclick="navPage(\'notifs\')"><div class="st-i">'+ic('award')+'</div><div class="st-v">'+(D.err.adj?'!':(adj<0?'−':(adj?'+':''))+AR(Math.abs(adj)))+'</div><div class="st-l">إضافة / حذف الإدارة</div><div class="st-s">'+AR((D.adj||[]).length)+' حركة</div></div></div>';
+    +'<div class="st '+(adj<0?'t-red':'t-green')+'" onclick="navPage(\'notifs\')"><div class="st-i">'+ic('award')+'</div><div class="st-v">'+(D.err.adj?'!':(adj<0?'−':(adj?'+':''))+AR(Math.abs(adj)))+'</div><div class="st-l">إضافة / خصم / السوق</div><div class="st-s">'+AR((D.adj||[]).length)+' حركة</div></div></div>';
   const B=D.board;
   h+='<div class="grid2"><div class="card">'+cardH('trophy','لوحة الشرف',B&&B.total?('ترتيب '+esc(first(KID.name))+': '+AR(B.rank||'—')+' من '+AR(B.total)+' في الحلقة'):'الحلقة',null,['var(--gold-pale)','var(--gold)']);
   if(D.err.board) h+=errBox();
@@ -1130,9 +1329,9 @@ function rPoints(){
   h+='<div class="card">'+cardH('gift','الكروت',null,null,['var(--gold-pale)','var(--gold)'])+'<div class="list">'
     +(D.err.cards?errBox():((D.cards||[]).length?D.cards.slice(0,30).map(c=>{ const m=CARD[c.card_type]||[c.card_type||'كارت','#8ea598']; const isBig=(+c.points||0)>=50;
       return '<div class="li"><div class="li-i" style="background:'+m[1]+'1f;color:'+m[1]+';">'+ic('card')+'</div><div class="li-m"><div class="li-t">كارت '+esc(m[0])+'</div><div class="li-s">'+fmtD(c.date)+(c.reason?' • '+esc(c.reason):'')+'</div></div><div class="li-e"><b style="color:'+m[1]+';">'+AR(c.points||0)+'</b><div style="font-size:.66rem;color:var(--light);">'+(isBig?(c.is_exchange?'تبديل':'مكافأة'):'تسليم')+'</div></div></div>'; }).join(''):emptyBox('gift','مفيش كروت لسه')))+'</div></div>';
-  h+='<div class="card">'+cardH('award','إضافة وحذف النقاط','من المشرف أو الإدارة — بالسبب',null,['var(--pale)','var(--jade)'])+'<div class="list">'
+  h+='<div class="card">'+cardH('award','إضافة وحذف النقاط','من الإدارة والمشرف وسوق النقاط — بالسبب',null,['var(--pale)','var(--jade)'])+'<div class="list">'
     +(D.err.adj?errBox():((D.adj||[]).length?D.adj.slice(0,30).map(a=>{ const add=(+a.points||0)>0;
-      return '<div class="li"><div class="li-i" style="background:'+(add?'var(--pale)':'var(--red-pale)')+';color:'+(add?'var(--jade)':'var(--red)')+';">'+ic(add?'star':'alert')+'</div><div class="li-m"><div class="li-t">'+(add?'إضافة نقاط':'حذف نقاط')+'</div><div class="li-s" style="white-space:normal;">'+esc(a.reason||'')+'</div><div class="li-s">'+fmtDT(a.created_at)+(a.by_name?' • '+esc(a.by_name):'')+'</div></div><div class="li-e"><b style="color:'+(add?'var(--jade)':'var(--red)')+';">'+(add?'+':'−')+AR(Math.abs(+a.points||0))+'</b></div></div>'; }).join(''):emptyBox('award','مفيش إضافة أو حذف نقاط لحد دلوقتي')))+'</div></div>';
+      return '<div class="li"><div class="li-i" style="background:'+(add?'var(--pale)':'var(--red-pale)')+';color:'+(add?'var(--jade)':'var(--red)')+';">'+ic(/^🛒/.test(a.reason||'')?'cart':(add?'star':'alert'))+'</div><div class="li-m"><div class="li-t">'+(/^🛒/.test(a.reason||'')?'شراء من سوق النقاط':(/^↩️/.test(a.reason||'')?'إلغاء عملية شراء':(add?'إضافة نقاط':'حذف نقاط')))+'</div><div class="li-s" style="white-space:normal;">'+esc(a.reason||'')+'</div><div class="li-s">'+fmtDT(a.created_at)+(a.by_name?' • '+esc(a.by_name):'')+'</div></div><div class="li-e"><b style="color:'+(add?'var(--jade)':'var(--red)')+';">'+(add?'+':'−')+AR(Math.abs(+a.points||0))+'</b></div></div>'; }).join(''):emptyBox('award','مفيش إضافة أو حذف نقاط لحد دلوقتي')))+'</div></div>';
   h+='<div class="card">'+cardH('moon','نقاط تحفيز الصلوات',null,null,['var(--purple-pale)','var(--purple)'])+'<div class="list">'
     +(D.err.ppts?errBox():((D.ppts||[]).length?D.ppts.map(p=>'<div class="li"><div class="li-i" style="background:var(--purple-pale);color:var(--purple);">'+ic('gift')+'</div><div class="li-m"><div class="li-t">أسبوع '+fmtD(p.week_start)+'</div><div class="li-s">'+esc(p.awarded_by_name||'')+(p.note?' • '+esc(p.note):'')+'</div></div><div class="li-e"><b style="color:var(--purple);">+'+AR(p.points)+'</b></div></div>').join(''):emptyBox('moon','مفيش نقاط تحفيز لسه')))+'</div></div>';
   h+='</div></div>';
@@ -1200,6 +1399,80 @@ function rSubs(){
   el.innerHTML=h;
 }
 
+// ══ 🛒 سوق النقاط (دفعة ٣١) — منتجات شعبة الابن (store_products — RLS) + مشترياته (store_orders) — عرض بس ══
+//   الشراء نفسه بيتم في المدرسة من ركن «سوق النقاط» (فريق منصة النقاط بيخصم من الرصيد)
+const STO_CATS=[['all','الكل','🛍️'],['sweets','حلويات','🍬'],['toys','ألعاب','🧸'],['school','أدوات مدرسية','✏️'],['books','كتب','📚'],['other','أخرى','🎁']];
+let STO={rows:null, err:false, cat:'all', sort:'hot', q:''};
+function stoImgUrl(p){ return (p&&p.image_path)?(_SB_URL+'/storage/v1/object/public/store/'+String(p.image_path).split('/').map(encodeURIComponent).join('/')):''; }
+function stoEmo(c){ const x=STO_CATS.find(z=>z[0]===c); return x&&x[0]!=='all'?x[2]:'🎁'; }
+function stoImg(p,cls){ const e=stoEmo(p&&p.category); return (p&&p.image_path)?'<img src="'+esc(stoImgUrl(p))+'" alt="" loading="lazy" onerror="this.outerHTML=\'<span class=&quot;'+(cls||'s-e')+'&quot;>'+e+'</span>\'">':'<span class="'+(cls||'s-e')+'">'+e+'</span>'; }
+async function loadStore(){
+  try{
+    const {data,error}=await selectAll(db.from('store_products').select('id,name,description,category,price,stock,sold_count,image_path,branch_ids,created_at,sort_order').order('sort_order').order('created_at',{ascending:false}).order('id'));
+    if(error) throw error; STO.rows=data||[]; STO.err=false;
+  }catch(e){ STO.err=true; loadWarn(e); }
+  if(PAGE==='store') rStore();
+  if(PAGE==='home') stoTeaser();
+}
+function stoKidRows(){ return (STO.rows||[]).filter(p=>KID&&(p.branch_ids||[]).includes(KID.branch_id)); }
+function stoHot(L){ return new Set(L.filter(p=>(p.sold_count||0)>0).sort((a,b)=>(b.sold_count||0)-(a.sold_count||0)).slice(0,3).map(p=>p.id)); }
+function stoNew(p){ return p.created_at&&(Date.now()-new Date(p.created_at).getTime())<7*86400000; }
+function stoQ(v){ STO.q=v; rStoreGrid(); }
+function rStore(){
+  const el=pg('store'); if(!KID){ el.innerHTML=''; return; }
+  if(STO.rows==null&&!STO.err){ el.innerHTML=skel(5); loadStore(); return; }
+  if(STO.err&&!STO.rows){ el.innerHTML='<div class="card">'+errBox()+'<div style="text-align:center;padding:0 0 18px;"><button class="btn btn-o btn-sm" onclick="STO.err=false;rStore();">إعادة المحاولة</button></div></div>'; STO.err=false; return; }
+  const pts=+KID.total_points||0, all=stoKidRows(), avail=all.filter(p=>+p.stock>0), can=avail.filter(p=>p.price<=pts).length;
+  let h='<div class="sto-hero"><div class="sh-i">🛒</div><div style="position:relative;z-index:1;min-width:0;"><div class="sh-t">سوق النقاط</div>'
+    +'<div class="sh-s">'+(all.length?(can?'رصيد '+esc(first(KID.name))+' يكفي '+AR(can)+' من '+AR(avail.length)+' منتج متاح 🎉':'اجمع نقاط أكتر بالحفظ والحضور والصلاة عشان تشتري من السوق 🌟'):'المنتجات بتنزل قريب إن شاء الله')+'</div></div>'
+    +'<div class="sh-b"><b>'+AR(pts)+'</b><small>نقطة '+esc(first(KID.name))+'</small></div></div>';
+  if(all.length){
+    h+='<div class="lv-bar"><div class="tabs">'+STO_CATS.map(([k,l,e])=>{ const n=k==='all'?all.length:all.filter(p=>p.category===k).length;
+        return (k!=='all'&&!n)?'':'<button class="tab'+(STO.cat===k?' on':'')+'" onclick="STO.cat=\''+k+'\';rStore();">'+e+' '+l+' ('+AR(n)+')</button>'; }).join('')+'</div>'
+      +'<select class="in sto-sort" onchange="STO.sort=this.value;rStoreGrid();">'+[['hot','🔥 الأكثر مبيعاً'],['new','🆕 الأحدث'],['low','⬇️ الأقل نقاط'],['high','⬆️ الأعلى نقاط']].map(o=>'<option value="'+o[0]+'"'+(STO.sort===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'
+      +lvSearch('stoQ',STO.q,'ابحث عن منتج…')+'</div>';
+  }
+  h+='<div id="sto-grid"></div>';
+  // مشتريات الابن
+  const ok=D&&D.k&&KID&&D.k.id===KID.id, O=ok?(D.sord||[]):null;
+  h+='<div class="card">'+cardH('receipt','مشتريات '+esc(first(KID.name)),'من ركن سوق النقاط في المدرسة',null,['var(--gold-pale)','var(--gold)'])+'<div class="list">'
+    +(!ok?'<div class="card-b"><div class="skel"></div></div>':(D.err.sord?errBox():(O.length?O.map(o=>{ const it=(o.store_order_items||[]).map(i=>esc(i.product_name)+(i.qty>1?' ×'+AR(i.qty):'')).join('، ');
+        return '<div class="li"><div class="li-i" style="background:'+(o.refunded?'var(--bg)':'var(--gold-pale)')+';color:'+(o.refunded?'var(--light)':'var(--gold)')+';">'+ic('cart')+'</div><div class="li-m"><div class="li-t" style="white-space:normal;">'+(it||'مشتريات')+'</div><div class="li-s">'+fmtDT(o.created_at)+' • عملية #'+AR(o.order_no)+'</div></div>'
+          +'<div class="li-e">'+(o.refunded?'<span class="pill p-gray">اتلغت</span>':'<b style="color:var(--red);">−'+AR(o.total)+'</b><div style="font-size:.64rem;color:var(--light);">نقطة</div>')+'</div></div>'; }).join('')
+      :emptyBox('cart',kidWord('لسه مااشتراش','لسه مااشترتش')+' حاجة من السوق'))))+'</div></div>';
+  h+='<div style="font-size:.72rem;color:var(--light);text-align:center;line-height:1.8;">الشراء بيتم في المدرسة من ركن «سوق النقاط» — والنقاط بتتخصم من رصيد '+kidWord('ابنك','بنتك')+' ويوصلك إشعار</div>';
+  el.innerHTML=h; rStoreGrid();
+}
+function rStoreGrid(){
+  const box=$('sto-grid'); if(!box||!KID) return;
+  const pts=+KID.total_points||0, all=stoKidRows(), hot=stoHot(all), q=lvNorm(STO.q);
+  const L=all.filter(p=>(STO.cat==='all'||p.category===STO.cat)&&(!q||lvNorm(p.name).indexOf(q)>=0||lvNorm(p.description).indexOf(q)>=0));
+  const S={hot:(a,b)=>(b.sold_count||0)-(a.sold_count||0), new:(a,b)=>String(b.created_at).localeCompare(String(a.created_at)), low:(a,b)=>a.price-b.price, high:(a,b)=>b.price-a.price}[STO.sort];
+  L.sort((a,b)=>((+b.stock>0)-(+a.stock>0))||(S?S(a,b):0));
+  if(!all.length){ box.innerHTML='<div class="card">'+emptyBox('cart','لسه مفيش منتجات في سوق '+esc(KID.branch||'')+' — هتنزل قريب إن شاء الله')+'</div>'; return; }
+  if(!L.length){ box.innerHTML='<div class="card">'+emptyBox('search','مفيش منتجات مطابقة')+'</div>'; return; }
+  box.innerHTML='<div class="sgrid">'+L.map(p=>{
+    const st=+p.stock||0, out=st<=0, pr=+p.price||0, pc=pr?Math.min(100,Math.round(pts/pr*100)):100;
+    const aff=out?'':(pts>=pr?'<div class="s-ok">✅ '+kidWord('رصيده','رصيدها')+' يكفي</div>'
+      :'<div class="bar" style="height:7px;"><i style="width:'+pc+'%;background:var(--gold);"></i></div><div class="s-need">فاضل '+AR(pr-pts)+' نقطة — معاك '+AR(pts)+' من '+AR(pr)+'</div>');
+    return '<div class="scard'+(out?' out':'')+'"><div class="s-img">'+stoImg(p)
+      +'<div class="s-bd">'+(hot.has(p.id)?'<span class="s-hot">🔥 الأكثر مبيعاً</span>':'')+(out?'<span class="s-out">نفد</span>':'')+(!hot.has(p.id)&&!out&&stoNew(p)?'<span class="s-new">جديد</span>':'')+'</div></div>'
+      +'<div class="s-b"><div class="s-n" title="'+esc(p.name)+'">'+esc(p.name)+'</div>'+(p.description?'<div class="s-d">'+esc(p.description)+'</div>':'')
+      +'<div class="s-p"><span>⭐</span><b>'+AR(pr)+'</b><small>نقطة</small></div>'
+      +(out?'<div class="s-st out">نفد — هيتوفر قريب إن شاء الله</div>':(st<=5?'<div class="s-st low">⚡ متبقي '+AR(st)+' بس</div>':'<div class="s-st ok">✔ متوفر</div>'))
+      +'<div class="s-aff">'+aff+'</div></div></div>'; }).join('')+'</div>';
+}
+// كارت في الرئيسية يشجّع الطالب
+function stoTeaser(){
+  const box=$('home-store'); if(!box||!KID) return;
+  if(STO.rows==null){ if(!STO.err) loadStore(); return; }
+  const all=stoKidRows().filter(p=>+p.stock>0); if(!all.length){ box.innerHTML=''; return; }
+  const pts=+KID.total_points||0, can=all.filter(p=>p.price<=pts).length, hot=stoHot(all);
+  const pick=all.slice().sort((a,b)=>(hot.has(b.id)-hot.has(a.id))||((a.price<=pts?0:1)-(b.price<=pts?0:1))||(b.sold_count||0)-(a.sold_count||0)).slice(0,4);
+  box.innerHTML='<div class="card sto-teaser" onclick="navPage(\'store\')">'+cardH('cart','🛒 سوق النقاط',can?(kidWord('رصيده','رصيدها')+' يكفي '+AR(can)+' من '+AR(all.length)+' منتج'):('اجمع نقاط أكتر — فيه '+AR(all.length)+' منتج مستنيك'),'<button class="btn btn-p btn-sm">تسوّق ←</button>',['var(--gold-pale)','var(--gold)'])
+    +'<div class="sto-strip">'+pick.map(p=>'<div class="sto-mini"><div class="sm-i">'+stoImg(p,'s-e')+'</div><div class="sm-n">'+esc(p.name)+'</div><div class="sm-p">⭐ '+AR(p.price)+'</div></div>').join('')+'</div></div>';
+}
+
 // ══ الإعلانات والرسائل ══
 let INB_TAB='ann';
 async function loadInbox(){
@@ -1227,8 +1500,9 @@ const NTF_ICON={points_add:['star','var(--pale)','var(--jade)'], points_remove:[
   // (دفعة ١٨) تلقائية من القاعدة (parent_alerts_dispatch)
   absence_warn:['calcheck','var(--red-pale)','var(--red)'], grade_warn:['book','var(--gold-pale)','var(--gold)'],
   prayer_reminder:['moon','var(--purple-pale)','var(--purple)'], sub_reminder:['wallet','var(--gold-pale)','var(--gold)'],
-  points_reset:['star','var(--gold-pale)','var(--gold)']};   // (دفعة ١٩) تصفير النقاط
-const NTF_LINKS=['points','recitation','attendance','prayers','subs'];
+  points_reset:['star','var(--gold-pale)','var(--gold)'],   // (دفعة ١٩) تصفير النقاط
+  store_purchase:['cart','var(--gold-pale)','var(--gold)'], store_refund:['repeat','var(--pale)','var(--jade)']};   // (دفعة ٣١) سوق النقاط
+const NTF_LINKS=['points','recitation','attendance','prayers','subs','store'];
 async function loadNotifs(){
   try{
     const {data,error}=await db.from('notifications').select('id,type,title,body,link,meta,is_read,created_at,actor_name')
@@ -1237,7 +1511,7 @@ async function loadNotifs(){
     const prevTop=NTF.top, rows=data||[];
     NTF={rows, err:false, top:rows.length?String(rows[0].id):null};
     // إشعار نقاط جديد وصل والصفحة مفتوحة → حدّث رصيد الابن من القاعدة
-    if(prevTop!==undefined && NTF.top && NTF.top!==prevTop && /^(points_|recitation)/.test(rows[0].type||'') && KID) loadKid();
+    if(prevTop!==undefined && NTF.top && NTF.top!==prevTop && /^(points_|recitation|store_)/.test(rows[0].type||'') && KID) loadKid();
   }catch(e){ NTF.err=true; NTF.rows=NTF.rows||[]; loadWarn(e); }
   inboxBadge(); if(PAGE==='notifs') rNotifs();
 }
@@ -1375,13 +1649,16 @@ function libOpen(id){ id=lvId(id); if(!id) return; window.open('https://drive.go
 
 async function loadVid(){
   try{
-    const {data,error}=await selectAll(db.from('media_videos').select('id,title,description,drive_id,sort_order,created_at').eq('is_active',true).order('sort_order').order('created_at').order('id'));
+    const {data,error}=await selectAll(db.from('media_videos').select('id,title,description,drive_id,source,sort_order,created_at').eq('is_active',true).order('sort_order').order('created_at').order('id'));
     if(error) throw error;
     VID.rows=(data||[]).filter(v=>lvId(v.drive_id)); VID.err=false;
   }catch(e){ VID.err=true; loadWarn(e); }
   if(PAGE==='videos') rVid();
 }
 function vidQ(v){ VID.q=v; rVidGrid(); }
+// (دفعة ٢٧) يوتيوب أو جوجل درايف
+function vdYt(v){ return v&&v.source==='youtube'; }
+function vdThumb(v,id){ return vdYt(v)?'https://img.youtube.com/vi/'+id+'/hqdefault.jpg':'https://drive.google.com/thumbnail?id='+id+'&sz=w640'; }
 function rVid(){
   const el=pg('videos');
   if(VID.rows==null&&!VID.err){ el.innerHTML=skel(5); loadVid(); return; }
@@ -1397,7 +1674,7 @@ function rVidGrid(){
   const list=all.map((v,i)=>Object.assign({_n:i+1},v)).filter(v=>!q||lvNorm(v.title).indexOf(q)>=0||lvNorm(v.description).indexOf(q)>=0);
   if(!list.length){ box.innerHTML='<div class="card">'+emptyBox('video',all.length?'مفيش مقاطع مطابقة':'لسه مفيش مقاطع مرئية')+'</div>'; return; }
   box.innerHTML='<div class="vid-grid">'+list.map(v=>{ const id=lvId(v.drive_id), t=esc((v.title&&v.title.trim())||('مقطع مرئي '+AR(v._n)));
-    return '<button class="lv-card" onclick="vidPlay(\''+esc(String(v.id))+'\')"><div class="lv-cover"><img src="https://drive.google.com/thumbnail?id='+id+'&sz=w640" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="lv-play"><span>'+ic('play')+'</span></div><div class="lv-no">'+AR(v._n)+'</div></div>'
+    return '<button class="lv-card" onclick="vidPlay(\''+esc(String(v.id))+'\')"><div class="lv-cover"><img src="'+vdThumb(v,id)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><div class="lv-play"><span>'+ic('play')+'</span></div><div class="lv-no">'+AR(v._n)+'</div></div>'
       +'<div class="lv-t">'+t+(v.description&&v.description.trim()?'<div class="lv-d">'+esc(String(v.description).trim().slice(0,110))+'</div>':'')+'</div></button>'; }).join('')+'</div>';
 }
 function vidPlay(vid){
@@ -1405,7 +1682,7 @@ function vidPlay(vid){
   const i=(VID.rows||[]).indexOf(v);
   $('vid-mt').textContent=(v.title&&v.title.trim())||('مقطع مرئي '+AR(i+1));
   $('vid-desc').textContent=(v.description||'').trim();
-  $('vid-frame').src='https://drive.google.com/file/d/'+id+'/preview';
+  $('vid-frame').src=vdYt(v)?'https://www.youtube-nocookie.com/embed/'+id+'?rel=0&autoplay=1':'https://drive.google.com/file/d/'+id+'/preview';
   openModal('modal-video');
 }
 function vidClose(){ const f=$('vid-frame'); if(f) f.src='about:blank'; closeModal('modal-video'); }
@@ -1445,7 +1722,47 @@ async function changeMyPassword(){
   catch(e){ console.warn(e); showToast('⚠️ ما اتغيّرتش — جرّب تاني'); }
   finally{ btn.disabled=false; }
 }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal('modal-msg'); closeModal('modal-compose'); vidClose(); toggleSide(false); } });
+// ══ 🎨 الثيمات (دفعة ٢٣) — نفس ثيمات لوحة المدير (theme.js) • بتتحفظ للحساب: set_my_theme → users.theme ══
+const THEMES={
+  forest:{label:'الغابة الزمرد',emoji:'🌲',dark:true,v:{pd:'#0f3320',p:'#1e5c36',pl:'#2d8050',pp:'#e8f5ee',a:'#c8920a',al:'#f0b429',sb:'linear-gradient(180deg,#0f2318 0%,#1e5c36 100%)',act:'linear-gradient(135deg,rgba(46,128,80,.65),rgba(46,128,80,.35))',txt:'rgba(255,255,255,.62)',bg:'#f5f7f5',bd:'#dce8e0'}},
+  ocean:{label:'المحيط الأزرق',emoji:'🌊',dark:true,v:{pd:'#0c2340',p:'#1a4a7a',pl:'#2563a8',pp:'#e8f0fb',a:'#c8920a',al:'#f0c040',sb:'linear-gradient(180deg,#0c2340 0%,#1a4a7a 100%)',act:'linear-gradient(135deg,rgba(37,99,168,.65),rgba(37,99,168,.35))',txt:'rgba(255,255,255,.62)',bg:'#f3f6fb',bd:'#ccdaea'}},
+  royal:{label:'البنفسجي الملكي',emoji:'👑',dark:true,v:{pd:'#3d2878',p:'#5b3fa0',pl:'#7c5fbe',pp:'#f0ebfa',a:'#c8920a',al:'#f0b429',sb:'linear-gradient(180deg,#3d2878 0%,#5b3fa0 100%)',act:'linear-gradient(135deg,rgba(200,146,10,.3),rgba(200,146,10,.15))',txt:'rgba(255,255,255,.62)',bg:'#f7f4fc',bd:'#ddd4f0'}},
+  midnight:{label:'منتصف الليل',emoji:'🌙',dark:true,v:{pd:'#1f2937',p:'#374151',pl:'#4b5563',pp:'#f3f4f6',a:'#c8920a',al:'#f0b429',sb:'linear-gradient(180deg,#111827 0%,#1f2937 100%)',act:'linear-gradient(135deg,rgba(200,146,10,.3),rgba(200,146,10,.12))',txt:'rgba(255,255,255,.62)',bg:'#f6f7f8',bd:'#e0e3e8'}},
+  ruby:{label:'الياقوت الأحمر',emoji:'❤️',dark:true,v:{pd:'#6d0f1f',p:'#9b1c2e',pl:'#c0283d',pp:'#fdeef0',a:'#c8920a',al:'#f0b429',sb:'linear-gradient(180deg,#6d0f1f 0%,#9b1c2e 100%)',act:'linear-gradient(135deg,rgba(200,146,10,.3),rgba(200,146,10,.12))',txt:'rgba(255,255,255,.62)',bg:'#fdf5f6',bd:'#f0d4d8'}},
+  teal:{label:'الفيروزي',emoji:'🦚',dark:true,v:{pd:'#0d4f49',p:'#0f766e',pl:'#14a099',pp:'#e6faf9',a:'#c8920a',al:'#f0b429',sb:'linear-gradient(180deg,#0d4f49 0%,#0f766e 100%)',act:'linear-gradient(135deg,rgba(20,160,153,.55),rgba(20,160,153,.28))',txt:'rgba(255,255,255,.62)',bg:'#f2fafa',bd:'#c8e8e7'}},
+  sage:{label:'الأخضر الحكيم',emoji:'🌿',dark:false,v:{pd:'#1a5c36',p:'#2d7a50',pl:'#3da068',pp:'#eaf6f0',a:'#c8920a',al:'#f0b429',sb:'#ffffff',act:'linear-gradient(135deg,#2d7a50,#3da068)',txt:'#4a6258',bg:'#f4f7f5',bd:'#d8e8df'}},
+  amber:{label:'العنبر الذهبي',emoji:'🌅',dark:false,v:{pd:'#7c3a05',p:'#b45309',pl:'#d97706',pp:'#fef3e2',a:'#1a7a4a',al:'#25a05f',sb:'#ffffff',act:'linear-gradient(135deg,#b45309,#d97706)',txt:'#6a4a28',bg:'#faf8f4',bd:'#e8d8c0'}}
+};
+let THEME_CUR='forest';
+function thApply(key){
+  if(!THEMES[key]) key='forest'; THEME_CUR=key;
+  const t=THEMES[key], v=t.v, r=document.documentElement, base=(key==='forest');   // الغابة = شكل اللوحة الأصلي
+  const set=(k,x)=>{ if(base) r.style.removeProperty(k); else r.style.setProperty(k,x); };
+  set('--forest',v.pd); set('--emerald',v.p); set('--jade',v.pl); set('--mint',v.pl); set('--pale',v.pp);
+  set('--gold',v.a); set('--gold-l',v.al); set('--bg',v.bg); set('--border',v.bd);
+  set('--sb-bg',v.sb); set('--sb-act',v.act); set('--sb-text',v.txt);
+  r.classList.toggle('th-light',!t.dark);
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content',base?'#0f2318':v.pd);
+}
+function thOpen(){
+  $('th-grid').innerHTML=Object.keys(THEMES).map(k=>{ const t=THEMES[k], on=k===THEME_CUR;
+    return '<button class="th-card'+(on?' on':'')+'" onclick="thPick(\''+k+'\')"><div class="th-emo">'+t.emoji+'</div><div class="th-name">'+t.label+'</div>'
+      +'<div class="th-dots"><i style="background:'+t.v.pd+';"></i><i style="background:'+t.v.p+';"></i><i style="background:'+t.v.a+';"></i></div>'
+      +(on?'<div class="th-cur">✓ الحالي</div>':'')+'</button>'; }).join('');
+  toggleSide(false); openModal('modal-theme');
+}
+async function thPick(key){
+  if(!THEMES[key]) return;
+  closeModal('modal-theme');
+  if(key===THEME_CUR) return;
+  const prev=THEME_CUR; thApply(key);
+  try{
+    const {data,error}=await db.rpc('set_my_theme',{p_theme:key});
+    if(error||!data||!data.ok) throw (error||new Error('لم يُحفظ'));
+    ME.theme=key; showToast('🎨 الثيم اتحفظ لحسابك');
+  }catch(e){ console.warn('[theme]',e); thApply(prev); showToast('⚠️ الثيم ما اتحفظش — تأكد من الاتصال وجرّب تاني'); }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal('modal-msg'); closeModal('modal-compose'); closeModal('modal-theme'); vidClose(); toggleSide(false); } });
 </script>
 </body>
 </html>

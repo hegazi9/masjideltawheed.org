@@ -268,7 +268,11 @@ const DASHBOARDS = {
   teacher:    'dashboard_teacher.html',
   parent:     'dashboard_parent.html',
   employee:   'dashboard_staff.html',
+  finance:    'dashboard_finance.html',   // (دفعة ٢٩) المدير المالي — بيدخل من «الموظفون»
+  store:      'dashboard_store.html',     // (دفعة ٣١) فريق منصة النقاط — بيدخل من «الموظفون»
 };
+// زرار «الموظفون» بيدخّل الموظف والمدير المالي وفريق منصة النقاط
+const ROLE_BTN = { finance: 'employee', store: 'employee' };
 // الحقول الحسّاسة ما بتتخزنش في المتصفح
 const SENSITIVE = ['id_number','id_type','dob','address','marital','licenses','notes','password_plain'];
 
@@ -409,7 +413,7 @@ async function doLogin() {
     const userData = userRows[0];
 
     // ٣ — تحقق من الدور
-    if (userData.role !== selectedRole) {
+    if ((ROLE_BTN[userData.role] || userData.role) !== selectedRole) {
       await db.auth.signOut();
       throw new Error('role_mismatch');
     }
@@ -445,13 +449,15 @@ async function doLogin() {
 function showWelcome(userData) {
   document.getElementById('login-form-wrap').style.display = 'none';
   document.getElementById('welcome-screen').style.display  = 'block';
-  const roleNames = { admin:'مدير', supervisor:'مشرف', teacher:'معلم', parent:'ولي أمر', employee:'الموظفون' };
+  const roleNames = { admin:'مدير', supervisor:'مشرف', teacher:'معلم', parent:'ولي أمر', employee:'الموظفون', finance:'المدير المالي', store:'فريق منصة النقاط' };
   const msgs = {
     admin:      'لوحة المدير تتيح لك إدارة كامل المدرسة.',
     supervisor: 'لوحة المشرف تتيح لك متابعة الحلقات والتقارير.',
     teacher:    'لوحة المعلم تتيح لك تسجيل الحضور ومتابعة الحفظ.',
     parent:     'تابع صلوات أولادك وحفظهم وحضورهم ونقاطهم.',
     employee:   'بيانات الطلاب والطالبات وملفاتهم + التنبيهات الأسبوعية.',
+    finance:    'الشؤون المالية كاملة — الواردات والمصروفات والخزنة والتقارير لكل الشعب.',
+    store:      'سوق النقاط — البيع بنقاط الطلاب ولوحة الشرف والمنتجات.',
   };
   document.getElementById('w-title').textContent = 'مرحباً، ' + (userData.full_name || '') + '!';
   document.getElementById('w-badge').textContent = roleNames[userData.role] || userData.role;

@@ -4465,6 +4465,19 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         <div style="font-size:1.3rem;color:var(--blue);">‹</div>
       </div>
     </div>
+    <div onclick="nav(null,'fin-debt')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--red);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">الديون</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">فلوس داخلة للمدرسة (قرض) — بتدخل الخزنة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--red);">‹</div>
+      </div>
+    </div>
     <div onclick="nav(null,'rep-subs')"
       style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
       onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
@@ -4557,15 +4570,54 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         <div style="font-size:1.3rem;color:var(--gold);">‹</div>
       </div>
     </div>
-    <div onclick="nav(null,'fin-debt')"
+    <div onclick="nav(null,'fin-assets')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--blue),#2588c4);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">الأصول</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">الحاجات الثابتة: تربيزات وكراسي وسبورات وشاشات</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--blue);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-msubs')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--purple);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#8a5cd0);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">اشتراكات شهرية</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">إنترنت وتليفون • ذكاء اصطناعي • الموقع • رصيد المشرفات</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--purple);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-trans')"
+      style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
+      onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">انتقالات</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مواصلات الرحلات ومشاوير احتياجات المدرسة</div>
+        </div>
+        <div style="font-size:1.3rem;color:var(--gold);">‹</div>
+      </div>
+    </div>
+    <div onclick="nav(null,'fin-adv')"
       style="cursor:pointer;background:var(--white);border:1px solid var(--border);border-top:4px solid var(--red);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 22px;transition:transform .2s,box-shadow .2s;"
       onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-lg)'"
       onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow)'">
       <div style="display:flex;align-items:center;gap:16px;">
-        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
+        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#c0392b,#e05545);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg></div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">ديون</div>
-          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">مستحقات لم تُسدَّد بعد</div>
+          <div style="font-size:1.12rem;font-weight:800;color:var(--forest);">سُلفة</div>
+          <div style="font-size:.78rem;color:var(--light);margin-top:3px;">قرض حسن من المدرسة — بيرجع للخزنة لما يترد</div>
         </div>
         <div style="font-size:1.3rem;color:var(--red);">‹</div>
       </div>
@@ -4656,7 +4708,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
     <div class="card-body card-body-0" style="overflow-x:auto;">
       <table class="tbl" style="font-size:.78rem;">
-        <thead>
+        <thead id="fin-subs-thead">
           <tr>
             <th rowspan="2" style="text-align:center;vertical-align:middle;">م</th>
             <th rowspan="2" style="vertical-align:middle;">اسم الطالب</th>
@@ -4827,35 +4879,158 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
   </div>
 </div>
-<!-- ══ PAGE: ديون ══ -->
-<div id="page-fin-debt" class="page">
+<!-- ══ PAGE: الأصول (دفعة ٢٨) ══ -->
+<div id="page-fin-assets" class="page">
   <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
     <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
     <span style="margin:0 8px;">/ </span>
     <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
     <span style="margin:0 8px;">/ </span>
-    <span>ديون</span>
+    <span>الأصول</span>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون</div>
-    <button class="btn btn-primary" onclick="openDebtModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة دين</button>
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg> الأصول</div>
+    <button class="btn btn-primary" onclick="openExpModal('assets')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة أصل</button>
   </div>
   <div class="card">
     <div class="card-head">
-      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> سجل الديون</div>
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg> سجل الأصول — <span class="term-name-lbl"></span></div>
+      <span class="badge bg-blue" id="fin-assets-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع الأصل</th>
+          <th>وسيلة الدفع</th><th>المستلم</th><th>التاريخ</th><th>ملاحظات</th>
+          <th style="text-align:center;">إيصال</th><th style="text-align:center;">قيد عكسي</th>
+        </tr></thead>
+        <tbody id="fin-assets-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: اشتراكات شهرية (دفعة ٢٨) ══ -->
+<div id="page-fin-msubs" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>اشتراكات شهرية</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> اشتراكات شهرية</div>
+    <button class="btn btn-primary" onclick="openExpModal('monthly_subs')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة اشتراك شهري</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> سجل اشتراكات شهرية — <span class="term-name-lbl"></span></div>
+      <span class="badge bg-purple" id="fin-msubs-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع الاشتراك</th>
+          <th>وسيلة الدفع</th><th>المستلم</th><th>التاريخ</th><th>ملاحظات</th>
+          <th style="text-align:center;">إيصال</th><th style="text-align:center;">قيد عكسي</th>
+        </tr></thead>
+        <tbody id="fin-msubs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: انتقالات (دفعة ٢٨) ══ -->
+<div id="page-fin-trans" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span>
+    <span>انتقالات</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg> انتقالات</div>
+    <button class="btn btn-primary" onclick="openExpModal('transport')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg> إضافة انتقالات</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg> سجل انتقالات — <span class="term-name-lbl"></span></div>
+      <span class="badge bg-gold" id="fin-trans-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>المشرف</th><th>المبلغ</th><th>نوع المشوار</th>
+          <th>وسيلة الدفع</th><th>المستلم</th><th>التاريخ</th><th>ملاحظات</th>
+          <th style="text-align:center;">إيصال</th><th style="text-align:center;">قيد عكسي</th>
+        </tr></thead>
+        <tbody id="fin-trans-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: الديون (واردات — دفعة ٢٨) ══ -->
+<div id="page-fin-debt" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-rev')">الواردات</span>
+    <span style="margin:0 8px;">/ </span><span>الديون</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> الديون</div>
+    <button class="btn btn-primary" onclick="openDebtModal()">➕ إضافة دين</button>
+  </div>
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:16px;line-height:1.8;">الدين = فلوس داخلة للمدرسة: النقدي بيدخل الخزنة على طول، وفودافون كاش / انستاباي بيفضل في محفظة العميل لحد «تم التحصيل». زرار «سداد» بيخصم المبلغ من الخزنة (أو من محفظة) ومابيظهرش في المصروفات.</div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> سجل الديون — <span class="term-name-lbl"></span></div>
       <span class="badge bg-red" id="fin-debt-total">— ج.م</span>
     </div>
     <div class="card-body card-body-0" style="overflow-x:auto;">
       <table class="tbl" style="font-size:.78rem;">
         <thead><tr>
-          <th style="text-align:center;">م</th><th>صاحب الدين</th><th>المبلغ</th><th>البند</th>
-          <th>وسيلة الدفع</th><th>المستلم</th><th>تاريخ الدين</th>
-          <th style="text-align:center;border-right:2px solid var(--border);">تم الرد</th>
-          <th style="text-align:center;">تاريخ الرد</th><th style="text-align:center;">وسيلة الدفع</th>
-          <th style="text-align:center;border-left:2px solid var(--border);">المشرف</th>
+          <th style="text-align:center;">م</th><th>صاحب الدين</th><th>المبلغ</th>
+          <th>وسيلة الاستلام</th><th>المستلم</th><th>تاريخ الدين</th>
+          <th style="text-align:center;border-right:2px solid var(--border);">السداد</th>
+          <th style="text-align:center;">تاريخ السداد</th><th style="text-align:center;">اتسدّد من</th>
+          <th style="text-align:center;border-left:2px solid var(--border);">سجّله</th>
           <th>ملاحظات</th>
         </tr></thead>
         <tbody id="fin-debt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: السُّلف (دفعة ٢٨) ══ -->
+<div id="page-fin-adv" class="page">
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:14px;">
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'finance')">الشؤون المالية</span>
+    <span style="margin:0 8px;">/ </span>
+    <span style="cursor:pointer;color:var(--jade);" onclick="nav(null,'fin-exp')">المصروفات</span>
+    <span style="margin:0 8px;">/ </span><span>سُلفة</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px;">
+    <div class="section-title" style="margin-bottom:0;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> السُّلف (قرض حسن)</div>
+    <button class="btn btn-primary" onclick="openAdvModal()">➕ إضافة سُلفة</button>
+  </div>
+  <div style="font-size:.78rem;color:var(--light);margin-bottom:16px;line-height:1.8;">لو حد أخد من المدرسة فلوس على سبيل القرض الحسن — المبلغ بيتخصم من الخزنة، ولما يرجّعه اضغط «تم الرد» فيرجع الخزنة.</div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> سجل السُّلف — <span class="term-name-lbl"></span></div>
+      <span class="badge bg-gold" id="fin-adv-total">— ج.م</span>
+    </div>
+    <div class="card-body card-body-0" style="overflow-x:auto;">
+      <table class="tbl" style="font-size:.78rem;">
+        <thead><tr>
+          <th style="text-align:center;">م</th><th>اللي أخد السلفة</th><th>المبلغ</th>
+          <th>اتصرفت من</th><th>سلّمها</th><th>التاريخ</th>
+          <th style="text-align:center;border-right:2px solid var(--border);">الرد</th>
+          <th style="text-align:center;">تاريخ الرد</th><th style="text-align:center;">رجعت في</th>
+          <th style="text-align:center;border-left:2px solid var(--border);">سجّل الرد</th>
+          <th>ملاحظات</th>
+        </tr></thead>
+        <tbody id="fin-adv-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -5962,10 +6137,10 @@ async function stuSheetFill(root){
     // (دفعة ١٥) مستوى التجويد تلقائي من ملف الطالب — ولو مفيش تقييم: المستوى اليدوي
     set('lvl', r.tajweed_level || r.level);
     const lv = tr.querySelector('[data-f="lvl"]');
-    if (lv) lv.title = r.tajweed_level_no ? (STU_TJ_TOPIC[r.tajweed_level_no-1]||'') + ' — من تقييم التجويد في ملف الطالب' : (r.level ? 'مستوى مكتوب يدوي' : '');
+    if (lv) lv.title = r.tajweed_level_no ? (STU_TJ_TOPIC[r.tajweed_level_no-1]||'') + ' — آخر مستوى حدّده المعلم في ملف الطالب' : (r.level ? 'مستوى مكتوب يدوي' : '');
   });
 }
-const STU_TJ_TOPIC=['أحكام النون الساكنة والتنوين','أحكام الميم الساكنة','أحكام المدود','مخارج الحروف','صفات الحروف','الوقف والابتداء','أحكام متقدمة (الترقيق والتفخيم / الراء / اللام)'];
+const STU_TJ_TOPIC=['مخرج الأحرف اللثوية ومخرج الجيم','التفخيم والترقيق','الهمس والقلقلة والشدة في الجيم وإتمام الحركات','الإدغام (المثلين والمتقاربين والمتجانسين) • الضاد • اللام الشمسية والقمرية','أحكام النون الساكنة والتنوين','أحكام الميم الساكنة • النون والميم المشددتين','المدود'];   // (دفعة ٢٤) المستويات الجديدة
 // (دفعة ١٥) الجدول الطلابي بيتحدّث من القاعدة كل دقيقة + لما ترجع للصفحة
 function stuSheetAutoRefresh(){
   if (document.visibilityState !== 'visible') return;
@@ -8064,6 +8239,7 @@ async function refreshSupervisorData(){
 // ══════════════════════════════════════
 const PAGE_TITLES = {
   'rep-subs':'💳 تقارير الاشتراكات',
+  'fin-assets':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg> الأصول','fin-msubs':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> اشتراكات شهرية','fin-trans':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg> انتقالات','fin-adv':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> السُّلف',
   dashboard:'🏠 لوحة القيادة',students:'👨‍🎓 الطلاب',teachers:'👨‍🏫 المعلمون',
   weekly:'📅 المتابعة الأسبوعية',
   walerts:'🔔 التنبيهات الأسبوعية',
@@ -9871,6 +10047,8 @@ let MEDIA_VIDEOS = [];
 let _curMedia = null;
 function mediaAr(n){ return String(n==null?'':n).replace(/[0-9]/g,function(d){ return '\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669'[+d]; }); }
 
+// (دفعة ٢٧) المصدر: drive = جوجل درايف • youtube = يوتيوب (المدير بيضيف من لوحته)
+function mediaThumb(v){ var id=encodeURIComponent(v.drive_id||''); return v.source==='youtube' ? 'https://img.youtube.com/vi/'+id+'/hqdefault.jpg' : 'https://drive.google.com/thumbnail?id='+id+'&sz=w640'; }
 async function renderMediaPage(){
   const grid = document.getElementById('media-grid');
   const cnt = document.getElementById('media-count');
@@ -9901,9 +10079,9 @@ async function renderMediaPage(){
     var titleAttr = (v.title || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;');
     return '<div style="cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;"'
       + ' onmouseenter="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--shadow-lg)\'" onmouseleave="this.style.transform=\'\';this.style.boxShadow=\'var(--shadow)\'"'
-      + ' onclick="playMedia(\'' + v.drive_id + '\',\'' + titleAttr + '\')">'
+      + ' onclick="playMedia(\'' + v.drive_id + '\',\'' + titleAttr + '\',\'' + (v.source==='youtube'?'youtube':'drive') + '\')">'
       +   '<div style="position:relative;padding-top:56.25%;background:linear-gradient(135deg,#1a2a20,#0f2318);">'
-      +     '<img src="https://drive.google.com/thumbnail?id=' + v.drive_id + '&sz=w640" alt="" loading="lazy"'
+      +     '<img src="' + mediaThumb(v) + '" alt="" loading="lazy"'
       +       ' onerror="this.style.display=\'none\'"'
       +       ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'
       +     '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.08);">'
@@ -9911,15 +10089,15 @@ async function renderMediaPage(){
       +     '</div>'
       +     '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);color:#fff;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;">' + mediaAr(i+1) + '</div>'
       +   '</div>'
-      +   '<div style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">' + title + '</div>'
+      +   '<div style="padding:12px 13px;font-size:.85rem;font-weight:700;color:var(--forest);line-height:1.55;min-height:44px;">' + title + ((v.description&&String(v.description).trim())?'<div style="font-size:.74rem;font-weight:500;color:var(--mid);margin-top:3px;">'+String(v.description).trim().replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>':'') + '</div>'
       + '</div>';
   }).join('');
 }
 
-function playMedia(driveId, title){
+function playMedia(driveId, title, source){
   _curMedia = driveId;
   var f = document.getElementById('media-vid-frame');
-  if (f) f.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+  if (f) f.src = source==='youtube' ? 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(driveId) + '?rel=0&autoplay=1' : 'https://drive.google.com/file/d/' + driveId + '/preview';
   var pt = document.getElementById('media-vid-title');
   if (pt) pt.textContent = '\u25b6\ufe0f ' + (title && title.trim() ? title : '\u0645\u0642\u0637\u0639 \u0645\u0631\u0626\u064a');
   openModal('modal-media-video');
@@ -9959,6 +10137,10 @@ function nav(el, pageId, fromPopstate){
   if (pageId === 'fin-mot')   loadFinExp('motivation');
   if (pageId === 'fin-purch') loadFinExp('purchases');
   if (pageId === 'fin-mkt')   loadFinExp('marketing');
+  if (pageId === 'fin-assets') loadFinExp('assets');         // (دفعة ٢٨)
+  if (pageId === 'fin-msubs')  loadFinExp('monthly_subs');
+  if (pageId === 'fin-trans')  loadFinExp('transport');
+  if (pageId === 'fin-adv')    loadFinAdvances();
   if (pageId === 'fin-debt')  loadFinDebts();
   if (pageId === 'fin-report') initFinReport();   // (دفعة ١٥)
   if (pageId === 'dashboard') loadSupervisorDashboard();
@@ -10924,7 +11106,7 @@ async function loadSupervisorDashboard(){
   if(subEl) subEl.textContent = 'متابعة ' + branches.join(' + ') + ' — هنا والآن';
 
   container.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري تحميل الجلسات...</div>';
-  await svPreloadSessions(branches);
+  await Promise.all([ svPreloadSessions(branches), svPreloadPreps(branches) ]);   // (دفعة ٢٤) + تحضير الدرس
   svRenderDashboard(branches);
   try{ svFillNotesBranches(); svLoadMyNotes(); }catch(e){ console.log('sv notes:', e); }
 }
@@ -11086,7 +11268,7 @@ function svBranchTeachers(branchName){
   return circles.map(c=>{
     const nm = c.teacher||'معلم';
     window.SV_SESS_BRANCH[nm] = branchName;
-    return { name:nm, phone:svTeacherPhone(c.teacher) };
+    return { name:nm, phone:svTeacherPhone(c.teacher), teacherId:c.teacherId||null, circleId:c.circleId||null };
   });
 }
 
@@ -11261,11 +11443,12 @@ function svBuildBranchTable(branchName){
             </span>
           </div>
         </td>
+        <td style="padding:9px 10px;text-align:center;" id="svprep-${rowId}" data-tid="${esc(t.teacherId||'')}" data-br="${esc(branchName)}">${svPrepCell(branchName, t.teacherId)}</td>
         <td style="padding:9px 10px;text-align:center;">${sessCell}</td>
       </tr>`;
     }).join('');
   } else {
-    rows = `<tr><td colspan="5"><div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا يوجد معلمون في هذه الشعبة</div></td></tr>`;
+    rows = `<tr><td colspan="6"><div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا يوجد معلمون في هذه الشعبة</div></td></tr>`;
   }
 
   return `<div class="card" style="margin-bottom:0;border-top:3px solid ${cfg.accent};">
@@ -11276,13 +11459,14 @@ function svBuildBranchTable(branchName){
       <span class="badge bg-gray" style="font-size:.78rem;">📅 حلقة ${svFmtArDate(date)}</span>
     </div>
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;min-width:560px;">
+      <table style="width:100%;border-collapse:collapse;min-width:700px;">
         <thead>
           <tr style="background:var(--bg);">
             <th style="padding:10px;text-align:center;font-size:.78rem;color:var(--mid);width:40px;">م</th>
             <th style="padding:10px;text-align:right;font-size:.78rem;color:var(--mid);">اسم المعلم</th>
             <th style="padding:10px;text-align:center;font-size:.78rem;color:var(--mid);">رقم الهاتف</th>
             <th style="padding:10px;text-align:center;font-size:.78rem;color:var(--mid);">الحضور</th>
+            <th style="padding:10px;text-align:center;font-size:.78rem;color:var(--mid);" title="تلقائي من نماذج تحضير الدرس — «حضّر» = التحضير اتعتمد">تحضير الدرس</th>
             <th style="padding:10px;text-align:center;font-size:.78rem;color:var(--mid);">الجلسة الإشرافية</th>
           </tr>
         </thead>
@@ -11291,6 +11475,84 @@ function svBuildBranchTable(branchName){
     </div>
   </div>`;
 }
+
+// ══════════════════════════════════════════════════════
+// (دفعة ٢٤) تحضير الدرس في لوحة القيادة — تلقائي من lesson_preps
+// تحضير الحلقة = أي تحضير بتاريخ بعد الحلقة اللي فاتت لحد تاريخ الحلقة دي
+// «حضّر» = التحضير اتعتمد بس — المُرسَل / المُرجَع / المسودة = «لم يحضّر» + توضيح
+// ══════════════════════════════════════════════════════
+window.SV_PREPS = window.SV_PREPS || {};   // { 'branch|teacherId': lesson_prep row }
+const SV_PREP_RANK = { approved:4, submitted:3, returned:2, draft:1 };
+function svPrevCircleDate(branchName, iso){
+  const d0 = new Date(iso+'T00:00:00');
+  for(let back=1; back<=8; back++){
+    const d = new Date(d0); d.setDate(d0.getDate()-back);
+    if(svDayWindow(branchName, d.getDay())) return localISO(d);
+  }
+  const d = new Date(d0); d.setDate(d0.getDate()-7); return localISO(d);
+}
+async function svPreloadPreps(branches){
+  const win = {}; let minFrom = null, maxTo = null;
+  (branches||[]).forEach(b=>{
+    const to = svCurrentCircleDate(b), from = svPrevCircleDate(b, to);   // (from, to]
+    win[b] = {from, to};
+    if(!minFrom || from < minFrom) minFrom = from;
+    if(!maxTo || to > maxTo) maxTo = to;
+  });
+  const circleBranch = {};   // circleId → الشعبة (عشان المعلم اللي في شعبتين)
+  Object.keys(BRANCH_DATA||{}).forEach(b=> ((BRANCH_DATA||{})[b]||[]).forEach(c=>{ if(c.circleId) circleBranch[String(c.circleId)] = b; }));
+  const tids = new Set();
+  (branches||[]).forEach(b=> svBranchCircles(b).forEach(c=>{ if(c.teacherId) tids.add(String(c.teacherId)); }));
+  const next = {};
+  if(!minFrom || !tids.size){ window.SV_PREPS = next; return true; }
+  try{
+    const { data, error } = await selectAll(db.from('lesson_preps')
+      .select('id,teacher_id,circle_id,date,subject,title,status,data,image_url,supervisor_note,submitted_at,reviewed_at')
+      .in('teacher_id', [...tids]).gt('date', minFrom).lte('date', maxTo).order('date').order('id'));
+    if(error) throw error;
+    window._LP_ROWS = window._LP_ROWS || {};
+    (data||[]).forEach(r=>{
+      window._LP_ROWS[r.id] = r;
+      (branches||[]).forEach(b=>{
+        const w = win[b]; if(!(r.date > w.from && r.date <= w.to)) return;
+        const cb = r.circle_id ? circleBranch[String(r.circle_id)] : null;
+        if(cb && cb !== b) return;                         // تحضير حلقته في الشعبة التانية
+        const k = b+'|'+r.teacher_id, cur = next[k];
+        const better = !cur || (SV_PREP_RANK[r.status]||0) > (SV_PREP_RANK[cur.status]||0)
+          || ((SV_PREP_RANK[r.status]||0) === (SV_PREP_RANK[cur.status]||0) && String(r.date) > String(cur.date));
+        if(better) next[k] = r;
+      });
+    });
+    window.SV_PREPS = next; window._svPrepErr = false;
+    return true;
+  }catch(e){ window._svPrepErr = true; loadWarn(e); return false; }
+}
+function svPrepCell(branchName, teacherId){
+  if(!teacherId) return '<span style="color:var(--light);">—</span>';
+  if(window._svPrepErr) return '<span style="color:var(--light);font-size:.74rem;" title="ما اتحمّلش — اعمل تحديث">⚠️</span>';
+  const r = (window.SV_PREPS||{})[branchName+'|'+teacherId];
+  const subj = r ? (r.subject==='tajweed' ? 'التجويد' : 'المنهج المصاحب') : '';
+  const tip  = r ? esc(subj + (r.title ? ' — ' + r.title : '') + ' • ' + (r.date||'')) : '';
+  const open = (r && r.status !== 'draft') ? ` onclick="openPrepReview('${esc(r.id)}')" style="cursor:pointer;"` : '';   // المسودة مش للمراجعة
+  if(r && r.status === 'approved')
+    return `<div${open} title="${tip}"><span class="badge bg-green" style="font-size:.74rem;">✅ حضّر</span><div style="font-size:.64rem;color:var(--jade);margin-top:3px;">${esc(subj)}</div></div>`;
+  const hint = !r ? ''
+    : r.status === 'submitted' ? '<div style="font-size:.66rem;color:var(--blue);font-weight:700;margin-top:3px;text-decoration:underline;">📤 بانتظار اعتمادك — راجِع</div>'
+    : r.status === 'returned'  ? '<div style="font-size:.66rem;color:var(--gold);font-weight:700;margin-top:3px;">↩️ مُرجَع للتعديل</div>'
+    :                            '<div style="font-size:.66rem;color:var(--light);margin-top:3px;">📝 مسودة لسه ما اتبعتتش</div>';
+  return `<div${open} title="${tip}"><span class="badge bg-red" style="font-size:.74rem;">❌ لم يحضّر</span>${hint}</div>`;
+}
+function svPrepCellsUpdate(){
+  document.querySelectorAll('td[id^="svprep-"]').forEach(td=>{ td.innerHTML = svPrepCell(td.dataset.br, td.dataset.tid||null); });
+}
+async function svPrepsRefresh(){
+  const pg = document.getElementById('page-dashboard');
+  if(!pg || !pg.classList.contains('active')) return;
+  const ok = await svPreloadPreps(svGetMyBranches());
+  if(ok !== false || window._svPrepErr) svPrepCellsUpdate();
+}
+setInterval(()=>{ if(document.visibilityState==='visible' && !document.querySelector('.overlay.open')) svPrepsRefresh(); }, 60000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') svPrepsRefresh(); });
 
 // ── تغيير الحضور ──
 function svAttChange(sel, branch, teacher, rowId){
@@ -13870,11 +14132,8 @@ async function openStudentFile(key, name, safeId) {
   // ── fill tab 3: quran record (تلقائي من تسميع المعلم) ──
   sfSet('sf-current-achievement', d.currentAchievement || '');
   sfRenderQuranAuto(name);
-  // ── fill tab 4: tajweed ──
-  const tj = d.tajweed || {};
-  document.querySelectorAll('[data-tj]').forEach(el => {
-    el.value = tj[el.dataset.tj] || '';
-  });
+  // ── fill tab 4: tajweed (دفعة ٢٤) — مستوى شهري للدورة المختارة + أرشيف الصيف ──
+  const tjw = document.getElementById('sf-tj-wrap'); if (tjw) tjw.innerHTML = tjPaneHtml(d, VIEW_TERM, 'sf-tj');
   // ── fill tab 5: behavior ──
   const bh = termBh(d, VIEW_TERM);
   ['month1','month2','month3'].forEach(mo => {
@@ -13901,6 +14160,104 @@ async function openStudentFile(key, name, safeId) {
   document.getElementById('overlay-student-file').style.display = 'flex';
 }
 
+// ══ 🎙️ التجويد (دفعة ٢٤) — ٧ مستويات • المعلم بيحدد مستوى الطالب كل شهر: المستوى + التقدير + ملاحظة ══
+//   student_files.data.tajweed_t[term_id] = { month1:{lvl,gr,note}, month2:{…}, month3:{…} }
+//   data.tajweed (مهارات المستويات القديمة) = أرشيف الدورة الصيفية — عرض بس ومابيتعدّلش
+const TJ_LEVELS=[
+  'مخرج الأحرف اللثوية ومخرج الجيم',
+  'التفخيم والترقيق — أحكام الراء ولام اسم الجلالة وألف المد',
+  'الهمس والقلقلة والشدة في الجيم وإتمام الحركات',
+  'الإدغام في المثلين والمتقاربين والمتجانسين • حرف الضاد • اللام الشمسية واللام القمرية',
+  'الإظهار والإدغام والإقلاب والإخفاء في النون الساكنة والتنوين',
+  'الإخفاء والإدغام والإظهار في الميم الساكنة • النون والميم المشددتين',
+  'المد الطبيعي والمتصل والمنفصل واللازم ومد العوض والبدل واللين'
+];
+const TJ_ORD=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع'];
+const TJ_GR=['ممتاز','جيد جداً','جيد','يحتاج تطوير'];
+const TJ_GR_COL={'ممتاز':'var(--jade)','جيد جداً':'var(--blue)','جيد':'var(--gold)','يحتاج تطوير':'var(--red)'};
+const TJ_MONTHS=[['month1','الشهر الأول'],['month2','الشهر الثاني'],['month3','الشهر الثالث']];
+// المستويات القديمة (الصيف) — للأرشيف بس
+const TJ_OLD=[
+  ['المستوى الأول — أحكام نون الساكنة والتنوين',[['izhar','الإظهار الحلقي'],['idgham_g','الإدغام بغنة'],['idgham_ng','الإدغام بلا غنة'],['iqlab','الإقلاب'],['ikhfa','الإخفاء']]],
+  ['المستوى الثاني — أحكام الميم الساكنة',[['ikhfa_shaf','الإخفاء الشفوي'],['idgham_mim','الإدغام المتماثل'],['izhar_shaf','الإظهار الشفوي']]],
+  ['المستوى الثالث — أحكام المدود',[['mad_tab','المد الطبيعي'],['mad_waj','المد الواجب المتصل'],['mad_jaiz','المد الجائز المنفصل'],['mad_badal','المد البدل']]],
+  ['المستوى الرابع — مخارج الحروف',[['mak_jawf','الحروف الجوفية'],['mak_halq','الحروف الحلقية'],['mak_lath','الحروف اللثوية'],['mak_shaf','الحروف الشفوية']]],
+  ['المستوى الخامس — صفات الحروف',[['sif_laz','الصفات اللازمة'],['sif_arid','الصفات العارضة'],['sif_hams','الهمس والجهر'],['sif_rakh','الرخاوة والشدة']]],
+  ['المستوى السادس — الوقف والابتداء',[['waqf_tam','الوقف التام'],['waqf_kaf','الوقف الكافي'],['waqf_has','الوقف الحسن']]],
+  ['المستوى السابع — أحكام متقدمة',[['taf_tar','الترقيق والتفخيم'],['ahkam_ra','أحكام الراء'],['ahkam_lam','أحكام اللام']]]
+];
+function tjEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function tjLvlName(n){ n=+n; return (n>=1&&n<=7)?('المستوى '+TJ_ORD[n-1]):''; }
+function tjIsLegacy(t){ return !t||!!(t.settings&&t.settings.legacy); }
+function tjOf(d,t){ const x=t&&d&&d.tajweed_t&&d.tajweed_t[t.id]; return (x&&typeof x==='object')?x:{}; }
+function tjLast(m){ for(let i=TJ_MONTHS.length-1;i>=0;i--){ const x=m&&m[TJ_MONTHS[i][0]]; if(x&&+x.lvl>=1&&+x.lvl<=7) return Object.assign({mlbl:TJ_MONTHS[i][1]},x); } return null; }
+function tjHasOld(d){ const tj=(d&&d.tajweed)||{}; return Object.keys(tj).some(k=>String(tj[k]==null?'':tj[k]).trim()!==''); }
+function tjRefHtml(open){
+  return '<details'+(open?' open':'')+' style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--forest);padding:8px 12px;background:var(--pale);border-radius:8px;">📚 مستويات التجويد السبعة</summary>'
+    +'<div style="padding:6px 4px 0;">'+TJ_LEVELS.map((s,i)=>'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 2px;border-bottom:1px dashed var(--border);font-size:.78rem;line-height:1.7;"><b style="min-width:96px;color:var(--emerald);white-space:nowrap;">'+tjLvlName(i+1)+'</b><span style="color:var(--mid);">'+tjEsc(s)+'</span></div>').join('')+'</div></details>';
+}
+function tjCurHtml(last){
+  if(!last) return '';
+  return '<div style="font-size:.82rem;margin-bottom:10px;padding:9px 12px;border-radius:8px;background:var(--pale);color:var(--forest);line-height:1.8;">🎯 المستوى الحالي: <b>'+tjLvlName(last.lvl)+'</b> — '+tjEsc(TJ_LEVELS[last.lvl-1])
+    +(last.gr?' • التقدير: <b style="color:'+(TJ_GR_COL[last.gr]||'inherit')+';">'+tjEsc(last.gr)+'</b>':'')+' <span style="color:var(--light);font-size:.74rem;">('+last.mlbl+')</span></div>';
+}
+// أرشيف الصيف (المهارات القديمة) — عرض بس
+function tjArchiveHtml(d,open){
+  if(!tjHasOld(d)) return '';
+  const tj=d.tajweed||{}, td='padding:5px 9px;border:1px solid var(--border);';
+  let rows='';
+  TJ_OLD.forEach(([lvl,skills])=>{ const has=skills.filter(([k])=>String(tj[k]||'').trim()||String(tj[k+'_note']||'').trim()); if(!has.length) return;
+    rows+='<tr style="background:var(--pale);"><td colspan="3" style="'+td+'font-weight:700;font-size:.76rem;color:var(--forest);">'+lvl+'</td></tr>'
+      +has.map(([k,l])=>'<tr><td style="'+td+'">'+l+'</td><td style="'+td+'text-align:center;font-weight:700;white-space:nowrap;color:'+(TJ_GR_COL[tj[k]]||'var(--mid)')+';">'+tjEsc(tj[k]||'—')+'</td><td style="'+td+'color:var(--mid);">'+tjEsc(tj[k+'_note']||'')+'</td></tr>').join(''); });
+  return '<details'+(open?' open':'')+' style="margin-top:12px;"><summary style="cursor:pointer;font-size:.8rem;font-weight:800;color:var(--mid);padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">📦 أرشيف الدورة الصيفية — المستويات القديمة (عرض بس)</summary>'
+    +'<div style="overflow-x:auto;margin-top:8px;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;font-family:Tajawal,sans-serif;"><thead><tr style="background:var(--pale);color:var(--forest);"><th style="'+td+'text-align:right;">المهارة</th><th style="'+td+'">التقدير</th><th style="'+td+'text-align:right;">ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>';
+}
+// نموذج الإدخال: شهر × (المستوى + التقدير + ملاحظة)
+function tjEditHtml(d,t,pre){
+  const m=tjOf(d,t), st='box-sizing:border-box;font-family:Tajawal,sans-serif;font-size:.8rem;padding:7px 9px;border:1.5px solid var(--border);border-radius:7px;outline:none;background:var(--white,#fff);color:var(--ink,#1a1a1a);';
+  return TJ_MONTHS.map(([k,l])=>{ const x=m[k]||{};
+    const lv='<option value="">— اختار المستوى —</option>'+TJ_LEVELS.map((s,i)=>'<option value="'+(i+1)+'"'+(+x.lvl===i+1?' selected':'')+'>'+tjLvlName(i+1)+' — '+tjEsc(s)+'</option>').join('');
+    const gr='<option value="">— التقدير —</option>'+TJ_GR.map(g=>'<option value="'+g+'"'+(g===x.gr?' selected':'')+'>'+g+'</option>').join('');
+    return '<div style="border:1.5px solid var(--border);border-right:4px solid var(--jade);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--white,#fff);">'
+      +'<div style="font-weight:800;color:var(--forest);font-size:.84rem;margin-bottom:8px;">📅 '+l+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+      +'<select id="'+pre+'-'+k+'-lvl" style="'+st+'flex:2 1 220px;min-width:0;max-width:100%;">'+lv+'</select>'
+      +'<select id="'+pre+'-'+k+'-gr" style="'+st+'flex:1 1 120px;min-width:0;">'+gr+'</select></div>'
+      +'<input id="'+pre+'-'+k+'-note" type="text" maxlength="300" placeholder="ملاحظة (اختياري)" value="'+tjEsc(x.note||'')+'" style="'+st+'width:100%;">'
+      +'</div>'; }).join('');
+}
+// null = مفيش نموذج (دورة قديمة) • bad = اسم الشهر اللي فيه تقدير/ملاحظة من غير مستوى
+function tjCollect(pre){
+  if(!document.getElementById(pre+'-month1-lvl')) return null;
+  const data={}; let bad=null;
+  TJ_MONTHS.forEach(([k,l])=>{
+    const v=f=>{ const e=document.getElementById(pre+'-'+k+'-'+f); return e?String(e.value||'').trim():''; };
+    const lvl=parseInt(v('lvl'),10), gr=v('gr'), note=v('note').slice(0,300);
+    if(!lvl&&!gr&&!note) return;
+    if(!(lvl>=1&&lvl<=7)){ if(!bad) bad=l; return; }
+    data[k]={ lvl, gr:TJ_GR.includes(gr)?gr:'', note };
+  });
+  return { data, bad };
+}
+function tjPaneHtml(d,t,pre){
+  const head='<div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ التجويد — ٧ مستويات'+(t?' • '+tjEsc(t.name):'')+'</div>';
+  if(tjIsLegacy(t)) return head+'<div style="font-size:.78rem;color:#7a5200;background:var(--gold-pale);padding:9px 12px;border-radius:8px;margin-bottom:10px;line-height:1.8;">المستويات الجديدة بتبدأ من الدورة الخريفية — اللي تحت أرشيف للعرض بس</div>'
+    +(tjHasOld(d)?tjArchiveHtml(d,true):'<div style="text-align:center;color:var(--light);padding:18px;font-size:.82rem;">مفيش تقييم تجويد في الدورة دي</div>');
+  return head+tjCurHtml(tjLast(tjOf(d,t)))
+    +'<div style="font-size:.74rem;color:var(--light);margin-bottom:10px;line-height:1.7;">كل شهر: اختار مستوى الطالب وتقديره فيه (وملاحظة لو فيه) — وبيظهر لولي الأمر في ملف ابنه</div>'
+    +tjRefHtml(false)+tjEditHtml(d,t,pre)+tjArchiveHtml(d,false);
+}
+// دمج: بيانات الدورة دي في tajweed_t[term] من غير ما يلمس باقي الدورات ولا الأرشيف القديم
+function tjPack(prev,obj,t){
+  if(!obj||!Object.prototype.hasOwnProperty.call(obj,'_tj')) return obj;
+  const o=Object.assign({},obj), tj=o._tj; delete o._tj; delete o._tjBad;
+  if(tjIsLegacy(t)||!tj) return o;
+  const all=Object.assign({}, (prev&&prev.tajweed_t&&typeof prev.tajweed_t==='object')?prev.tajweed_t:{});
+  if(Object.keys(tj).length) all[t.id]=tj; else delete all[t.id];
+  o.tajweed_t=all;
+  return o;
+}
+
 function sfSet(id, val) { const el=document.getElementById(id); if(el) el.value=val; }
 function sfSetSel(id, val) { const el=document.getElementById(id); if(el) el.value=val; }
 
@@ -13924,9 +14281,9 @@ async function saveStudentFile() {
   const prev = getStudentData(key);
   // السجل القرآني تلقائي (لا يُحفظ يدوياً) — يُبقى أي قيم قديمة كما هي
   const sessions = prev.sessions || [];
-  // collect tajweed
-  const tajweed = {};
-  document.querySelectorAll('[data-tj]').forEach(el => { tajweed[el.dataset.tj] = el.value; });
+  // collect tajweed (دفعة ٢٤) — بيتحفظ في tajweed_t[الدورة] • القديم (tajweed) مابيتلمسش
+  const tjc = tjCollect('sf-tj');
+  if (tjc && tjc.bad) { switchFileTab(4); showToast('⚠️ اختار مستوى التجويد في «'+tjc.bad+'»'); return; }
   // collect behavior
   const behavior = {};
   ['month1','month2','month3'].forEach(mo => {
@@ -13970,10 +14327,11 @@ async function saveStudentFile() {
     momEdu: document.getElementById('sf-mom-edu')?.value||'',
     familyNotes: document.getElementById('sf-family-notes')?.value||'',
     currentAchievement: document.getElementById('sf-current-achievement')?.value||'',
-    sessions, tajweed, behavior, interventions, parentCalls,
+    sessions, behavior, interventions, parentCalls,
     strengths: document.getElementById('sf-strengths')?.value||'',
     needs: document.getElementById('sf-needs')?.value||'',
   };
+  delete d.tajweed; delete d.tajweed_t; if (tjc) d._tj = tjc.data;
   saveStudentData(key, d);
   // ── حفظ في قاعدة البيانات للتزامن بين اللوحات [#6] ──
   try {
@@ -13983,7 +14341,7 @@ async function saveStudentFile() {
       const { data: cur, error: rErr } = await db.from('student_files').select('data').eq('student_id', sid).maybeSingle();
       if (rErr) throw rErr;
       const prevDb = (cur && cur.data) || {};
-      const merged = Object.assign({}, prevDb, termBhPack(prevDb, d, VIEW_TERM));
+      const merged = Object.assign({}, prevDb, tjPack(prevDb, termBhPack(prevDb, d, VIEW_TERM), VIEW_TERM));   // (دفعة ٢٤)
       const { data: res, error } = await db.from('student_files').upsert({student_id: sid, data: merged}, {onConflict:'student_id'}).select('student_id');
       if (error) throw error; if (!res || !res.length) throw new Error('RLS');
     }
@@ -14229,242 +14587,8 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') hideStudentMenu
         <div id="sf-quran-auto"></div>
       </div>
 
-      <!-- TAB 4: Tajweed -->
-      <div class="sf-tab-pane" style="display:none;">
-        <div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:9px 14px;border-radius:8px;font-weight:700;font-size:.85rem;margin-bottom:12px;">🎙️ سجل التجويد — 7 مستويات</div>
-        <div style="overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
-            <thead><tr style="background:var(--pale);color:var(--forest);">
-              <th style="padding:7px 10px;border:1px solid var(--border);text-align:right;">المهارة</th>
-              <th style="padding:7px;border:1px solid var(--border);text-align:center;width:140px;">مستوى الطالب</th>
-              <th style="padding:7px;border:1px solid var(--border);text-align:right;">الملاحظات</th>
-            </tr></thead>
-            <tbody><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى الأول — أحكام نون الساكنة والتنوين</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإظهار الحلقي</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="izhar" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="izhar_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإدغام بغنة</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="idgham_g" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="idgham_g_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإدغام بلا غنة</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="idgham_ng" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="idgham_ng_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإقلاب</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="iqlab" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="iqlab_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإخفاء</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="ikhfa" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="ikhfa_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى الثاني — أحكام الميم الساكنة</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإخفاء الشفوي</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="ikhfa_shaf" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="ikhfa_shaf_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإدغام المتماثل</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="idgham_mim" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="idgham_mim_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الإظهار الشفوي</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="izhar_shaf" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="izhar_shaf_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى الثالث — أحكام المدود</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">المد الطبيعي</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mad_tab" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mad_tab_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">المد الواجب المتصل</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mad_waj" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mad_waj_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">المد الجائز المنفصل</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mad_jaiz" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mad_jaiz_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">المد البدل</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mad_badal" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mad_badal_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى الرابع — مخارج الحروف</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الحروف الجوفية</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mak_jawf" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mak_jawf_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الحروف الحلقية</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mak_halq" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mak_halq_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الحروف اللثوية</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mak_lath" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mak_lath_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الحروف الشفوية</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="mak_shaf" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="mak_shaf_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى الخامس — صفات الحروف</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الصفات اللازمة</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="sif_laz" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="sif_laz_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الصفات العارضة</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="sif_arid" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="sif_arid_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الهمس والجهر</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="sif_hams" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="sif_hams_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الرخاوة والشدة</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="sif_rakh" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="sif_rakh_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى السادس — الوقف والابتداء</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الوقف التام</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="waqf_tam" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="waqf_tam_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الوقف الكافي</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="waqf_kaf" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="waqf_kaf_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الوقف الحسن</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="waqf_has" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="waqf_has_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr style="background:var(--pale);">
-    <td colspan="3" style="padding:8px 10px;font-weight:700;font-size:.82rem;color:var(--forest);border:1px solid var(--border);">المستوى السابع — أحكام متقدمة</td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">الترقيق والتفخيم</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="taf_tar" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="taf_tar_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">أحكام الراء</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="ahkam_ra" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="ahkam_ra_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr><tr>
-    <td style="padding:7px 10px;border:1px solid var(--border);">أحكام اللام</td>
-    <td style="padding:7px;border:1px solid var(--border);">
-      <select data-tj="ahkam_lam" style="width:100%;font-family:Tajawal;font-size:.8rem;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;outline:none;">
-        <option value="">—</option><option value="ممتاز">ممتاز</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option><option value="يحتاج تطوير">يحتاج تطوير</option>
-      </select>
-    </td>
-    <td style="padding:7px;border:1px solid var(--border);"><input type="text" placeholder="ملاحظات" data-tj="ahkam_lam_note" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-family:Tajawal;font-size:.8rem;outline:none;box-sizing:border-box;"></td>
-  </tr></tbody>
-          </table>
-        </div>
-      </div>
+      <!-- TAB 4: Tajweed (دفعة ٢٤) — ٧ مستويات شهرية + أرشيف الصيف — بيترسم من tjPaneHtml -->
+      <div class="sf-tab-pane" style="display:none;"><div id="sf-tj-wrap"></div></div>
 
       <!-- TAB 5: Behavior -->
       <div class="sf-tab-pane" style="display:none;">
@@ -16250,12 +16374,12 @@ async function loadLessonReviews(){
   if(!rows.length){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد تحضيرات مُرسلة للمراجعة</div>'; return; }
   const pending=rows.filter(r=>r.status==='submitted'), others=rows.filter(r=>r.status!=='submitted');
   const rowHtml=(r)=>'<tr>'+
-    '<td style="font-weight:700;color:var(--forest);">'+(names[r.teacher_id]||'—')+'</td>'+
+    '<td style="font-weight:700;color:var(--forest);">'+esc(names[r.teacher_id]||'—')+'</td>'+
     '<td>'+(r.subject==='tajweed'?'التجويد':'المنهج المصاحب')+'</td>'+
-    '<td>'+((r.title||'—'))+'</td>'+
-    '<td style="white-space:nowrap;">'+(r.date||'—')+'</td>'+
+    '<td>'+esc(r.title||'—')+'</td>'+
+    '<td style="white-space:nowrap;">'+esc(r.date||'—')+'</td>'+
     '<td>'+lpStatusBadge(r.status)+'</td>'+
-    '<td><button class="btn btn-primary btn-sm" onclick="openPrepReview(\''+r.id+'\')">مراجعة</button></td></tr>';
+    '<td><button class="btn btn-primary btn-sm" onclick="openPrepReview(\''+esc(r.id)+'\')">مراجعة</button></td></tr>';
   const tbl=(list,empty)=>'<div style="overflow-x:auto;"><table class="rpt-table" style="min-width:680px;"><thead><tr><th>المعلم</th><th>المادة</th><th>عنوان الدرس</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead><tbody>'+(list.map(rowHtml).join('')||('<tr><td colspan="6" style="text-align:center;color:var(--light);padding:16px;">'+empty+'</td></tr>'))+'</tbody></table></div>';
   out.innerHTML='<div class="card"><div class="card-head"><div class="card-title">📥 بانتظار المراجعة ('+rptAr(pending.length)+')</div></div>'+tbl(pending,'لا يوجد')+'</div>'+
     (others.length?('<div class="card" style="margin-top:16px;"><div class="card-head"><div class="card-title">📋 مراجَعة سابقاً</div></div>'+tbl(others,'—')+'</div>'):'');
@@ -16318,7 +16442,7 @@ async function approvePrep(){
   try{
     if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
     const {data,error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:true, p_note:null });
-    if(error) throw error;
+    if(error) throw new Error(error.message||'تعذّرت الموافقة');   // (دفعة ٢٤) رسالة القاعدة زي ما هي (مثلاً: برّه شُعبك)
     const res = Array.isArray(data) ? data[0] : data;
     // ✔ تأكيد إن الحالة اتغيّرت فعلاً — الـ RPC ممكن يرجع بصمت من غير ما يعتمد (صلاحية/RLS)
     const {data:chk} = await db.from('lesson_preps').select('status').eq('id', id).maybeSingle();
@@ -16331,6 +16455,7 @@ async function approvePrep(){
     closeModal('modal-prep-review');
     await loadLessonReviews();
     lpRefreshPendingBadge();
+    svPrepsRefresh();   // (دفعة ٢٤) خانة «تحضير الدرس» في لوحة القيادة
   }catch(e){ showToast('❌ تعذّرت الموافقة: '+waErr(e)); }
   finally{ if(btns) btns.style.pointerEvents=''; }
 }
@@ -16345,7 +16470,7 @@ async function returnPrep(){
   try{
     if(!(await waEnsureSession())) throw new Error('الجلسة انتهت — اعمل خروج ودخول تاني');
     const {error} = await db.rpc('approve_lesson_prep',{ p_id:id, p_approve:false, p_note:note });
-    if(error) throw error;
+    if(error) throw new Error(error.message||'تعذّر الإرجاع');
     // ✔ تأكيد إن الإرجاع اتحفظ فعلاً
     const {data:chk} = await db.from('lesson_preps').select('status').eq('id', id).maybeSingle();
     if(!chk || chk.status!=='returned') throw new Error('لم يُحفَظ الإرجاع — راجع الصلاحيات وحاول تاني');
@@ -16353,6 +16478,7 @@ async function returnPrep(){
     closeModal('modal-prep-review');
     await loadLessonReviews();
     lpRefreshPendingBadge();
+    svPrepsRefresh();   // (دفعة ٢٤)
   }catch(e){ showToast('❌ تعذّر الإرجاع: '+waErr(e)); }
   finally{ if(btns) btns.style.pointerEvents=''; }
 }
@@ -17493,68 +17619,138 @@ function tcRenderMetric(){
   </div>
 </div>
 
-<!-- إضافة دين -->
+<!-- إضافة دين — واردات (دفعة ٢٨) -->
 <div class="overlay" id="modal-fin-debt">
   <div class="modal" style="max-width:520px;">
     <div class="modal-head">
-      <div class="modal-title">إضافة دين</div>
+      <div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg> إضافة دين — فلوس داخلة للمدرسة</div>
       <button class="modal-close" onclick="closeModal('modal-fin-debt')">×</button>
     </div>
     <div class="modal-body">
       <div class="form-grid-2">
         <div class="fg"><label>المبلغ (ج.م) *</label>
-          <input type="number" id="dbt-amount" min="0" step="1" placeholder="مثال: 800" autocomplete="off"></div>
+          <input type="number" id="dbt-amount" min="0" step="1" placeholder="مثال: 5000" autocomplete="off"></div>
         <div class="fg"><label>اسم صاحب الدين *</label>
-          <input type="text" id="dbt-creditor" placeholder="اسم صاحب الدين" autocomplete="off"></div>
-        <div class="fg"><label>البند *</label>
-          <select id="dbt-cat">
-            <option value="food">طعام</option>
-            <option value="maintenance">صيانة</option><option value="motivation">تحفيز وترفيه</option>
-            <option value="purchases">مشتريات</option><option value="marketing">تسويق</option>
-          </select></div>
-        <div class="fg"><label>وسيلة الدفع *</label>
-          <select id="dbt-pay">
-            <option value="cash">نقدي</option><option value="vodafone_cash">فودافون كاش</option>
+          <input type="text" id="dbt-creditor" placeholder="اللي سلّف المدرسة" autocomplete="off"></div>
+        <div class="fg full"><label>وسيلة الاستلام *</label>
+          <select id="dbt-pay" onchange="finPayChange('dbt')">
+            <option value="cash">نقدي (يدخل الخزنة)</option><option value="vodafone_cash">فودافون كاش</option>
             <option value="instapay">انستاباي</option>
           </select></div>
-        <div class="fg full"><label>المستلم (تلقائي — المسجِّل)</label>
-          <input type="text" id="dbt-receiver" readonly style="background:#f3f4f6;font-weight:700;"></div>
-        <div class="fg full"><label>ملاحظات</label>
-          <textarea id="dbt-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label id="dbt-receiver-lbl">المستلم (تلقائي)</label>
+          <input type="text" id="dbt-receiver" autocomplete="off"></div>
+        <div class="fg full" id="dbt-recsel-wrap" style="display:none;">
+          <label>اسم صاحب المحفظة (العميل) *</label>
+          <select id="dbt-recsel" onchange="finRecSelChange('dbt')"></select>
+          <input type="text" id="dbt-recnew" placeholder="اكتب اسم العميل الجديد" autocomplete="off" style="display:none;margin-top:7px;"></div>
+        <div class="fg full"><label>ملاحظات (سبب الدين)</label>
+          <textarea id="dbt-notes" placeholder="مثال: لسداد مرتبات الشهر (اختياري)"></textarea></div>
         <div class="fg full"><label>تاريخ الدين</label>
           <input type="text" id="dbt-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
       </div>
     </div>
     <div class="modal-foot" style="justify-content:center;gap:16px;">
-      <button class="btn btn-primary" style="min-width:130px;" onclick="saveDebt(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveDebt(this)">💾 حفظ</button>
       <button class="btn btn-outline" onclick="closeModal('modal-fin-debt')">إلغاء</button>
     </div>
   </div>
 </div>
 
-<!-- رد الدين -->
+<!-- سداد الدين (دفعة ٢٨) — بيخصم من الخزنة ومابيظهرش في المصروفات -->
 <div class="overlay" id="modal-fin-debt-pay">
   <div class="modal" style="max-width:470px;">
     <div class="modal-head">
-      <div class="modal-title">إضافة رد — دين</div>
+      <div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg> سداد دين</div>
       <button class="modal-close" onclick="closeModal('modal-fin-debt-pay')">×</button>
     </div>
     <div class="modal-body">
       <div class="alert-strip alert-warn" id="dbtp-info"></div>
-      <div class="fg"><label>وسيلة الدفع *</label>
-        <select id="dbtp-pay">
-          <option value="cash">نقدي</option><option value="vodafone_cash">فودافون كاش</option>
-          <option value="instapay">انستاباي</option>
-        </select></div>
-      <div class="fg"><label>المشرف (تلقائي — المسجِّل)</label>
-        <input type="text" id="dbtp-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
-      <div class="fg"><label>تاريخ الرد</label>
-        <input type="text" id="dbtp-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
-      <div class="alert-strip alert-ok" style="font-size:.76rem;">عند التأكيد يُنقل البند تلقائياً من صندوق الديون إلى صندوق المصروفات المطابق.</div>
+      <div class="form-grid-2">
+        <div class="fg full"><label>اتسدّد من *</label>
+          <select id="dbtp-pay" onchange="finDbtPayChange()">
+            <option value="cash">الخزنة (نقدي)</option><option value="vodafone_cash">محفظة فودافون كاش</option>
+            <option value="instapay">محفظة انستاباي</option>
+          </select></div>
+        <div class="fg full" id="dbtp-wallet-wrap" style="display:none;"><label>صاحب المحفظة (العميل) *</label>
+          <select id="dbtp-wallet"></select></div>
+        <div class="fg full"><label>سجّله (تلقائي)</label>
+          <input type="text" id="dbtp-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>تاريخ السداد</label>
+          <input type="text" id="dbtp-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+      <div class="alert-strip alert-ok" style="font-size:.76rem;">المبلغ بيتخصم من الخزنة (أو من المحفظة المختارة) — ومابيظهرش في المصروفات.</div>
     </div>
     <div class="modal-foot" style="justify-content:center;gap:16px;">
-      <button class="btn btn-primary" style="min-width:130px;" onclick="confirmDebtPay(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> تأكيد</button>
+      <button class="btn btn-primary" style="min-width:130px;" onclick="confirmDebtPay(this)">✔ تأكيد السداد</button>
       <button class="btn btn-outline" onclick="closeModal('modal-fin-debt-pay')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- سُلفة — قرض حسن (دفعة ٢٨) -->
+<div class="overlay" id="modal-fin-adv">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg> إضافة سُلفة (قرض حسن)</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-adv')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid-2">
+        <div class="fg"><label>المبلغ (ج.م) *</label>
+          <input type="number" id="adv-amount" min="0" step="1" placeholder="مثال: 1000" autocomplete="off"></div>
+        <div class="fg"><label>اسم اللي أخد السلفة *</label>
+          <input type="text" id="adv-borrower" placeholder="الاسم" autocomplete="off"></div>
+        <div class="fg full"><label>اتصرفت من *</label>
+          <select id="adv-pay" onchange="finAdvPayChange()">
+            <option value="cash">الخزنة (نقدي)</option><option value="vodafone_cash">محفظة فودافون كاش</option>
+            <option value="instapay">محفظة انستاباي</option>
+          </select></div>
+        <div class="fg full" id="adv-wallet-wrap" style="display:none;"><label>صاحب المحفظة (العميل) *</label>
+          <select id="adv-wallet"></select></div>
+        <div class="fg full"><label>سلّمها (تلقائي)</label>
+          <input type="text" id="adv-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="adv-notes" placeholder="مثال: هيرجّعها آخر الشهر (اختياري)"></textarea></div>
+        <div class="fg full"><label>التاريخ</label>
+          <input type="text" id="adv-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+      <div class="alert-strip alert-ok" style="font-size:.76rem;">السلفة بتتخصم من الخزنة — ولما ترجع اضغط «تم الرد» في السجل.</div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="saveAdvance(this)">💾 حفظ</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-adv')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- رد السُّلفة (دفعة ٢٨) -->
+<div class="overlay" id="modal-fin-adv-pay">
+  <div class="modal" style="max-width:470px;">
+    <div class="modal-head">
+      <div class="modal-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg> رد سُلفة</div>
+      <button class="modal-close" onclick="closeModal('modal-fin-adv-pay')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert-strip alert-warn" id="adp-info"></div>
+      <div class="form-grid-2">
+        <div class="fg full"><label>رجعت في *</label>
+          <select id="adp-pay" onchange="finAdpPayChange()">
+            <option value="cash">الخزنة (نقدي)</option><option value="vodafone_cash">محفظة فودافون كاش</option>
+            <option value="instapay">محفظة انستاباي</option>
+          </select></div>
+        <div class="fg full" id="adp-wallet-wrap" style="display:none;"><label>صاحب المحفظة (العميل) *</label>
+          <select id="adp-wallet"></select></div>
+        <div class="fg full"><label>سجّله (تلقائي)</label>
+          <input type="text" id="adp-by" readonly style="background:#f3f4f6;font-weight:700;"></div>
+        <div class="fg full"><label>ملاحظات</label>
+          <textarea id="adp-notes" placeholder="أي ملاحظات (اختياري)"></textarea></div>
+        <div class="fg full"><label>تاريخ الرد</label>
+          <input type="text" id="adp-date" readonly style="background:#f3f4f6;text-align:center;font-weight:700;"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:16px;">
+      <button class="btn btn-primary" style="min-width:130px;" onclick="confirmAdvPay(this)">✔ تأكيد الرد</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-fin-adv-pay')">إلغاء</button>
     </div>
   </div>
 </div>
@@ -17563,16 +17759,28 @@ function tcRenderMetric(){
 /* ══════════════════════════════════════════════════════
    الشؤون المالية — لوحة المشرف
    الواردات: اشتراكات الطلاب / التبرعات / الكفالات
-   المصروفات: كل البنود ما عدا دعم العملاء
+   المصروفات: كل البنود + الأصول والاشتراكات الشهرية والانتقالات والسُّلف (دفعة ٢٨) — المرتبات والخزنة للمدير بس
+   الديون: في الواردات (دفعة ٢٨) • كل القوايم = الدورة المختارة من القايمة اللي فوق
    الفصل بالجنس: الذكور ← الأبطال + الرواد • الإناث ← الملكات + الأميرات
    كل البيانات حيّة من Supabase — لا بيانات ثابتة
 ══════════════════════════════════════════════════════ */
 
 const FIN_PAY_AR      = { cash:'نقدي', vodafone_cash:'فودافون كاش', instapay:'انستاباي' };
 const FIN_PAY_BADGE   = { cash:'bg-green', vodafone_cash:'bg-red', instapay:'bg-blue' };
-const FIN_MONTH_AR    = { 1:'الشهر الأول', 2:'الشهر الثاني', 3:'الشهر الثالث' };
+const FIN_MONTH_AR  = { 1:'الشهر الأول', 2:'الشهر الثاني', 3:'الشهر الثالث', 4:'الشهر الرابع', 5:'الشهر الخامس', 6:'الشهر السادس' };
+// (دفعة ٢٥) عدد شهور اشتراك الدورة المعروضة (terms.settings.subs_months) — ١..٦
+function finMonthsN(){ const t=(typeof VIEW_TERM!=='undefined'&&VIEW_TERM)||(typeof CUR_TERM!=='undefined'&&CUR_TERM)||{}; const n=parseInt(((t.settings||{}).subs_months),10)||3; return Math.max(1,Math.min(6,n)); }
+function finMonthList(){ return Array.from({length:finMonthsN()},(_,i)=>i+1); }
+function finSubsHeadRender(){
+  const th=document.getElementById('fin-subs-thead'); if(!th) return;
+  const L=finMonthList(), b='border-left:2px solid var(--border);';
+  th.innerHTML='<tr><th rowspan="2" style="text-align:center;vertical-align:middle;">م</th><th rowspan="2" style="vertical-align:middle;">اسم الطالب</th>'
+    +L.map((m,i)=>'<th colspan="4" style="text-align:center;'+(i===0?'border-right:2px solid var(--border);':'')+b+'">'+FIN_MONTH_AR[m]+'</th>').join('')
+    +'<th rowspan="2" style="vertical-align:middle;">ملاحظات</th></tr><tr>'
+    +L.map((m,i)=>'<th style="text-align:center;'+(i===0?'border-right:2px solid var(--border);':'')+'">المبلغ</th><th style="text-align:center;">وسيلة الدفع</th><th style="text-align:center;">المستلم</th><th style="text-align:center;'+b+'">تاريخ التسليم</th>').join('')+'</tr>';
+}
 const FIN_DUR_AR      = { 1:'شهر', 2:'شهرين', 3:'ثلاثة أشهر' };
-const FIN_EXP_CAT_AR  = { salaries:'مرتبات', food:'طعام', maintenance:'صيانة', motivation:'تحفيز وترفيه', purchases:'مشتريات', marketing:'تسويق' };
+const FIN_EXP_CAT_AR  = { salaries:'مرتبات', food:'طعام', maintenance:'صيانة', motivation:'تحفيز وترفيه', purchases:'مشتريات', marketing:'تسويق', assets:'الأصول', monthly_subs:'اشتراكات شهرية', transport:'انتقالات' };
 const FIN_SAL_KIND_AR = { monthly:'مرتب شهري', bonus:'حوافز' };
 const FIN_ROLE_AR     = { teacher:'معلم', supervisor:'مشرف', admin:'مدير', employee:'موظف' };
 
@@ -17584,6 +17792,11 @@ const FIN_ICON_P = {
   gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
   cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/>',
   megaphone: '<path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  armchair: '<path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/>',
+  repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+  bus: '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>',
+  coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+  undo2: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
 };
 function finIcon(name, size, color){
   size = size || 18; color = color || 'currentColor';
@@ -17601,9 +17814,14 @@ function finNorm(s){ return String(s||'').replace(/[أإآ]/g,'ا').replace(/ى/
 function finUnc(r){ return !!r && r.pay_method !== 'cash' && !r.collected; }
 function finUncBadge(r){ return finUnc(r) ? ' <span class="badge bg-gray" style="font-size:.6rem;">غير محصَّل</span>' : ''; }
 
-/* ══ نطاق شُعب المشرف حسب الجنس ══ */
+/* ══ نطاق شُعب المشرف (دفعة ٢٨): من admin_scope في القاعدة (svMyBranches) ══
+   الأبطال والرواد لمشرفينهم • الملكات والأميرات لمشرفة البنات — ولو النطاق مش معروف: ولا حاجة (fail-closed) */
 function finMyBranches(){
-  return (MY_GENDER === 'إناث') ? ['الملكات','الأميرات'] : ['الأبطال','الرواد'];
+  const L = (window._svBranches || []).map(b => b && b.name).filter(Boolean);
+  if(L.length) return L;
+  if(MY_GENDER === 'إناث') return ['الملكات','الأميرات'];
+  if(MY_GENDER === 'ذكور') return ['الأبطال','الرواد'];
+  return [];
 }
 function finInMySection(branch){
   const b = finNorm(branch);
@@ -17692,6 +17910,7 @@ async function finStuSearch(p){
   box.innerHTML = '<div class="fin-sres-empty">جاري البحث…</div>'; box.classList.add('open');
   let hits = [];
   try{
+    await svMyBranches();
     const { data } = await db.rpc('search_students', { q });
     hits = (data||[])
       .filter(x => finInMySection(x.branch))
@@ -17746,26 +17965,31 @@ function finValidate(p, needStudent){
 }
 
 
-/* ══ قفل الفترة ══ */
-let FIN_LOCK_UNTIL = null;
-async function finLoadLock(){
-  try{
-    const { data } = await db.from('fin_settings').select('v').eq('k','locked_until').single();
-    FIN_LOCK_UNTIL = (data && data.v) || '1900-01-01';
-  }catch(e){ FIN_LOCK_UNTIL = '1900-01-01'; }
-  return FIN_LOCK_UNTIL;
+// (دفعة ٢٨) قفل الفترة اتشال من الواجهة — الدورة المختارة هي الفترة
+function finLockedUntil(){ return '1900-01-01'; }
+function finLockGuard(){ return true; }
+
+/* ══ (دفعة ٢٨) الماليات حسب الدورة المختارة من القايمة اللي فوق ══ */
+function finViewTerm(){ return (typeof VIEW_TERM!=='undefined' && VIEW_TERM) || (typeof CUR_TERM!=='undefined' && CUR_TERM) || null; }
+function finTermOf(iso){
+  iso = String(iso||'').slice(0,10);
+  const L = (typeof TERMS!=='undefined' && TERMS) || [];
+  if(!iso || !L.length) return null;
+  return L.find(t => t.start_date <= iso && iso <= t.end_date) || L.filter(t => t.start_date <= iso).pop() || L[0];
 }
-function finLockBlocks(dateISO){
-  if(!FIN_LOCK_UNTIL) return false;
-  return String(dateISO) <= String(FIN_LOCK_UNTIL);
+// الصف تبع الدورة المعروضة؟ اللي ليه term_id بيمشي بيه — والباقي بتاريخه (أو بالتاريخ اللي يتبعت)
+function finInTerm(r, iso){
+  const T = finViewTerm(); if(!T || !r) return true;
+  if(iso === undefined && r.term_id) return String(r.term_id) === String(T.id);
+  const t = finTermOf(iso !== undefined ? iso : (r.paid_date || r.date));
+  return !!t && t.id === T.id;
 }
-function finLockGuard(){
-  if(finLockBlocks(finTodayISO())){
-    showToast('🔒 الفترة مقفولة حتى ' + finDateAr(FIN_LOCK_UNTIL) + ' — التسجيل ممنوع');
-    return false;
-  }
-  return true;
+function finTermLbl(){ const T = finViewTerm(); return T ? T.name : ''; }
+function finSavedToast(msg){
+  const T = finViewTerm(), t = finTermOf(finTodayISO());
+  showToast(msg + (T && t && T.id !== t.id ? ' — اتسجّل في «' + t.name + '» (تاريخ النهارده)' : ''));
 }
+async function finLoadLock(){ return '1900-01-01'; }
 
 /* ══════════ التبرعات ══════════ */
 /* ══ الإيصالات / القيد العكسي / وسيلة الدفع / نهاية الكفالة ══ */
@@ -17888,6 +18112,9 @@ async function getBranchPrices(force){
   return FIN_PRICES;
 }
 function finPrice(branchName){
+  // (دفعة ٢٥) سعر الشهر الخاص بالدورة المعروضة (terms.settings.prices) — وإلا السعر العام من الخزنة
+  try{ const tp=(typeof VIEW_TERM!=='undefined'&&VIEW_TERM&&VIEW_TERM.settings&&VIEW_TERM.settings.prices)||null;
+    if(tp){ const k=Object.keys(tp).find(x=>finNorm(x)===finNorm(branchName)); if(k&&+tp[k]>0) return Number(tp[k]); } }catch(e){}
   if(!FIN_PRICES) return 0;
   const b = FIN_PRICES.find(x => finNorm(x.branch_name) === finNorm(branchName));
   return b ? Number(b.monthly_price||0) : 0;
@@ -17954,7 +18181,7 @@ async function loadSubsRep(force){
       const key = (st.circle_id || 'x') + '|' + (st.teacher_name || '—');
       if(!gmap[key]) gmap[key] = { teacher: st.teacher_name||'—', circle: st.circle_name||'—', branch: st.branch_name||'—', rows: [] };
       const p = paid[st.id] || {};
-      const months = [1,2,3].map(m => ({ m, amt: (p[m] != null ? p[m].amt : null), pay: p[m] ? p[m].pay : null, unc: p[m] ? p[m].unc : false }));
+      const months = finMonthList().map(m => ({ m, amt: (p[m] != null ? p[m].amt : null), pay: p[m] ? p[m].pay : null, unc: p[m] ? p[m].unc : false }));
       const paidCnt = months.filter(x => x.amt != null).length;
       const sponsor = sponMap[st.id] || (sponFlag[st.id] ? 'مكفول' : null);
       gmap[key].rows.push({ id: st.id, name: st.name, branch: st.branch_name||'—', months, flag: !!sponFlag[st.id],
@@ -17968,6 +18195,7 @@ async function loadSubsRep(force){
     groups.forEach(g => g.rows.sort((a,b) => (b.dueCnt - a.dueCnt) || a.name.localeCompare(b.name,'ar')));
 
     SUBSREP = { groups };
+    await svMyBranches();
 
     // فلتر المعلمين
     const sel = document.getElementById('subsrep-teacher');
@@ -18043,7 +18271,7 @@ function renderSubsRep(){
       + '<span class="sub">طلاب: '+finAr(g.rows.length)+(gSpon?' • مكفول: '+finAr(gSpon):'')+' • مدفوع: '+finAr(gPaid)+' • متأخر: '+finAr(gDue)+' • محصَّل: '+finMoney(gSum)+'</span></div>';
     html += '<table class="srep-tbl"><thead><tr>'
       + '<th style="width:40px;">م</th><th>اسم الطالب</th>'
-      + '<th style="width:110px;">الشهر الأول</th><th style="width:110px;">الشهر الثاني</th><th style="width:110px;">الشهر الثالث</th>'
+      + finMonthList().map(m => '<th style="width:110px;">'+FIN_MONTH_AR[m]+'</th>').join('')
       + '<th style="width:90px;">الحالة</th></tr></thead><tbody>'
       + g.rows.map((r,i) => {
           const stTxt = r.sponsor
@@ -18059,7 +18287,7 @@ function renderSubsRep(){
             + '<td class="srep-num">'+stTxt+'</td></tr>';
         }).join('')
       + '</tbody><tfoot><tr><td colspan="2">الإجمالي</td>'
-      + '<td class="srep-num" colspan="3">مدفوع '+finAr(gPaid)+' / متأخر '+finAr(gDue)+'</td>'
+      + '<td class="srep-num" colspan="'+finMonthsN()+'">مدفوع '+finAr(gPaid)+' / متأخر '+finAr(gDue)+'</td>'
       + '<td class="srep-num">'+finMoney(gSum)+'</td></tr></tfoot></table>';
   });
 
@@ -18074,8 +18302,9 @@ function renderSubsRep(){
 ══════════════════════════════════════════════════════ */
 function repISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function initFinReport(){
-  const f = document.getElementById('rep-from');
-  if(f && !f.value) repQuick('term');
+  const f = document.getElementById('rep-from'), t = document.getElementById('rep-to');
+  const T = finViewTerm();   // (دفعة ٢٨) التقرير جوه الدورة المختارة بس
+  if(f && (!f.value || (T && (f.value < T.start_date || f.value > T.end_date || (t && (t.value > T.end_date || t.value < T.start_date)))))) repQuick('term');
 }
 function repQuick(k){
   const now = new Date();
@@ -18095,21 +18324,29 @@ function repQuick(k){
   document.getElementById('rep-to').value   = repISO(to);
 }
 async function buildFinReport(btn){
-  const from = document.getElementById('rep-from').value;
-  const to   = document.getElementById('rep-to').value;
+  let from = document.getElementById('rep-from').value;
+  let to   = document.getElementById('rep-to').value;
   if(!from || !to){ showToast('⚠️ اختر تاريخ البداية والنهاية'); return; }
   if(from > to){ showToast('⚠️ تاريخ «من» بعد تاريخ «إلى»'); return; }
+  const _T = finViewTerm();   // (دفعة ٢٨) جوه حدود الدورة المختارة
+  if(_T && (from < _T.start_date || to > _T.end_date)){
+    if(from < _T.start_date) from = _T.start_date; if(to > _T.end_date) to = _T.end_date;
+    if(from > to){ from = _T.start_date; to = _T.end_date; }
+    document.getElementById('rep-from').value = from; document.getElementById('rep-to').value = to;
+    showToast('ℹ️ التقرير جوه «' + _T.name + '» بس — اتظبطت الفترة');
+  }
   const sheet = document.getElementById('fin-report-sheet');
   const pdfBtn = document.getElementById('rep-pdf-btn');
   sheet.innerHTML = '<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--light);">جاري تجميع البيانات…</div></div>';
   if(btn) btn.disabled = true;
   try{
+    await svMyBranches();
     const [subsR, sponR] = await Promise.all([
       selectAll(db.from('fin_subscriptions').select('*').order('id')),
       selectAll(db.from('fin_sponsorships').select('*').order('id')),
     ]);
     if(subsR.error) throw subsR.error; if(sponR.error) throw sponR.error;
-    const mine = a => (a.data||[]).filter(r => !r.reversed && finInMySection(r.student_branch));   // القيد العكسي يفضل بالسالب
+    const mine = a => (a.data||[]).filter(r => !r.reversed && finInMySection(r.student_branch) && finInTerm(r));   // (دفعة ٢٨) + الدورة   // القيد العكسي يفضل بالسالب
     const SUBS = mine(subsR), SPON = mine(sponR);
     const dOf = r => r.paid_date || r.date;
     const inR = (d,a,b) => d && d >= a && d <= b;
@@ -18149,7 +18386,7 @@ async function buildFinReport(btn){
         + '<td class="rep-num" style="color:'+(sum(u)?'var(--gold)':'var(--light)')+';">'+(k==='cash'?'—':finMoney(sum(u)))+'</td></tr>';
     }).join('');
     // اشتراكات حسب الشهر
-    const monRows = [1,2,3].map(m => {
+    const monRows = finMonthList().map(m => {
       const g = C.s.filter(r => +r.month_no === m);
       return '<tr><td style="font-weight:700;">'+(FIN_MONTH_AR[m]||('الشهر '+finAr(m)))+'</td><td class="rep-num">'+finAr(g.length)+'</td><td class="rep-num">'+finMoney(sum(g))+'</td></tr>';
     }).join('');
@@ -18158,7 +18395,7 @@ async function buildFinReport(btn){
     sheet.innerHTML =
       '<div class="rep-sheet">'
       + '<div class="rep-head"><div><div class="rep-h1">مدرسة التوحيد القرآنية</div>'
-      +   '<div class="rep-h2">إصلاح حياة — التقرير المالي لقسم '+finEsc(finMyBranches().join(' + '))+'</div></div>'
+      +   '<div class="rep-h2">إصلاح حياة — التقرير المالي لقسم '+finEsc(finMyBranches().join(' + '))+' — '+finEsc(finTermLbl())+'</div></div>'
       +   '<div class="rep-meta"><div>الفترة: من <strong>'+finDateAr(from)+'</strong> إلى <strong>'+finDateAr(to)+'</strong></div>'
       +     '<div>المقارنة مع: '+finDateAr(pf)+' — '+finDateAr(pt)+'</div>'
       +     '<div>تاريخ الإصدار: '+finDateAr(finTodayISO())+' • أعدّه: '+finEsc(me.name)+'</div></div></div>'
@@ -18227,7 +18464,7 @@ async function saveDonation(btn){
     }]).select('id');
     if(error) throw error;
     if (!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
-    showToast('✅ تم تسجيل التبرع');
+    finSavedToast('✅ تم تسجيل التبرع');
     closeModal('modal-fin-don');
     loadFinDonations();
   }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
@@ -18241,7 +18478,7 @@ async function loadFinDonations(){
     const { data, error } = await selectAll(db.from('fin_donations').select('*')
       .order('date',{ascending:false}).order('created_at',{ascending:false}));
     if(error) throw error;
-    const rows = data || [];
+    const rows = (data || []).filter(r => finInTerm(r));   // (دفعة ٢٨) الدورة المختارة بس
     const tot = document.getElementById('fin-don-total');
     if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
     if(!rows.length){
@@ -18305,7 +18542,7 @@ async function saveSponsorship(btn){
     }]).select('id');
     if(error) throw error;
     if (!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
-    showToast('✅ تم تسجيل الكفالة');
+    finSavedToast('✅ تم تسجيل الكفالة');
     closeModal('modal-fin-spon');
     loadFinSponsorships();
   }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
@@ -18319,7 +18556,8 @@ async function loadFinSponsorships(){
     const { data, error } = await selectAll(db.from('fin_sponsorships').select('*')
       .order('date',{ascending:false}).order('created_at',{ascending:false}));
     if(error) throw error;
-    const rows = (data||[]).filter(r => finInMySection(r.student_branch));
+    await svMyBranches();
+    const rows = (data||[]).filter(r => finInMySection(r.student_branch) && finInTerm(r));   // (دفعة ٢٨) + الدورة المختارة
     const tot = document.getElementById('fin-spon-total');
     if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
     if(!rows.length){
@@ -18366,6 +18604,7 @@ function openSubsModal(){
 async function subsAfterPick(){
   document.getElementById('subs-rest').style.display = 'block';
   const sel = document.getElementById('subs-month');
+  sel.innerHTML = finMonthList().map(m => '<option value="'+m+'">'+FIN_MONTH_AR[m]+'</option>').join('');   // (دفعة ٢٥) شهور الدورة
   [...sel.options].forEach(o => { o.disabled = false; o.textContent = FIN_MONTH_AR[+o.value]; });
   document.getElementById('subs-paid-hint').textContent = '';
   const s = FIN_SEL['subs']; if(!s || !s.id) return;
@@ -18422,9 +18661,11 @@ function _finSubCell(r){
 
 async function loadFinSubs(){
   const tb = document.getElementById('fin-subs-tbody'); if(!tb) return;
+  finSubsHeadRender();   // (دفعة ٢٥)
   if (typeof kfRender === 'function') kfRender();   // ⭐ المكفولون (دفعة ١٤)
   tb.innerHTML = '<tr><td colspan="15" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
   try{
+    await svMyBranches();
     const { data, error } = await selectAll(db.from('fin_subscriptions').select('*').order('created_at',{ascending:true}));
     if(error) throw error;
     const rows = (data||[]).filter(r => finInMySection(r.student_branch) && !r.reversal_of && !r.reversed && termRowMatch(r));
@@ -18446,7 +18687,7 @@ async function loadFinSubs(){
       return '<tr><td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
         + '<td><div style="font-weight:700;color:var(--forest);">'+finEsc(g.name||'—')+'</div>'
         +   '<div style="font-size:.68rem;color:var(--light);">'+finEsc(g.branch||'—')+' • '+finEsc(g.circle||'—')+'</div></td>'
-        + _finSubCell(g.m[1]) + _finSubCell(g.m[2]) + _finSubCell(g.m[3])
+        + finMonthList().map(m => _finSubCell(g.m[m])).join('')
         + '<td style="font-size:.72rem;color:var(--light);">'+finEsc(g.notes.join(' — ')||'—')+'</td></tr>';
     }).join('');
   }catch(e){
@@ -18461,6 +18702,9 @@ const FIN_EXP_CFG = {
   motivation:  { page:'fin-mot',   ico:'gift',      title:'إضافة تحفيز',   lbl:'نوع التحفيز *', mode:'text',   ph:'اكتب نوع التحفيز' },
   purchases:   { page:'fin-purch', ico:'cart',      title:'إضافة مشتريات', lbl:'البند *',       mode:'text',   ph:'اكتب البند' },
   marketing:   { page:'fin-mkt',   ico:'megaphone', title:'إضافة تسويق',   lbl:'نوع التسويق *', mode:'text',   ph:'اكتب نوع التسويق' },
+  assets:       { page:'fin-assets', ico:'armchair', title:'إضافة أصل',          lbl:'نوع الأصل *',     mode:'selother', opts:['تربيزات','كراسي','سبورات','شاشات'], ph:'اكتب نوع الأصل' },
+  monthly_subs: { page:'fin-msubs',  ico:'repeat',   title:'إضافة اشتراك شهري',  lbl:'نوع الاشتراك *',  mode:'selother', opts:['اشتراك الإنترنت والتليفون','اشتراك الذكاء الاصطناعي','اشتراك الموقع والمستخدمين','رصيد تليفون المشرفات'], ph:'اكتب نوع الاشتراك' },
+  transport:    { page:'fin-trans',  ico:'bus',      title:'إضافة انتقالات',     lbl:'نوع المشوار *',   mode:'selother', opts:['رحلة','مشوار لشراء احتياجات المدرسة'], ph:'اكتب المشوار' },
 };
 let EXP_CAT = null;
 
@@ -18471,11 +18715,19 @@ function openExpModal(cat){
   document.getElementById('exp-m-title').innerHTML = finIcon(c.ico, 18, 'currentColor') + ' ' + c.title;
   document.getElementById('exp-kind-lbl').textContent = c.lbl;
   const sel = document.getElementById('exp-kind-sel'), txt = document.getElementById('exp-kind-txt');
-  if(c.mode === 'select'){
-    sel.innerHTML = c.opts.map(o => '<option value="'+finEsc(o)+'">'+finEsc(o)+'</option>').join('');
-    sel.style.display = ''; txt.style.display = 'none'; sel.value = c.opts[0];
+  sel.onchange = null; txt.value = ''; txt.style.marginTop = '';
+  if(c.mode === 'select' || c.mode === 'selother'){
+    // (دفعة ٢٨) selother = قايمة + «غير ذلك…» بيفتح خانة كتابة
+    sel.innerHTML = c.opts.map(o => '<option value="'+finEsc(o)+'">'+finEsc(o)+'</option>').join('')
+      + (c.mode === 'selother' ? '<option value="__other">غير ذلك…</option>' : '');
+    sel.style.display = ''; sel.value = c.opts[0];
+    txt.placeholder = c.ph || ''; txt.style.display = 'none';
+    if(c.mode === 'selother'){
+      txt.style.marginTop = '7px';
+      sel.onchange = function(){ const o = sel.value === '__other'; txt.style.display = o ? '' : 'none'; if(o) txt.focus(); };
+    }
   }else{
-    txt.placeholder = c.ph || ''; txt.value = '';
+    txt.placeholder = c.ph || '';
     txt.style.display = ''; sel.style.display = 'none';
   }
   document.getElementById('exp-amount').value  = '';
@@ -18493,9 +18745,10 @@ async function saveExpense(btn){
   const c = FIN_EXP_CFG[EXP_CAT]; if(!c) return;
   const amt = parseFloat(document.getElementById('exp-amount').value);
   if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
-  const kind = (c.mode === 'select'
-    ? document.getElementById('exp-kind-sel').value
-    : (document.getElementById('exp-kind-txt').value||'').trim());
+  const _ksel = document.getElementById('exp-kind-sel').value;
+  const kind = (c.mode === 'select' ? _ksel
+    : (c.mode === 'selother' && _ksel !== '__other' ? _ksel
+    : (document.getElementById('exp-kind-txt').value||'').trim()));
   if(!kind){ showToast('⚠️ ' + c.lbl.replace(' *','') + ' مطلوب'); return; }
   const pay    = document.getElementById('exp-pay').value;
   const paidTo = (document.getElementById('exp-paidto').value||'').trim();
@@ -18520,7 +18773,7 @@ async function saveExpense(btn){
     }]).select('id');
     if(error) throw error;
     if (!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
-    showToast('✅ تم التسجيل');
+    finSavedToast('✅ تم التسجيل');
     closeModal('modal-fin-exp');
     loadFinExp(EXP_CAT);
   }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
@@ -18535,7 +18788,7 @@ async function loadFinExp(cat){
     const { data, error } = await selectAll(db.from('fin_expenses').select('*').eq('category',cat)
       .order('date',{ascending:false}).order('created_at',{ascending:false}));
     if(error) throw error;
-    const rows = data || [];
+    const rows = (data || []).filter(r => finInTerm(r));   // (دفعة ٢٨) الدورة المختارة بس
     const tot = document.getElementById(c.page+'-total');
     if(tot) tot.textContent = finMoney(rows.reduce((a,r)=>a+Number(r.amount||0),0));
     if(!rows.length){
@@ -18559,97 +18812,105 @@ async function loadFinExp(cat){
   }
 }
 
-/* ══════════ الديون ══════════ */
+/* ══════════ الديون — واردات (دفعة ٢٨) ══════════
+   الدين = فلوس داخلة للمدرسة: النقدي ← الخزنة • فودافون كاش / انستاباي ← محفظة العميل لحد «تم التحصيل»
+   «سداد» = بيخصم من الخزنة (أو من محفظة) — ومابيظهرش في المصروفات */
 function openDebtModal(){
   if(!finLockGuard()) return;
   document.getElementById('dbt-amount').value   = '';
   document.getElementById('dbt-creditor').value = '';
   document.getElementById('dbt-notes').value    = '';
-  document.getElementById('dbt-cat').value      = 'salaries';
   document.getElementById('dbt-pay').value      = 'cash';
-  document.getElementById('dbt-receiver').value = finMe().name;
   document.getElementById('dbt-date').value     = finDateAr(finTodayISO());
+  finPayChange('dbt');
   openModal('modal-fin-debt');
 }
 
 async function saveDebt(btn){
-  const amt = parseFloat(document.getElementById('dbt-amount').value);
-  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
+  const v = finValidate('dbt', false); if(!v) return;
   const cr = (document.getElementById('dbt-creditor').value||'').trim();
   if(!cr){ showToast('⚠️ اكتب اسم صاحب الدين'); return; }
-  if(!finLockGuard()) return;
   finBusy(btn, true);
   try{
     const me = finMe();
-    await finEnsureClient(cr);
-    const { data: _rows, error, status } = await db.from('fin_debts').insert([{
-      amount: amt, creditor_name: cr,
-      category: document.getElementById('dbt-cat').value,
-      pay_method: document.getElementById('dbt-pay').value,
-      receiver: me.name,
-      notes: (document.getElementById('dbt-notes').value||'').trim() || null,
-      date: finTodayISO(), repaid: false, created_by: me.id
+    if(v.pay !== 'cash') await finEnsureClient(v.rec);
+    const { data: _rows, error } = await db.from('fin_debts').insert([{
+      amount: v.amt, creditor_name: cr, category: null,
+      pay_method: v.pay, receiver: v.rec, collected: v.pay === 'cash',
+      notes: v.notes, date: finTodayISO(), repaid: false, created_by: me.id
     }]).select('id');
     if(error) throw error;
-    if (!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn,false); return; }
-    showToast('✅ تم تسجيل الدين');
+    if(!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn, false); return; }
+    finSavedToast(v.pay === 'cash' ? '✅ تم تسجيل الدين — دخل الخزنة' : '✅ تم تسجيل الدين — في محفظة ' + v.rec);
     closeModal('modal-fin-debt');
     loadFinDebts();
   }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
   finBusy(btn, false);
 }
 
+function finPayFromCell(m, wallet){
+  if(!m) return '<span class="fin-cell-none">—</span>';
+  return '<span class="badge '+(FIN_PAY_BADGE[m]||'bg-gray')+'">'+(m==='cash' ? 'الخزنة (نقدي)' : (FIN_PAY_AR[m]||'—'))+'</span>'
+    + (wallet ? '<div style="font-size:.64rem;color:var(--light);">محفظة: '+finEsc(wallet)+'</div>' : '');
+}
+
 async function loadFinDebts(){
   const tb = document.getElementById('fin-debt-tbody'); if(!tb) return;
-  tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
   try{
     const { data, error } = await selectAll(db.from('fin_debts').select('*')
       .order('repaid',{ascending:true}).order('date',{ascending:false}).order('created_at',{ascending:false}));
     if(error) throw error;
-    const rows = data || [];
+    const rows = (data || []).filter(r => finInTerm(r, r.date));
     window._finDebts = rows;
+    const all_  = rows.reduce((a,r)=>a+Number(r.amount||0),0);
     const open_ = rows.filter(r => !r.repaid).reduce((a,r)=>a+Number(r.amount||0),0);
     const tot = document.getElementById('fin-debt-total');
-    if(tot) tot.textContent = 'غير مسدَّد: ' + finMoney(open_);
+    if(tot) tot.textContent = 'الوارد: ' + finMoney(all_) + ' • لسه ما اتسدّدش: ' + finMoney(open_);
     if(!rows.length){
-      tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--light);padding:34px;">لا توجد ديون مسجّلة بعد</td></tr>';
+      tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--light);padding:34px;">لا توجد ديون مسجّلة في «'+finEsc(finTermLbl())+'»</td></tr>';
       return;
     }
     tb.innerHTML = rows.map((r,i) => {
       const done = !!r.repaid;
       const doneCell = done
-        ? '<span class="badge bg-green">'+finIcon('check',12)+' تم الرد</span>'
-        : '<button class="btn btn-gold btn-xs" onclick="openDebtPay(\''+r.id+'\')">'+finIcon('plus',12)+' إضافة رد</button>';
-      return '<tr'+(done?' style="opacity:.72;"':'')+'>'
+        ? '<span class="badge bg-green">'+finIcon('check',12)+' اتسدّد</span>'
+        : '<button class="btn btn-gold btn-xs" onclick="openDebtPay(\''+r.id+'\')">'+finIcon('undo2',12)+' سداد</button>';
+      return '<tr'+(done?' style="opacity:.72;"':(finUnc(r)?' class="fin-unc"':''))+'>'
         + '<td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
         + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.creditor_name||'—')+'</td>'
         + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
-        + '<td><span class="badge bg-purple">'+finEsc(FIN_EXP_CAT_AR[r.category]||'—')+'</span></td>'
-        + '<td><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span></td>'
+        + '<td><span class="badge '+(FIN_PAY_BADGE[r.pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.pay_method]||'—')+'</span>'+finUncBadge(r)+'</td>'
         + '<td>'+finEsc(r.receiver||'—')+'</td>'
         + '<td>'+finDateAr(r.date)+'</td>'
         + '<td style="text-align:center;border-right:2px solid var(--border);">'+doneCell+'</td>'
         + '<td style="text-align:center;">'+(done ? finDateAr(r.repaid_date) : '<span class="fin-cell-none">—</span>')+'</td>'
-        + '<td style="text-align:center;">'+(done && r.repaid_pay_method ? '<span class="badge '+(FIN_PAY_BADGE[r.repaid_pay_method]||'bg-gray')+'">'+(FIN_PAY_AR[r.repaid_pay_method]||'—')+'</span>' : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="text-align:center;">'+(done ? finPayFromCell(r.repaid_pay_method, r.repaid_wallet_owner) : '<span class="fin-cell-none">—</span>')+'</td>'
         + '<td style="text-align:center;border-left:2px solid var(--border);">'+(done ? finEsc(r.repaid_by_name||'—') : '<span class="fin-cell-none">—</span>')+'</td>'
-        + '<td style="font-size:.74rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td></tr>';
+        + '<td style="font-size:.74rem;color:var(--light);">'+finEsc(r.notes||'—')+'</td>'
+        + '</tr>';
     }).join('');
   }catch(e){
-    tb.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+    tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
   }
 }
 
 let DEBT_PAY_ID = null;
 
+function finDbtPayChange(){
+  const m = document.getElementById('dbtp-pay').value, w = document.getElementById('dbtp-wallet-wrap');
+  if(m === 'cash') w.style.display = 'none'; else { w.style.display = ''; finFillWallet('dbtp-wallet'); }
+}
+
 function openDebtPay(id){
   const d = (window._finDebts||[]).find(x => x.id === id); if(!d) return;
   DEBT_PAY_ID = id;
   document.getElementById('dbtp-info').innerHTML =
-    '<div><strong>'+finEsc(d.creditor_name)+'</strong> — '+finMoney(d.amount)
-    + ' — بند: <strong>'+finEsc(FIN_EXP_CAT_AR[d.category]||'—')+'</strong></div>';
+    '<div><strong>'+finEsc(d.creditor_name)+'</strong> — '+finMoney(d.amount)+' — من '+finDateAr(d.date)+'</div>';
   document.getElementById('dbtp-pay').value  = 'cash';
   document.getElementById('dbtp-by').value   = finMe().name;
   document.getElementById('dbtp-date').value = finDateAr(finTodayISO());
+  finDbtPayChange();
   openModal('modal-fin-debt-pay');
 }
 
@@ -18657,33 +18918,163 @@ async function confirmDebtPay(btn){
   const d = (window._finDebts||[]).find(x => x.id === DEBT_PAY_ID);
   if(!d){ showToast('⚠️ لم يتم تحديد الدين'); return; }
   if(d.repaid){ showToast('⚠️ هذا الدين مسدَّد بالفعل'); return; }
-  finBusy(btn, true);
-  const me = finMe(), today = finTodayISO();
   const payM = document.getElementById('dbtp-pay').value;
+  let wallet = null;
+  if(payM !== 'cash'){
+    wallet = document.getElementById('dbtp-wallet').value;
+    if(!wallet){ showToast('⚠️ اختر المحفظة اللي هيتسدّد منها'); return; }
+  }
+  finBusy(btn, true);
+  const me = finMe();
   try{
+    // ★ صف واحد بس اتحدّث = إحنا اللي سدّدنا (يمنع التسجيل المزدوج)
     const { data: chkRows, error: uErr } = await db.from('fin_debts').update({
-      repaid: true, repaid_date: today, repaid_pay_method: payM, repaid_by_name: me.name, repaid_by_id: me.id
+      repaid: true, repaid_date: finTodayISO(), repaid_pay_method: payM, repaid_wallet_owner: wallet,
+      repaid_by_name: me.name, repaid_by_id: me.id
     }).eq('id', d.id).eq('repaid', false).select('id');
     if(uErr) throw uErr;
-    // ★ صف واحد بس اتحدّث = إحنا اللي سدّدنا (يمنع التسجيل المزدوج لو اتنين ضغطوا مع بعض)
-    if(!chkRows || chkRows.length !== 1){ showToast('⚠️ الدين اتسدّد قبل كده أو الصلاحية مرفوضة'); finBusy(btn,false); loadFinDebts(); return; }
-    const { error: iErr } = await db.from('fin_expenses').insert([{
-      category: d.category, amount: d.amount,
-      recipient: d.creditor_name, recipient_role: null,
-      kind: 'سداد دين — ' + d.creditor_name,
-      by_name: me.name, by_id: me.id,
-      notes: d.notes, date: today, source: 'debt', debt_id: d.id, created_by: me.id
-    }]);
-    if(iErr){
-      await db.from('fin_debts').update({ repaid:false, repaid_date:null, repaid_pay_method:null, repaid_by_name:null, repaid_by_id:null }).eq('id', d.id);
-      throw iErr;
-    }
-    showToast('✅ تم الرد ونُقل البند إلى ' + (FIN_EXP_CAT_AR[d.category]||'المصروفات'));
+    if(!chkRows || chkRows.length !== 1){ showToast('⚠️ الدين اتسدّد قبل كده أو الصلاحية مرفوضة'); finBusy(btn, false); loadFinDebts(); return; }
+    finSavedToast('✅ اتسجّل السداد — اتخصم من ' + (payM === 'cash' ? 'الخزنة' : 'محفظة ' + wallet));
     closeModal('modal-fin-debt-pay');
     loadFinDebts();
   }catch(e){ showToast('❌ تعذّر التأكيد: '+(e.message||e.code||'')); }
   finBusy(btn, false);
 }
+
+/* ══════════ السُّلف — قرض حسن (دفعة ٢٨) ══════════
+   السلفة بتتخصم من الخزنة (أو من محفظة) • «تم الرد» بيرجّعها للخزنة (أو لمحفظة) */
+function finAdvPayChange(){
+  const m = document.getElementById('adv-pay').value, w = document.getElementById('adv-wallet-wrap');
+  if(m === 'cash') w.style.display = 'none'; else { w.style.display = ''; finFillWallet('adv-wallet'); }
+}
+function openAdvModal(){
+  if(!finLockGuard()) return;
+  ['adv-amount','adv-borrower','adv-notes'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; });
+  document.getElementById('adv-pay').value  = 'cash';
+  document.getElementById('adv-by').value   = finMe().name;
+  document.getElementById('adv-date').value = finDateAr(finTodayISO());
+  finAdvPayChange();
+  openModal('modal-fin-adv');
+}
+
+async function saveAdvance(btn){
+  const amt = parseFloat(document.getElementById('adv-amount').value);
+  if(!(amt > 0)){ showToast('⚠️ اكتب المبلغ صحيحاً'); return; }
+  const who = (document.getElementById('adv-borrower').value||'').trim();
+  if(!who){ showToast('⚠️ اكتب اسم اللي أخد السلفة'); return; }
+  const pay = document.getElementById('adv-pay').value;
+  let wallet = null;
+  if(pay !== 'cash'){
+    wallet = document.getElementById('adv-wallet').value;
+    if(!wallet){ showToast('⚠️ اختر المحفظة اللي اتصرفت منها'); return; }
+  }
+  finBusy(btn, true);
+  try{
+    const me = finMe();
+    const { data: _rows, error } = await db.from('fin_advances').insert([{
+      borrower_name: who, amount: amt, pay_method: pay, wallet_owner: wallet,
+      given_by_name: me.name, given_by_id: me.id,
+      notes: (document.getElementById('adv-notes').value||'').trim() || null,
+      date: finTodayISO(), repaid: false, created_by: me.id
+    }]).select('id');
+    if(error) throw error;
+    if(!_rows || !_rows.length){ showToast('⚠️ لم يُحفظ (صلاحيات RLS)'); finBusy(btn, false); return; }
+    finSavedToast('✅ اتسجّلت السلفة — اتخصمت من ' + (pay === 'cash' ? 'الخزنة' : 'محفظة ' + wallet));
+    closeModal('modal-fin-adv');
+    loadFinAdvances();
+  }catch(e){ showToast('❌ تعذّر الحفظ: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
+async function loadFinAdvances(){
+  const tb = document.getElementById('fin-adv-tbody'); if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--light);padding:26px;">جاري التحميل…</td></tr>';
+  try{
+    const { data, error } = await selectAll(db.from('fin_advances').select('*')
+      .order('repaid',{ascending:true}).order('date',{ascending:false}).order('created_at',{ascending:false}));
+    if(error) throw error;
+    const rows = (data || []).filter(r => finInTerm(r, r.date));
+    window._finAdv = rows;
+    const all_  = rows.reduce((a,r)=>a+Number(r.amount||0),0);
+    const open_ = rows.filter(r => !r.repaid).reduce((a,r)=>a+Number(r.amount||0),0);
+    const tot = document.getElementById('fin-adv-total');
+    if(tot) tot.textContent = 'اتصرف: ' + finMoney(all_) + ' • لسه ما اترّدش: ' + finMoney(open_);
+    if(!rows.length){
+      tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--light);padding:34px;">لا توجد سُلف مسجّلة في «'+finEsc(finTermLbl())+'»</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map((r,i) => {
+      const done = !!r.repaid;
+      const doneCell = done
+        ? '<span class="badge bg-green">'+finIcon('check',12)+' اترّدت</span>'
+        : '<button class="btn btn-gold btn-xs" onclick="openAdvPay(\''+r.id+'\')">'+finIcon('undo2',12)+' تم الرد</button>';
+      return '<tr'+(done?' style="opacity:.72;"':'')+'>'
+        + '<td style="text-align:center;font-weight:700;color:var(--light);">'+finAr(i+1)+'</td>'
+        + '<td style="font-weight:700;color:var(--forest);">'+finEsc(r.borrower_name||'—')+'</td>'
+        + '<td class="fin-cell-amt">'+finMoney(r.amount)+'</td>'
+        + '<td>'+finPayFromCell(r.pay_method, r.wallet_owner)+'</td>'
+        + '<td>'+finEsc(r.given_by_name||'—')+'</td>'
+        + '<td>'+finDateAr(r.date)+'</td>'
+        + '<td style="text-align:center;border-right:2px solid var(--border);">'+doneCell+'</td>'
+        + '<td style="text-align:center;">'+(done ? finDateAr(r.repaid_date) : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="text-align:center;">'+(done ? finPayFromCell(r.repaid_pay_method, r.repaid_wallet_owner) : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="text-align:center;border-left:2px solid var(--border);">'+(done ? finEsc(r.repaid_by_name||'—') : '<span class="fin-cell-none">—</span>')+'</td>'
+        + '<td style="font-size:.74rem;color:var(--light);">'+finEsc([r.notes, r.repaid_notes].filter(Boolean).join(' — ')||'—')+'</td>'
+        + '</tr>';
+    }).join('');
+  }catch(e){
+    tb.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--red);padding:26px;">تعذّر التحميل: '+finEsc(e.message||e.code||'')+'</td></tr>';
+  }
+}
+
+let ADV_PAY_ID = null;
+
+function finAdpPayChange(){
+  const m = document.getElementById('adp-pay').value, w = document.getElementById('adp-wallet-wrap');
+  if(m === 'cash') w.style.display = 'none'; else { w.style.display = ''; finFillWallet('adp-wallet'); }
+}
+
+function openAdvPay(id){
+  const a = (window._finAdv||[]).find(x => x.id === id); if(!a) return;
+  ADV_PAY_ID = id;
+  document.getElementById('adp-info').innerHTML =
+    '<div><strong>'+finEsc(a.borrower_name)+'</strong> — سلفة '+finMoney(a.amount)+' — من '+finDateAr(a.date)+'</div>';
+  document.getElementById('adp-pay').value   = 'cash';
+  document.getElementById('adp-notes').value = '';
+  document.getElementById('adp-by').value    = finMe().name;
+  document.getElementById('adp-date').value  = finDateAr(finTodayISO());
+  finAdpPayChange();
+  openModal('modal-fin-adv-pay');
+}
+
+async function confirmAdvPay(btn){
+  const a = (window._finAdv||[]).find(x => x.id === ADV_PAY_ID);
+  if(!a){ showToast('⚠️ لم يتم تحديد السلفة'); return; }
+  if(a.repaid){ showToast('⚠️ السلفة دي اترّدت قبل كده'); return; }
+  const payM = document.getElementById('adp-pay').value;
+  let wallet = null;
+  if(payM !== 'cash'){
+    wallet = document.getElementById('adp-wallet').value;
+    if(!wallet){ showToast('⚠️ اختر المحفظة اللي الفلوس رجعت فيها'); return; }
+  }
+  finBusy(btn, true);
+  const me = finMe();
+  try{
+    const { data: chk, error } = await db.from('fin_advances').update({
+      repaid: true, repaid_amount: a.amount, repaid_date: finTodayISO(),
+      repaid_pay_method: payM, repaid_wallet_owner: wallet,
+      repaid_by_name: me.name, repaid_by_id: me.id,
+      repaid_notes: (document.getElementById('adp-notes').value||'').trim() || null
+    }).eq('id', a.id).eq('repaid', false).select('id');
+    if(error) throw error;
+    if(!chk || chk.length !== 1){ showToast('⚠️ السلفة اترّدت قبل كده أو الصلاحية مرفوضة'); finBusy(btn, false); loadFinAdvances(); return; }
+    finSavedToast('✅ تم رد السلفة — رجعت ' + (payM === 'cash' ? 'الخزنة' : 'محفظة ' + wallet));
+    closeModal('modal-fin-adv-pay');
+    loadFinAdvances();
+  }catch(e){ showToast('❌ تعذّر التأكيد: '+(e.message||e.code||'')); }
+  finBusy(btn, false);
+}
+
 
 finLoadLock();
 
