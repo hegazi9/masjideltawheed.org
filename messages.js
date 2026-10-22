@@ -371,7 +371,7 @@ function openMessageX(id, e) {
 
   if (!m.read && !m.is_mine) {
     m.read = true;
-    markReadDB(id);
+    markReadDB(id).then(function (ok) { if (!ok) { m.read = false; renderMessages(); updateFolderCounts(); } });   // (دفعة ٣٣)
     var row = document.getElementById('msg-row-' + id);
     if (row) row.classList.remove('unread');
     updateFolderCounts();
@@ -420,8 +420,10 @@ async function markReadDB(id, val) {
       .update({ is_read: v }).eq('id', id).select('id');
     if (r.error) throw r.error;
     if (!r.data || !r.data.length) throw new Error('صفر صفوف — مرفوض من RLS');
+    return true;
   } catch (e) {
     if (typeof showToast === 'function') showToast('⚠️ لم تُحفظ حالة القراءة');
+    return false;
   }
 }
 async function starDB(id, starred) {
@@ -453,7 +455,7 @@ async function toggleRead(id) {
   if (!m) return;
   m.read = !m.read;
   renderMessages(); updateFolderCounts();
-  await markReadDB(id, m.read);
+  if (!(await markReadDB(id, m.read))) { m.read = !m.read; renderMessages(); updateFolderCounts(); }   // (دفعة ٣٣)
 }
 async function delMsg(id) {
   var m = MD().find(function (x) { return x.id === id; });
@@ -561,15 +563,18 @@ function boot() {
     if (e) e.stopPropagation();
     var m = MD().find(function (x) { return x.id === id; });
     if (!m) return;
-    m.starred = !m.starred;
-    renderMessages(); updateFolderCounts();
-    if (OPENID() === id) {
-      var sb = document.getElementById('detail-star-btn');
-      if (sb) sb.style.color = m.starred ? 'var(--gold)' : 'var(--mid)';
-      var ss = document.getElementById('detail-star-svg');
-      if (ss) ss.setAttribute('fill', m.starred ? '#c8920a' : 'none');
+    function paint() {
+      renderMessages(); updateFolderCounts();
+      if (OPENID() === id) {
+        var sb = document.getElementById('detail-star-btn');
+        if (sb) sb.style.color = m.starred ? 'var(--gold)' : 'var(--mid)';
+        var ss = document.getElementById('detail-star-svg');
+        if (ss) ss.setAttribute('fill', m.starred ? '#c8920a' : 'none');
+      }
     }
-    starDB(id, m.starred);
+    m.starred = !m.starred;
+    paint();
+    starDB(id, m.starred).then(function (ok) { if (!ok) { m.starred = !m.starred; paint(); } });   // (دفعة ٣٣)
   };
   window.markMsgReadInDB = function (id) { return markReadDB(id, true); };
   window.updateMsgStarInDB = function (id, s) { return starDB(id, s); };

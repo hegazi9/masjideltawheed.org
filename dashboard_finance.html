@@ -20,7 +20,7 @@
 <title>لوحة المدير المالي — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -2895,10 +2895,32 @@ async function finDelete(table, id, reload){
 
 
 /* ══ الإيصالات ══ */
+// (دفعة ٣٣) تصغير الصور قبل الرفع — أطول ضلع ١٦٠٠ بكسل • JPEG ٨٢٪ (الكلام والأرقام بتفضل واضحة)
+// PDF / GIF / HEIC / صورة صغيرة (أقل من ٣٠٠ ك.ب) → بتترفع زي ما هي • لو التصغير فشل أو طلع أكبر → الأصل
+function imgShrink(file, max, q){
+  max = max || 1600; q = q || 0.82;
+  return new Promise(res => {
+    if(!file || !/^image\/(jpeg|jpg|png|webp|bmp)$/i.test(file.type || '') || file.size < 300*1024) return res(file);
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      try{
+        let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, max / Math.max(w, h));
+        w = Math.max(1, Math.round(w*k)); h = Math.max(1, Math.round(h*k));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+        URL.revokeObjectURL(u);
+        c.toBlob(b => res(b && b.size < file.size ? new File([b], String(file.name || 'img').replace(/\.[^.]+$/, '') + '.jpg', { type:'image/jpeg' }) : file), 'image/jpeg', q);
+      }catch(e){ URL.revokeObjectURL(u); res(file); }
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); res(file); };
+    im.src = u;
+  });
+}
 async function finUploadReceipt(inputId, folder){
   const el = document.getElementById(inputId);
-  const f = el && el.files && el.files[0];
+  let f = el && el.files && el.files[0];
   if(!f) return { url:null, path:null };
+  f = await imgShrink(f);
   if(f.size > 5*1024*1024){ showToast('⚠️ حجم الإيصال أكبر من ٥ ميجا'); return { url:null, path:null }; }
   const ext = (f.name.split('.').pop()||'jpg').toLowerCase();
   const path = folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;

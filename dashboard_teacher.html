@@ -27,7 +27,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
   const _SB_URL = 'https://mybjyoxfmbivamasxhyw.supabase.co';
   const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15Ymp5b3hmbWJpdmFtYXN4aHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzUzMzQsImV4cCI6MjA5Mjg1MTMzNH0.BovV1TLnArBWoH4JTbhBbB9JEP5WuLZYe3jpHOxGs08';
@@ -1162,19 +1162,6 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<!-- ══════════════ التسميع والتقييم (الأركان) ══════════════ -->
-<div id="page-recitation" class="page">
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">🧩 أركان الحلقة — <span id="rec-circle-name" style="color:var(--jade);">—</span></div>
-      <button class="btn btn-ghost btn-sm" onclick="navPage('students')">👨‍🎓 جدول التسميع والمتابعة ←</button>
-    </div>
-    <div class="card-body">
-      <div id="arkan-checklist" style="display:flex;flex-direction:column;gap:8px;"></div>
-    </div>
-  </div>
-</div>
-
 <!-- ══════════════ النقاط والكروت ══════════════ -->
 <div id="page-points" class="page">
   <div class="card">
@@ -1518,6 +1505,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       </div>
     </div>
   </div>
+</div>
 
 <!-- ══════════════ الإعلانات ══════════════ -->
 <div id="page-announcements" class="page">
@@ -1534,8 +1522,10 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
       <div class="card-body" id="profile-body"></div></div>
     <div class="card"><div class="card-head"><div class="card-title">🔒 تغيير كلمة المرور</div></div>
       <div class="card-body">
-        <div class="fg"><label>كلمة المرور الجديدة</label><input type="text" id="set-newpass" placeholder="اكتب كلمة المرور الجديدة"></div>
-        <button class="btn btn-primary" onclick="changePassword()">💾 حفظ كلمة المرور</button>
+        <div class="fg"><label>كلمة المرور الحالية</label><input type="password" id="set-pw-cur" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="fg"><label>كلمة المرور الجديدة</label><input type="password" id="set-pw-new" placeholder="٨ حروف على الأقل" autocomplete="new-password"></div>
+        <div class="fg"><label>تأكيد كلمة المرور</label><input type="password" id="set-pw-new2" placeholder="••••••••" autocomplete="new-password"></div>
+        <button class="btn btn-primary" id="set-pw-btn" onclick="changeMyPassword()">💾 حفظ كلمة المرور</button>
       </div>
     </div>
   </div>
@@ -2753,7 +2743,7 @@ function planAllowed(){
 
 const PAGE_TITLES = { splans:'🎯 خطة الطالب', prayers:'🕌 تقرير الصلوات',
   dashboard:'🏠 لوحة القيادة', circles:'🕌 حلقاتي', students:'👨‍🎓 طلاب الحلقة',
-  attendance:'📅 الحضور', recitation:'🎙️ التسميع والتقييم', points:'🏆 النقاط والكروت',
+  attendance:'📅 الحضور', points:'🏆 النقاط والكروت',
   files:'📁 ملفات الطلاب', reports:'📄 تقاريري', training:'🎓 تأهيل المعلمين',
   messages:'✉️ الرسائل', announcements:'📢 الإعلانات', settings:'⚙️ الإعدادات',
   tasks:'✅ المهام اليومية', lessonprep:'📝 تحضير الدروس', strategies:'🎬 استراتيجيات التعلم النشط',
@@ -2962,7 +2952,6 @@ function nav(el, pageId, fromPopstate){
   if(pageId==='circles') renderCircles();
   if(pageId==='students') renderStudents();
   if(pageId==='attendance') renderAttendance();
-  if(pageId==='recitation') renderRecitation();
   if(pageId==='points') renderPoints();
   if(pageId==='files') renderFiles();
   if(pageId==='splans') renderStudentPlans();
@@ -3071,7 +3060,7 @@ function renderSwitcher(){
   if(!today.length){ el.innerHTML='<div class="alert-strip alert-warn">🔒 لا توجد حلقة اليوم — تظهر الحلقات وطلابها في مواعيدها المحددة فقط.</div>'; return; }
   el.innerHTML=today.map(c=>{
     const on=c.id===ACTIVE_CIRCLE_ID || (!today.find(x=>x.id===ACTIVE_CIRCLE_ID)&&c.id===today[0].id);
-    return `<button class="btn ${on?'btn-primary':'btn-outline'} btn-sm" onclick="setCircle('${c.id}')">🕌 ${c.name} <span style="opacity:.7;font-size:.72rem;">(${c.branch})</span></button>`;
+    return `<button class="btn ${on?'btn-primary':'btn-outline'} btn-sm" onclick="setCircle('${c.id}')">🕌 ${esc(c.name)} <span style="opacity:.7;font-size:.72rem;">(${esc(c.branch)})</span></button>`;
   }).join('');
 }
 function setCircle(id){ ACTIVE_CIRCLE_ID=id; const cur=document.querySelector('.page.active')?.id?.replace('page-','')||'dashboard'; nav(null,cur,true); showToast('🕌 تم اختيار الحلقة'); }
@@ -3466,10 +3455,32 @@ function lpRenderImage(){
       +'</div>';
   } else { box.style.display='none'; box.innerHTML=''; }
 }
+// (دفعة ٣٣) تصغير الصور قبل الرفع — أطول ضلع ١٦٠٠ بكسل • JPEG ٨٢٪ (الكلام والأرقام بتفضل واضحة)
+// PDF / GIF / HEIC / صورة صغيرة (أقل من ٣٠٠ ك.ب) → بتترفع زي ما هي • لو التصغير فشل أو طلع أكبر → الأصل
+function imgShrink(file, max, q){
+  max = max || 1600; q = q || 0.82;
+  return new Promise(res => {
+    if(!file || !/^image\/(jpeg|jpg|png|webp|bmp)$/i.test(file.type || '') || file.size < 300*1024) return res(file);
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      try{
+        let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, max / Math.max(w, h));
+        w = Math.max(1, Math.round(w*k)); h = Math.max(1, Math.round(h*k));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+        URL.revokeObjectURL(u);
+        c.toBlob(b => res(b && b.size < file.size ? new File([b], String(file.name || 'img').replace(/\.[^.]+$/, '') + '.jpg', { type:'image/jpeg' }) : file), 'image/jpeg', q);
+      }catch(e){ URL.revokeObjectURL(u); res(file); }
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); res(file); };
+    im.src = u;
+  });
+}
 async function lpUploadImage(inp){
-  const f=inp.files&&inp.files[0]; inp.value='';
+  let f=inp.files&&inp.files[0]; inp.value='';
   if(!f) return;
   if(!f.type.startsWith('image/')){ showToast('⚠️ اختر ملف صورة'); return; }
+  f=await imgShrink(f);
   if(f.size>5*1024*1024){ showToast('⚠️ حجم الصورة أكبر من ٥ ميجا'); return; }
   if(LP_STATE.status==='submitted'||LP_STATE.status==='approved'||LP_STATE.loadFailed){ showToast('⏳ التحضير مُرسل/معتمَد — لا يمكن التعديل'); return; }
   lpSaveState('saving');
@@ -3660,7 +3671,7 @@ function circleCard(c){
     <div class="card-body">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div><div style="font-size:1rem;font-weight:800;color:var(--forest);">${c.name}</div>
-        <div style="font-size:.76rem;color:var(--light);margin-top:2px;">${c.branch} • ${c.gender}</div></div>
+        <div style="font-size:.76rem;color:var(--light);margin-top:2px;">${esc(c.branch)} • ${esc(c.gender)}</div></div>
         ${(()=>{ const ov=circleOverride(c); if(ov&&ov.cancel) return '<span class="badge bg-red">🔕 ملغاة النهارده'+(ov.note?' — '+esc(ov.note):'')+'</span>'; if(ov) return '<span class="badge bg-gold">⏰ النهارده '+termHourAr(ov.s)+'–'+termHourAr(ov.e)+'</span>'; return today?'<span class="badge bg-green">🟢 اليوم</span>':''; })()}
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;">${days}</div>
@@ -4076,13 +4087,10 @@ async function saveAttendance(){
 
 // ══ RECITATION (جدول المتابعة + مودال التسميع) ══
 const ATT_AR = { present:'حاضر', late:'متأخر', absent:'غائب' };
+// (دفعة ٣٢) «أركان الحلقة» اتشالت — تنضيف مفاتيحها القديمة من الجهاز
+try{ Object.keys(localStorage).filter(k=>k.indexOf('arkan_')===0).forEach(k=>localStorage.removeItem(k)); }catch(e){}
 const ATT_COLOR = { present:'#1a7a4a', late:'var(--gold)', absent:'var(--red)' };
 
-function renderRecitation(){
-  const c=activeCircle();
-  document.getElementById('rec-circle-name').textContent=c?(c.name+' — '+c.branch):'—';
-  renderArkan(c);
-}
 function evalCellBtn(sid,type){
   const st=REC_STATE[sid] && REC_STATE[sid][type];
   if(st) return `<span style="cursor:pointer;" onclick="openEval('${sid}','${type}')">${gradeBadge(st.grade)}</span>`;
@@ -4128,7 +4136,7 @@ function confirmUploadReport(){
   if(!list.length){ showToast('⚠️ لا يوجد طلاب'); return; }
   const d=new Date(D()+'T00:00:00'); const dayName=DAYS_AR[d.getDay()];
   document.getElementById('ur-info').innerHTML=
-    `الحلقة: <strong>${c.name}</strong> — ${c.branch}<br>التاريخ: <strong>${new Date(D()).toLocaleDateString('ar-EG')}</strong> (${dayName})<br>عدد الطلاب: <strong>${list.length}</strong>`;
+    `الحلقة: <strong>${esc(c.name)}</strong> — ${esc(c.branch)}<br>التاريخ: <strong>${new Date(D()).toLocaleDateString('ar-EG')}</strong> (${dayName})<br>عدد الطلاب: <strong>${list.length}</strong>`;
   openModal('modal-upload');
 }
 function collectReport(c,list){
@@ -4179,7 +4187,7 @@ async function renderGuestResults(q){
   box.innerHTML=res.map((s,i)=>`<div onclick="pickGuest(${i})" data-i="${i}" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:9px;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background='#fff'">
     <div class="avatar" style="width:30px;height:30px;font-size:.76rem;">${s.name[0]}</div>
     <div><div style="font-weight:700;color:var(--forest);font-size:.86rem;">${s.name}</div>
-    <div style="font-size:.72rem;color:var(--light);">${s.branch} • ${MY_GENDER==='إناث'?'معلمة':'معلم'}: ${s.teacher||'بدون حلقة'}</div></div>
+    <div style="font-size:.72rem;color:var(--light);">${esc(s.branch)} • ${MY_GENDER==='إناث'?'معلمة':'معلم'}: ${esc(s.teacher||'بدون حلقة')}</div></div>
   </div>`).join('');
   window._guestRes=res;
 }
@@ -4479,18 +4487,6 @@ function setAttUI(sid,status,mins){
   if(status==='late'){ const l=document.getElementById('late-'+sid); if(l){ l.style.display='block'; if(mins) document.getElementById('latemin-'+sid).value=mins; } }
 }
 
-// أركان الحلقة (تلقين/كنوز/تجويد) — تُحفظ محلياً لليوم
-function renderArkan(c){
-  if(!c){ document.getElementById('arkan-checklist').innerHTML=''; return; }
-  const key='arkan_'+c.id+'_'+D();
-  const st=JSON.parse(localStorage.getItem(key)||'{}');
-  const items=[['talqeen','🔁 التلقين الجماعي'],['kunoz','💎 شرح الكنوز الأثرية'],['tajweed','📗 شرح التجويد']];
-  document.getElementById('arkan-checklist').innerHTML=items.map(([k,t])=>`
-    <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-weight:600;font-size:.86rem;">
-      <input type="checkbox" ${st[k]?'checked':''} onchange="toggleArkan('${c.id}','${k}',this.checked)" style="width:18px;height:18px;"> ${t}
-    </label>`).join('');
-}
-function toggleArkan(cid,k,v){ const key='arkan_'+cid+'_'+D(); const st=JSON.parse(localStorage.getItem(key)||'{}'); st[k]=v; localStorage.setItem(key,JSON.stringify(st)); }
 
 // ══ POINTS / CARDS ══
 const CARDS=[['excellent','أخضر ١٥',15,'#1a7a4a'],['very_good','أزرق ١٠',10,'var(--blue)'],['good','أصفر ٥',5,'var(--gold)'],['silver','فضي ٥٠',50,'#8a8f98'],['golden','ذهبي ١٠٠',100,'#c8920a'],['diamond','ماسي ٢٠٠',200,'#6b3fa0']];
@@ -4566,8 +4562,19 @@ async function openFile(id){
     box.innerHTML=(data&&data.length)? '<div style="font-weight:700;color:var(--forest);margin-bottom:6px;">آخر التسميعات</div>'+data.map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px;"><span>${r.date} • ${r.type==='review'?'مراجعة':'حفظ'}</span>${gradeBadge(r.grade)}</div>`).join('') : '— لا يوجد سجل تسميع بعد';
   }catch(e){ document.getElementById('file-records').innerHTML=''; }
 }
-function fileRow(k,v){ return `<div style="display:flex;justify-content:space-between;padding:9px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">${k}</span><span style="font-weight:700;">${v}</span></div>`; }
-async function saveNotes(id){ const v=document.getElementById('file-notes').value.trim(); try{ await db.from('students').update({notes:v}).eq('id',id); const s=MY_STUDENTS.find(x=>x.id===id); if(s) s.notes=v; showToast('💾 تم حفظ الملاحظات'); }catch(e){ showToast('❌ خطأ'); } }
+function fileRow(k,v){ return `<div style="display:flex;justify-content:space-between;padding:9px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">${esc(k)}</span><span style="font-weight:700;">${esc(v)}</span></div>`; }
+async function saveNotes(id){
+  const el=document.getElementById('file-notes'); if(!el) return;
+  const v=el.value.trim();
+  if(v.length>1000){ showToast('⚠️ الملاحظات أطول من ١٠٠٠ حرف'); return; }
+  try{
+    const {data,error}=await db.rpc('student_notes_save',{p_student:id,p_notes:v});
+    if(error) throw error;
+    if(!data||data.ok!==true) throw new Error('لم يُحفظ');
+    const s=MY_STUDENTS.find(x=>x.id===id); if(s) s.notes=v;
+    showToast('💾 تم حفظ الملاحظات');
+  }catch(e){ showToast('❌ لم تُحفظ الملاحظات — '+recFriendlyErr(e)); }
+}
 
 // ══════════ ملف الطالب: السجل القرآني / التجويد / التقييم السلوكي ══════════
 // يُحفظ في جدول student_files (student_id, data jsonb) ليظهر في كل اللوحات.
@@ -5372,8 +5379,9 @@ async function csAddImages(input){
   const files=Array.from(input.files||[]); if(!files.length) return;
   if(!(await ensureFreshSession())){ showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول'); return; }
   const up=document.getElementById('cs-uploading'); up.style.display='block';
-  for(const f of files){
+  for(let f of files){
     if(!f.type.startsWith('image/')){ showToast('⚠️ الملفات صور فقط'); continue; }
+    f=await imgShrink(f);   // (دفعة ٣٣)
     if(f.size>5*1024*1024){ showToast('⚠️ حجم الصورة أكبر من ٥ ميجا: '+f.name); continue; }
     const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
     const path=cu.id+'/'+_csCtx.courseId+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ext;
@@ -5415,7 +5423,6 @@ async function submitCourseSummary(){
       const {data,error}=await db.from('course_summaries').insert(body).select('id');
       if(error) throw error; if(!data||!data.length) throw new Error('الإضافة مرفوضة من RLS');
     }
-    await csNotifySupervisor(_csCtx.courseName);
     const {data:all}=await db.from('course_summaries').select('*').eq('teacher_id',cu.id);
     CS_MAP={}; (all||[]).forEach(r=>{ CS_MAP[r.course_id]=r; });
     closeModal('modal-cs');
@@ -5424,22 +5431,7 @@ async function submitCourseSummary(){
   }catch(e){ showToast('❌ تعذّر الإرسال: '+(e.message||e.code||'')); }
   finally{ btn.disabled=false; btn.textContent=ot; }
 }
-async function csNotifySupervisor(courseName){
-  try{
-    const c=activeCircle()||MY_CIRCLES[0]; if(!c) return;
-    const {data:cir}=await db.from('circles').select('supervisor_id').eq('id',c.id).maybeSingle();
-    const sup=cir&&cir.supervisor_id; if(!sup) return;
-    let supName='المشرف';
-    try{ const {data:su}=await db.from('users').select('full_name').eq('id',sup).maybeSingle(); if(su&&su.full_name) supName=su.full_name; }catch(e){ loadWarn(e); }
-    await db.from('messages').insert({
-      sender_id:cu.id, sender_name:cu.full_name||'معلم', sender_role:'teacher',
-      to_id:String(sup), to_name:supName, to_role:'supervisor',
-      subject:'📝 تلخيص دورة جديد للمراجعة',
-      body:'المعلم/ '+(cu.full_name||'')+' أرسل تلخيص دورة «'+(courseName||'')+'» للمراجعة.\nراجعه من: التقارير ← تلخيصات الدورات.',
-      is_read:false, starred:false, urgent:false, is_draft:false, deleted:false
-    }).select('id');
-  }catch(e){ console.warn('csNotifySupervisor:', e && e.message); }
-}
+// (دفعة ٣٢) إشعار «تلخيص دورة جديد» بقى من القاعدة (trg_cs_notify) → لكل مشرفين شعبة المعلم
 
 // ── رصيد النقاط في السايدبار ──
 async function refreshMyPoints(){
@@ -5747,10 +5739,13 @@ async function sendReply() {
   showToast('✅ تم إرسال الرد بنجاح');
 }
 
-function deleteDetailMsg() {
+async function deleteDetailMsg() {
   if (!MSG_OPEN_ID) return;
   const m = MESSAGES_DATA.find(x => x.id === MSG_OPEN_ID);
-  if (m) { m.deleted = true; deleteMsgInDB(m.id); }
+  if (!m) return;
+  // (دفعة ٣٣) الرسالة بتتشال من الشاشة بعد ما القاعدة تأكد الحذف بس
+  if (!(await deleteMsgInDB(m.id))) { showToast('⚠️ ما اتحذفتش الرسالة — اتأكد من الاتصال وحاول تاني'); return; }
+  m.deleted = true;
   closeDetail();
   renderMessages();
   updateFolderCounts();
@@ -5763,10 +5758,10 @@ function toggleStar(id, e) {
   const m = MESSAGES_DATA.find(x => x.id === id);
   if (!m) return;
   m.starred = !m.starred;
-  updateMsgStarInDB(id, m.starred);
-  const starEl = document.querySelector(`#msg-row-${id} .msg-row-star`);
-  if (starEl) starEl.classList.toggle('starred', m.starred);
-  updateFolderCounts();
+  const paint = () => { const starEl = document.querySelector(`#msg-row-${id} .msg-row-star`); if (starEl) starEl.classList.toggle('starred', m.starred); updateFolderCounts(); };
+  paint();
+  // (دفعة ٣٣) لو الحفظ فشل → النجمة ترجع زي ما كانت
+  updateMsgStarInDB(id, m.starred).then(ok => { if (ok) return; m.starred = !m.starred; paint(); showToast('⚠️ ما اتحفظتش النجمة — حاول تاني'); });
 }
 
 // ── تحديد متعدد ──
@@ -5790,17 +5785,20 @@ function toggleSelectAll(masterCb) {
     MSG_SELECTED_IDS.size > 0 ? 'flex' : 'none';
 }
 
-function deleteSelectedMsgs() {
-  MSG_SELECTED_IDS.forEach(id => {
+async function deleteSelectedMsgs() {
+  const ids = [...MSG_SELECTED_IDS];
+  let ok = 0, bad = 0;
+  for (const id of ids) {
     const m = MESSAGES_DATA.find(x => x.id === id);
-    if (m) { m.deleted = true; deleteMsgInDB(id); }
-  });
-  MSG_SELECTED_IDS.clear();
-  document.getElementById('msg-delete-selected-btn').style.display = 'none';
+    if (!m) continue;
+    if (await deleteMsgInDB(id)) { m.deleted = true; ok++; MSG_SELECTED_IDS.delete(id); } else bad++;
+  }
+  if (!bad) MSG_SELECTED_IDS.clear();
+  document.getElementById('msg-delete-selected-btn').style.display = MSG_SELECTED_IDS.size ? 'flex' : 'none';
   document.getElementById('msg-select-all').checked = false;
   renderMessages();
   updateFolderCounts();
-  showToast('🗑️ تم حذف الرسائل المحددة');
+  showToast(bad ? ('⚠️ اتحذف ' + ok + ' • ما اتحذفش ' + bad + ' — حاول تاني') : '🗑️ تم حذف الرسائل المحددة');
 }
 
 // ── تبديل الفولدر ──
@@ -5924,15 +5922,27 @@ function formatMsgTimeFull(iso) {
 }
 
 // ── قاعدة البيانات helpers ──
+// (دفعة ٣٣) كل وسم بيتأكد إن الصف اتحدّث فعلاً (RLS بترفض بصمت) — بيرجّع true / false
+async function _msgPatchDB(id, patch) {
+  try {
+    const { data, error } = await db.from('messages').update(patch).eq('id', id).select('id');
+    if (error) throw error;
+    return Array.isArray(data) && data.length > 0;
+  } catch(e) { console.warn('[messages]', e); return false; }
+}
 async function markMsgReadInDB(id) {
-  try { await db.from('messages').update({ is_read: true }).eq('id', id); } catch(e){ loadWarn(e); }
+  const ok = await _msgPatchDB(id, { is_read: true });
+  if (!ok) {   // ترجع «مش مقروءة» عشان الرقم مايكدبش
+    const m = MESSAGES_DATA.find(x => x.id === id);
+    if (m) m.read = false;
+    const row = document.getElementById('msg-row-' + id);
+    if (row) row.classList.add('unread');
+    updateFolderCounts();
+  }
+  return ok;
 }
-async function updateMsgStarInDB(id, starred) {
-  try { await db.from('messages').update({ starred }).eq('id', id); } catch(e){ loadWarn(e); }
-}
-async function deleteMsgInDB(id) {
-  try { await db.from('messages').update({ deleted: true }).eq('id', id); } catch(e){ loadWarn(e); }
-}
+async function updateMsgStarInDB(id, starred) { return _msgPatchDB(id, { starred }); }
+async function deleteMsgInDB(id) { return _msgPatchDB(id, { deleted: true }); }
 
 // ══ COMPOSE ══
 function openComposeModal() {
@@ -6123,9 +6133,25 @@ function renderProfile(){
       ${fileRow('عدد الحلقات',MY_CIRCLES.length)}${fileRow('عدد الطلاب',MY_STUDENTS.length)}
     </div>`;
 }
-async function changePassword(){
-  // تغيير كلمة المرور يتم عبر أداة الإدارة (Supabase Auth) — لا تُخزَّن كلمات مرور في الجداول
-  showToast('🔒 تغيير كلمة المرور يتم من إدارة المدرسة عبر أداة الإدارة');
+// تغيير كلمة المرور (دفعة ٣٢) — Supabase Auth بس، مفيش كلمات مرور في الجداول
+async function changeMyPassword(){
+  const cur=document.getElementById('set-pw-cur').value, nw=document.getElementById('set-pw-new').value, nw2=document.getElementById('set-pw-new2').value;
+  if(!cur||!nw){ showToast('⚠️ اكتب كلمة المرور الحالية والجديدة'); return; }
+  if(nw.length<8){ showToast('⚠️ كلمة المرور الجديدة ٨ حروف على الأقل'); return; }
+  if(nw!==nw2){ showToast('⚠️ التأكيد مش مطابق'); return; }
+  if(nw===cur){ showToast('⚠️ كلمة المرور الجديدة زي القديمة'); return; }
+  const btn=document.getElementById('set-pw-btn'); btn.disabled=true;
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    if(!session) throw new Error('الجلسة انتهت — سجّل الدخول تاني');
+    const {error:e1}=await db.auth.signInWithPassword({email:session.user.email,password:cur});
+    if(e1) throw new Error('كلمة المرور الحالية غلط');
+    const {error:e2}=await db.auth.updateUser({password:nw});
+    if(e2) throw e2;
+    ['set-pw-cur','set-pw-new','set-pw-new2'].forEach(id=>document.getElementById(id).value='');
+    showToast('🔒 تم تغيير كلمة المرور');
+  }catch(e){ showToast('❌ '+((e&&e.message)||'تعذّر تغيير كلمة المرور')); }
+  finally{ btn.disabled=false; }
 }
 
 // ══ REPORTS (طباعة RTL) ══
@@ -6144,7 +6170,7 @@ async function printDailyReport(){
 function printStudentsReport(){
   const c=activeCircle(); if(!c){ showToast('⚠️ لا توجد حلقة'); return; }
   const list=studentsOf(c);
-  const rows=list.map((s,i)=>`<tr><td>${i+1}<\/td><td>${s.name}<\/td><td>${s.mem} جزء<\/td><td>${s.points}<\/td><td>${s.phone}<\/td><\/tr>`).join('');
+  const rows=list.map((s,i)=>`<tr><td>${i+1}<\/td><td>${s.name}<\/td><td>${s.mem} جزء<\/td><td>${s.points}<\/td><td>${esc(s.phone)}<\/td><\/tr>`).join('');
   openReport(reportHead('كشف طلاب الحلقة','الحلقة: '+c.name+' — '+list.length+' طالب')+`<table><thead><tr><th>#<\/th><th>الطالب<\/th><th>الحفظ<\/th><th>النقاط<\/th><th>ولي الأمر<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table>`);
 }
 function printPointsReport(){

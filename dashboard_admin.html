@@ -22,7 +22,6 @@
      │  «id="page-teachers"»
      │  «id="page-supervisors"»
      │  «id="page-parents"»
-     │  «id="page-parents-branch"»
      │  «id="page-attendance"»
      │  «id="page-memorization"»
      │  «id="page-schedule"»
@@ -88,17 +87,13 @@
      │  SUPABASE DATA
      │  STATIC BRANCH DATA (from Excel)
      │  KEBAR CIRCLE CARD (اسم + هاتف فقط)
-     │  PARENTS BRANCH — OPEN & BUILD
-     │  PARENTS CONTEXT MENU — JS
      │  TEACHERS — DATA & STATE
      │  TEACHER CARD CONTEXT MENU
      │  CENTRAL MESSAGE SENDER
-     │  PARENTS — DATA & STATE
      │  NAVIGATION
      │  RENDER STUDENTS
      │  NOTIFICATION SYSTEM
      │  نظام فلترة الشعب بحسب صلاحيات المدير
-     │  RENDER TEACHERS — alias
      │  ATTENDANCE GRID
      │  ANNOUNCEMENTS
      │  BAR CHART
@@ -126,7 +121,7 @@
 <title>لوحة المدير — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
@@ -1707,7 +1702,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     <div class="sb-item" onclick="nav(this,'tadmin')">
       <span class="sb-icon">🎓</span> إدارة التأهيل
     </div>
-    <div class="sb-item" onclick="nav(this,'stats')" style="display:none;">
+    <div class="sb-item" onclick="nav(this,'stats')">
       <span class="sb-icon">📊</span> الإحصاءات
     </div>
     <div class="sb-item" onclick="nav(this,'media')">
@@ -2164,7 +2159,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-outline btn-sm" id="sv-back-btn" onclick="svShowBranches()" style="display:none;">← رجوع</button>
-      <button class="btn btn-gold" onclick="openMoveTeacher()">⇄ نقل معلم</button>
       <button class="btn btn-primary" onclick="openAddSupervisor()">➕ إضافة مشرف</button>
     </div>
   </div>
@@ -2367,188 +2361,8 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </div>
 
-<!-- ══ MODAL: MOVE TEACHER ══ -->
-<div class="overlay" id="modal-move-teacher">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-head">
-      <div class="modal-title">⇄ نقل معلم إلى مشرف آخر</div>
-      <button class="modal-close" onclick="closeModal('modal-move-teacher')">×</button>
-    </div>
-    <div class="modal-body" style="padding:20px 22px;">
-      <div class="fg" style="margin-bottom:12px;">
-        <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">١. ابحث عن المعلم بالاسم</label>
-        <input type="text" id="mvt-search" placeholder="اكتب اسم المعلم..." oninput="filterMoveTeachers()" autocomplete="off"
-          style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-      </div>
-      <div id="mvt-results" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:16px;">
-        <div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>
-      </div>
-      <div id="mvt-selected-box" style="display:none;">
-        <div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.85rem;">
-          <span style="color:var(--mid);">المعلم المحدد:</span>
-          <span id="mvt-selected-name" style="font-weight:800;color:var(--emerald);"></span>
-          <span id="mvt-current-sup" style="color:var(--light);font-size:.8rem;"></span>
-        </div>
-        <div class="fg" style="margin-bottom:4px;">
-          <label style="display:block;margin-bottom:6px;font-weight:700;color:var(--forest);">٢. اختر المشرف المنقول إليه</label>
-          <select id="mvt-to-sup"
-            style="width:100%;font-family:Tajawal;font-size:.92rem;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="">-- اختر المشرف --</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot" style="justify-content:center;gap:16px;">
-      <button class="btn btn-gold" style="min-width:130px;" onclick="confirmMoveTeacher()">⇄ تأكيد النقل</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-move-teacher')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
-<!-- ══ MODAL: ADD SUPERVISOR ══ -->
-<div class="overlay" id="modal-add-supervisor">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-title">➕ إضافة مشرف جديد</div>
-      <button class="modal-close" onclick="closeModal('modal-add-supervisor')">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👤 البيانات الأساسية
-      </div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم *</label><input type="text" id="sv-fname" placeholder="مثال: أحمد" oninput="autoGenSupervisorUser()"></div>
-        <div class="fg"><label>العائلة *</label><input type="text" id="sv-lname" placeholder="مثال: الأحمدي" oninput="autoGenSupervisorUser()"></div>
-        <div class="fg"><label>الاسم بالأجنبي</label><input type="text" id="sv-fname-en" placeholder="First Name" style="direction:ltr;"></div>
-        <div class="fg"><label>اللقب بالأجنبي</label><input type="text" id="sv-lname-en" placeholder="Last Name" style="direction:ltr;"></div>
-        <div class="fg"><label>الجنس *</label>
-          <select id="sv-gender" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="ذكر">ذكر</option>
-            <option value="أنثى">أنثى</option>
-          </select>
-        </div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="sv-dob"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="sv-phone" placeholder="01xxxxxxxxx"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="sv-email" placeholder="example@email.com" style="direction:ltr;"></div>
-        <div class="fg" style="grid-column:1/-1;"><label>الشعبة (يمكن اختيار أكثر من شعبة)</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="الأبطال" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🦁 الأبطال
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="الرواد" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🚀 الرواد
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="الملكات" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 👑 الملكات
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-              <input type="checkbox" value="الأميرات" class="sv-branch-check" onchange="svBranchCheckStyle(this)" style="accent-color:var(--jade);width:15px;height:15px;"> 🌸 الأميرات
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:#fff;transition:all .15s;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
-            </label>
-          </div>
-        </div>
-        <div class="fg"><label>نوع الهوية</label>
-          <select id="sv-id-type" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="بطاقة وطنية">بطاقة وطنية</option>
-            <option value="جواز سفر">جواز سفر</option>
-            <option value="إقامة">إقامة</option>
-          </select>
-        </div>
-        <div class="fg"><label>رقم الهوية</label><input type="text" id="sv-id-num" placeholder="XXXXXXXXXXXXXXX" style="direction:ltr;"></div>
-        <div class="fg"><label>العنوان</label><input type="text" id="sv-address" placeholder="مثال: حي الصنوبر البحري"></div>
-        <div class="fg"><label>المؤهل العلمي</label><input type="text" id="sv-qualification" placeholder="مثال: بكالوريوس"></div>
-      </div>
 
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👨‍🏫 المعلمون التابعون للمشرف
-      </div>
-      <div style="font-size:.78rem;color:var(--light);margin-bottom:8px;">اختر المعلمين الذين سيشرف عليهم (يمكن اختيار أكثر من معلم)</div>
-      <div id="sv-teachers-picker" style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:8px;background:var(--bg);"></div>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-
-      <div style="background:var(--blue-pale);border-right:4px solid var(--blue);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--blue);">
-        🔐 معلومات تخص الحساب
-      </div>
-      <div class="form-grid-2">
-        <div class="fg">
-          <label>اسم المستخدم</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="sv-username" placeholder="سيتم توليده تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateSupervisorUsername()">🔄</button>
-          </div>
-        </div>
-        <div class="fg">
-          <label>كلمة السر</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="sv-password" placeholder="سيتم توليدها تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateSupervisorPassword()">🔄</button>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--pale);border-radius:var(--r-sm);padding:12px 14px;font-size:.8rem;color:var(--mid);margin-top:4px;">
-        💡 سيتم إرسال بيانات الدخول للمشرف عبر الهاتف بعد إضافته
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="addSupervisor()">➕ إضافة</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add-supervisor')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: EDIT SUPERVISOR ══ -->
-<div class="overlay" id="modal-edit-supervisor">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-title">✏️ تعديل بيانات المشرف</div>
-      <button class="modal-close" onclick="closeModal('modal-edit-supervisor')">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-sv-id">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👤 البيانات الأساسية
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="fg"><label>الاسم *</label><input type="text" id="edit-sv-fname"></div>
-        <div class="fg"><label>العائلة</label><input type="text" id="edit-sv-lname"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="edit-sv-phone"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="edit-sv-email" style="direction:ltr;"></div>
-        <div class="fg"><label>الحالة</label>
-          <select id="edit-sv-status" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="نشط">نشط</option>
-            <option value="موقوف">موقوف</option>
-          </select>
-        </div>
-      </div>
-      <div style="background:var(--gold-pale);border-radius:var(--r-sm);padding:9px 13px;font-size:.78rem;color:var(--gold);margin-top:14px;">
-        💡 الشعبة والمعلمون يتحدّدان تلقائياً من المعلمين المرتبطين بالمشرف. لإضافة مشرف جديد استخدم «أداة الإدارة».
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="saveEditSupervisor()">💾 حفظ التغييرات</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-edit-supervisor')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: VIEW SUPERVISOR ══ -->
-<div class="overlay" id="modal-view-supervisor">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-head">
-      <div class="modal-title">📋 ملف المشرف</div>
-      <button class="modal-close" onclick="closeModal('modal-view-supervisor')">×</button>
-    </div>
-    <div class="modal-body" id="view-supervisor-body"></div>
-    <div class="modal-foot">
-      <button class="btn btn-outline btn-sm" onclick="editSupervisorFromView()">✏️ تعديل</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-view-supervisor')">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      PAGE: PARENTS
@@ -2639,311 +2453,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     PAGE: PARENTS BRANCH DETAIL
-══════════════════════════════════════════════════════ -->
-<div id="page-parents-branch" class="page">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-outline btn-sm" onclick="navPage('parents')" style="font-size:.8rem;">← رجوع</button>
-      <div id="pb-branch-badge" style="padding:6px 16px;border-radius:20px;font-size:.85rem;font-weight:700;color:#fff;"></div>
-    </div>
-    <button class="btn btn-primary btn-sm" onclick="openAddParent()">➕ إضافة ولي أمر</button>
-  </div>
-  <div id="pb-circles-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;"></div>
-</div>
-
-<!-- ══ PARENT CONTEXT MENU ══ -->
-<div id="pb-ctx-menu" style="display:none;position:fixed;z-index:9000;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1px solid var(--border);min-width:180px;overflow:hidden;">
-  <div style="padding:8px 14px;background:linear-gradient(135deg,var(--forest),var(--emerald));color:#fff;font-size:.82rem;font-weight:700;" id="pb-ctx-name">—</div>
-  <div onclick="pbCtxSendMsg()" style="padding:11px 16px;cursor:pointer;font-size:.84rem;display:flex;align-items:center;gap:10px;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">💬 إرسال رسالة</div>
-  <div onclick="pbCtxEdit()" style="padding:11px 16px;cursor:pointer;font-size:.84rem;display:flex;align-items:center;gap:10px;transition:background .15s;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">✏️ تعديل البيانات</div>
-  <div onclick="pbCtxDelete()" style="padding:11px 16px;cursor:pointer;font-size:.84rem;display:flex;align-items:center;gap:10px;color:var(--red);transition:background .15s;" onmouseover="this.style.background='var(--red-pale)'" onmouseout="this.style.background=''">🗑️ حذف من القائمة</div>
-</div>
-
-<!-- ══ MODAL: اختيار مستقبل الرسالة ══ -->
-<div class="overlay" id="modal-pb-msg-target">
-  <div class="modal" style="max-width:340px;">
-    <div class="modal-head">
-      <div class="modal-title">💬 إرسال رسالة لـ</div>
-      <button class="modal-close" onclick="closeModal('modal-pb-msg-target')">×</button>
-    </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;padding:20px;">
-      <div style="font-size:.85rem;color:var(--mid);margin-bottom:6px;">اختر المستقبل للطالب: <strong id="pb-msg-student-name">—</strong></div>
-      <button class="btn btn-outline" style="justify-content:flex-start;gap:12px;" onclick="pbOpenMsgCompose('أب')">👨 الأب</button>
-      <button class="btn btn-outline" style="justify-content:flex-start;gap:12px;" onclick="pbOpenMsgCompose('أم')">👩 الأم</button>
-      <button class="btn btn-primary" style="justify-content:flex-start;gap:12px;" onclick="pbOpenMsgCompose('الاثنين')">👨‍👩 الاثنين</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: كتابة الرسالة ══ -->
-<div class="overlay" id="modal-pb-msg-compose">
-  <div class="modal" style="max-width:500px;">
-    <div class="modal-head">
-      <div class="modal-title">✉️ كتابة الرسالة</div>
-      <button class="modal-close" onclick="closeModal('modal-pb-msg-compose')">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="background:var(--pale);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.82rem;color:var(--mid);">
-        إلى: <strong id="pb-msg-to-label">—</strong> — ولي أمر: <strong id="pb-msg-student-label">—</strong>
-      </div>
-      <div class="fg">
-        <label>عنوان الرسالة</label>
-        <input type="text" id="pb-msg-title" placeholder="مثال: متابعة الحفظ">
-      </div>
-      <div class="fg">
-        <label>نص الرسالة</label>
-        <textarea id="pb-msg-body" rows="5" placeholder="اكتب الرسالة هنا..."></textarea>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="pbSendMsg()">📤 إرسال</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-pb-msg-compose')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: تعديل بيانات ولي الأمر (من قائمة الشعبة) ══ -->
-<div class="overlay" id="modal-pb-edit-parent">
-  <div class="modal" style="max-width:720px;">
-    <div class="modal-head">
-      <div class="modal-title">✏️ تعديل بيانات ولي أمر — <span id="pb-edit-student-name-label">—</span></div>
-      <button class="modal-close" onclick="closeModal('modal-pb-edit-parent')">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--emerald);">👤 بيانات ولي الأمر</div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم *</label><input type="text" id="pbe-fname" placeholder="مثال: رمضان"></div>
-        <div class="fg"><label>العائلة *</label><input type="text" id="pbe-lname" placeholder="مثال: بحري"></div>
-        <div class="fg"><label>رقم هاتف الأب</label><input type="tel" id="pbe-dad-phone" placeholder="01xxxxxxxxx"></div>
-        <div class="fg"><label>رقم هاتف الأم</label><input type="tel" id="pbe-mom-phone" placeholder="01xxxxxxxxx"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="pbe-email" placeholder="example@email.com" style="direction:ltr;"></div>
-        <div class="fg"><label>صلة القرابة</label>
-          <select id="pbe-relation" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="الأب">الأب</option><option value="الأم">الأم</option><option value="كافل">كافل</option><option value="أخرى">أخرى</option>
-          </select>
-        </div>
-        <div class="fg"><label>الوظيفة</label><input type="text" id="pbe-job" placeholder="مثال: تاجر"></div>
-        <div class="fg"><label>العنوان</label><input type="text" id="pbe-address" placeholder="مثال: حي الصنوبر"></div>
-      </div>
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin:14px 0;font-size:.84rem;font-weight:700;color:var(--emerald);">📝 ملاحظات</div>
-      <div class="fg"><textarea id="pbe-notes" rows="3" placeholder="أي ملاحظات خاصة بولي الأمر..."></textarea></div>
-    </div>
-    <div class="modal-foot" style="justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal('modal-pb-edit-parent')">إلغاء</button>
-      <button class="btn btn-primary" onclick="pbConfirmSaveEdit()">💾 تعديل</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ DIALOG: تأكيد حفظ التعديل ══ -->
-<div class="overlay" id="modal-pb-confirm-save">
-  <div class="modal" style="max-width:360px;">
-    <div class="modal-head" style="background:linear-gradient(135deg,var(--gold),#a07800);">
-      <div class="modal-title">💾 تأكيد الحفظ</div>
-      <button class="modal-close" onclick="closeModal('modal-pb-confirm-save')">×</button>
-    </div>
-    <div class="modal-body" style="text-align:center;padding:28px 22px;">
-      <div style="font-size:2rem;margin-bottom:12px;">❓</div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--forest);">هل أنت متأكد من حفظ التغييرات؟</div>
-    </div>
-    <div class="modal-foot" style="justify-content:center;gap:10px;">
-      <button class="btn btn-primary" onclick="pbSaveEdit()">✅ نعم</button>
-      <button class="btn btn-danger" onclick="pbDiscardEdit()">❌ لا</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-pb-confirm-save')">↩️ لاغي</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ DIALOG: تأكيد الحذف ══ -->
-<div class="overlay" id="modal-pb-confirm-delete">
-  <div class="modal" style="max-width:380px;">
-    <div class="modal-head" style="background:linear-gradient(135deg,var(--red),#8b1a10);">
-      <div class="modal-title">🗑️ تأكيد الحذف</div>
-      <button class="modal-close" onclick="closeModal('modal-pb-confirm-delete')">×</button>
-    </div>
-    <div class="modal-body" style="text-align:center;padding:28px 22px;">
-      <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
-      <div style="font-size:.9rem;color:var(--mid);line-height:1.8;" id="pb-delete-msg">—</div>
-    </div>
-    <div class="modal-foot" style="justify-content:center;gap:10px;">
-      <button class="btn btn-danger" onclick="pbDoDelete()">✅ نعم</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-pb-confirm-delete')">❌ لا</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     MODAL: ADD PARENT
-══════════════════════════════════════════════════════ -->
-<div class="overlay" id="modal-add-parent">
-  <div class="modal" style="max-width:720px;">
-    <div class="modal-head">
-      <div class="modal-title">👨‍👦 إضافة ولي أمر جديد</div>
-      <button class="modal-close" onclick="closeModal('modal-add-parent')">×</button>
-    </div>
-    <div class="modal-body">
-
-      <!-- قسم الصورة — محسّن -->
-      <div style="background:linear-gradient(135deg,var(--pale),#f0faf5);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:18px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--jade),var(--forest));display:flex;align-items:center;justify-content:center;font-size:1rem;">🖼️</div>
-          <span style="font-weight:800;font-size:.9rem;color:var(--forest);">صورة ولي الأمر</span>
-          <span style="font-size:.72rem;color:var(--light);margin-right:auto;">اختياري</span>
-        </div>
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-          <!-- preview circle -->
-          <div id="p-avatar-circle" style="width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;box-shadow:0 4px 14px rgba(200,146,10,.25);overflow:hidden;border:3px solid #fff;">
-            👨‍👦
-          </div>
-          <div style="flex:1;min-width:180px;">
-            <button type="button" onclick="document.getElementById('p-photo').click()" style="display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:9px 16px;cursor:pointer;font-family:Tajawal;font-size:.84rem;font-weight:700;color:var(--forest);transition:all .18s;margin-bottom:10px;width:100%;" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="this.style.borderColor='var(--border)'">
-              <span style="font-size:1rem;">📁</span> اختر صورة من الجهاز
-            </button>
-            <input type="file" id="p-photo" accept="image/*" style="display:none;" onchange="previewParentPhoto(this)">
-            <div id="p-photo-drop" ondragover="event.preventDefault()" ondrop="handleParentPhotoDrop(event)" style="border:2px dashed var(--border);border-radius:var(--r-sm);padding:12px 10px;text-align:center;font-size:.76rem;color:var(--light);background:var(--bg);transition:border-color .2s;cursor:pointer;" onclick="document.getElementById('p-photo').click()" onmouseover="this.style.borderColor='var(--jade)'" onmouseout="this.style.borderColor='var(--border)'">
-              🗂️ أو اسحب وأفلت الصورة هنا
-            </div>
-          </div>
-          <div style="font-size:.72rem;color:var(--light);line-height:1.7;min-width:100px;">
-            ✅ JPG, PNG, WEBP<br>✅ حجم أقصى 2MB<br><span id="p-photo-filename" style="color:var(--jade);font-weight:700;"></span>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-
-      <!-- قسم معلومات ولي الأمر -->
-      <div style="display:flex;align-items:center;gap:8px;background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;">
-        <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--jade),var(--forest));display:flex;align-items:center;justify-content:center;font-size:.9rem;">👤</div>
-        <span style="font-weight:800;font-size:.88rem;color:var(--forest);">معلومات ولي الأمر</span>
-      </div>
-
-      <!-- الأبناء والبنات -->
-      <div class="fg" style="margin-bottom:16px;">
-        <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-          <span style="font-size:.88rem;font-weight:700;color:var(--forest);">👨‍👧‍👦 الأبناء والبنات</span>
-          <span style="font-size:.7rem;color:var(--light);font-weight:400;">(اضغط على الاسم لتحديده)</span>
-        </label>
-        <!-- فلتر الشعبة -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="p-branch-filter-btns">
-          <button type="button" onclick="filterChildrenTags('الكل')" class="p-branch-btn active-branch-btn" style="padding:4px 12px;border-radius:99px;border:1.5px solid var(--jade);background:var(--jade);color:#fff;cursor:pointer;font-family:Tajawal;font-size:.75rem;font-weight:700;transition:all .15s;">الكل</button>
-          <button type="button" onclick="filterChildrenTags('الأبطال')" class="p-branch-btn" style="padding:4px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--bg);color:var(--mid);cursor:pointer;font-family:Tajawal;font-size:.75rem;font-weight:700;transition:all .15s;">🦁 الأبطال</button>
-          <button type="button" onclick="filterChildrenTags('الرواد')" class="p-branch-btn" style="padding:4px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--bg);color:var(--mid);cursor:pointer;font-family:Tajawal;font-size:.75rem;font-weight:700;transition:all .15s;">🚀 الرواد</button>
-          <button type="button" onclick="filterChildrenTags('الملكات')" class="p-branch-btn" style="padding:4px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--bg);color:var(--mid);cursor:pointer;font-family:Tajawal;font-size:.75rem;font-weight:700;transition:all .15s;">👑 الملكات</button>
-          <button type="button" onclick="filterChildrenTags('الأميرات')" class="p-branch-btn" style="padding:4px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--bg);color:var(--mid);cursor:pointer;font-family:Tajawal;font-size:.75rem;font-weight:700;transition:all .15s;">🌸 الأميرات</button>
-        </div>
-        <div id="p-children-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:44px;max-height:130px;overflow-y:auto;padding:8px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);"></div>
-        <div style="margin-top:6px;font-size:.74rem;color:var(--jade);font-weight:700;" id="p-selected-count">لم يتم تحديد أي ابن/ابنة</div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم *</label><input type="text" id="p-fname" placeholder="مثال: رمضان" oninput="autoGenParentUser()"></div>
-        <div class="fg"><label>العائلة *</label><input type="text" id="p-lname" placeholder="مثال: بحري" oninput="autoGenParentUser()"></div>
-        <div class="fg"><label>الاسم بالأجنبي</label><input type="text" id="p-fname-en" placeholder="First Name" style="direction:ltr;"></div>
-        <div class="fg"><label>اللقب بالأجنبي</label><input type="text" id="p-lname-en" placeholder="Last Name" style="direction:ltr;"></div>
-        <div class="fg"><label>صلة القرابة</label>
-          <select id="p-relation" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="الأب">الأب</option>
-            <option value="الأم">الأم</option>
-            <option value="كافل">كافل</option>
-            <option value="أخرى">أخرى</option>
-          </select>
-        </div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="p-dob"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="p-phone" placeholder="01xxxxxxxxx"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="p-email" placeholder="example@email.com" style="direction:ltr;"></div>
-        <div class="fg"><label>الوظيفة</label><input type="text" id="p-job" placeholder="مثال: تاجر"></div>
-        <div class="fg"><label>العنوان</label><input type="text" id="p-address" placeholder="مثال: حي الصنوبر البحري"></div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-
-      <!-- قسم الحساب -->
-      <div style="background:var(--blue-pale);border-right:4px solid var(--blue);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--blue);">
-        🔐 معلومات تخص الحساب
-      </div>
-      <div class="form-grid-2">
-        <div class="fg">
-          <label>اسم المستخدم</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="p-username" placeholder="سيتم توليده تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateParentUsername()">🔄</button>
-          </div>
-        </div>
-        <div class="fg">
-          <label>كلمة السر</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="p-password" placeholder="سيتم توليدها تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateParentPassword()">🔄</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="background:var(--pale);border-radius:var(--r-sm);padding:12px 14px;font-size:.8rem;color:var(--mid);margin-top:4px;">
-        💡 سيتم إرسال بيانات الدخول لولي الأمر عبر الهاتف بعد إضافته
-      </div>
-
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="addParent()">➕ إضافة</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add-parent')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Parent -->
-<div class="overlay" id="modal-edit-parent">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-title">✏️ تعديل بيانات ولي الأمر</div>
-      <button class="modal-close" onclick="closeModal('modal-edit-parent')">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-p-id">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👤 البيانات الأساسية
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="fg"><label>الاسم *</label><input type="text" id="edit-p-fname"></div>
-        <div class="fg"><label>العائلة *</label><input type="text" id="edit-p-lname"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="edit-p-phone"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="edit-p-email" style="direction:ltr;"></div>
-        <div class="fg"><label>صلة القرابة</label>
-          <select id="edit-p-relation" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="الأب">الأب</option>
-            <option value="الأم">الأم</option>
-            <option value="كافل">كافل</option>
-            <option value="أخرى">أخرى</option>
-          </select>
-        </div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="edit-p-dob"></div>
-        <div class="fg"><label>الوظيفة</label><input type="text" id="edit-p-job"></div>
-        <div class="fg"><label>العنوان</label><input type="text" id="edit-p-address"></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="saveEditParent()">💾 حفظ التغييرات</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-edit-parent')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- View Parent -->
-<div class="overlay" id="modal-view-parent">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-head">
-      <div class="modal-title">📋 ملف ولي الأمر</div>
-      <button class="modal-close" onclick="closeModal('modal-view-parent')">×</button>
-    </div>
-    <div class="modal-body" id="view-parent-body"></div>
-    <div class="modal-foot">
-      <button class="btn btn-outline btn-sm" onclick="editParentFromView()">✏️ تعديل</button>
-      <button class="btn btn-primary" onclick="closeModal('modal-view-parent')">إغلاق</button>
-    </div>
-  </div>
-</div>
 <!-- ══════════════════════════════════════════════════════
      PAGE: ATTENDANCE
 ══════════════════════════════════════════════════════ -->
@@ -4025,81 +3534,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </div>
 
-<!-- ══ MODAL: ADD EMPLOYEE ══ -->
-<div class="overlay" id="modal-add-employee">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-title">➕ إضافة موظف جديد</div>
-      <button class="modal-close" onclick="closeModal('modal-add-employee')">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👤 البيانات الأساسية
-      </div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم *</label><input type="text" id="em-fname" placeholder="مثال: يوسف" oninput="autoGenEmployeeUser()"></div>
-        <div class="fg"><label>العائلة *</label><input type="text" id="em-lname" placeholder="مثال: لبديري" oninput="autoGenEmployeeUser()"></div>
-        <div class="fg"><label>الاسم بالأجنبي</label><input type="text" id="em-fname-en" placeholder="First Name" style="direction:ltr;"></div>
-        <div class="fg"><label>اللقب بالأجنبي</label><input type="text" id="em-lname-en" placeholder="Last Name" style="direction:ltr;"></div>
-        <div class="fg"><label>الوظيفة *</label>
-          <select id="em-job" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="">اختر الوظيفة</option>
-            <option value="مشرف الحلقات">مشرف الحلقات</option>
-            <option value="المشرف على الموقع">المشرف على الموقع</option>
-            <option value="راصد الدرجات">راصد الدرجات</option>
-            <option value="أخرى">أخرى</option>
-          </select>
-        </div>
-        <div class="fg"><label>الجنس *</label>
-          <select id="em-gender" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="ذكر">ذكر</option>
-            <option value="أنثى">أنثى</option>
-          </select>
-        </div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="em-dob"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="em-phone" placeholder="01xxxxxxxxx"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="em-email" placeholder="example@email.com" style="direction:ltr;"></div>
-        <div class="fg"><label>نوع الهوية</label>
-          <select id="em-id-type" style="font-family:Tajawal;font-size:.88rem;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-            <option value="بطاقة وطنية">بطاقة وطنية</option>
-            <option value="جواز سفر">جواز سفر</option>
-            <option value="إقامة">إقامة</option>
-          </select>
-        </div>
-        <div class="fg"><label>رقم الهوية</label><input type="text" id="em-id-num" placeholder="XXXXXXXXXXXXXXX" style="direction:ltr;"></div>
-        <div class="fg"><label>العنوان</label><input type="text" id="em-address" placeholder="مثال: حي النزهة"></div>
-        <div class="fg"><label>المؤهل العلمي</label><input type="text" id="em-qualification" placeholder="مثال: بكالوريوس"></div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-      <div style="background:var(--blue-pale);border-right:4px solid var(--blue);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--blue);">
-        🔐 معلومات تخص الحساب
-      </div>
-      <div class="form-grid-2">
-        <div class="fg">
-          <label>اسم المستخدم</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="em-username" placeholder="سيتم توليده تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateEmployeeUsername()">🔄</button>
-          </div>
-        </div>
-        <div class="fg">
-          <label>كلمة السر</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="em-password" placeholder="سيتم توليدها تلقائياً" style="flex:1;font-family:monospace;direction:ltr;border:2px solid var(--red);border-radius:var(--r-sm);padding:9px 13px;">
-            <button type="button" class="btn btn-ghost btn-xs" onclick="generateEmployeePassword()">🔄</button>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--pale);border-radius:var(--r-sm);padding:12px 14px;font-size:.8rem;color:var(--mid);margin-top:4px;">
-        💡 سيتم إرسال بيانات الدخول للموظف عبر الهاتف بعد إضافته
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="addEmployee()">➕ إضافة</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add-employee')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ MODAL: EDIT EMPLOYEE ══ -->
 <div class="overlay" id="modal-edit-employee">
@@ -5601,12 +5035,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         </div>
         <div class="fg"><label>المستوى</label>
           <select id="t-level">
-            <option value="">— اختر المستوى —</option>
-            <option value="مبتدئ">مبتدئ</option>
-            <option value="متوسط">متوسط</option>
-            <option value="متقدم">متقدم</option>
-            <option value="حافظ">حافظ</option>
-            <option value="مُجاز">مُجاز</option>
+            <option value="">🤖 تلقائي حسب التأهيل</option>
           </select>
         </div>
         <div class="fg"><label>الدور *</label>
@@ -5732,75 +5161,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
 </div>
 
-<!-- Edit Teacher -->
-<div class="overlay" id="modal-edit-teacher">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-title">✏️ تعديل بيانات المعلم</div>
-      <button class="modal-close" onclick="closeModal('modal-edit-teacher')">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-t-id">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;font-size:.84rem;font-weight:700;color:var(--emerald);">
-        👤 البيانات الشخصية
-      </div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم</label><input type="text" id="edit-t-fname"></div>
-        <div class="fg"><label>العائلة</label><input type="text" id="edit-t-lname"></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="edit-t-phone"></div>
-        <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="edit-t-email" style="direction:ltr;"></div>
-        <div class="fg"><label>التخصص</label><input type="text" id="edit-t-specialty"></div>
-        <div class="fg"><label>الجنس</label>
-          <select id="edit-t-gender">
-            <option value="ذكر">ذكر</option>
-            <option value="أنثى">أنثى</option>
-          </select>
-        </div>
-        <div class="fg"><label>نوع الهوية</label>
-          <select id="edit-t-id-type">
-            <option value="">اختر</option>
-            <option value="بطاقة وطنية">بطاقة وطنية</option>
-            <option value="جواز سفر">جواز سفر</option>
-            <option value="إقامة">إقامة</option>
-          </select>
-        </div>
-        <div class="fg"><label>رقم الهوية</label><input type="text" id="edit-t-id-num" style="direction:ltr;"></div>
-      </div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الشعبة</label>
-          <select id="edit-t-branch">
-            <option>الأبطال</option><option>الرواد</option>
-          </select>
-        </div>
-        <div class="fg"><label>الحالة</label>
-          <select id="edit-t-status">
-            <option value="true">نشط</option>
-            <option value="false">موقوف</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="saveEditTeacher()">💾 حفظ التعديلات</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-edit-teacher')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
-<!-- View Teacher Profile -->
-<div class="overlay" id="modal-view-teacher">
-  <div class="modal" style="max-width:500px;">
-    <div class="modal-head">
-      <div class="modal-title">👁️ ملف المعلم</div>
-      <button class="modal-close" onclick="closeModal('modal-view-teacher')">×</button>
-    </div>
-    <div class="modal-body" id="view-teacher-body">
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="closeModal('modal-view-teacher')">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ Teacher Card Context Menu ══ -->
 <div id="teacher-ctx-menu" style="display:none;position:fixed;z-index:9999;background:var(--white);border-radius:var(--r);box-shadow:0 8px 32px rgba(15,35,24,.18);border:1px solid var(--border);min-width:190px;overflow:hidden;">
@@ -5903,12 +5264,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         </div>
         <div class="fg"><label>المستوى</label>
           <select id="ce-t-level">
-            <option value="">— اختر المستوى —</option>
-            <option value="مبتدئ">مبتدئ</option>
-            <option value="متوسط">متوسط</option>
-            <option value="متقدم">متقدم</option>
-            <option value="حافظ">حافظ</option>
-            <option value="مُجاز">مُجاز</option>
+            <option value="">🤖 تلقائي حسب التأهيل</option>
           </select>
         </div>
         <div class="fg" style="grid-column:1/-1;"><label>المشرف المتابع</label>
@@ -5938,7 +5294,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
       </div>
       <div class="form-grid-2">
         <div class="fg"><label>الجنس</label>
-          <select id="ce-t-gender"><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option></select>
+          <select id="ce-t-gender"><option value="">— غير محدد —</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option></select>
         </div>
         <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="ce-t-dob"></div>
         <div class="fg"><label>رقم الهاتف</label><input type="tel" id="ce-t-phone" placeholder="01xxxxxxxxx"></div>
@@ -6492,43 +5848,9 @@ function buildCircleCard(teacher, students, color, isFemale, ids) {
 }
 
 // ── Edit Student Modal ──
-let _editKey = '', _editSafeId = '';
 
-function openEditStudent(key, name, safeId) {
-  _editKey = key;
-  _editSafeId = safeId;
-  const d = getStudentData(key);
-  document.getElementById('es-name').textContent = name;
-  document.getElementById('es-age').value  = d.age || '';
-  document.getElementById('es-mem').value  = d.mem || '';
-  document.getElementById('es-dad').value  = d.dad || '';
-  document.getElementById('es-mom').value  = d.mom || '';
-  document.getElementById('es-dob').value  = d.dob || '';
-  document.getElementById('es-pts').value  = d.pts || '';
-  document.getElementById('es-lvl').value  = d.lvl || '';
-  document.getElementById('overlay-edit-student').style.display = 'flex';
-}
 
-function closeEditStudent() {
-  document.getElementById('overlay-edit-student').style.display = 'none';
-}
 
-function saveStudentLocal() {
-  const obj = {
-    age: document.getElementById('es-age').value.trim(),
-    mem: document.getElementById('es-mem').value.trim(),
-    dad: document.getElementById('es-dad').value.trim(),
-    mom: document.getElementById('es-mom').value.trim(),
-    dob: document.getElementById('es-dob').value.trim(),
-    pts: document.getElementById('es-pts').value.trim(),
-    lvl: document.getElementById('es-lvl').value.trim(),
-  };
-  saveStudentData(_editKey, obj);
-  closeEditStudent();
-  // re-render the teacher card rows
-  refreshCircleCard(_editSafeId);
-  showToast('✅ تم حفظ بيانات الطالب');
-}
 
 function refreshCircleCard(safeId) {
   for (const [branch, circles] of Object.entries(BRANCH_DATA)) {
@@ -6590,214 +5912,7 @@ function openBranch(branchName) {
 }
 
 
-// ══════════════════════════════════════
-// PARENTS BRANCH — OPEN & BUILD
-// ══════════════════════════════════════
-function openParentBranch(branchName) {
-  nav(null, 'parents-branch');
 
-  const branchConfig = {
-    'الأبطال':  { emoji: '🦁', label: 'الأبطال — ١١–١٤ سنة — ذكور',   bg: 'linear-gradient(135deg,var(--jade),var(--forest))', key: 'الأبطال' },
-    'الرواد':   { emoji: '🚀', label: 'الرواد — ٧–١٠ سنة — ذكور',      bg: 'linear-gradient(135deg,#2196a3,#15616d)',           key: 'الرواد' },
-    'الملكات':  { emoji: '👑', label: 'الملكات — ١١–١٤ سنة — إناث',    bg: 'linear-gradient(135deg,#9b59b6,#6c3483)',           key: 'البنات', sub: 'الملكات' },
-    'الأميرات': { emoji: '🌸', label: 'الأميرات — ٧–١٠ سنة — إناث',   bg: 'linear-gradient(135deg,#e84393,#b5006d)',           key: 'البنات', sub: 'الأميرات' },
-  };
-
-  const cfg = branchConfig[branchName];
-  if (!cfg) return;
-
-  // Set badge
-  const badge = document.getElementById('pb-branch-badge');
-  if (badge) {
-    badge.textContent = cfg.emoji + ' ' + cfg.label;
-    badge.style.background = cfg.bg;
-  }
-
-  // Build circles
-  const grid = document.getElementById('pb-circles-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  let circles = BRANCH_DATA[cfg.key] || [];
-  // فلتر حسب sub (للملكات والأميرات)
-  if (cfg.sub) circles = circles.filter(c => c.sub === cfg.sub);
-
-  if (circles.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--light);font-size:.9rem;">لا توجد بيانات</div>`;
-    return;
-  }
-
-  const isFemale = !!cfg.sub;
-  grid.innerHTML = circles.map(c => buildParentCircleCard(c.teacher, c.students, c.color || cfg.bg, isFemale, branchName)).join('');
-}
-
-function buildParentCircleCard(teacher, students, color, isFemale, branchName) {
-  const safeId = 'pb_' + teacher.replace(/\s+/g,'_');
-  const teacherLabel = isFemale ? `👩‍🏫 المعلمة: ${teacher}` : `👨‍🏫 المعلم: ${teacher}`;
-  const studentWord  = isFemale ? 'طالبة' : 'طالب';
-
-  const rows = students.map((s, i) => {
-    const key = safeId + '_' + i;
-    const d = getStudentData(key);
-    const sEsc = s.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    const dadPhone = d.dad || '—';
-    const momPhone = d.mom || '—';
-    return `<tr style="border-bottom:1px solid var(--border);cursor:pointer;"
-      onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''"
-      oncontextmenu="showParentMenu(event,'${sEsc}','${branchName ? branchName.replace(/'/g,"\\'") : ''}');return false;"
-      ontouchstart="startParentLongPress(event,'${sEsc}','${branchName ? branchName.replace(/'/g,"\\'") : ''}')"
-      ontouchend="clearParentLongPress()" ontouchmove="clearParentLongPress()">
-      <td style="padding:6px 8px;color:var(--light);font-size:.75rem;text-align:center;width:32px;">${i+1}</td>
-      <td style="padding:6px 10px;font-weight:600;">${s}</td>
-      <td style="padding:6px 10px;text-align:center;direction:ltr;font-size:.82rem;">${dadPhone}</td>
-      <td style="padding:6px 10px;text-align:center;direction:ltr;font-size:.82rem;">${momPhone}</td>
-    </tr>`;
-  }).join('');
-
-  return `
-  <div class="card" style="overflow:hidden;">
-    <div style="background:${color};color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div style="font-weight:700;font-size:.95rem;">${teacherLabel}</div>
-      <span style="background:rgba(255,255,255,.2);padding:2px 12px;border-radius:10px;font-size:.75rem;">${students.length} ${studentWord}</span>
-    </div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:.82rem;font-family:Tajawal;">
-        <thead><tr style="background:var(--pale);color:var(--forest);">
-          <th style="padding:8px 6px;text-align:center;width:32px;">#</th>
-          <th style="padding:8px 10px;text-align:right;">اسم الطالب</th>
-          <th style="padding:8px 10px;text-align:center;">📞 ولي الأمر (أب)</th>
-          <th style="padding:8px 10px;text-align:center;">📞 ولي الأمر (أم)</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function initParentBranchCounts() {
-  const counts = {
-    'الأبطال':  { teacherKey: 'pb-count-abtal-teachers',   studentKey: 'pb-count-abtal-students' },
-    'الرواد':   { teacherKey: 'pb-count-rowad-teachers',    studentKey: 'pb-count-rowad-students' },
-    'الملكات':  { teacherKey: 'pb-count-malakat-teachers',  studentKey: 'pb-count-malakat-students' },
-    'الأميرات': { teacherKey: 'pb-count-amerat-teachers',   studentKey: 'pb-count-amerat-students' },
-  };
-
-  // الأبطال
-  if (BRANCH_DATA['الأبطال']) {
-    const d = BRANCH_DATA['الأبطال'];
-    const el = document.getElementById('pb-count-abtal-teachers'); if (el) el.textContent = d.length;
-    const sl = document.getElementById('pb-count-abtal-students'); if (sl) sl.textContent = d.reduce((a,c)=>a+c.students.length,0);
-  }
-  // الرواد
-  if (BRANCH_DATA['الرواد']) {
-    const d = BRANCH_DATA['الرواد'];
-    const el = document.getElementById('pb-count-rowad-teachers'); if (el) el.textContent = d.length;
-    const sl = document.getElementById('pb-count-rowad-students'); if (sl) sl.textContent = d.reduce((a,c)=>a+c.students.length,0);
-  }
-  // الملكات
-  if (BRANCH_DATA['البنات']) {
-    const malakat = BRANCH_DATA['البنات'].filter(c=>c.sub==='الملكات');
-    const amerat  = BRANCH_DATA['البنات'].filter(c=>c.sub==='الأميرات');
-    const me = document.getElementById('pb-count-malakat-teachers'); if (me) me.textContent = malakat.length;
-    const ms = document.getElementById('pb-count-malakat-students'); if (ms) ms.textContent = malakat.reduce((a,c)=>a+c.students.length,0);
-    const ae = document.getElementById('pb-count-amerat-teachers'); if (ae) ae.textContent = amerat.length;
-    const as2 = document.getElementById('pb-count-amerat-students'); if (as2) as2.textContent = amerat.reduce((a,c)=>a+c.students.length,0);
-  }
-}
-
-// ══════════════════════════════════════
-// PARENTS CONTEXT MENU — JS
-// ══════════════════════════════════════
-let _pbCtxStudent = '';
-let _pbCtxBranch  = '';
-let _pbLongPressTimer = null;
-
-function showParentMenu(e, studentName, branchName) {
-  _pbCtxStudent = studentName;
-  _pbCtxBranch  = branchName;
-  const menu = document.getElementById('pb-ctx-menu');
-  document.getElementById('pb-ctx-name').textContent = studentName;
-  menu.style.display = 'block';
-  // position
-  let x = e.clientX, y = e.clientY;
-  const mw = 200, mh = 130;
-  if (x + mw > window.innerWidth)  x = window.innerWidth  - mw - 8;
-  if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
-  menu.style.left = x + 'px';
-  menu.style.top  = y + 'px';
-  // close on outside click
-  setTimeout(() => document.addEventListener('click', closeParentMenuOnce, { once: true }), 0);
-}
-
-function closeParentMenu() {
-  const m = document.getElementById('pb-ctx-menu');
-  if (m) m.style.display = 'none';
-}
-function closeParentMenuOnce() { closeParentMenu(); }
-
-function startParentLongPress(e, studentName, branchName) {
-  _pbLongPressTimer = setTimeout(() => {
-    const touch = e.touches[0];
-    showParentMenu({ clientX: touch.clientX, clientY: touch.clientY }, studentName, branchName);
-  }, 600);
-}
-function clearParentLongPress() { clearTimeout(_pbLongPressTimer); }
-
-// ── 1. إرسال رسالة ──
-function pbCtxSendMsg() {
-  closeParentMenu();
-  document.getElementById('pb-msg-student-name').textContent = _pbCtxStudent;
-  openModal('modal-pb-msg-target');
-}
-
-function pbOpenMsgCompose(target) {
-  closeModal('modal-pb-msg-target');
-  const labelMap = { 'أب': 'الأب', 'أم': 'الأم', 'الاثنين': 'الأب والأم' };
-  document.getElementById('pb-msg-to-label').textContent = labelMap[target] || target;
-  document.getElementById('pb-msg-student-label').textContent = _pbCtxStudent;
-  document.getElementById('pb-msg-title').value = '';
-  document.getElementById('pb-msg-body').value = '';
-  openModal('modal-pb-msg-compose');
-}
-
-async function pbSendMsg() {
-  closeModal('modal-pb-msg-compose');
-  showToast('🚧 بيانات ومراسلة أولياء الأمور هتتفعّل مع لوحة ولي الأمر — ما اتحفظش حاجة');
-}
-
-// ── 2. تعديل البيانات ──
-function pbCtxEdit() {
-  closeParentMenu();
-  showToast('🚧 بيانات ومراسلة أولياء الأمور هتتفعّل مع لوحة ولي الأمر — ما اتحفظش حاجة');
-}
-
-function pbConfirmSaveEdit() {
-  openModal('modal-pb-confirm-save');
-}
-
-function pbSaveEdit() {
-  closeModal('modal-pb-confirm-save'); closeModal('modal-pb-edit-parent');
-  showToast('🚧 بيانات ومراسلة أولياء الأمور هتتفعّل مع لوحة ولي الأمر — ما اتحفظش حاجة');
-}
-
-function pbDiscardEdit() {
-  closeModal('modal-pb-confirm-save');
-  closeModal('modal-pb-edit-parent');
-  showToast('ℹ️ لم يتم حفظ التغييرات');
-}
-
-// ── 3. حذف من القائمة ──
-function pbCtxDelete() {
-  closeParentMenu();
-  document.getElementById('pb-delete-msg').innerHTML =
-    `هل أنت متأكد من حذف ولي أمر الطالب:<br><strong style="color:var(--forest);">${_pbCtxStudent}</strong><br>من شعبة: <strong style="color:var(--jade);">${_pbCtxBranch}</strong> ؟`;
-  openModal('modal-pb-confirm-delete');
-}
-
-function pbDoDelete() {
-  closeModal('modal-pb-confirm-delete');
-  showToast('🚧 بيانات ومراسلة أولياء الأمور هتتفعّل مع لوحة ولي الأمر — ما اتحفظش حاجة');
-}
 
 // ══════════════════════════════════════
 // TEACHERS — DATA & STATE
@@ -6811,30 +5926,13 @@ let tIdImgData = null;  // base64 صورة الهوية
 let tCvFileName = '';
 
 async function loadTeachers() {
-  // جرب أولاً مع branch_id
-  let data, error;
-  ({ data, error } = await db
+  // (دفعة ٣٢) كل الأعمدة موجودة — مفيش نسخة «ناقصة» تتحمّل وتتحفظ فوق البيانات
+  const { data, error } = await db
     .from('users')
-    .select('id, full_name, phone, username, is_active, branch_id, supervisor_id, dob, level, email, gender, address, education, licenses, job_title, marital, id_type, id_number, notes')
-    .eq('role', 'teacher'));
+    .select('id, full_name, phone, username, is_active, branch_id, supervisor_id, dob, level, email, gender, address, education, licenses, job_title, marital, id_type, id_number')
+    .eq('role', 'teacher');
 
-  if (error) {
-    // جرب بدون branch_id
-    ({ data, error } = await db
-      .from('users')
-      .select('id, full_name, phone, username, is_active, dob')
-      .eq('role', 'teacher'));
-  }
-
-  if (error) {
-    // فولباك أخير: من غير عمود dob (لو لسه ماتعملش)
-    ({ data, error } = await db
-      .from('users')
-      .select('id, full_name, phone, username, is_active')
-      .eq('role', 'teacher'));
-  }
-
-  if (error) { console.error('teachers error:', error); return; }
+  if (error) { loadWarn(error); showToast('⚠️ تعذّر تحميل بيانات المعلمين — اعمل تحديث للصفحة'); return; }
 
   // جيب أسماء الشعب
   const { data: branchData } = await db.from('branches').select('id, name');
@@ -6888,7 +5986,6 @@ function processTeachers(data, branchMap) {
   // Update stats
   const active = TEACHERS.filter(t => t.is_active).length;
   const updates = {
-    'stat-teachers': TEACHERS.length,
     't-stat-active': active,
     't-badge-active': 'نشط: ' + active,
     't-stat-students': STUDENTS.length,
@@ -6926,9 +6023,10 @@ function renderTeacherBranchCards() {
       }
     }
   });
-  // update stat-teachers total
-  const total = (BRANCH_DATA['الأبطال']||[]).length + (BRANCH_DATA['الرواد']||[]).length +
-                (BRANCH_DATA['البنات']||[]).length;
+  // إجمالي المعلمين = عدد المعلمين النشطين (المعلم اللي في شعبتين بيتعدّ مرة واحدة)
+  const _tSet = new Set();
+  ['الأبطال','الرواد','البنات'].forEach(k => (BRANCH_DATA[k]||[]).forEach(it => _tSet.add(String(it.teacherId || it.teacher))));
+  const total = _tSet.size;
   const el = document.getElementById('stat-teachers');
   if (el) el.textContent = total;
 }
@@ -7025,8 +6123,8 @@ function renderTeacherBranchDetail(branchName, meta) {
     <div class="card" style="border:2px solid transparent;transition:all .22s;overflow:hidden;user-select:none;"
          onmouseover="this.style.borderColor='${cardColor}';this.style.transform='translateY(-3px)'"
          onmouseout="this.style.borderColor='transparent';this.style.transform='translateY(0)'"
-         oncontextmenu="showTeacherCtxMenu(event,'${tNameEsc}','${tId}','${branchName}');return false;"
-         ontouchstart="startTeacherLongPress(event,'${tNameEsc}','${tId}','${branchName}')"
+         oncontextmenu="showTeacherCtxMenu(event,'${tNameEsc}','${tId}','${cleanName(branchName)}');return false;"
+         ontouchstart="startTeacherLongPress(event,'${tNameEsc}','${tId}','${cleanName(branchName)}')"
          ontouchend="clearTeacherLongPress()"
          ontouchmove="clearTeacherLongPress()"
          >
@@ -7037,7 +6135,7 @@ function renderTeacherBranchDetail(branchName, meta) {
         <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;flex-shrink:0;">${initial}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:.98rem;font-weight:800;font-family:'Amiri',serif;line-height:1.3;">${tName}</div>
-          <div style="font-size:.7rem;opacity:.85;margin-top:2px;">${branchName}${sub}</div>
+          <div style="font-size:.7rem;opacity:.85;margin-top:2px;">${esc(branchName)}${esc(sub)}</div>
         </div>
         <span style="background:rgba(255,255,255,.22);padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;">نشط</span>
       </div>
@@ -7052,7 +6150,7 @@ function renderTeacherBranchDetail(branchName, meta) {
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);">
           <span style="font-size:.78rem;color:var(--light);">📱 الهاتف</span>
-          <span style="font-weight:700;font-size:.83rem;color:var(--ink);direction:ltr;">${phone}</span>
+          <span style="font-weight:700;font-size:.83rem;color:var(--ink);direction:ltr;">${esc(phone)}</span>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);">
@@ -7393,7 +6491,7 @@ function renderTeacherSearchResults(q) {
       <div style="width:38px;height:38px;border-radius:50%;background:var(--jade);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">${initial}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:.9rem;">${t.full_name}</div>
-        <div style="font-size:.74rem;color:var(--light);">${br}${br && t.phone && t.phone!=='—' ? ' • ' : ''}${t.phone && t.phone!=='—' ? t.phone : ''}</div>
+        <div style="font-size:.74rem;color:var(--light);">${esc(br)}${br && t.phone && t.phone!=='—' ? ' • ' : ''}${t.phone && t.phone!=='—' ? esc(t.phone) : ''}</div>
       </div>
       <span style="color:var(--jade);font-size:1.1rem;">✏️</span>
     </div>`;
@@ -7422,14 +6520,26 @@ function pickTeacherForEdit(id) {
   openCardEditTeacher(t);
 }
 
-function openCardEditTeacher(t) {
+// (دفعة ٣٢) الحفظ بيبعت الحقول اللي اتغيّرت بس — مقارنةً باللقطة دي
+const CE_T_FIELDS = { phone:'ce-t-phone', email:'ce-t-email', gender:'ce-t-gender', dob:'ce-t-dob', level:'ce-t-level',
+  branch_id:'ce-t-branch', supervisor_id:'ce-t-supervisor', address:'ce-t-address', education:'ce-t-education',
+  licenses:'ce-t-licenses', id_type:'ce-t-id-type', id_number:'ce-t-id-num', is_active:'ce-t-status' };
+function ceTeacherSnap() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const o = { full_name: (g('ce-t-fname') + ' ' + g('ce-t-lname')).trim() };
+  Object.entries(CE_T_FIELDS).forEach(([k, id]) => { o[k] = g(id); });
+  return o;
+}
+async function openCardEditTeacher(t) {
+  window._ceTSnap = null;
+  try { await tlvLoad(); } catch(e) { loadWarn(e); }
   document.getElementById('card-edit-t-id').value    = t.id;
   document.getElementById('card-edit-t-name').value  = t.full_name;
   document.getElementById('ce-t-fname').value   = t.name  || '';
   document.getElementById('ce-t-lname').value   = t.lname || '';
   document.getElementById('ce-t-phone').value   = t.phone !== '—' ? t.phone : '';
   document.getElementById('ce-t-email').value   = t.email !== '—' ? t.email : '';
-  document.getElementById('ce-t-gender').value  = t.gender !== '—' ? t.gender : 'ذكر';
+  document.getElementById('ce-t-gender').value  = (t.gender && t.gender !== '—') ? t.gender : '';
   document.getElementById('ce-t-id-type').value = t.id_type !== '—' ? t.id_type : '';
   document.getElementById('ce-t-id-num').value  = t.id_number !== '—' ? t.id_number : '';
   document.getElementById('ce-t-status').value  = String(t.is_active);
@@ -7449,6 +6559,7 @@ function openCardEditTeacher(t) {
     cb.checked = cb.value === t.circle;
     updateCEBranchLabel(cb);
   });
+  window._ceTSnap = ceTeacherSnap();
   openModal('modal-card-edit-teacher');
 }
 
@@ -7472,7 +6583,7 @@ function openCardEditTeacherByName(tName, branchName) {
   document.getElementById('ce-t-lname').value    = parts.slice(1).join(' ') || '';
   document.getElementById('ce-t-phone').value    = stored?.phone    || '';
   document.getElementById('ce-t-email').value    = stored?.email    || '';
-  document.getElementById('ce-t-gender').value   = stored?.gender   || 'ذكر';
+  document.getElementById('ce-t-gender').value   = stored?.gender   || '';
   document.getElementById('ce-t-id-type').value  = stored?.id_type  || '';
   document.getElementById('ce-t-id-num').value   = stored?.id_number || '';
   document.getElementById('ce-t-status').value   = 'true';
@@ -7571,25 +6682,18 @@ async function doSaveCardEdit() {
   if (!id) { showToast('⚠️ المعلم ده مش متسجّل في القاعدة — أضِفه من زر «إضافة معلم»'); return; }
   if (!(await adminEnsureSession())) { showToast('⚠️ الجلسة انتهت — اعمل خروج ودخول تاني'); return; }
 
-  // ★ ١ — حفظ كل الحقول في users (أعمدة حقيقية)
-  const payload = {
-    full_name: newFullName,
-    phone:     phone || null,
-    is_active: is_active,
-    dob:       dob || null,
-    level:     level || null,
-    branch_id: branchId || null,
-    supervisor_id: supId || null,
-    email:     email || null,
-    gender:    gender || null,
-    address:   address || null,
-    education: education || null,
-    licenses:  licenses || null,
-    id_type:   idType || null,
-    id_number: idNum || null,
-  };
-
-  if (!payload.branch_id) delete payload.branch_id;   // من غير شعبة = مفيش نقل
+  // ★ ١ — (دفعة ٣٢) ابعت الحقول اللي اتغيّرت بس — اللي ما اتلمسش مايتكتبش فوقه
+  const snap0 = window._ceTSnap;
+  if (!snap0) { showToast('⚠️ افتح نافذة التعديل تاني'); return; }
+  const snap1 = ceTeacherSnap();
+  const payload = {};
+  Object.keys(snap1).forEach(k => {
+    if (snap1[k] === snap0[k]) return;
+    if (k === 'is_active') payload.is_active = snap1[k] === 'true';
+    else if (k === 'branch_id') { if (snap1[k]) payload.branch_id = snap1[k]; }   // من غير شعبة = مفيش نقل
+    else payload[k] = snap1[k] || null;
+  });
+  if (!Object.keys(payload).length) { closeModal('modal-card-edit-teacher'); showToast('ℹ️ مفيش تعديلات'); return; }
   const { data: res, error } = await db.rpc('staff_update', { p_user: id, p_data: payload });
   if (error) { console.error(error); showToast('❌ خطأ في الحفظ: ' + adminErr(error)); return; }
   const circleMsg = (res && res.circles_moved) ? (' • 🕌 ' + res.circles_moved + ' حلقة اتنقلت بطلابها للشعبة الجديدة') : '';
@@ -7778,10 +6882,10 @@ function renderTeachersList(list) {
       <td>${t.lname || '—'}</td>
       <td>${t.gender}</td>
       <td><span class="badge bg-blue" style="font-size:.72rem;">${t.circle}</span></td>
-      <td style="direction:ltr;text-align:right;">${t.phone}</td>
-      <td style="font-size:.78rem;direction:ltr;">${t.email}</td>
+      <td style="direction:ltr;text-align:right;">${esc(t.phone)}</td>
+      <td style="font-size:.78rem;direction:ltr;">${esc(t.email)}</td>
       <td><span class="badge bg-gray" style="font-size:.7rem;">${t.id_type}</span></td>
-      <td style="font-family:monospace;font-size:.78rem;direction:ltr;">${t.id_number}</td>
+      <td style="font-family:monospace;font-size:.78rem;direction:ltr;">${esc(t.id_number)}</td>
       <td style="text-align:center;">
         ${t.id_img ? '<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();viewTeacherImg(\'' + t.id + '\')">🖼️</button>' : '<span style="color:var(--light);font-size:.75rem;">—</span>'}
       </td>
@@ -7812,11 +6916,6 @@ function updateTeacherPagination(total) {
 
 function tGoPage(p) { tCurrentPage = p; filterTeachers(); }
 
-function changeTeacherRows(val) {
-  tRowsPerPage = parseInt(val);
-  tCurrentPage = 1;
-  filterTeachers();
-}
 
 function selectTeacherRow(id, row) {
   document.querySelectorAll('#teachers-tbody tr').forEach(r => r.style.background = '');
@@ -7847,10 +6946,6 @@ function updateTeacherActionBtns() {
   if (dupBtn) dupBtn.disabled = checked !== 1;
 }
 
-function toggleAllTeachers(cb) {
-  document.querySelectorAll('.t-row-check').forEach(c => c.checked = cb.checked);
-  onTeacherCheck();
-}
 
 // Filter & sort
 function filterTeachers() {
@@ -7875,11 +6970,6 @@ function filterTeachers() {
   if (tbody && tbody.style.display !== 'none') renderTeachersList(filtered);
 }
 
-function sortTeachers(col) {
-  if (tSortCol === col) tSortAsc = !tSortAsc;
-  else { tSortCol = col; tSortAsc = true; }
-  filterTeachers();
-}
 
 // ══════════ USERNAME / PASSWORD AUTO-GEN ══════════
 function autoGenTeacherUser() {
@@ -7927,6 +7017,7 @@ function adminErr(e){
 
 // تحميل الشعب والمشرفين لكل القوائم المنسدلة
 async function loadPickLists(){
+  try{ await tlvLoad(); }catch(e){ loadWarn(e); }
   try{
     const {data:brs} = await db.from('branches').select('id,name').order('name');
     window.BRANCH_LIST = (brs||[]).map(b=>({id:b.id,name:b.name}));
@@ -7942,6 +7033,9 @@ function fillPickLists(){
   const sOpts = '<option value="">— بدون مشرف —</option>'  + window.SUP_LIST.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
   ['t-branch','ce-t-branch'].forEach(id=>{ const el=document.getElementById(id); if(el){ const v=el.value; el.innerHTML=bOpts; el.value=v; } });
   ['t-supervisor','ce-t-supervisor'].forEach(id=>{ const el=document.getElementById(id); if(el){ const v=el.value; el.innerHTML=sOpts; el.value=v; } });
+  // (دفعة ٣٢) مستوى التأهيل من training_levels — فاضي = تلقائي
+  const lOpts = '<option value="">🤖 تلقائي حسب التأهيل</option>' + (TLV_LV||[]).map(l=>`<option value="${esc(l.id)}">✋ ${esc(l.name)}</option>`).join('');
+  ['t-level','ce-t-level'].forEach(id=>{ const el=document.getElementById(id); if(el){ const v=el.value; el.innerHTML=lOpts; el.value=v; } });
 }
 function branchIdByName(n){ const h=window.BRANCH_LIST.find(b=>b.name===n); return h?h.id:null; }
 function branchNameById(id){ const h=window.BRANCH_LIST.find(b=>b.id===id); return h?h.name:''; }
@@ -8105,117 +7199,12 @@ function viewTeacherImg(id) {
 }
 
 // View teacher profile
-function viewTeacher(id) {
-  const t = TEACHERS.find(t => t.id === id);
-  if (!t) return;
-  document.getElementById('view-teacher-body').innerHTML = `
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="avatar" style="margin:0 auto 12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));width:64px;height:64px;font-size:1.5rem;">${(t.name||'م')[0]}</div>
-      <div style="font-size:1.1rem;font-weight:800;color:var(--forest);">${t.full_name}</div>
-      <div style="font-size:.82rem;color:var(--light);margin-top:4px;">${t.circle}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${[
-        ['الجنس', t.gender],
-        ['الحلقة / الشعبة', t.circle],
-        ['رقم الهاتف', t.phone],
-        ['البريد الإلكتروني', t.email],
-        ['نوع الهوية', t.id_type],
-        ['رقم الهوية', t.id_number],
-        ['اسم المستخدم', `<span style="font-family:monospace;">${t.username}</span>`],
-        ['الحالة', `<span class="badge ${t.status === 'نشط' ? 'bg-green' : 'bg-red'}">${t.status}</span>`],
-      ].map(([k, v]) => `
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;">
-          <span style="color:var(--light);">${k}</span><span style="font-weight:700;">${v}</span>
-        </div>`).join('')}
-    </div>`;
-  openModal('modal-view-teacher');
-}
 
 // Edit teacher (selected)
-function editTeacherSelected() {
-  if (!selectedTeacherId) { showToast('⚠️ اختار معلماً أولاً'); return; }
-  editTeacher(selectedTeacherId);
-}
 
-function editTeacher(id) {
-  const t = TEACHERS.find(t => t.id === id);
-  if (!t) return;
-  document.getElementById('edit-t-id').value = t.id;
-  document.getElementById('edit-t-fname').value = t.name;
-  document.getElementById('edit-t-lname').value = t.lname;
-  document.getElementById('edit-t-phone').value = t.phone === '—' ? '' : t.phone;
-  document.getElementById('edit-t-email').value = t.email === '—' ? '' : t.email;
-  document.getElementById('edit-t-specialty').value = t.specialty || '';
-  document.getElementById('edit-t-gender').value = t.gender === '—' ? 'ذكر' : t.gender;
-  document.getElementById('edit-t-id-type').value = t.id_type === '—' ? '' : t.id_type;
-  document.getElementById('edit-t-id-num').value = t.id_number === '—' ? '' : t.id_number;
-  document.getElementById('edit-t-branch').value = t.circle === '—' ? 'الأبطال' : t.circle;
-  document.getElementById('edit-t-status').value = String(t.is_active);
-  openModal('modal-edit-teacher');
-}
 
-async function saveEditTeacher() {
-  const id = document.getElementById('edit-t-id').value;
-  const fname = document.getElementById('edit-t-fname').value.trim();
-  const lname = document.getElementById('edit-t-lname').value.trim();
-  const phone = document.getElementById('edit-t-phone').value.trim();
-  const email = document.getElementById('edit-t-email').value.trim();
-  const gender = document.getElementById('edit-t-gender').value;
-  const idType = document.getElementById('edit-t-id-type').value;
-  const idNum = document.getElementById('edit-t-id-num').value.trim();
-  const is_active = document.getElementById('edit-t-status').value === 'true';
-
-  if (!fname) { showToast('⚠️ اكتب اسم المعلم'); return; }
-
-  // Store extra fields in notes
-  const extraData = {};
-  if (email) extraData.email = email;
-  if (gender) extraData.gender = gender;
-  if (idType) extraData.id_type = idType;
-  if (idNum) extraData.id_number = idNum;
-  const notesJson = Object.keys(extraData).length ? JSON.stringify(extraData) : null;
-
-  // Try update with notes first
-  let error;
-  ({ error } = await db.from('users').update({
-    full_name: fname + ' ' + lname,
-    phone: phone || null,
-    is_active,
-    notes: notesJson,
-  }).eq('id', id));
-
-  // Retry without notes if column doesn't exist
-  if (error && error.message && error.message.includes('notes')) {
-    ({ error } = await db.from('users').update({
-      full_name: fname + ' ' + lname,
-      phone: phone || null,
-      is_active,
-    }).eq('id', id));
-  }
-
-  if (error) { console.error(error); showToast('❌ خطأ في التعديل'); return; }
-
-  closeModal('modal-edit-teacher');
-  showToast('✅ تم تعديل بيانات المعلم!');
-  await loadTeachers();
-}
 
 // Duplicate teacher
-function dupTeacher() {
-  if (!selectedTeacherId) { showToast('⚠️ اختار معلماً أولاً'); return; }
-  const t = TEACHERS.find(t => t.id === selectedTeacherId);
-  if (!t) return;
-  openModal('modal-add-teacher');
-  setTimeout(() => {
-    document.getElementById('t-fname').value = t.name;
-    document.getElementById('t-lname').value = t.lname;
-    document.getElementById('t-phone').value = t.phone === '—' ? '' : t.phone;
-    generateTeacherPassword();
-    generateTeacherUsername();
-    showToast('📋 تم نسخ بيانات المعلم — عدّل ما تحتاج');
-  }, 200);
-}
 
 // إيقاف جماعي مع التأكد من عدد الصفوف الفعلي (RLS بتفشل بصمت)
 // تغيير كلمة مرور المدير نفسه — Supabase Auth حقيقي
@@ -8247,552 +7236,14 @@ async function bulkDeactivate(ids) {
   } catch(e) { showToast('❌ خطأ في الحذف: ' + adminErr(e)); }
 }
 // Delete teacher (selected or by id)
-function deleteTeacherSelected() {
-  const checked = [...document.querySelectorAll('.t-row-check:checked')].map(cb => cb.dataset.id);
-  if (!checked.length) { showToast('⚠️ اختار معلماً أولاً'); return; }
-  if (!confirm(`هل تريد حذف ${checked.length} معلم؟`)) return;
-  bulkDeactivate(checked).then(() => loadTeachers());
-}
 
-async function deleteTeacher(id) {
-  if (!confirm('هل تريد حذف هذا المعلم؟')) return;
-  const { error } = await db.from('users').update({ is_active: false }).eq('id', id);
-  if (error) { console.error(error); showToast('❌ خطأ في الحذف'); return; }
-  showToast('🗑️ تم حذف المعلم');
-  await loadTeachers();
-}
 
 // Print teacher list
-function printTeacherList() {
-  const rows = TEACHERS.map((t, i) => `<tr>
-    <td style="text-align:center">${i + 1}</td>
-    <td>${t.name}</td><td>${t.lname}</td>
-    <td>${t.gender}</td><td>${t.circle}</td>
-    <td dir="ltr">${t.phone}</td>
-    <td dir="ltr">${t.id_type}</td>
-    <td dir="ltr">${t.id_number}</td>
-  </tr>`).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
-    <style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}
-    table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}
-    td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}
-    .hdr{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style>
-    <\/head><body>
-    <div class="hdr"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية<\/div>
-    <div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}<\/div><\/div>
-    <h2>قائمة المعلمين<\/h2>
-    <p style="text-align:center;color:#666;">إجمالي ${TEACHERS.length} معلم<\/p>
-    <table><thead><tr>
-      <th>#<\/th><th>الاسم<\/th><th>العائلة<\/th><th>الجنس<\/th><th>الحلقة<\/th><th>الهاتف<\/th><th>نوع الهوية<\/th><th>رقم الهوية<\/th>
-    <\/tr><\/thead><tbody>${rows}<\/tbody><\/table>
-    <\/body><\/html>`);
-  w.document.close(); w.print();
-}
 
 // Export to Excel (CSV)
-function exportTeachersExcel() {
-  const headers = ['الاسم','العائلة','الجنس','الحلقة','الهاتف','البريد','نوع الهوية','رقم الهوية','اسم المستخدم','الحالة'];
-  const rows = TEACHERS.map(t => [t.name, t.lname, t.gender, t.circle, t.phone, t.email, t.id_type, t.id_number, t.username, t.status]);
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'قائمة_المعلمين.csv';
-  a.click();
-  showToast('✅ تم تصدير ملف Excel');
-}
 
 // جيب الإعلانات من Supabase
-// ══════════════════════════════════════
-// PARENTS — DATA & STATE
-// ══════════════════════════════════════
-let PARENTS = [];
-let selectedParentId = null;
-let pRowsPerPage = 10;
-let pCurrentPage = 1;
-let pSortCol = '';
-let pSortAsc = true;
-let pPhotoData = null;
 
-async function loadParents() {
-  let data, error;
-  ({ data, error } = await db
-    .from('users')
-    .select('id, full_name, phone, username, is_active, created_at')
-    .eq('role', 'parent')
-    .order('created_at', { ascending: false }));
-
-  if (error) { console.error('parents error:', error); return; }
-  processParents(data);
-}
-
-function processParents(data) {
-  PARENTS = (data || []).map((p, i) => {
-    let extra = {};
-    try { if (p.notes) extra = JSON.parse(p.notes); } catch(e) {}
-    return {
-      id: p.id,
-      idx: i + 1,
-      name: (p.full_name || 'بدون اسم').split(' ')[0],
-      lname: (p.full_name || '').split(' ').slice(1).join(' '),
-      full_name: p.full_name || 'بدون اسم',
-      phone: p.phone || '—',
-      email: extra.email || '—',
-      relation: extra.relation || '—',
-      dob: extra.dob || '—',
-      job: extra.job || '—',
-      address: extra.address || '—',
-      children: extra.children || '—',
-      username: p.username || '—',
-      status: p.is_active ? 'نشط' : 'موقوف',
-      is_active: p.is_active,
-    };
-  });
-
-  const fathers = PARENTS.filter(p => p.relation === 'الأب').length;
-  const mothers = PARENTS.filter(p => p.relation === 'الأم').length;
-  const other = PARENTS.filter(p => p.relation !== 'الأب' && p.relation !== 'الأم').length;
-  const updates = {
-    'stat-parents': PARENTS.length,
-    'p-stat-total': PARENTS.length,
-    'p-stat-fathers': fathers,
-    'p-stat-mothers': mothers,
-    'p-stat-other': other,
-    'p-badge-total': 'الإجمالي: ' + PARENTS.length,
-  };
-  Object.entries(updates).forEach(([id, val]) => {
-    const el = document.getElementById(id); if (el) el.textContent = val;
-  });
-
-  renderParentsList(PARENTS);
-}
-
-function renderParentsList(list) {
-  const tbody = document.getElementById('parents-tbody');
-  if (!tbody) return;
-
-  const start = (pCurrentPage - 1) * pRowsPerPage;
-  const paged = pRowsPerPage >= 999 ? list : list.slice(start, start + pRowsPerPage);
-
-  if (paged.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--light);">لا يوجد أولياء أمور</td></tr>`;
-    document.getElementById('p-page-info').textContent = '0 سجل';
-    document.getElementById('p-pagination').innerHTML = '';
-    return;
-  }
-
-  tbody.innerHTML = paged.map(p => `
-    <tr style="cursor:pointer;" onclick="viewParent('${p.id}')">
-      <td onclick="event.stopPropagation()">
-        <input type="checkbox" class="p-row-check" data-id="${p.id}"
-          onchange="onParentCheck(this)" style="cursor:pointer;">
-      </td>
-      <td><div style="display:flex;align-items:center;gap:9px;">
-        <div class="avatar" style="background:linear-gradient(135deg,var(--gold),var(--gold-l));width:32px;height:32px;font-size:.85rem;">${(p.name||'و')[0]}</div>
-        <strong>${p.name}</strong>
-      </div></td>
-      <td>${p.lname}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.children}</td>
-      <td dir="ltr">${p.phone}</td>
-      <td dir="ltr" style="font-size:.8rem;">${p.email}</td>
-      <td><code style="font-size:.78rem;background:var(--pale);padding:2px 6px;border-radius:4px;">${p.username}</code></td>
-      <td><span class="badge ${p.relation==='الأب'?'bg-blue':p.relation==='الأم'?'bg-purple':'bg-gold'}">${p.relation}</span></td>
-      <td style="font-size:.8rem;">${p.dob}</td>
-      <td style="font-size:.8rem;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.address}</td>
-    </tr>`).join('');
-
-  // Pagination info
-  const total = list.length;
-  const totalPages = pRowsPerPage >= 999 ? 1 : Math.ceil(total / pRowsPerPage);
-  document.getElementById('p-page-info').textContent =
-    `عرض ${start + 1}–${Math.min(start + pRowsPerPage, total)} من ${total}`;
-
-  const pag = document.getElementById('p-pagination');
-  pag.innerHTML = '';
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.style.cssText = `padding:4px 10px;border-radius:6px;border:1.5px solid ${i===pCurrentPage?'var(--jade)':'var(--border)'};
-      background:${i===pCurrentPage?'var(--jade)':'var(--white)'};color:${i===pCurrentPage?'#fff':'var(--mid)'};
-      cursor:pointer;font-family:Tajawal;font-size:.8rem;`;
-    btn.onclick = () => { pCurrentPage = i; renderParentsList(PARENTS_FILTERED || PARENTS); };
-    pag.appendChild(btn);
-  }
-}
-
-let PARENTS_FILTERED = null;
-
-function filterParents() {
-  const q = document.getElementById('parent-search')?.value?.toLowerCase() || '';
-  const rel = document.getElementById('parent-filter-relation')?.value || '';
-  PARENTS_FILTERED = PARENTS.filter(p => {
-    const matchQ = !q || p.full_name.toLowerCase().includes(q) || p.phone.includes(q) || p.username.toLowerCase().includes(q);
-    const matchRel = !rel || p.relation === rel;
-    return matchQ && matchRel;
-  });
-  pCurrentPage = 1;
-  renderParentsList(PARENTS_FILTERED);
-}
-
-function sortParents(col) {
-  if (pSortCol === col) { pSortAsc = !pSortAsc; } else { pSortCol = col; pSortAsc = true; }
-  const list = PARENTS_FILTERED || PARENTS;
-  list.sort((a, b) => {
-    const av = a[col] || ''; const bv = b[col] || '';
-    return pSortAsc ? av.localeCompare(bv,'ar') : bv.localeCompare(av,'ar');
-  });
-  renderParentsList(list);
-}
-
-function changeParentRows(val) {
-  pRowsPerPage = parseInt(val); pCurrentPage = 1;
-  renderParentsList(PARENTS_FILTERED || PARENTS);
-}
-
-function onParentCheck(cb) {
-  const checked = [...document.querySelectorAll('.p-row-check:checked')];
-  const n = checked.length;
-  selectedParentId = n === 1 ? checked[0].dataset.id : null;
-  const badge = document.getElementById('p-badge-selected');
-  badge.style.display = n > 0 ? 'inline-flex' : 'none';
-  badge.textContent = 'محدد: ' + n;
-  document.getElementById('p-btn-edit').disabled = n !== 1;
-  document.getElementById('p-btn-dup').disabled = n !== 1;
-  document.getElementById('p-btn-del').disabled = n === 0;
-}
-
-function toggleAllParents(cb) {
-  document.querySelectorAll('.p-row-check').forEach(c => { c.checked = cb.checked; });
-  onParentCheck(cb);
-}
-
-function openAddParent() {
-  // Reset fields
-  ['p-fname','p-lname','p-fname-en','p-lname-en','p-phone','p-email','p-job','p-address'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  pPhotoData = null;
-  // Reset photo UI
-  const avatar = document.getElementById('p-avatar-circle');
-  if (avatar) avatar.innerHTML = '👨‍👦';
-  const drop = document.getElementById('p-photo-drop');
-  if (drop) drop.textContent = '🗂️ أو اسحب وأفلت الصورة هنا';
-  const fname = document.getElementById('p-photo-filename');
-  if (fname) fname.textContent = '';
-
-  generateParentUsername();
-  generateParentPassword();
-
-  // ── جيب كل الأسماء من BRANCH_DATA ──
-  const allStudents = [];
-  const seen = new Set();
-  const branchOrder = ['الأبطال','الرواد','البنات'];
-  const subMap = { 'الملكات': 'الملكات', 'الأميرات': 'الأميرات' };
-
-  branchOrder.forEach(bKey => {
-    (BRANCH_DATA[bKey] || []).forEach(circle => {
-      // تحديد الشعبة الحقيقية للعرض
-      let displayBranch = bKey;
-      if (bKey === 'البنات' && circle.sub) displayBranch = circle.sub;
-      (circle.students || []).forEach(name => {
-        if (!seen.has(name)) {
-          seen.add(name);
-          allStudents.push({ name, branch: displayBranch });
-        }
-      });
-    });
-  });
-
-  // احفظ في variable عالمي عشان الفلتر
-  window._allParentChildren = allStudents;
-
-  renderChildrenTags('الكل');
-
-  // Reset branch filter buttons
-  document.querySelectorAll('.p-branch-btn').forEach(b => {
-    b.style.background = 'var(--bg)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color = 'var(--mid)';
-  });
-  const firstBtn = document.querySelector('.p-branch-btn');
-  if (firstBtn) {
-    firstBtn.style.background = 'var(--jade)';
-    firstBtn.style.borderColor = 'var(--jade)';
-    firstBtn.style.color = '#fff';
-  }
-
-  openModal('modal-add-parent');
-}
-
-function renderChildrenTags(branch) {
-  const tagsDiv = document.getElementById('p-children-tags');
-  if (!tagsDiv) return;
-
-  const list = (window._allParentChildren || []).filter(s =>
-    branch === 'الكل' || s.branch === branch
-  );
-
-  tagsDiv.innerHTML = '';
-  list.forEach(({ name, branch: b }) => {
-    const branchColors = {
-      'الأبطال':  { bg:'#e8f5ee', border:'var(--jade)',  color:'var(--emerald)', activeBg:'var(--jade)',   activeColor:'#fff' },
-      'الرواد':   { bg:'#e8f4fb', border:'#2196a3',       color:'#15616d',        activeBg:'#2196a3',       activeColor:'#fff' },
-      'الملكات':  { bg:'#f3e8fa', border:'#9b59b6',       color:'#6c3483',        activeBg:'#9b59b6',       activeColor:'#fff' },
-      'الأميرات': { bg:'#fde8f4', border:'#e84393',       color:'#b5006d',        activeBg:'#e84393',       activeColor:'#fff' },
-    };
-    const c = branchColors[b] || branchColors['الأبطال'];
-
-    const tag = document.createElement('span');
-    tag.textContent = name;
-    tag.dataset.name = name;
-    tag.dataset.branch = b;
-    tag.dataset.selected = '0';
-    tag.style.cssText = `padding:4px 12px;border-radius:99px;border:1.5px solid ${c.border};cursor:pointer;font-size:.78rem;background:${c.bg};color:${c.color};transition:all .15s;user-select:none;`;
-    tag.onclick = () => {
-      const sel = tag.dataset.selected === '1';
-      tag.dataset.selected = sel ? '0' : '1';
-      tag.style.background   = sel ? c.bg   : c.activeBg;
-      tag.style.color        = sel ? c.color : c.activeColor;
-      tag.style.fontWeight   = sel ? '400'   : '700';
-      tag.style.boxShadow    = sel ? 'none'  : '0 2px 8px rgba(0,0,0,.12)';
-      updateSelectedCount();
-    };
-    tagsDiv.appendChild(tag);
-  });
-  updateSelectedCount();
-}
-
-function filterChildrenTags(branch) {
-  // تحديث أزرار الفلتر
-  document.querySelectorAll('.p-branch-btn').forEach(b => {
-    b.style.background  = 'var(--bg)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color       = 'var(--mid)';
-  });
-  event.target.style.background  = 'var(--jade)';
-  event.target.style.borderColor = 'var(--jade)';
-  event.target.style.color       = '#fff';
-  renderChildrenTags(branch);
-}
-
-function updateSelectedCount() {
-  const selected = [...document.querySelectorAll('#p-children-tags span[data-selected="1"]')];
-  const el = document.getElementById('p-selected-count');
-  if (!el) return;
-  if (selected.length === 0) {
-    el.textContent = 'لم يتم تحديد أي ابن/ابنة';
-    el.style.color = 'var(--light)';
-  } else {
-    el.textContent = '✅ محدد: ' + selected.map(s => s.dataset.name).join('، ');
-    el.style.color = 'var(--jade)';
-  }
-}
-
-function handleParentPhotoDrop(e) {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (!file || !file.type.startsWith('image/')) return;
-  const fakeInput = { files: [file] };
-  previewParentPhoto(fakeInput);
-}
-
-function autoGenParentUser() {
-  const fname = document.getElementById('p-fname')?.value?.trim() || '';
-  const lname = document.getElementById('p-lname')?.value?.trim() || '';
-  if (!fname && !lname) return;
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
-  const uname = 'parent' + rand;
-  document.getElementById('p-username').value = uname;
-  document.getElementById('p-password').value = uname;
-}
-
-function generateParentUsername() {
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
-  const uname = 'parent' + rand;
-  document.getElementById('p-username').value = uname;
-}
-
-function generateParentPassword() {
-  const rand = Math.floor(Math.random() * 9000000 + 1000000);
-  document.getElementById('p-password').value = 'parent' + rand;
-}
-
-function previewParentPhoto(input) {
-  const file = input.files ? input.files[0] : input;
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pPhotoData = e.target.result;
-    const avatar = document.getElementById('p-avatar-circle');
-    if (avatar) avatar.innerHTML = `<img src="${pPhotoData}" style="width:100%;height:100%;object-fit:cover;">`;
-    const drop = document.getElementById('p-photo-drop');
-    if (drop) drop.textContent = '✅ ' + file.name;
-    const fn = document.getElementById('p-photo-filename');
-    if (fn) fn.textContent = file.name;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function addParent() {
-  // حسابات أولياء الأمور محتاجة حساب دخول (Auth) — هتتفعّل مع لوحة ولي الأمر
-  showToast('🚧 إضافة أولياء الأمور هتتفعّل مع لوحة ولي الأمر');
-}
-
-function viewParent(id) {
-  const p = PARENTS.find(p => p.id === id);
-  if (!p) return;
-  document.getElementById('view-parent-body').innerHTML = `
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="avatar" style="margin:0 auto 12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));width:64px;height:64px;font-size:1.5rem;">${(p.name||'و')[0]}</div>
-      <div style="font-size:1.1rem;font-weight:800;color:var(--forest);">${p.full_name}</div>
-      <div style="font-size:.82rem;color:var(--light);margin-top:4px;">${p.relation}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      ${[
-        ['الأبناء', p.children],
-        ['صلة القرابة', p.relation],
-        ['رقم الهاتف', p.phone],
-        ['البريد الإلكتروني', p.email],
-        ['الوظيفة', p.job],
-        ['العنوان', p.address],
-        ['تاريخ الميلاد', p.dob],
-        ['اسم المستخدم', `<span style="font-family:monospace;">${p.username}</span>`],
-        ['الحالة', `<span class="badge ${p.is_active ? 'bg-green' : 'bg-red'}">${p.status}</span>`],
-      ].map(([k, v]) => `
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;">
-          <span style="color:var(--light);">${k}</span><span style="font-weight:700;">${v}</span>
-        </div>`).join('')}
-    </div>`;
-  openModal('modal-view-parent');
-}
-
-function editParentFromView() {
-  closeModal('modal-view-parent');
-  if (selectedParentId) editParent(selectedParentId);
-}
-
-function editParentSelected() {
-  if (!selectedParentId) { showToast('⚠️ اختار ولي أمر أولاً'); return; }
-  editParent(selectedParentId);
-}
-
-function editParent(id) {
-  const p = PARENTS.find(p => p.id === id);
-  if (!p) return;
-  document.getElementById('edit-p-id').value = p.id;
-  document.getElementById('edit-p-fname').value = p.name;
-  document.getElementById('edit-p-lname').value = p.lname;
-  document.getElementById('edit-p-phone').value = p.phone === '—' ? '' : p.phone;
-  document.getElementById('edit-p-email').value = p.email === '—' ? '' : p.email;
-  document.getElementById('edit-p-relation').value = p.relation === '—' ? 'الأب' : p.relation;
-  document.getElementById('edit-p-dob').value = p.dob === '—' ? '' : p.dob;
-  document.getElementById('edit-p-job').value = p.job === '—' ? '' : p.job;
-  document.getElementById('edit-p-address').value = p.address === '—' ? '' : p.address;
-  openModal('modal-edit-parent');
-}
-
-async function saveEditParent() {
-  const id = document.getElementById('edit-p-id').value;
-  const fname = document.getElementById('edit-p-fname').value.trim();
-  const lname = document.getElementById('edit-p-lname').value.trim();
-  const phone = document.getElementById('edit-p-phone').value.trim();
-  const email = document.getElementById('edit-p-email').value.trim();
-  const relation = document.getElementById('edit-p-relation').value;
-  const dob = document.getElementById('edit-p-dob').value;
-  const job = document.getElementById('edit-p-job').value.trim();
-  const address = document.getElementById('edit-p-address').value.trim();
-
-  if (!fname) { showToast('⚠️ اكتب اسم ولي الأمر'); return; }
-
-  const extraData = {};
-  if (email) extraData.email = email;
-  if (relation) extraData.relation = relation;
-  if (dob) extraData.dob = dob;
-  if (job) extraData.job = job;
-  if (address) extraData.address = address;
-  const notesJson = Object.keys(extraData).length ? JSON.stringify(extraData) : null;
-
-  let error;
-  ({ error } = await db.from('users').update({
-    full_name: fname + ' ' + lname,
-    phone: phone || null,
-    notes: notesJson,
-  }).eq('id', id));
-
-  if (error && error.message && error.message.includes('notes')) {
-    ({ error } = await db.from('users').update({
-      full_name: fname + ' ' + lname,
-      phone: phone || null,
-    }).eq('id', id));
-  }
-
-  if (error) { console.error(error); showToast('❌ خطأ في التعديل'); return; }
-
-  closeModal('modal-edit-parent');
-  showToast('✅ تم تعديل بيانات ولي الأمر!');
-  await loadParents();
-}
-
-function dupParent() {
-  if (!selectedParentId) { showToast('⚠️ اختار ولي أمر أولاً'); return; }
-  const p = PARENTS.find(p => p.id === selectedParentId);
-  if (!p) return;
-  openAddParent();
-  setTimeout(() => {
-    document.getElementById('p-fname').value = p.name;
-    document.getElementById('p-lname').value = p.lname;
-    document.getElementById('p-phone').value = p.phone === '—' ? '' : p.phone;
-    generateParentPassword();
-    generateParentUsername();
-    showToast('📋 تم نسخ بيانات ولي الأمر — عدّل ما تحتاج');
-  }, 200);
-}
-
-function deleteParentSelected() {
-  const checked = [...document.querySelectorAll('.p-row-check:checked')].map(cb => cb.dataset.id);
-  if (!checked.length) { showToast('⚠️ اختار ولي أمر أولاً'); return; }
-  if (!confirm(`هل تريد حذف ${checked.length} ولي أمر؟`)) return;
-  bulkDeactivate(checked).then(() => loadParents());
-}
-
-function printParentList() {
-  const rows = PARENTS.map((p, i) => `<tr>
-    <td style="text-align:center">${i + 1}</td>
-    <td>${p.name}</td><td>${p.lname}</td>
-    <td>${p.relation}</td><td>${p.children}</td>
-    <td dir="ltr">${p.phone}</td>
-    <td dir="ltr">${p.email}</td>
-  </tr>`).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
-    <style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}
-    table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}
-    td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}
-    .hdr{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style>
-    <\/head><body>
-    <div class="hdr"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية<\/div>
-    <div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}<\/div><\/div>
-    <h2>قائمة أولياء الأمور<\/h2>
-    <p style="text-align:center;color:#666;">إجمالي ${PARENTS.length} ولي أمر<\/p>
-    <table><thead><tr>
-      <th>#<\/th><th>الاسم<\/th><th>العائلة<\/th><th>الصلة<\/th><th>الأبناء<\/th><th>الهاتف<\/th><th>البريد<\/th>
-    <\/tr><\/thead><tbody>${rows}<\/tbody><\/table>
-    <\/body><\/html>`);
-  w.document.close(); w.print();
-}
-
-function exportParentsExcel() {
-  const headers = ['الاسم','العائلة','صلة القرابة','الأبناء','الهاتف','البريد','الوظيفة','العنوان','اسم المستخدم'];
-  const rows = PARENTS.map(p => [p.name, p.lname, p.relation, p.children, p.phone, p.email, p.job, p.address, p.username]);
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'قائمة_أولياء_الأمور.csv';
-  a.click();
-  showToast('✅ تم تصدير ملف Excel');
-}
 async function loadAnnouncements() {
   const { data, error } = await db
     .from('announcements')
@@ -8909,7 +7360,6 @@ const PAGE_TITLES = {
   tadmin:'🎓 إدارة تأهيل المعلمين',
   'branch-abtal':'🦁 شعبة الأبطال','branch-rowad':'🚀 شعبة الرواد',
   'branch-banat':'👑 شعبة البنات',
-  'parents-branch':'<svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;vertical-align:-3px;" fill="currentColor"><circle cx="8" cy="4.9" r="3"/><path d="M8 9.5c-2.8 0-5 2.2-5 5V20a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-5.5c0-2.8-2.2-5-5-5Z"/><circle cx="17.8" cy="10.9" r="2.3"/><path d="M17.8 14.3c-2.1 0-3.8 1.7-3.8 3.8V20a1 1 0 0 0 1 1h5.6a1 1 0 0 0 1-1v-1.9c0-2.1-1.7-3.8-3.8-3.8Z"/></svg> أولياء الأمور — الشعبة',
 };
 
 // ══ مزامنة BRANCH_DATA من قاعدة البيانات (منقولة من المشرف) ══
@@ -9130,7 +7580,7 @@ async function loadAdminAttendance(){
     return `<tr>
       <td style="color:var(--light);font-size:.75rem;">${i+1}</td>
       <td><div style="display:flex;align-items:center;gap:9px;"><div class="avatar">${s.name[0]}</div><strong>${s.name}</strong></div></td>
-      <td><span class="badge bg-gold">${s.branch}</span></td>
+      <td><span class="badge bg-gold">${esc(s.branch)}</span></td>
       <td><span class="badge bg-blue">${s.circle}</span></td>
       <td>${s.teacher}</td>
       <td>${badge}</td>
@@ -9217,7 +7667,7 @@ function viewStudent(id) {
         <span style="width:100%;display:flex;gap:6px;justify-content:flex-end;">
           <button class="btn btn-primary btn-xs" onclick="stPtOpen('${s.id}',cleanName('${cleanName(s.name)}'),1,${+s.points||0},b=>{ stPtAfter('${s.id}',b); viewStudent('${s.id}'); })">➕ إضافة النقاط</button>
           <button class="btn btn-danger btn-xs" onclick="stPtOpen('${s.id}',cleanName('${cleanName(s.name)}'),-1,${+s.points||0},b=>{ stPtAfter('${s.id}',b); viewStudent('${s.id}'); })">➖ حذف النقاط</button></span></div>
-      <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">رقم ولي الأمر</span><span style="font-weight:700;">${s.phone}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--pale);border-radius:var(--r-sm);font-size:.85rem;"><span style="color:var(--light);">رقم ولي الأمر</span><span style="font-weight:700;">${esc(s.phone)}</span></div>
       ${s.notes ? '<div style="padding:10px 14px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.82rem;border-right:3px solid var(--gold);">' +esc(s.notes)+ '</div>' : ''}
     </div>`;
   openModal('modal-view-student');
@@ -9375,7 +7825,6 @@ async function init(){
   await Promise.all([loadStudents(), loadTeachers(), loadAnnouncements(), loadNotifications()]);
   renderTeacherBranchCards();        // أعد رسم صناديق الشعب بالبيانات الحقيقية
   loadDashboardCounts();
-  initParentBranchCounts();
   // تحميل عدد الرسائل غير المقروءة لإظهار الـ badge
   loadUnreadMsgCount();
   showToast('✅ تم تحميل البيانات!');
@@ -9421,10 +7870,6 @@ async function refreshAdminData(){
 }
 
 
-// ══════════════════════════════════════
-// RENDER TEACHERS — alias
-// ══════════════════════════════════════
-function renderTeachers() { filterTeachers(); }
 
 // ══════════════════════════════════════
 // ATTENDANCE GRID
@@ -9505,7 +7950,7 @@ async function bulkDelAnn(){
 }
 
 function askDelAnn(id, title){
-  document.getElementById('del-ann-msg').innerHTML = `هل أنت متأكد من حذف إعلان<br><strong style="color:var(--forest);">(${title})</strong><br>من قائمة الإعلانات نهائياً؟`;
+  document.getElementById('del-ann-msg').innerHTML = `هل أنت متأكد من حذف إعلان<br><strong style="color:var(--forest);">(${esc(title)})</strong><br>من قائمة الإعلانات نهائياً؟`;
   annToDelete = id;
   openModal('modal-del-ann');
 }
@@ -9513,14 +7958,20 @@ function askDelAnn(id, title){
 async function confirmDelAnn(){
   if(annToDelete === null){ closeModal('modal-del-ann'); return; }
   const ids = Array.isArray(annToDelete) ? annToDelete : [annToDelete];
+  // (دفعة ٣٣) كل حذف بيتأكد إن الصف اتحدّث فعلاً
+  let bad = 0;
   for(const id of ids){
-    await db.from('announcements').update({is_active:false}).eq('id', id);
+    try{
+      const { data, error } = await db.from('announcements').update({is_active:false}).eq('id', id).select('id');
+      if(error || !Array.isArray(data) || !data.length) bad++;
+    }catch(e){ console.warn('[ann]', e); bad++; }
   }
   closeModal('modal-del-ann');
   annToDelete = null;
   const btn = document.getElementById('ann-bulk-del-btn');
   if(btn) btn.style.display = 'none';
-  showToast('🗑️ تم حذف الإعلان');
+  if(bad) showToast(bad === ids.length ? '⚠️ ما اتحذفش — اتأكد من الصلاحية والاتصال وحاول تاني' : ('⚠️ اتحذف ' + (ids.length - bad) + ' • ما اتحذفش ' + bad));
+  else showToast('🗑️ تم حذف الإعلان');
   await loadAnnouncements();
 }
 
@@ -9814,7 +8265,7 @@ function filterDelStudents(){
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:.88rem;color:var(--ink);">${s.name||'بدون اسم'}</div>
-        <div style="font-size:.74rem;color:var(--light);">${s.circle||'—'} • ${s.branch||'—'}</div>
+        <div style="font-size:.74rem;color:var(--light);">${esc(s.circle||'—')} • ${esc(s.branch||'—')}</div>
       </div>
       <button class="btn btn-danger btn-sm" onclick="confirmDelStudent('${s.id}','${(s.name||'').replace(/'/g,'')}')">🗑 حذف</button>
     </div>`).join('');
@@ -9860,8 +8311,8 @@ async function loadMoveCircles(){
     const brName={}; (brs||[]).forEach(b=>brName[b.id]=b.name);
     const { data:circles } = await db.from('circles').select('id,name,branch_id,is_active').order('name');
     const list=(circles||[]).filter(c=>c.is_active!==false).map(c=>({ id:c.id, name:c.name||'حلقة', branch:brName[c.branch_id]||'' }));
-    const opts='<option value="">-- اختر الحلقة --</option>'+list.map(c=>`<option value="${c.id}">${c.name}${c.branch?(' — '+c.branch):''}</option>`).join('');
-    const fromOpts='<option value="">-- كل الحلقات --</option>'+list.map(c=>`<option value="${c.id}">${c.name}${c.branch?(' — '+c.branch):''}</option>`).join('');
+    const opts='<option value="">-- اختر الحلقة --</option>'+list.map(c=>`<option value="${c.id}">${esc(c.name)}${c.branch?(' — '+esc(c.branch)):''}</option>`).join('');
+    const fromOpts='<option value="">-- كل الحلقات --</option>'+list.map(c=>`<option value="${c.id}">${esc(c.name)}${c.branch?(' — '+esc(c.branch)):''}</option>`).join('');
     if(from) from.innerHTML=fromOpts;
     if(to) to.innerHTML=opts;
   }catch(e){
@@ -9885,7 +8336,7 @@ function filterMoveStudents(){
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:.88rem;color:var(--ink);">${s.name||'بدون اسم'}</div>
-        <div style="font-size:.74rem;color:var(--light);">${s.circle||'—'} • ${s.branch||'—'}</div>
+        <div style="font-size:.74rem;color:var(--light);">${esc(s.circle||'—')} • ${esc(s.branch||'—')}</div>
       </div>
       <button class="btn btn-outline btn-sm" onclick="selectMoveStudent('${s.id}','${(s.name||'').replace(/'/g,'')}')">اختيار</button>
     </div>`).join('');
@@ -10820,7 +9271,7 @@ function svRenderReportsTable(rows){
     <td style="padding:10px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
     <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);white-space:nowrap;">${svFmtReportDate(r.session_date)}</td>
     <td style="padding:10px;font-weight:700;color:var(--forest);">${esc(r.teacher_name||'—')}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${r.branch||'—'}</td>
+    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${esc(r.branch||'—')}</td>
     <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
     <td style="padding:10px;text-align:center;">${svSessType(r)}</td>
     <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
@@ -10861,7 +9312,7 @@ function svViewReport(i){
   document.getElementById('rep-detail-meta').innerHTML =
     `<span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
      <span class="badge bg-gray">👤 المشرف: ${r.supervisor_name||'—'}</span>
-     <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
+     <span class="badge bg-gray">🏫 ${esc(r.branch||'—')}</span>
      <span class="badge ${r.attendance==='غائب'?'bg-red':'bg-green'}">الحضور: ${r.attendance||'—'}${r.attendance==='متأخر'&&r.late_min?(' ('+r.late_min+'د)'):''}</span>
      <div style="width:100%;margin-top:4px;font-size:.74rem;color:var(--mid);">نوع الجلسة: ${svSessType(r)}</div>`;
   document.getElementById('rep-detail-body').innerHTML =
@@ -11331,7 +9782,6 @@ function _setAdm(prefix, branches, sv, tch, st) {
 // SUPERVISORS JS
 // ══════════════════════════════════════
 let SUPERVISORS = [], SUPERVISORS_FILTERED = [], SV_SELECTED = new Set();
-let svPage = 1, svRowsPerPage = 10, svSortField = '', svSortDir = 1;
 
 async function loadSupervisors() {
   // ── live: المشرف مربوط بالشعب عن طريق users.admin_scope (مش users.supervisor_id القديم) ──
@@ -11465,10 +9915,8 @@ function updateSupervisorStats() {
   svUpdateBranchOverviewCards();
 }
 
-function updateSupervisorBranchCards() { updateSupervisorStats(); }
 
 // ── مزامنة المشرفين مع لوحة المشرف عبر localStorage ──
-function saveSupervisorsToStorage() { /* لا تخزين محلي لبيانات المشرفين */ }
 
 // ── تحديث كروت الشعب في صفحة المشرفين ──
 function svUpdateBranchOverviewCards() {
@@ -11569,106 +10017,6 @@ function svRenderDetailCards(cfg, list) {
   }).join('');
 }
 
-// ══════════════════════════════════════
-// نقل المعلم بين المشرفين (بنمط نقل الطالب)
-// يحدّث users.supervisor_id + circles.supervisor_id معاً
-// ══════════════════════════════════════
-let MVT_TEACHERS = [];        // [{id, name, supId, supName}]
-let MVT_SUPERVISORS = [];     // [{id, name}]
-let MVT_SELECTED = null;      // {id, name, supId}
-
-async function openMoveTeacher(){
-  MVT_SELECTED = null;
-  const s=document.getElementById('mvt-search'); if(s) s.value='';
-  const box=document.getElementById('mvt-selected-box'); if(box) box.style.display='none';
-  const res=document.getElementById('mvt-results');
-  if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">جارٍ التحميل...</div>';
-  openModal('modal-move-teacher');
-  await loadMoveTeacherData();
-  if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>';
-}
-
-// قراءة المعلمين والمشرفين live من DB
-async function loadMoveTeacherData(){
-  try{
-    const { data:sups } = await db.from('users').select('id,full_name').eq('role','supervisor').order('full_name');
-    MVT_SUPERVISORS = (sups||[]).map(s=>({ id:s.id, name:s.full_name||'مشرف' }));
-    const supName={}; MVT_SUPERVISORS.forEach(s=>supName[s.id]=s.name);
-
-    const { data:teachers } = await db.from('users').select('id,full_name,supervisor_id').eq('role','teacher').order('full_name');
-    MVT_TEACHERS = (teachers||[]).map(t=>({
-      id:t.id, name:t.full_name||'معلم',
-      supId:t.supervisor_id||null,
-      supName: t.supervisor_id ? (supName[t.supervisor_id]||'—') : 'بدون مشرف'
-    }));
-
-    // عمارة قائمة المشرفين
-    const sel=document.getElementById('mvt-to-sup');
-    if(sel) sel.innerHTML='<option value="">-- اختر المشرف --</option>'+
-      MVT_SUPERVISORS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-  }catch(e){
-    MVT_TEACHERS=[]; MVT_SUPERVISORS=[];
-    const res=document.getElementById('mvt-results');
-    if(res) res.innerHTML='<div style="padding:16px;text-align:center;color:var(--red);font-size:.85rem;">تعذّر التحميل</div>';
-  }
-}
-
-function filterMoveTeachers(){
-  const q=(document.getElementById('mvt-search')?.value||'').trim();
-  const box=document.getElementById('mvt-results');
-  if(!box) return;
-  if(!q){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">اكتب اسم المعلم للبحث</div>'; return; }
-  const list=MVT_TEACHERS.filter(t=>(t.name||'').includes(q));
-  if(!list.length){ box.innerHTML='<div style="padding:16px;text-align:center;color:var(--light);font-size:.85rem;">لا توجد نتائج</div>'; return; }
-  box.innerHTML=list.slice(0,50).map(t=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:700;font-size:.88rem;color:var(--ink);">${t.name}</div>
-        <div style="font-size:.74rem;color:var(--light);">المشرف الحالي: ${t.supName}</div>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="selectMoveTeacher('${t.id}')">اختيار</button>
-    </div>`).join('');
-}
-
-function selectMoveTeacher(id){
-  const t=MVT_TEACHERS.find(x=>x.id===id);
-  if(!t) return;
-  MVT_SELECTED = { id:t.id, name:t.name, supId:t.supId };
-  const nm=document.getElementById('mvt-selected-name'); if(nm) nm.textContent=t.name;
-  const cur=document.getElementById('mvt-current-sup'); if(cur) cur.textContent=' (الحالي: '+t.supName+')';
-  const box=document.getElementById('mvt-selected-box'); if(box) box.style.display='';
-  const res=document.getElementById('mvt-results');
-  if(res) res.innerHTML='<div style="padding:12px;text-align:center;color:var(--jade);font-size:.82rem;font-weight:700;">✔ تم اختيار المعلم — اختر المشرف الجديد بالأسفل</div>';
-  // استبعاد المشرف الحالي من القائمة (اختياري للوضوح)
-  const sel=document.getElementById('mvt-to-sup');
-  if(sel) sel.innerHTML='<option value="">-- اختر المشرف --</option>'+
-    MVT_SUPERVISORS.map(s=>`<option value="${s.id}"${s.id===t.supId?' disabled':''}>${s.name}${s.id===t.supId?' (الحالي)':''}</option>`).join('');
-}
-
-async function confirmMoveTeacher(){
-  if(!MVT_SELECTED){ showToast('⚠️ ابحث واختر المعلم أولاً'); return; }
-  const toSup=document.getElementById('mvt-to-sup')?.value||'';
-  if(!toSup){ showToast('⚠️ اختر المشرف المنقول إليه'); return; }
-  if(toSup===MVT_SELECTED.supId){ showToast('⚠️ المعلم تابع لهذا المشرف بالفعل'); return; }
-  showToast('⏳ جارٍ النقل...');
-
-  // 1) تحديث supervisor_id في users (لوحة المدير/المشرف تقرأه)
-  const { error: uErr, status: uStat } = await db.from('users')
-    .update({ supervisor_id: toSup }).eq('id', MVT_SELECTED.id);
-  if(uErr){ showToast('❌ خطأ في النقل: '+uErr.message); return; }
-  if(uStat!==204 && uStat!==200){ showToast('⚠️ لم يتم النقل (تحقق من الصلاحية)'); return; }
-
-  // 2) تحديث supervisor_id في كل حلقات المعلم (المشرف يقرأ حلقاته عبر circles.supervisor_id)
-  const { error: cErr } = await db.from('circles')
-    .update({ supervisor_id: toSup }).eq('teacher_id', MVT_SELECTED.id);
-  if(cErr){ showToast('⚠️ تم تحديث المعلم لكن تعذّر تحديث الحلقات: '+cErr.message); }
-
-  closeModal('modal-move-teacher');
-  showToast('✅ تم نقل المعلم '+MVT_SELECTED.name+' بنجاح');
-  await refreshAdminData();
-  if (typeof loadSupervisors === 'function') await loadSupervisors();
-  if(svCurrentBranchKey) svRenderDetailCards(SV_BRANCH_CFG[svCurrentBranchKey], null);
-}
 
 
 function svShowBranches(fromPopstate) {
@@ -11685,7 +10033,6 @@ function svShowBranches(fromPopstate) {
   if (!fromPopstate) history.pushState({ page: 'supervisors', svBranch: null }, '', '#supervisors');
 }
 
-function openSvBranchList(branch) { showToast('📋 ' + branch); }
 
 // ── Context menu & long press ──
 let svActiveId = null, svLongPressTimer = null;
@@ -11862,241 +10209,26 @@ async function svDeleteYes() {
   updateSupervisorStats();
 }
 
-function filterSupervisors() {
-  const q = (document.getElementById('supervisor-search')?.value || '').toLowerCase();
-  const branch = document.getElementById('supervisor-filter-branch')?.value || '';
-  const status = document.getElementById('supervisor-filter-status')?.value || '';
-  SUPERVISORS_FILTERED = SUPERVISORS.filter(s => {
-    const fullname = ((s.name || '') + ' ' + (s.lname || '')).toLowerCase();
-    return (!q || fullname.includes(q)) &&
-           (!branch || s.branch === branch) &&
-           (!status || (s.status || 'نشط') === status);
-  });
-  if (svSortField) {
-    SUPERVISORS_FILTERED.sort((a, b) => {
-      const av = (a[svSortField] || '').toString().toLowerCase();
-      const bv = (b[svSortField] || '').toString().toLowerCase();
-      return av < bv ? -svSortDir : av > bv ? svSortDir : 0;
-    });
-  }
-  svPage = 1;
-  renderSupervisors();
-}
 
-function sortSupervisors(field) {
-  if (svSortField === field) svSortDir *= -1; else { svSortField = field; svSortDir = 1; }
-  filterSupervisors();
-}
 
-function renderSupervisors() {
-  const tbody = document.getElementById('supervisors-tbody');
-  if (!tbody) return;
-  const start = (svPage - 1) * svRowsPerPage;
-  const end = start + svRowsPerPage;
-  const slice = SUPERVISORS_FILTERED.slice(start, end);
-  if (!slice.length) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--light);">لا يوجد مشرفون مطابقون للبحث</td></tr>';
-  } else {
-    tbody.innerHTML = slice.map(s => {
-      const checked = SV_SELECTED.has(s.id) ? 'checked' : '';
-      const rowBg = SV_SELECTED.has(s.id) ? 'background:var(--pale);' : '';
-      const statusBadge = (s.status || 'نشط') === 'نشط'
-        ? '<span class="badge bg-green">نشط</span>'
-        : '<span class="badge bg-gray">موقوف</span>';
-      const initials = ((s.name || '?')[0] + (s.lname || '?')[0]).toUpperCase();
-      return `<tr${gMark(s.gender)} style="${rowBg}">
-        <td><input type="checkbox" ${checked} onchange="toggleSupervisorRow(this,'${s.id}')"></td>
-        <td><div style="display:flex;align-items:center;gap:9px;cursor:pointer;" onclick="viewSupervisor('${s.id}')">
-          <div class="avatar" style="background:linear-gradient(135deg,var(--jade),var(--mint));">${initials}</div>
-          <div><strong>${s.name || '—'}</strong>${statusBadge ? ' ' + statusBadge : ''}</div>
-        </div></td>
-        <td>${s.lname || '—'}</td>
-        <td>${s.gender || '—'}</td>
-        <td>${s.circles_count || 0} حلقة</td>
-        <td dir="ltr">${s.phone || '—'}</td>
-        <td dir="ltr" style="font-size:.78rem;">${s.email || '—'}</td>
-        <td>${s.id_type || '—'}</td>
-        <td dir="ltr" style="font-size:.78rem;">${s.id_number || '—'}</td>
-        <td>${s.id_image ? '<span class="badge bg-green">✔</span>' : '<span class="badge bg-gray">—</span>'}</td>
-        <td>${s.cv ? '<span class="badge bg-blue">✔</span>' : '<span class="badge bg-gray">—</span>'}</td>
-      </tr>`;
-    }).join('');
-  }
-  const info = document.getElementById('sv-page-info');
-  if (info) info.textContent = `يُعرض ${Math.min(start + 1, SUPERVISORS_FILTERED.length)}–${Math.min(end, SUPERVISORS_FILTERED.length)} من ${SUPERVISORS_FILTERED.length}`;
-  renderSupervisorPagination();
-}
 
-function renderSupervisorPagination() {
-  const cont = document.getElementById('sv-pagination');
-  if (!cont) return;
-  const total = Math.ceil(SUPERVISORS_FILTERED.length / svRowsPerPage);
-  cont.innerHTML = Array.from({ length: total }, (_, i) =>
-    `<button onclick="svGoPage(${i + 1})" style="padding:5px 11px;border-radius:6px;border:1.5px solid ${svPage === i + 1 ? 'var(--jade)' : 'var(--border)'};background:${svPage === i + 1 ? 'var(--pale)' : 'var(--white)'};cursor:pointer;font-family:Tajawal;font-size:.8rem;font-weight:${svPage === i + 1 ? '700' : '400'};color:${svPage === i + 1 ? 'var(--emerald)' : 'var(--mid)'};">${i + 1}</button>`
-  ).join('');
-}
 
-function svGoPage(p) { svPage = p; renderSupervisors(); }
 
-function toggleSupervisorRow(cb, id) {
-  if (cb.checked) SV_SELECTED.add(id); else SV_SELECTED.delete(id);
-  updateSvSelectionUI();
-  renderSupervisors();
-}
 
-function toggleAllSupervisors(cb) {
-  const start = (svPage - 1) * svRowsPerPage;
-  SUPERVISORS_FILTERED.slice(start, start + svRowsPerPage).forEach(s => {
-    if (cb.checked) SV_SELECTED.add(s.id); else SV_SELECTED.delete(s.id);
-  });
-  updateSvSelectionUI();
-  renderSupervisors();
-}
 
-function updateSvSelectionUI() {
-  const n = SV_SELECTED.size;
-  const badge = document.getElementById('sv-badge-selected');
-  if (badge) { badge.textContent = 'محدد: ' + n; badge.style.display = n ? '' : 'none'; }
-  ['sv-btn-edit', 'sv-btn-dup', 'sv-btn-del'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.disabled = (n === 0);
-  });
-}
 
-function changeSupervisorRows(v) { svRowsPerPage = parseInt(v); svPage = 1; renderSupervisors(); }
 
 // إضافة مشرف = نفس نموذج إضافة المعلم بدور «مشرف» (RPC admin_create_staff)
 async function openAddSupervisor(){ await openAddTeacher(); const r=document.getElementById('t-role'); if(r) r.value='supervisor'; }
-function _legacyOpenAddSupervisor() {
-  ['sv-fname','sv-lname','sv-fname-en','sv-lname-en','sv-phone','sv-email','sv-address','sv-qualification','sv-dob','sv-id-num','sv-username','sv-password'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  generateSupervisorUsername();
-  generateSupervisorPassword();
 
-  // Populate teachers picker from all branches
-  const picker = document.getElementById('sv-teachers-picker');
-  if (picker) {
-    const allTeachers = [];
-    Object.entries(BRANCH_DATA).forEach(([branch, items]) => {
-      items.forEach(item => allTeachers.push({ name: item.teacher, branch }));
-    });
-    picker.innerHTML = allTeachers.map(t => {
-      const tid = 'svt_' + t.name.replace(/\s+/g,'_');
-      return `<label style="display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--pale)'" onmouseout="this.style.background=''">
-        <input type="checkbox" id="${tid}" value="${t.name}" style="cursor:pointer;width:15px;height:15px;">
-        <span style="font-weight:600;">${t.name}</span>
-        <span style="font-size:.7rem;color:var(--light);margin-right:auto;">${t.branch}</span>
-      </label>`;
-    }).join('');
-  }
-  openModal('modal-add-supervisor');
-}
 
-function autoGenSupervisorUser() {
-  const f = (document.getElementById('sv-fname')?.value || '').trim();
-  const l = (document.getElementById('sv-lname')?.value || '').trim();
-  const u = document.getElementById('sv-username');
-  if (f && u && !u._manualEdit) {
-    u.value = (f + (l ? '.' + l : '')).toLowerCase()
-      .replace(/\s+/g, '').replace(/[أإآ]/g, 'a').replace(/[ة]/g, 'a').replace(/[ى]/g, 'y');
-  }
-}
 
-function generateSupervisorUsername() {
-  const f = (document.getElementById('sv-fname')?.value || 'supervisor').trim();
-  const u = document.getElementById('sv-username');
-  if (u) { u.value = f.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 900 + 100); u._manualEdit = false; }
-}
 
-function generateSupervisorPassword() {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$';
-  const p = document.getElementById('sv-password');
-  if (p) p.value = Array.from({ length: 10 }, () => chars[_rnd(chars.length)]).join('');
-}
 
-async function addSupervisor() {
-  closeModal('modal-add-supervisor');
-  openAddSupervisor();
-}
 
-function viewSupervisor(id) {
-  const s = SUPERVISORS.find(x => x.id === id);
-  if (!s) return;
-  const body = document.getElementById('view-supervisor-body');
-  if (body) {
-    body._id = id;
-    body.innerHTML = `
-    <div style="text-align:center;margin-bottom:16px;">
-      <div class="avatar" style="width:56px;height:56px;font-size:1.4rem;margin:0 auto 8px;background:linear-gradient(135deg,var(--jade),var(--mint));">${(s.name||'?')[0]}${(s.lname||'?')[0]}</div>
-      <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">${s.name || ''} ${s.lname || ''}</div>
-      <span class="badge ${(s.status||'نشط')==='نشط'?'bg-green':'bg-gray'}">${s.status||'نشط'}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.83rem;">
-      <div><span style="color:var(--light);">الجنس:</span> ${s.gender||'—'}</div>
-      <div><span style="color:var(--light);">الشعبة:</span> ${s.branch||'—'}</div>
-      <div><span style="color:var(--light);">الهاتف:</span> <span dir="ltr">${s.phone||'—'}</span></div>
-      <div><span style="color:var(--light);">البريد:</span> <span dir="ltr" style="font-size:.78rem;">${s.email||'—'}</span></div>
-      <div><span style="color:var(--light);">المؤهل:</span> ${s.qualification||'—'}</div>
-      <div><span style="color:var(--light);">الحلقات:</span> ${s.circles_count||0}</div>
-      <div><span style="color:var(--light);">نوع الهوية:</span> ${s.id_type||'—'}</div>
-      <div><span style="color:var(--light);">رقم الهوية:</span> <span dir="ltr">${s.id_number||'—'}</span></div>
-    </div>`;
-  }
-  openModal('modal-view-supervisor');
-}
 
-function editSupervisorFromView() {
-  const id = document.getElementById('view-supervisor-body')?._id;
-  closeModal('modal-view-supervisor');
-  if (id) editSupervisor(id);
-}
 
-function editSupervisorSelected() {
-  if (SV_SELECTED.size !== 1) { showToast('⚠️ حدد مشرفاً واحداً فقط', 'error'); return; }
-  editSupervisor([...SV_SELECTED][0]);
-}
 
-function editSupervisor(id) {
-  const s = SUPERVISORS.find(x => x.id === id);
-  if (!s) return;
-  document.getElementById('edit-sv-id').value = id;
-  document.getElementById('edit-sv-fname').value = s.name || '';
-  document.getElementById('edit-sv-lname').value = s.lname || '';
-  document.getElementById('edit-sv-phone').value = s.phone || '';
-  document.getElementById('edit-sv-email').value = s.email || '';
-  document.getElementById('edit-sv-status').value = s.status || 'نشط';
-  openModal('modal-edit-supervisor');
-}
-
-async function saveEditSupervisor() {
-  const compositeId = document.getElementById('edit-sv-id')?.value;
-  const fname = document.getElementById('edit-sv-fname')?.value?.trim();
-  const lname = document.getElementById('edit-sv-lname')?.value?.trim();
-  if (!fname) { showToast('⚠️ الاسم مطلوب', 'error'); return; }
-
-  // استخراج uuid المشرف الحقيقي من الـ id المركّب: sv-<uuid>-<branchGroup>
-  const realId = extractSupervisorUuid(compositeId);
-  if (!realId) { showToast('❌ تعذّر تحديد المشرف', 'error'); return; }
-
-  // users فيه full_name واحد (مش name/lname منفصلين)
-  const fullName = [fname, lname].filter(Boolean).join(' ').trim();
-  const payload = {
-    full_name: fullName,
-    phone: document.getElementById('edit-sv-phone')?.value?.trim() || null,
-    email: document.getElementById('edit-sv-email')?.value?.trim() || null,
-    is_active: (document.getElementById('edit-sv-status')?.value || 'نشط') === 'نشط',
-  };
-
-  const { data: _rows, error, status } = await db.from('users').update(payload).eq('id', realId).select('id');
-  if (error) { showToast('❌ خطأ في التعديل: ' + error.message, 'error'); return; }
-  if (!_rows || !_rows.length) { showToast('⚠️ لم يتم التعديل (تحقق من الصلاحية)', 'error'); return; }
-
-  closeModal('modal-edit-supervisor');
-  showToast('✅ تم تعديل بيانات المشرف');
-  await loadSupervisors();
-}
 
 // استخراج uuid المشرف من الـ id المركّب (sv-<uuid>-<branchGroup>) أو من كائن المشرف
 function extractSupervisorUuid(compositeId){
@@ -12109,71 +10241,9 @@ function extractSupervisorUuid(compositeId){
   return null;
 }
 
-async function deleteSupervisorSelected() {
-  if (!SV_SELECTED.size) return;
-  if (!confirm(`هل تريد حذف ${SV_SELECTED.size} مشرف(ين)؟\nسيتم نقل معلميهم لمشرف آخر في نفس الشعبة إن وُجد.`)) return;
 
-  // الـ id مركّب → نستخرج uuid الحقيقي ونزيل التكرار
-  const realIds = [...new Set([...SV_SELECTED].map(extractSupervisorUuid).filter(Boolean))];
-  if (!realIds.length) { showToast('❌ تعذّر تحديد المشرفين', 'error'); return; }
 
-  try {
-    for (const svId of realIds) {
-      // معلمو هذا المشرف
-      const { data: myTeachers } = await db.from('users')
-        .select('id, supervisor_id').eq('role','teacher').eq('supervisor_id', svId);
 
-      // مشرف بديل في نفس الشعبة (من SUPERVISORS المعروضة)
-      const svRecord = SUPERVISORS.find(s => extractSupervisorUuid(s.id) === svId);
-      let otherId = null;
-      if (svRecord) {
-        const other = SUPERVISORS.find(s => s.branch === svRecord.branch && extractSupervisorUuid(s.id) !== svId);
-        otherId = other ? extractSupervisorUuid(other.id) : null;
-      }
-
-      // نقل المعلمين للمشرف البديل (أو فكّ الربط لو مفيش بديل)
-      if (myTeachers && myTeachers.length) {
-        const ids = myTeachers.map(t => t.id);
-        await db.from('users').update({ supervisor_id: otherId }).in('id', ids);
-      }
-
-      // حذف حساب المشرف نهائياً من users
-      const { error: delErr } = await db.from('users').delete().eq('id', svId);
-      if (delErr) throw delErr;
-    }
-
-    SV_SELECTED.clear();
-    updateSvSelectionUI();
-    showToast('🗑️ تم حذف المشرف(ين) بنجاح');
-    await loadSupervisors();
-    const bk = svCurrentBranchKey;
-    if (bk && SV_BRANCH_CFG[bk]) svRenderDetailCards(SV_BRANCH_CFG[bk], null);
-  } catch (e) { showToast('❌ خطأ: ' + (e.message || e.code || ''), 'error'); }
-}
-
-function dupSupervisor() { showToast('⏳ سيتم تفعيل هذه الخاصية قريباً'); }
-
-function printSupervisorList() {
-  const rows = SUPERVISORS_FILTERED.map((s, i) =>
-    `<tr><td>${i+1}</td><td>${s.name||''} ${s.lname||''}</td><td>${s.gender||'—'}</td><td>${s.branch||'—'}</td><td>${s.phone||'—'}</td><td>${s.status||'نشط'}</td></tr>`
-  ).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}<\/style><\/head><body><h2>قائمة المشرفين — مدرسة التوحيد القرآنية<\/h2><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('ar-EG')} — إجمالي ${SUPERVISORS_FILTERED.length} مشرف<\/p><table><thead><tr><th>#<\/th><th>الاسم<\/th><th>الجنس<\/th><th>الشعبة<\/th><th>الهاتف<\/th><th>الحالة<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table><\/body><\/html>`);
-  w.document.close();
-  w.print();
-}
-
-function exportSupervisorsExcel() {
-  let csv = 'الاسم,العائلة,الجنس,الشعبة,الهاتف,البريد,الحالة\n';
-  SUPERVISORS_FILTERED.forEach(s => {
-    csv += `"${s.name||''}","${s.lname||''}","${s.gender||''}","${s.branch||''}","${s.phone||''}","${s.email||''}","${s.status||'نشط'}"\n`;
-  });
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'supervisors.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
 
 // ══════════════════════════════════════
 // EMPLOYEES JS
@@ -12225,10 +10295,6 @@ function filterEmployees() {
   renderEmployees();
 }
 
-function sortEmployees(field) {
-  if (emSortField === field) emSortDir *= -1; else { emSortField = field; emSortDir = 1; }
-  filterEmployees();
-}
 
 function renderEmployees() {
   const tbody = document.getElementById('employees-tbody');
@@ -12253,13 +10319,13 @@ function renderEmployees() {
           <div><strong>${e.name || '—'}</strong> ${statusBadge}</div>
         </div></td>
         <td>${e.lname || '—'}</td>
-        <td>${e.job || '—'}</td>
+        <td>${esc(e.job || '—')}</td>
         <td>${e.gender || '—'}</td>
-        <td dir="ltr" style="font-size:.78rem;">${e.username || '—'}</td>
-        <td dir="ltr">${e.phone || '—'}</td>
-        <td dir="ltr" style="font-size:.78rem;">${e.email || '—'}</td>
+        <td dir="ltr" style="font-size:.78rem;">${esc(e.username || '—')}</td>
+        <td dir="ltr">${esc(e.phone || '—')}</td>
+        <td dir="ltr" style="font-size:.78rem;">${esc(e.email || '—')}</td>
         <td>${e.id_type || '—'}</td>
-        <td dir="ltr" style="font-size:.78rem;">${e.id_number || '—'}</td>
+        <td dir="ltr" style="font-size:.78rem;">${esc(e.id_number || '—')}</td>
       </tr>`;
     }).join('');
   }
@@ -12282,13 +10348,6 @@ function toggleEmployeeRow(cb, id) {
   if (cb.checked) EM_SELECTED.add(id); else EM_SELECTED.delete(id);
   updateEmSelectionUI(); renderEmployees();
 }
-function toggleAllEmployees(cb) {
-  const start = (emPage - 1) * emRowsPerPage;
-  EMPLOYEES_FILTERED.slice(start, start + emRowsPerPage).forEach(e => {
-    if (cb.checked) EM_SELECTED.add(e.id); else EM_SELECTED.delete(e.id);
-  });
-  updateEmSelectionUI(); renderEmployees();
-}
 function updateEmSelectionUI() {
   const n = EM_SELECTED.size;
   const badge = document.getElementById('em-badge-selected');
@@ -12297,67 +10356,9 @@ function updateEmSelectionUI() {
     const btn = document.getElementById(id); if (btn) btn.disabled = (n === 0);
   });
 }
-function changeEmployeeRows(v) { emRowsPerPage = parseInt(v); emPage = 1; renderEmployees(); }
 
-function openAddEmployee() {
-  ['em-fname','em-lname','em-fname-en','em-lname-en','em-phone','em-email','em-address','em-qualification','em-dob','em-id-num','em-username','em-password'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  const j = document.getElementById('em-job'); if (j) j.value = '';
-  generateEmployeeUsername(); generateEmployeePassword();
-  openModal('modal-add-employee');
-}
 
-function autoGenEmployeeUser() {
-  const f = (document.getElementById('em-fname')?.value || '').trim();
-  const l = (document.getElementById('em-lname')?.value || '').trim();
-  const u = document.getElementById('em-username');
-  if (f && u && !u._manualEdit) {
-    u.value = ('staff' + f + (l ? l[0] : '')).toLowerCase().replace(/\s+/g,'').replace(/[أإآ]/g,'a').replace(/[ة]/g,'a').replace(/[ى]/g,'y');
-  }
-}
-function generateEmployeeUsername() {
-  const f = (document.getElementById('em-fname')?.value || 'staff').trim();
-  const u = document.getElementById('em-username');
-  if (u) { u.value = 'staff' + f.toLowerCase().replace(/\s+/g,'') + Math.floor(Math.random()*9000+1000); u._manualEdit = false; }
-}
-function generateEmployeePassword() {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$';
-  const p = document.getElementById('em-password');
-  if (p) p.value = Array.from({length:10}, () => chars[_rnd(chars.length)]).join('');
-}
 
-async function addEmployee() {
-  const fname = document.getElementById('em-fname')?.value?.trim();
-  const lname = document.getElementById('em-lname')?.value?.trim();
-  const username = document.getElementById('em-username')?.value?.trim();
-  const password = document.getElementById('em-password')?.value?.trim();
-  if (!fname || !lname) { showToast('⚠️ الاسم والعائلة مطلوبان', 'error'); return; }
-  if (!username || !password) { showToast('⚠️ اسم المستخدم وكلمة السر مطلوبان', 'error'); return; }
-  const payload = {
-    name: fname, lname,
-    name_en: document.getElementById('em-fname-en')?.value?.trim() || '',
-    lname_en: document.getElementById('em-lname-en')?.value?.trim() || '',
-    job: document.getElementById('em-job')?.value || '',
-    gender: document.getElementById('em-gender')?.value || 'ذكر',
-    dob: document.getElementById('em-dob')?.value || null,
-    phone: document.getElementById('em-phone')?.value?.trim() || '',
-    email: document.getElementById('em-email')?.value?.trim() || '',
-    id_type: document.getElementById('em-id-type')?.value || '',
-    id_number: document.getElementById('em-id-num')?.value?.trim() || '',
-    address: document.getElementById('em-address')?.value?.trim() || '',
-    qualification: document.getElementById('em-qualification')?.value?.trim() || '',
-    username, password,
-    status: 'نشط',
-  };
-  try {
-    const { error } = await db.from('employees').insert([payload]);
-    if (error) throw error;
-    closeModal('modal-add-employee');
-    showToast('✅ تمت إضافة الموظف بنجاح');
-    loadEmployees();
-  } catch (e) { showToast('❌ خطأ: ' + e.message, 'error'); }
-}
 
 function viewEmployee(id) {
   const e = EMPLOYEES.find(x => x.id === id); if (!e) return;
@@ -12368,15 +10369,15 @@ function viewEmployee(id) {
     <div style="text-align:center;margin-bottom:16px;">
       <div class="avatar" style="width:56px;height:56px;font-size:1.4rem;margin:0 auto 8px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#fff;">${(e.name||'?')[0]}${(e.lname||'?')[0]}</div>
       <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">${e.name||''} ${e.lname||''}</div>
-      <span class="badge bg-gold" style="margin-left:6px;">${e.job||'—'}</span>
+      <span class="badge bg-gold" style="margin-left:6px;">${esc(e.job||'—')}</span>
       <span class="badge ${(e.status||'نشط')==='نشط'?'bg-green':'bg-gray'}">${e.status||'نشط'}</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.83rem;">
       <div><span style="color:var(--light);">الجنس:</span> ${e.gender||'—'}</div>
-      <div><span style="color:var(--light);">اسم المستخدم:</span> <span dir="ltr">${e.username||'—'}</span></div>
-      <div><span style="color:var(--light);">الهاتف:</span> <span dir="ltr">${e.phone||'—'}</span></div>
-      <div><span style="color:var(--light);">البريد:</span> <span dir="ltr" style="font-size:.78rem;">${e.email||'—'}</span></div>
-      <div><span style="color:var(--light);">المؤهل:</span> ${e.qualification||'—'}</div>
+      <div><span style="color:var(--light);">اسم المستخدم:</span> <span dir="ltr">${esc(e.username||'—')}</span></div>
+      <div><span style="color:var(--light);">الهاتف:</span> <span dir="ltr">${esc(e.phone||'—')}</span></div>
+      <div><span style="color:var(--light);">البريد:</span> <span dir="ltr" style="font-size:.78rem;">${esc(e.email||'—')}</span></div>
+      <div><span style="color:var(--light);">المؤهل:</span> ${esc(e.qualification||'—')}</div>
       <div><span style="color:var(--light);">نوع الهوية:</span> ${e.id_type||'—'}</div>
     </div>`;
   }
@@ -12387,10 +10388,6 @@ function editEmployeeFromView() {
   const id = document.getElementById('view-employee-body')?._id;
   closeModal('modal-view-employee');
   if (id) editEmployee(id);
-}
-function editEmployeeSelected() {
-  if (EM_SELECTED.size !== 1) { showToast('⚠️ حدد موظفاً واحداً فقط', 'error'); return; }
-  editEmployee([...EM_SELECTED][0]);
 }
 function editEmployee(id) {
   const e = EMPLOYEES.find(x => x.id === id); if (!e) return;
@@ -12431,37 +10428,7 @@ async function saveEditEmployee() {
     loadEmployees();
   } catch (e) { showToast('❌ خطأ: ' + e.message, 'error'); }
 }
-async function deleteEmployeeSelected() {
-  if (!EM_SELECTED.size) return;
-  if (!confirm(`هل تريد حذف ${EM_SELECTED.size} موظف(ين)؟`)) return;
-  try {
-    const { error } = await db.from('employees').delete().in('id', [...EM_SELECTED]);
-    if (error) throw error;
-    EM_SELECTED.clear(); updateEmSelectionUI();
-    showToast('🗑️ تم حذف الموظف(ين) بنجاح');
-    loadEmployees();
-  } catch (e) { showToast('❌ خطأ: ' + e.message, 'error'); }
-}
-function dupEmployee() { showToast('⏳ سيتم تفعيل هذه الخاصية قريباً'); }
 
-function printEmployeeList() {
-  const rows = EMPLOYEES_FILTERED.map((e, i) =>
-    `<tr><td>${i+1}</td><td>${e.name||''} ${e.lname||''}</td><td>${e.job||'—'}</td><td>${e.gender||'—'}</td><td>${e.phone||'—'}</td><td>${e.username||'—'}</td><td>${e.status||'نشط'}</td></tr>`
-  ).join('');
-  const w = window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}<\/style><\/head><body><h2>قائمة الموظفين — مدرسة التوحيد القرآنية<\/h2><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('ar-EG')} — إجمالي ${EMPLOYEES_FILTERED.length} موظف<\/p><table><thead><tr><th>#<\/th><th>الاسم<\/th><th>الوظيفة<\/th><th>الجنس<\/th><th>الهاتف<\/th><th>اسم المستخدم<\/th><th>الحالة<\/th><\/tr><\/thead><tbody>${rows}<\/tbody><\/table><\/body><\/html>`);
-  w.document.close(); w.print();
-}
-function exportEmployeesExcel() {
-  let csv = 'الاسم,العائلة,الوظيفة,الجنس,الهاتف,البريد,اسم المستخدم,الحالة\n';
-  EMPLOYEES_FILTERED.forEach(e => {
-    csv += `"${e.name||''}","${e.lname||''}","${e.job||''}","${e.gender||''}","${e.phone||''}","${e.email||''}","${e.username||''}","${e.status||'نشط'}"\n`;
-  });
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='employees.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
 
 // نبدأ بعد تحميل كل السكريبتات (عشان كل الدوال تكون متعرّفة)
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -12689,52 +10656,6 @@ function stPtAfter(sid, bal){
 }
 </script>
 
-<!-- ══ EDIT STUDENT MODAL ══ -->
-<div id="overlay-edit-student" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:480px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Tajawal;direction:rtl;">
-    <div style="background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-weight:700;font-size:1rem;">✏️ تعديل بيانات الطالب</div>
-      <button onclick="closeEditStudent()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;">×</button>
-    </div>
-    <div style="padding:20px;">
-      <div style="font-weight:700;color:var(--forest);margin-bottom:14px;font-size:.95rem;" id="es-name"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">العمر</label>
-          <input id="es-age" type="number" placeholder="مثال: 12" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">تاريخ الميلاد</label>
-          <input id="es-dob" type="date" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">مقدار الحفظ</label>
-          <input id="es-mem" type="text" placeholder="مثال: جزء عم" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">المستوى العلمي</label>
-          <input id="es-lvl" type="text" placeholder="مثال: متوسط" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">هاتف الأب</label>
-          <input id="es-dad" type="tel" placeholder="01XXXXXXXXX" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">هاتف الأم</label>
-          <input id="es-mom" type="tel" placeholder="01XXXXXXXXX" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-        <div style="grid-column:1/-1;">
-          <label style="font-size:.78rem;color:var(--light);display:block;margin-bottom:4px;">عدد النقاط</label>
-          <input id="es-pts" type="number" placeholder="مثال: 150" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:Tajawal;font-size:.85rem;outline:none;box-sizing:border-box;">
-        </div>
-      </div>
-    </div>
-    <div style="padding:0 20px 18px;display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="closeEditStudent()" style="padding:9px 20px;border:1.5px solid var(--border);background:#fff;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:.85rem;">إلغاء</button>
-      <button onclick="saveStudentLocal()" style="padding:9px 20px;background:linear-gradient(135deg,var(--jade),var(--forest));color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:Tajawal;font-size:.85rem;font-weight:700;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:-3px;"><path d="M20 6 9 17l-5-5"/></svg> حفظ</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ STUDENT CONTEXT MENU ══ -->
 <div id="student-ctx-menu" style="display:none;position:fixed;z-index:2000;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.18);min-width:180px;overflow:hidden;font-family:Tajawal;direction:rtl;">
@@ -12823,59 +10744,7 @@ function closeEditConfirm() {
 }
 
 // ── Add student for specific teacher ──
-function openAddStudentForTeacher(safeId, teacher) {
-  // reset all fields
-  ['ns-fname','ns-mname','ns-lname','ns-pob','ns-nationality','ns-id-num',
-   'ns-address','ns-username','ns-password','ns-phone','ns-email',
-   'ns-father-phone','ns-mother-phone'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = '';
-  });
-  const dob = document.getElementById('ns-dob'); if(dob) dob.value = '';
-  const sick = document.getElementById('ns-sick'); if(sick) sick.value = 'no';
-  const sickR = document.getElementById('ns-sick-reason'); if(sickR) sickR.value = '';
-  // store context for saving
-  window._addingForSafeId = safeId;
-  window._addingForTeacher = teacher;
-  // update modal title & button
-  const title = document.querySelector('#modal-add-student .modal-title');
-  if(title) title.innerHTML = '➕ إضافة طالب — ' + teacher;
-  const addBtn = document.querySelector('#modal-add-student .modal-foot .btn-primary');
-  if(addBtn) { addBtn.textContent = '➕ إضافة'; addBtn.onclick = () => addStudentToCircle(); }
-  openModal('modal-add-student');
-}
 
-function addStudentToCircle() {
-  const fname = document.getElementById('ns-fname')?.value.trim();
-  const mname = document.getElementById('ns-mname')?.value.trim() || '';
-  const lname = document.getElementById('ns-lname')?.value.trim();
-  if(!fname || !lname) { showToast('⚠️ الاسم والعائلة مطلوبان'); return; }
-  const fullName = [fname, mname, lname].filter(Boolean).join(' ');
-  const safeId = window._addingForSafeId;
-  // add to BRANCH_DATA
-  for(const [br, circles] of Object.entries(BRANCH_DATA)){
-    const circle = circles.find(c => c.teacher.replace(/\s+/g,'_') === safeId);
-    if(!circle) continue;
-    circle.students.push(fullName);
-    // save data to localStorage
-    const idx = circle.students.length - 1;
-    const key = safeId + '_' + idx;
-    saveStudentData(key, {
-      dob: document.getElementById('ns-dob')?.value || '',
-      dad: document.getElementById('ns-father-phone')?.value || '',
-      mom: document.getElementById('ns-mother-phone')?.value || '',
-      age: '', mem: '', pts: '', lvl: '',
-    });
-    refreshCircleCard(safeId);
-    break;
-  }
-  // restore modal
-  const title = document.querySelector('#modal-add-student .modal-title');
-  if(title) title.innerHTML = '👨‍🎓 إضافة طالب جديد';
-  const addBtn = document.querySelector('#modal-add-student .modal-foot .btn-primary');
-  if(addBtn) { addBtn.textContent = '➕ إضافة'; addBtn.onclick = () => addStudent(); }
-  closeModal('modal-add-student');
-  showToast('✅ تم إضافة الطالب: ' + fullName);
-}
 
 function confirmSaveEdit() {
   // save ALL editable fields from modal form
@@ -14475,10 +12344,13 @@ async function sendReply() {
   showToast('✅ تم إرسال الرد بنجاح');
 }
 
-function deleteDetailMsg() {
+async function deleteDetailMsg() {
   if (!MSG_OPEN_ID) return;
   const m = MESSAGES_DATA.find(x => x.id === MSG_OPEN_ID);
-  if (m) { m.deleted = true; deleteMsgInDB(m.id); }
+  if (!m) return;
+  // (دفعة ٣٣) الرسالة بتتشال من الشاشة بعد ما القاعدة تأكد الحذف بس
+  if (!(await deleteMsgInDB(m.id))) { showToast('⚠️ ما اتحذفتش الرسالة — اتأكد من الاتصال وحاول تاني'); return; }
+  m.deleted = true;
   closeDetail();
   renderMessages();
   updateFolderCounts();
@@ -14491,10 +12363,10 @@ function toggleStar(id, e) {
   const m = MESSAGES_DATA.find(x => x.id === id);
   if (!m) return;
   m.starred = !m.starred;
-  updateMsgStarInDB(id, m.starred);
-  const starEl = document.querySelector(`#msg-row-${id} .msg-row-star`);
-  if (starEl) starEl.classList.toggle('starred', m.starred);
-  updateFolderCounts();
+  const paint = () => { const starEl = document.querySelector(`#msg-row-${id} .msg-row-star`); if (starEl) starEl.classList.toggle('starred', m.starred); updateFolderCounts(); };
+  paint();
+  // (دفعة ٣٣) لو الحفظ فشل → النجمة ترجع زي ما كانت
+  updateMsgStarInDB(id, m.starred).then(ok => { if (ok) return; m.starred = !m.starred; paint(); showToast('⚠️ ما اتحفظتش النجمة — حاول تاني'); });
 }
 
 // ── تحديد متعدد ──
@@ -14518,17 +12390,20 @@ function toggleSelectAll(masterCb) {
     MSG_SELECTED_IDS.size > 0 ? 'flex' : 'none';
 }
 
-function deleteSelectedMsgs() {
-  MSG_SELECTED_IDS.forEach(id => {
+async function deleteSelectedMsgs() {
+  const ids = [...MSG_SELECTED_IDS];
+  let ok = 0, bad = 0;
+  for (const id of ids) {
     const m = MESSAGES_DATA.find(x => x.id === id);
-    if (m) { m.deleted = true; deleteMsgInDB(id); }
-  });
-  MSG_SELECTED_IDS.clear();
-  document.getElementById('msg-delete-selected-btn').style.display = 'none';
+    if (!m) continue;
+    if (await deleteMsgInDB(id)) { m.deleted = true; ok++; MSG_SELECTED_IDS.delete(id); } else bad++;
+  }
+  if (!bad) MSG_SELECTED_IDS.clear();
+  document.getElementById('msg-delete-selected-btn').style.display = MSG_SELECTED_IDS.size ? 'flex' : 'none';
   document.getElementById('msg-select-all').checked = false;
   renderMessages();
   updateFolderCounts();
-  showToast('🗑️ تم حذف الرسائل المحددة');
+  showToast(bad ? ('⚠️ اتحذف ' + ok + ' • ما اتحذفش ' + bad + ' — حاول تاني') : '🗑️ تم حذف الرسائل المحددة');
 }
 
 // ── تبديل الفولدر ──
@@ -14652,15 +12527,27 @@ function formatMsgTimeFull(iso) {
 }
 
 // ── قاعدة البيانات helpers ──
+// (دفعة ٣٣) كل وسم بيتأكد إن الصف اتحدّث فعلاً (RLS بترفض بصمت) — بيرجّع true / false
+async function _msgPatchDB(id, patch) {
+  try {
+    const { data, error } = await db.from('messages').update(patch).eq('id', id).select('id');
+    if (error) throw error;
+    return Array.isArray(data) && data.length > 0;
+  } catch(e) { console.warn('[messages]', e); return false; }
+}
 async function markMsgReadInDB(id) {
-  try { await db.from('messages').update({ is_read: true }).eq('id', id); } catch(e){ loadWarn(e); }
+  const ok = await _msgPatchDB(id, { is_read: true });
+  if (!ok) {   // ترجع «مش مقروءة» عشان الرقم مايكدبش
+    const m = MESSAGES_DATA.find(x => x.id === id);
+    if (m) m.read = false;
+    const row = document.getElementById('msg-row-' + id);
+    if (row) row.classList.add('unread');
+    updateFolderCounts();
+  }
+  return ok;
 }
-async function updateMsgStarInDB(id, starred) {
-  try { await db.from('messages').update({ starred }).eq('id', id); } catch(e){ loadWarn(e); }
-}
-async function deleteMsgInDB(id) {
-  try { await db.from('messages').update({ deleted: true }).eq('id', id); } catch(e){ loadWarn(e); }
-}
+async function updateMsgStarInDB(id, starred) { return _msgPatchDB(id, { starred }); }
+async function deleteMsgInDB(id) { return _msgPatchDB(id, { deleted: true }); }
 
 // ══ COMPOSE ══
 function openComposeModal() {
@@ -15545,7 +13432,7 @@ async function rptRunTeacher(){
   // جدول الحلقات
   const circRows = circles.length ? circles.map(c=>`<tr>
       <td style="font-weight:700;color:var(--forest);">${c.name}</td>
-      <td>${c.branch_name||'—'}</td>
+      <td>${esc(c.branch_name||'—')}</td>
       <td>${rptAr(c.students.length)}</td></tr>`).join('')
     : '<tr><td colspan="3" style="color:var(--light);">لا حلقات</td></tr>';
   const circleTable = `<div class="card" style="margin-bottom:16px;"><div class="card-head"><div class="card-title">🕌 حلقات المعلم</div></div>
@@ -15893,7 +13780,7 @@ function adminWeeklyOpenDay(branchName, iso, dayLabel){
   awkLoadWeek(AWK_CURRENT).then(()=>{
     const b = AWK_BRANCHES.find(x=>x.name===branchName) || AWK_BRANCHES[0];
     const titleEl = document.getElementById('awkday-title');
-    if(titleEl) titleEl.innerHTML = `${b.emoji} شعبة ${branchName} — ${dayLabel} <span style="font-weight:600;color:var(--light);font-size:.8rem;">${rptFmtDate(iso)}</span>`;
+    if(titleEl) titleEl.innerHTML = `${b.emoji} شعبة ${esc(branchName)} — ${dayLabel} <span style="font-weight:600;color:var(--light);font-size:.8rem;">${rptFmtDate(iso)}</span>`;
     const body = document.getElementById('awkday-body');
     const NR = awkNoRev();
     const circles = awkBranchCircles(branchName);
@@ -15991,7 +13878,7 @@ async function rptRunSupervisor(){
           <span class="badge bg-gray">📅 ${svFmtReportDate(r.session_date)}</span>
           <span class="badge bg-blue">👤 ${r.supervisor_name||'—'}</span>
           <span class="badge bg-gold">👨‍🏫 ${esc(r.teacher_name||'—')}</span>
-          <span class="badge bg-gray">🏫 ${r.branch||'—'}</span>
+          <span class="badge bg-gray">🏫 ${esc(r.branch||'—')}</span>
           <span class="badge ${attBg}">الحضور: ${r.attendance||'—'}${lateTxt}</span>
           <button class="btn btn-outline btn-xs rpt-noprint" style="margin-right:auto;" onclick="svViewReport(${i})">👁️ التفاصيل الكاملة</button>
         </div>
@@ -16001,7 +13888,7 @@ async function rptRunSupervisor(){
       </div>`;
     }).join('');
     body = `<div class="card" style="margin-bottom:0;"><div class="card-head"><div class="card-title">🗂️ الجلسات بالتواريخ</div>
-      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-sv-out','تقرير-الجلسات-${branch||'الكل'}')">📄 PDF</button></div>
+      <button class="btn btn-outline btn-sm rpt-noprint" onclick="rptExportPdf('rep-sv-out','تقرير-الجلسات-${cleanName(branch||'الكل')}')">📄 PDF</button></div>
       <div style="padding:14px;">${cards}</div></div>`;
   }
 
@@ -16016,7 +13903,7 @@ async function rptRunSupervisor(){
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
           <span class="badge bg-gray">📅 ${svFmtReportDate(n.note_date)}</span>
           <span class="badge bg-blue">👤 ${n.supervisor_name||'—'}</span>
-          ${n.branch?`<span class="badge bg-gold">🏫 ${n.branch}</span>`:''}
+          ${n.branch?`<span class="badge bg-gold">🏫 ${esc(n.branch)}</span>`:''}
         </div>
         <div style="font-size:.86rem;color:var(--forest);line-height:1.9;white-space:pre-wrap;">${String(n.content||'').replace(/</g,'&lt;')}</div>
       </div>`).join('');
@@ -16510,7 +14397,7 @@ function tcRenderMetric(){
   const gc=(h,r)=>`${rptAr(h)} / ${rptAr(r)}`, pc=v=> v==null?'—':rptAr(v)+'٪';
   if(tb) tb.innerHTML=rows.map(r=>`<tr>
       <td style="text-align:right;font-weight:700;color:var(--forest);">${r.name}</td>
-      <td style="font-size:.72rem;color:var(--light);">${r.branch||'—'}</td>
+      <td style="font-size:.72rem;color:var(--light);">${esc(r.branch||'—')}</td>
       <td style="color:var(--jade);font-weight:700;">${rptAr(r.presN)}</td><td style="color:${r.absN?'var(--red)':'var(--light)'};font-weight:700;">${rptAr(r.absN)}</td>
       <td title="${rptAr(r.lateMin)} دقيقة تأخير">${rptAr(r.lateN)}${r.lateMin?`<div style="font-size:.64rem;color:var(--light);">${rptAr(r.lateMin)} د</div>`:''}</td><td>${rptAr(r.presPct)}٪</td>
       <td>${gc(r.hExc,r.rExc)}</td><td>${gc(r.hVg,r.rVg)}</td><td>${gc(r.hGood,r.rGood)}</td><td>${gc(r.hRetry,r.rRetry)}</td>
@@ -17219,10 +15106,32 @@ async function finDelete(table, id, reload){
 
 
 /* ══ الإيصالات ══ */
+// (دفعة ٣٣) تصغير الصور قبل الرفع — أطول ضلع ١٦٠٠ بكسل • JPEG ٨٢٪ (الكلام والأرقام بتفضل واضحة)
+// PDF / GIF / HEIC / صورة صغيرة (أقل من ٣٠٠ ك.ب) → بتترفع زي ما هي • لو التصغير فشل أو طلع أكبر → الأصل
+function imgShrink(file, max, q){
+  max = max || 1600; q = q || 0.82;
+  return new Promise(res => {
+    if(!file || !/^image\/(jpeg|jpg|png|webp|bmp)$/i.test(file.type || '') || file.size < 300*1024) return res(file);
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      try{
+        let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, max / Math.max(w, h));
+        w = Math.max(1, Math.round(w*k)); h = Math.max(1, Math.round(h*k));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+        URL.revokeObjectURL(u);
+        c.toBlob(b => res(b && b.size < file.size ? new File([b], String(file.name || 'img').replace(/\.[^.]+$/, '') + '.jpg', { type:'image/jpeg' }) : file), 'image/jpeg', q);
+      }catch(e){ URL.revokeObjectURL(u); res(file); }
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); res(file); };
+    im.src = u;
+  });
+}
 async function finUploadReceipt(inputId, folder){
   const el = document.getElementById(inputId);
-  const f = el && el.files && el.files[0];
+  let f = el && el.files && el.files[0];
   if(!f) return { url:null, path:null };
+  f = await imgShrink(f);
   if(f.size > 5*1024*1024){ showToast('⚠️ حجم الإيصال أكبر من ٥ ميجا'); return { url:null, path:null }; }
   const ext = (f.name.split('.').pop()||'jpg').toLowerCase();
   const path = folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
@@ -19915,7 +17824,7 @@ function dgOpenCircle(id){
   const c=DG.byId[id]; if(!c) return;
   const rg=dgWeekRange(DG.week);
   const m=c.metrics;
-  document.getElementById('dgm-title').innerHTML='🕌 '+c.name+' <span style="font-weight:600;color:var(--light);font-size:.82rem;">— '+c.branch+'</span>';
+  document.getElementById('dgm-title').innerHTML='🕌 '+esc(c.name)+' <span style="font-weight:600;color:var(--light);font-size:.82rem;">— '+esc(c.branch)+'</span>';
   let h='';
 
   // معلومات أساسية
@@ -20401,7 +18310,7 @@ function _weeklyOpenDayRender(branchName, iso, dayLabel){
   const cfg = SV_DB_BRANCH_CFG[branchName] || SV_DB_BRANCH_CFG['الأبطال'];
   const [y,m,dd] = iso.split('-');
   const titleEl = document.getElementById('wkday-title');
-  if(titleEl) titleEl.innerHTML = `${cfg.emoji} شعبة ${branchName} — ${dayLabel} <span style="font-weight:600;color:var(--light);font-size:.8rem;">${wkAr(parseInt(dd))} ${WK_MONTHS[parseInt(m)-1]} ${wkAr(y)}</span>`;
+  if(titleEl) titleEl.innerHTML = `${cfg.emoji} شعبة ${esc(branchName)} — ${dayLabel} <span style="font-weight:600;color:var(--light);font-size:.8rem;">${wkAr(parseInt(dd))} ${WK_MONTHS[parseInt(m)-1]} ${wkAr(y)}</span>`;
   const body = document.getElementById('wkday-body');
   const circles = svBranchCircles(branchName);
   if(!circles.length){
@@ -20505,7 +18414,7 @@ function wkPdfCirclePage(branchName, teacher, iso, weekIdx, supName){
       <div style="display:flex;align-items:center;gap:16px;border-bottom:3px solid #1e5c36;padding-bottom:15px;margin-bottom:18px;">
         <img src="${WK_LOGO}" style="width:64px;height:64px;border-radius:13px;object-fit:contain;flex-shrink:0;background:#fff;">
         <div style="flex:1;text-align:center;">
-          <div style="font-family:'Amiri',serif;font-size:20px;font-weight:700;color:#0f2318;line-height:1.7;">بيان المتابعة اليومية ليوم ${dayName} بتاريخ ${dateStr}<br>للأسبوع ${weekStr} لشعبة ${branchName} مع المشرف ${supName}</div>
+          <div style="font-family:'Amiri',serif;font-size:20px;font-weight:700;color:#0f2318;line-height:1.7;">بيان المتابعة اليومية ليوم ${dayName} بتاريخ ${dateStr}<br>للأسبوع ${weekStr} لشعبة ${esc(branchName)} مع المشرف ${esc(supName)}</div>
         </div>
         <div style="width:64px;flex-shrink:0;"></div>
       </div>
@@ -21302,7 +19211,7 @@ function waPdfBranchPage(branchName, supName){
       <div style="display:flex;align-items:center;gap:16px;border-bottom:3px solid #1e5c36;padding-bottom:15px;margin-bottom:18px;">
         <img src="${WK_LOGO}" style="width:64px;height:64px;border-radius:13px;object-fit:contain;flex-shrink:0;background:#fff;">
         <div style="flex:1;text-align:center;">
-          <div style="font-family:'Amiri',serif;font-size:20px;font-weight:700;color:#0f2318;line-height:1.7;">بيان التنبيهات الأسبوعية للأسبوع ${weekStr}<br>لشعبة ${branchName} مع المشرف ${supName}</div>
+          <div style="font-family:'Amiri',serif;font-size:20px;font-weight:700;color:#0f2318;line-height:1.7;">بيان التنبيهات الأسبوعية للأسبوع ${weekStr}<br>لشعبة ${esc(branchName)} مع المشرف ${supName}</div>
           <div style="font-size:13px;color:#8ea598;margin-top:6px;">${rangeStr}</div>
         </div>
         <div style="width:64px;flex-shrink:0;"></div>
