@@ -68,6 +68,7 @@ var TYPES = {
   lesson_prep:      { c: '#6b3fa0', l: 'تحضير درس',      p: 'rep-lessons', i: ic('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>') },
   lesson_prep_ok:   { c: '#1e5c36', l: 'اعتماد تحضير',   p: 'lessonprep',  i: ic('<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="m9 11 3 3L22 4"/>') },
   lesson_prep_back: { c: '#c8920a', l: 'إرجاع تحضير',    p: 'lessonprep',  i: ic('<path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>') },
+  course_summary:   { c: '#1d6fa4', l: 'تلخيص دورة',     p: 'rep-summaries', i: ic('<path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M8 7h7M8 11h5"/>') },
   alert_action:     { c: '#c0392b', l: 'تنبيه أسبوعي',   p: 'walerts',     i: ic('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>') },
   points:           { c: '#c8920a', l: 'نقاط',           p: 'points',      i: ic('<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>') },
   session:          { c: '#6b3fa0', l: 'زيارة إشرافية',  p: 'reports',     i: ic('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/>') },

@@ -32,7 +32,6 @@
      │  «id="page-att_students"»
      │  «id="page-att_teachers"»
      │  «id="page-att_employees"»
-     │  «id="page-circles"»
      │  «id="page-stats"»
      │  «id="page-exams"»
      │  «id="page-golden"»
@@ -2808,115 +2807,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- ══ PAGE: CIRCLES ══ -->
-<div id="page-circles" class="page">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-    <div class="section-title" style="margin-bottom:0;display:flex;align-items:center;gap:10px;"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--emerald),var(--jade));display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 10px rgba(30,92,54,.25);"><svg width="18" height="18" viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="4.5" r="3.2"/><path d="M16 9.5c-1.4 0-2.6.7-3.2 1.8L9.5 16h13l-3.3-4.7c-.6-1.1-1.8-1.8-3.2-1.8z"/><path d="M8 18c.5 1.5 1.8 3 3.5 4.2L9.5 27h13l-2-4.8C22.2 21 23.5 19.5 24 18H8z"/><line x1="7" y1="19.5" x2="10.5" y2="20.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="25" y1="19.5" x2="21.5" y2="20.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></span>الحلقات</div>
-    <button class="btn btn-primary" onclick="openModal('modal-add-circle')" style="display:none">➕ إضافة حلقة</button>
-  </div>
-
-  <!-- Stats Row -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;" id="circles-stats-row">
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;">
-      <div style="width:42px;height:42px;border-radius:10px;background:var(--pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">≡</div>
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--forest);" id="c-stat-total">0</div><div style="font-size:.74rem;color:var(--light);">إجمالي الحلقات</div></div>
-    </div>
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;">
-      <div style="width:42px;height:42px;border-radius:10px;background:var(--pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">👦</div>
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--jade);" id="c-stat-male">0</div><div style="font-size:.74rem;color:var(--light);">حلقات الذكور</div></div>
-    </div>
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;">
-      <div style="width:42px;height:42px;border-radius:10px;background:var(--purple-pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">👧</div>
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--purple);" id="c-stat-female">0</div><div style="font-size:.74rem;color:var(--light);">حلقات الإناث</div></div>
-    </div>
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;">
-      <div style="width:42px;height:42px;border-radius:10px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">👥</div>
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--gold);" id="c-stat-students">0</div><div style="font-size:.74rem;color:var(--light);">إجمالي الطلاب</div></div>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-body" style="padding:14px 18px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 180px;gap:12px;align-items:end;">
-        <div class="fg" style="margin:0;">
-          <label style="font-size:.75rem;font-weight:600;color:var(--mid);margin-bottom:4px;display:block;">نوع الحلقة</label>
-          <select id="c-filter-type" onchange="filterCircles()" style="width:100%;">
-            <option value="">جميع أنواع الحلقات</option>
-            <option value="حفظ">حفظ</option>
-            <option value="مراجعة">مراجعة</option>
-            <option value="حفظ ومراجعة">حفظ ومراجعة</option>
-            <option value="تجويد">تجويد</option>
-          </select>
-        </div>
-        <div class="fg" style="margin:0;">
-          <label style="font-size:.75rem;font-weight:600;color:var(--mid);margin-bottom:4px;display:block;">الجنس</label>
-          <select id="c-filter-gender" onchange="filterCircles()" style="width:100%;">
-            <option value="">الكل</option>
-            <option value="ذكور">ذكور</option>
-            <option value="إناث">إناث</option>
-            <option value="ذكور وإناث">ذكور وإناث</option>
-          </select>
-        </div>
-        <div class="fg" style="margin:0;">
-          <label style="font-size:.75rem;font-weight:600;color:var(--mid);margin-bottom:4px;display:block;">الشعبة</label>
-          <select id="c-filter-branch" onchange="filterCircles()" style="width:100%;">
-            <option value="">كل الشعب</option>
-            <option value="الأبطال">الأبطال</option>
-            <option value="الرواد">الرواد</option>
-            <option value="الملكات">الملكات</option>
-            <option value="الأميرات">الأميرات</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:.75rem;font-weight:600;color:var(--mid);margin-bottom:4px;display:block;">بحث</label>
-          <input type="text" id="c-search" placeholder="🔍 اسم الحلقة أو المعلم..." oninput="filterCircles()" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:.85rem;">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div class="card">
-    <div class="card-head" style="padding:12px 18px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="card-title">قائمة الحلقات</div>
-        <span class="badge bg-green" id="c-count-badge">0 حلقة</span>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-xs" onclick="printCirclesTable()">🖨️ طباعة</button>
-        <button class="btn btn-ghost btn-xs" onclick="exportCirclesExcel()">📊 Excel</button>
-        <select id="c-rows-select" onchange="cRowsPerPage=+this.value;cCurrentPage=1;renderCirclesList(CIRCLES_FILTERED)" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:.78rem;">
-          <option value="10">عرض 10</option>
-          <option value="25">عرض 25</option>
-          <option value="50">عرض 50</option>
-          <option value="9999">الكل</option>
-        </select>
-      </div>
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="tbl" id="circles-table">
-        <thead>
-          <tr>
-            <th style="width:36px;"><input type="checkbox" id="c-check-all" onchange="toggleAllCircles(this)" style="cursor:pointer;"></th>
-            <th style="cursor:pointer;" onclick="sortCircles('name')">اسم الحلقة ↕</th>
-            <th style="cursor:pointer;" onclick="sortCircles('type')">نوع الحلقة ↕</th>
-            <th style="cursor:pointer;" onclick="sortCircles('branch')">الشعبة ↕</th>
-            <th>الجنس</th>
-            <th>المعلمون</th>
-            <th style="cursor:pointer;" onclick="sortCircles('students_count')">عدد الطلاب ↕</th>
-            <th>أيام الحلقة</th>
-            <th>إجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="circles-tbody"></tbody>
-      </table>
-    </div>
-    <div style="padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);font-size:.8rem;color:var(--light);">
-      <span id="c-page-info">—</span>
-      <div style="display:flex;gap:6px;" id="c-pagination"></div>
-    </div>
-  </div>
-</div>
 
 <!-- ══ MODAL: ADD CIRCLE ══ -->
 <div class="overlay" id="modal-add-circle">
@@ -2997,64 +2887,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- ══ MODAL: EDIT CIRCLE ══ -->
-<div class="overlay" id="modal-edit-circle">
-  <div class="modal" style="max-width:700px;">
-    <div class="modal-head">
-      <div class="modal-title">✏️ تعديل الحلقة</div>
-      <button class="modal-close" onclick="closeModal('modal-edit-circle')">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="background:var(--pale);border-right:4px solid var(--jade);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--emerald);">📖 بيانات الحلقة</div>
-      <div class="form-grid-2">
-        <div class="fg"><label>الاسم بالعربية *</label><input type="text" id="ec-name-ar"></div>
-        <div class="fg"><label>الاسم بالأجنبي</label><input type="text" id="ec-name-en" style="direction:ltr;"></div>
-        <div class="fg"><label>نوع الحلقة *</label>
-          <select id="ec-type">
-            <option value="حفظ ومراجعة">حفظ ومراجعة</option>
-            <option value="حفظ">حفظ</option>
-            <option value="مراجعة">مراجعة</option>
-            <option value="تجويد">تجويد</option>
-          </select>
-        </div>
-        <div class="fg"><label>الجنس *</label>
-          <select id="ec-gender">
-            <option value="ذكور">ذكور</option>
-            <option value="إناث">إناث</option>
-            <option value="ذكور وإناث">ذكور وإناث</option>
-          </select>
-        </div>
-        <div class="fg"><label>الشعبة</label>
-          <select id="ec-branch">
-            <option value="">اختر الشعبة</option>
-            <option value="الأبطال">الأبطال</option>
-            <option value="الرواد">الرواد</option>
-            <option value="الملكات">الملكات</option>
-            <option value="الأميرات">الأميرات</option>
-          </select>
-        </div>
-        <div class="fg"><label>يعرض على واجهة الموقع؟</label>
-          <select id="ec-public">
-            <option value="نعم">نعم</option>
-            <option value="لا">لا</option>
-          </select>
-        </div>
-      </div>
-      <div class="fg" style="margin-bottom:14px;">
-        <label>قائمة المعلمين :</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);" id="ec-teachers-checkboxes"></div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
-      <div style="background:var(--gold-pale);border-right:4px solid var(--gold);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:.84rem;font-weight:700;color:var(--gold);">📅 مواعيد الحلقة</div>
-      <div id="ec-schedule-rows" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
-      <button type="button" class="btn btn-outline btn-sm" onclick="addScheduleRowEdit()" style="font-size:.82rem;">＋ إضافة يوم آخر</button>
-      <input type="hidden" id="ec-circle-id">
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-circle')">إلغاء</button>
-      <button class="btn btn-primary" onclick="updateCircle()">💾 حفظ التعديلات</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ PAGE: STATS ══ -->
 <!-- ══ PAGE: EXAMS ══ -->
@@ -4445,28 +4277,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- Add Memorization -->
-<div class="overlay" id="modal-add-mem">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-head">
-      <div class="modal-title">📖 تسجيل حصة حفظ</div>
-      <button class="modal-close" onclick="closeModal('modal-add-mem')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-grid-2">
-        <div class="fg" style="grid-column:1/-1;"><label>الطالب</label><select><option value="">— اختر الطالب —</option></select></div>
-        <div class="fg"><label>السورة</label><select><option>البقرة</option><option>آل عمران</option><option>الكهف</option></select></div>
-        <div class="fg"><label>التقييم</label><select><option>ممتاز</option><option>جيد جداً</option><option>جيد</option><option>مقبول</option></select></div>
-        <div class="fg"><label>من آية</label><input type="number" value="1"></div>
-        <div class="fg"><label>إلى آية</label><input type="number" value="20"></div>
-      </div>
-      <div class="fg"><label>ملاحظات</label><textarea placeholder="ملاحظات..."></textarea></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="closeModal('modal-add-mem');showToast('✅ تم حفظ السجل!')">💾 حفظ</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add-mem')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
 <!-- Add Announcement -->
 <div class="overlay" id="modal-add-ann">
@@ -4527,47 +4337,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 </div>
 
 <!-- Resend Announcement Modal -->
-<div class="overlay" id="modal-resend-ann">
-  <div class="modal" style="max-width:540px;">
-    <div class="modal-head">
-      <div class="modal-title">🔄 إعادة إرسال الإعلان</div>
-      <button class="modal-close" onclick="closeModal('modal-resend-ann')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg"><label>عنوان الإعلان</label><input id="resend-ann-title" type="text"></div>
-      <div class="fg">
-        <label style="font-size:.78rem;font-weight:700;color:var(--mid);display:block;margin-bottom:8px;">الموجّه إلى <span style="color:var(--red);font-size:.72rem;">(اختر الجهة)</span></label>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;background:var(--bg);padding:12px;border-radius:10px;border:1.5px solid var(--border);">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:6px 12px;background:#fff;border-radius:8px;border:1.5px solid var(--border);">
-            <input type="checkbox" id="rs-chk-teachers" style="width:15px;height:15px;accent-color:var(--jade);cursor:pointer;">
-            <span>👨‍🏫 المعلمين</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:6px 12px;background:#fff;border-radius:8px;border:1.5px solid var(--border);">
-            <input type="checkbox" id="rs-chk-supervisors" style="width:15px;height:15px;accent-color:var(--jade);cursor:pointer;">
-            <span>👁️ المشرفين</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:6px 12px;background:#fff;border-radius:8px;border:1.5px solid var(--border);">
-            <input type="checkbox" id="rs-chk-employees" style="width:15px;height:15px;accent-color:var(--jade);cursor:pointer;">
-            <span>💼 الموظفين</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:6px 12px;background:#fff;border-radius:8px;border:1.5px solid var(--border);">
-            <input type="checkbox" id="rs-chk-students" style="width:15px;height:15px;accent-color:var(--jade);cursor:pointer;">
-            <span>📖 الطلاب</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:600;padding:6px 12px;background:#fff;border-radius:8px;border:1.5px solid var(--border);">
-            <input type="checkbox" id="rs-chk-parents" style="width:15px;height:15px;accent-color:var(--jade);cursor:pointer;">
-            <span>👨‍👦 أولياء الأمور</span>
-          </label>
-        </div>
-      </div>
-      <div class="fg"><label>نص الإعلان</label><textarea id="resend-ann-body" style="min-height:100px;"></textarea></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="doResendAnn()">📤 إعادة الإرسال</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-resend-ann')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
 <!-- Delete Announcement Confirm Modal -->
 <div class="overlay" id="modal-del-ann">
@@ -4617,9 +4386,6 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
 // SUPABASE DATA
 // ══════════════════════════════════════
 let STUDENTS = [];
-let selectedStudentId = null;
-let rowsPerPage = 10;
-let currentPage = 1;
 let TEACHERS = [];
 let ANNOUNCEMENTS = [];
 let attState = {};
@@ -5574,35 +5340,6 @@ function openCardEditTeacher(t) {
   svFillBranchPicker('ce-branch-checkboxes', window._ceInitBranch, null);
 }
 
-function openCardEditTeacherByName(tName, branchName) {
-  // ابحث في BRANCH_DATA عن بيانات مخزنة للمعلم ده
-  let stored = null;
-  Object.values(BRANCH_DATA).forEach(arr => {
-    const found = arr.find(item => item.teacher === tName);
-    if (found) stored = found;
-  });
-
-  document.getElementById('card-edit-t-id').value    = '';
-  document.getElementById('card-edit-t-name').value  = tName;
-  const parts = tName.split(' ');
-  document.getElementById('ce-t-fname').value    = parts[0] || '';
-  document.getElementById('ce-t-lname').value    = parts.slice(1).join(' ') || '';
-  document.getElementById('ce-t-phone').value    = stored?.phone    || '';
-  document.getElementById('ce-t-email').value    = stored?.email    || '';
-  document.getElementById('ce-t-gender').value   = stored?.gender   || '';
-  document.getElementById('ce-t-id-type').value  = stored?.id_type  || '';
-  document.getElementById('ce-t-id-num').value   = stored?.id_number || '';
-  document.getElementById('ce-t-status').value   = 'true';
-  document.getElementById('ce-t-dob').value      = stored?.dob      || '';
-  document.getElementById('ce-t-address').value   = stored?.address   || '';
-  document.getElementById('ce-t-education').value = stored?.education || '';
-  document.getElementById('ce-t-licenses').value  = stored?.licenses  || '';
-  document.querySelectorAll('#ce-branch-checkboxes input[type=checkbox]').forEach(cb => {
-    cb.checked = cb.value === branchName;
-    updateCEBranchLabel(cb);
-  });
-  openModal('modal-card-edit-teacher');
-}
 
 function updateCEBranchLabel(cb) {
   const label = cb.closest('label');
@@ -5625,39 +5362,7 @@ function confirmSaveCardEdit() {
 }
 
 // ── تحديث BRANCH_DATA فورياً في الذاكرة ──
-function updateTeacherInBranchData(oldName, newName, newPhone, newActive, newAge, newDob) {
-  Object.keys(BRANCH_DATA).forEach(branchKey => {
-    BRANCH_DATA[branchKey].forEach(item => {
-      if (item.teacher === oldName) {
-        item.teacher = newName;
-        if (newPhone  !== undefined) item.phone  = newPhone;
-        if (newActive !== undefined) item.active = newActive;
-        if (newAge    !== undefined) item.age    = newAge;
-        if (newDob    !== undefined) item.dob    = newDob;
-      }
-    });
-  });
-  TEACHERS.forEach(t => {
-    if (t.full_name === oldName || t.id === _ctxTeacherId) {
-      t.full_name = newName;
-      t.name      = newName.split(' ')[0];
-      t.lname     = newName.split(' ').slice(1).join(' ');
-      if (newPhone  !== undefined && newPhone !== '') t.phone     = newPhone;
-      if (newActive !== undefined) { t.is_active = newActive; t.status = newActive ? 'نشط' : 'موقوف'; }
-      if (newAge    !== undefined) t.age = newAge;
-      if (newDob    !== undefined) t.dob = newDob;
-    }
-  });
-}
 
-function deleteTeacherFromBranchData(tName) {
-  Object.keys(BRANCH_DATA).forEach(branchKey => {
-    const idx = BRANCH_DATA[branchKey].findIndex(item => item.teacher === tName);
-    if (idx !== -1) BRANCH_DATA[branchKey].splice(idx, 1);
-  });
-  const ti = TEACHERS.findIndex(t => t.full_name === tName || t.id === _ctxTeacherId);
-  if (ti !== -1) TEACHERS.splice(ti, 1);
-}
 
 async function doSaveCardEdit() {
   closeModal('modal-confirm-edit-teacher');
@@ -6043,35 +5748,8 @@ async function loadAnnouncements() {
 }
 
 // حفظ الحضور في Supabase
-async function saveAttendanceToDB() {
-  const today = localISO(new Date());
-  const records = [];
-
-  for (const [i, status] of Object.entries(attState)) {
-    const student = STUDENTS[parseInt(i)];
-    if (!student) continue;
-    records.push({
-      student_id: student.id,
-      date: today,
-      status: status === 'present' ? 'present' : status === 'absent' ? 'absent' : 'late',
-      recorded_by: JSON.parse(localStorage.getItem('currentUser'))?.id || null,
-    });
-  }
-
-  if (records.length === 0) { showToast('⚠️ لم تسجل أي حضور'); return; }
-
-  const { error } = await db.from('attendance').upsert(records, {
-    onConflict: 'student_id,date',
-    ignoreDuplicates: false,
-  });
-
-  if (error) { console.error(error); showToast('❌ حدث خطأ في الحفظ'); return; }
-  showToast('✅ تم حفظ الحضور في قاعدة البيانات!');
-}
 
 // إضافة طالب في Supabase
-function genSU(){document.getElementById('ns-username').value='student'+Date.now().toString().slice(-7);}
-function genSP(){const c='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';let p='';for(let i=0;i<8;i++)p+=c[_rnd(c.length)];document.getElementById('ns-password').value=p;}
 
 async function addStudentToDB() {
   const fullName = document.getElementById('ns-fullname')?.value?.trim();
@@ -6321,34 +5999,8 @@ function renderStudentsList(list) {
     </tr>`).join('');
 }
 
-function renderStudents() { renderStudentsList(STUDENTS); }
 
-function filterStudents() {
-  const search = (document.getElementById('student-search')?.value || '').toLowerCase();
-  const branch = document.getElementById('student-filter-branch')?.value || '';
-  const status = document.getElementById('student-filter-status')?.value || '';
-  renderStudentsList(STUDENTS.filter(s =>
-    (!search || s.name.includes(search) || s.teacher.includes(search)) &&
-    (!branch || s.circle === branch) &&
-    (!status || s.status === status)
-  ));
-}
 
-function updateSBranchLabel(radio) {
-  document.querySelectorAll('.s-branch-label').forEach(l => {
-    l.style.borderColor = 'var(--border)';
-    l.style.background = '';
-    l.style.color = '';
-    l.style.fontWeight = '';
-  });
-  const label = radio.closest('label');
-  if (label) {
-    label.style.borderColor = 'var(--jade)';
-    label.style.background = 'var(--pale)';
-    label.style.color = 'var(--emerald)';
-    label.style.fontWeight = '700';
-  }
-}
 
 function viewStudent(id) {
   const s = STUDENTS.find(s => s.id === id);
@@ -6884,11 +6536,6 @@ async function bulkDelAnn(){
   openModal('modal-del-ann');
 }
 
-function askDelAnn(id, title){
-  document.getElementById('del-ann-msg').innerHTML = `هل أنت متأكد من حذف إعلان<br><strong style="color:var(--forest);">(${esc(title)})</strong><br>من قائمة الإعلانات نهائياً؟`;
-  annToDelete = id;
-  openModal('modal-del-ann');
-}
 
 async function confirmDelAnn(){
   if(annToDelete === null){ closeModal('modal-del-ann'); return; }
@@ -6910,37 +6557,7 @@ async function confirmDelAnn(){
   await loadAnnouncements();
 }
 
-function openResendAnn(id){
-  const ann = ANNOUNCEMENTS.find(a => a.id === id);
-  if(!ann) return;
-  document.getElementById('resend-ann-title').value = ann.title;
-  document.getElementById('resend-ann-body').value = ann.body;
-  // clear checkboxes
-  ['teachers','supervisors','employees','students','parents'].forEach(r=>{
-    const el = document.getElementById('rs-chk-'+r);
-    if(el) el.checked = false;
-  });
-  document.getElementById('modal-resend-ann').dataset.annId = id;
-  openModal('modal-resend-ann');
-}
 
-async function doResendAnn(){
-  const targets = [];
-  if(document.getElementById('rs-chk-teachers')?.checked) targets.push('teacher');
-  if(document.getElementById('rs-chk-supervisors')?.checked) targets.push('supervisor');
-  if(document.getElementById('rs-chk-employees')?.checked) targets.push('employee');
-  if(document.getElementById('rs-chk-students')?.checked) targets.push('student');
-  if(document.getElementById('rs-chk-parents')?.checked) targets.push('parent');
-  if(targets.length === 0){ showToast('⚠️ اختر جهة واحدة على الأقل'); return; }
-  const title = document.getElementById('resend-ann-title').value;
-  const body = document.getElementById('resend-ann-body').value;
-  const target_role = targets.join(',');
-  const { error } = await db.from('announcements').insert({ title, body, target_role, is_active: true });
-  if(error){ showToast('❌ خطأ في الإرسال'); return; }
-  closeModal('modal-resend-ann');
-  showToast('✅ تم إعادة إرسال الإعلان!');
-  await loadAnnouncements();
-}
 
 function toggleAnnCustom(){
   const customChk = document.getElementById('ann-chk-custom');
@@ -7080,18 +6697,7 @@ async function publishAnnToDB() {
 // ══════════════════════════════════════
 // BAR CHART
 // ══════════════════════════════════════
-const DAYS_DATA=[{d:'سبت',v:88},{d:'أحد',v:92},{d:'اثن',v:85},{d:'ثلا',v:95},{d:'أرب',v:91}];
-const COLORS=['#2d7a50','#40916c','#52a876','#74c69d','#2d7a50'];
 
-function renderBarChart(){
-  const max=100;
-  document.getElementById('att-chart').innerHTML = DAYS_DATA.map((d,i)=>`
-    <div class="bar-col">
-      <div style="font-size:.68rem;color:var(--light);margin-bottom:2px;">${d.v}%</div>
-      <div class="bar-fill" style="height:${(d.v/max)*64}px;background:${COLORS[i]};border-radius:4px 4px 0 0;width:100%;"></div>
-      <div class="bar-lbl">${d.d}</div>
-    </div>`).join('');
-}
 
 // ══════════════════════════════════════
 // MODAL
@@ -7300,196 +6906,24 @@ async function confirmMoveStudent(){
   await refreshSupervisorData();
 }
 
-function printStudentList(){
-  const circle=document.getElementById('s-filter-circle')?.value||'جميع الطلاب';
-  const rows=STUDENTS.map((s,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${s.name.split(' ')[0]}</td><td>${s.name.split(' ').slice(1).join(' ')}</td><td style="text-align:center">${s.dob||'—'}</td></tr>`).join('');
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}.header{display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e5c36;}<\/style><\/head><body><div class="header"><div style="font-weight:700;color:#1e5c36;font-size:1.1rem;">🕌 مدرسة التوحيد القرآنية</div><div style="color:#666;font-size:.85rem;">${new Date().toLocaleDateString('ar-EG')}</div></div><h2>قائمة الطلاب</h2><p style="text-align:center;color:#666;">الشعبة: ${circle} — إجمالي ${STUDENTS.length} طالب</p><table><thead><tr><th>الرقم</th><th>الاسم</th><th>العائلة</th><th>تاريخ الميلاد</th></tr></thead><tbody>${rows}</tbody></table><\/body><\/html>`);
-  w.document.close();w.print();
-}
 
-function selectRow(row,id){
-  document.querySelectorAll('#students-body tr').forEach(r=>r.style.background='');
-  row.style.background='var(--pale)';
-  selectedStudentId=id;
-}
 
 
 // ══════════════════════════════════════
 // CIRCLES
 // ══════════════════════════════════════
 let CIRCLES = [];
-let CIRCLES_FILTERED = [];
-let cCurrentPage = 1;
-let cRowsPerPage = 10;
-let cSortKey = 'name';
-let cSortAsc = true;
-let cSelectedId = null;
 
 const DAYS_AR = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
 
-async function loadCircles() {
-  try {
-    const _me = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const [{ data, error }, { data: brs, error: bErr }] = await Promise.all([
-      db.from('circles').select('*').order('created_at', { ascending: false }),
-      db.from('branches').select('id,name'),
-    ]);
-    if (error) throw error; if (bErr) throw bErr;
-    const _bn = {}; (brs || []).forEach(b => _bn[b.id] = b.name);
-    CIRCLES = (data || []).filter(c => _me.role !== 'supervisor' || c.supervisor_id === _me.id).map(c => ({
-      id: c.id,
-      name: c.name_ar || c.name || '—',
-      name_en: c.name_en || '',
-      type: c.type || '—',
-      branch: _bn[c.branch_id] || '—',
-      gender: c.gender || '—',
-      teachers: c.teachers || [],
-      students_count: c.students_count || 0,
-      schedule: c.schedule || [],
-      public: c.show_public || 'نعم',
-    }));
-    CIRCLES_FILTERED = [...CIRCLES];
-    renderCirclesList(CIRCLES_FILTERED);
-    updateCirclesStats();
-  } catch (e) {
-    loadWarn(e);
-    CIRCLES = [];
-    CIRCLES_FILTERED = [];
-    renderCirclesList([]);
-  }
-}
 
-function updateCirclesStats() {
-  const total = CIRCLES.length;
-  const male = CIRCLES.filter(c => c.gender === 'ذكور').length;
-  const female = CIRCLES.filter(c => c.gender === 'إناث').length;
-  const students = CIRCLES.reduce((s, c) => s + (c.students_count || 0), 0);
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('c-stat-total', total);
-  set('c-stat-male', male);
-  set('c-stat-female', female);
-  set('c-stat-students', students);
-}
 
-function filterCircles() {
-  const type = document.getElementById('c-filter-type')?.value || '';
-  const gender = document.getElementById('c-filter-gender')?.value || '';
-  const branch = document.getElementById('c-filter-branch')?.value || '';
-  const q = (document.getElementById('c-search')?.value || '').trim().toLowerCase();
-  CIRCLES_FILTERED = CIRCLES.filter(c => {
-    if (type && !c.type.includes(type)) return false;
-    if (gender && c.gender !== gender) return false;
-    if (branch && c.branch !== branch) return false;
-    if (q && !c.name.toLowerCase().includes(q) && !(c.teachers || []).join(' ').toLowerCase().includes(q)) return false;
-    return true;
-  });
-  cCurrentPage = 1;
-  renderCirclesList(CIRCLES_FILTERED);
-}
 
-function sortCircles(key) {
-  if (cSortKey === key) cSortAsc = !cSortAsc;
-  else { cSortKey = key; cSortAsc = true; }
-  CIRCLES_FILTERED.sort((a, b) => {
-    let va = a[key] ?? '', vb = b[key] ?? '';
-    if (typeof va === 'number') return cSortAsc ? va - vb : vb - va;
-    return cSortAsc ? String(va).localeCompare(String(vb), 'ar') : String(vb).localeCompare(String(va), 'ar');
-  });
-  renderCirclesList(CIRCLES_FILTERED);
-}
 
-function renderCirclesList(list) {
-  const tbody = document.getElementById('circles-tbody');
-  if (!tbody) return;
-  const badge = document.getElementById('c-count-badge');
-  if (badge) badge.textContent = list.length + ' حلقة';
 
-  const start = (cCurrentPage - 1) * cRowsPerPage;
-  const paged = cRowsPerPage >= 999 ? list : list.slice(start, start + cRowsPerPage);
 
-  if (paged.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--light);padding:36px;">
-      <span style="font-size:2rem;display:block;opacity:.35;margin-bottom:8px;">≡</span>لا توجد حلقات
-    </td></tr>`;
-    updateCirclesPagination(list.length);
-    return;
-  }
 
-  const genderColor = { 'ذكور': 'bg-blue', 'إناث': 'bg-purple', 'ذكور وإناث': 'bg-green' };
-  const typeColor = { 'حفظ ومراجعة': 'bg-green', 'حفظ': 'bg-blue', 'مراجعة': 'bg-gold', 'تجويد': 'bg-purple' };
 
-  tbody.innerHTML = paged.map(c => {
-    const teachersHtml = (c.teachers || []).length
-      ? c.teachers.slice(0, 2).map(t => `<span style="display:inline-block;padding:2px 8px;background:var(--pale);border-radius:99px;font-size:.72rem;margin:2px;">${t}</span>`).join('') + (c.teachers.length > 2 ? `<span style="font-size:.7rem;color:var(--light);"> +${c.teachers.length - 2}</span>` : '')
-      : '<span style="color:var(--light);font-size:.78rem;">—</span>';
-    const scheduleHtml = (c.schedule || []).filter(s => s.active !== false).map(s => `<span style="display:inline-block;padding:2px 7px;background:var(--gold-pale);border-radius:99px;font-size:.7rem;color:var(--gold);font-weight:600;margin:2px;">${s.day}</span>`).join('') || '<span style="color:var(--light);font-size:.78rem;">—</span>';
-    return `
-    <tr id="c-row-${c.id}" onclick="selectCircleRow('${c.id}',this)" style="cursor:pointer;transition:background .15s;">
-      <td onclick="event.stopPropagation()">
-        <input type="checkbox" class="c-row-check" data-id="${c.id}" onchange="onCircleCheck()" style="cursor:pointer;">
-      </td>
-      <td>
-        <div style="display:flex;align-items:center;gap:9px;">
-          <div class="avatar" style="background:linear-gradient(135deg,var(--jade),var(--mint));flex-shrink:0;">${(c.name||'ح')[0]}</div>
-          <strong>${c.name}</strong>
-        </div>
-      </td>
-      <td><span class="badge ${typeColor[c.type]||'bg-gray'}" style="font-size:.72rem;">${c.type}</span></td>
-      <td><span class="badge bg-green" style="font-size:.72rem;">${esc(c.branch||'—')}</span></td>
-      <td><span class="badge ${genderColor[c.gender]||'bg-gray'}" style="font-size:.72rem;">${c.gender}</span></td>
-      <td>${teachersHtml}</td>
-      <td style="text-align:center;font-weight:700;color:var(--forest);">${c.students_count || 0}</td>
-      <td>${scheduleHtml}</td>
-      <td onclick="event.stopPropagation()">
-        <div style="display:flex;gap:5px;">
-          <button class="btn btn-outline btn-xs" onclick="editCircle('${c.id}')">✏️ تعديل</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteCircle('${c.id}')">🗑</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-
-  updateCirclesPagination(list.length);
-}
-
-function updateCirclesPagination(total) {
-  const pages = Math.ceil(total / cRowsPerPage);
-  const info = document.getElementById('c-page-info');
-  if (info) {
-    const s = (cCurrentPage - 1) * cRowsPerPage + 1;
-    const e = Math.min(cCurrentPage * cRowsPerPage, total);
-    info.textContent = total > 0 ? `عرض ${s}–${e} من ${total}` : 'لا توجد حلقات';
-  }
-  const pg = document.getElementById('c-pagination');
-  if (!pg) return;
-  pg.innerHTML = '';
-  for (let i = 1; i <= Math.min(pages, 7); i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = 'btn btn-xs ' + (i === cCurrentPage ? 'btn-primary' : 'btn-ghost');
-    btn.onclick = () => { cCurrentPage = i; renderCirclesList(CIRCLES_FILTERED); };
-    pg.appendChild(btn);
-  }
-}
-
-function selectCircleRow(id, row) {
-  document.querySelectorAll('#circles-tbody tr').forEach(r => r.style.background = '');
-  row.style.background = 'var(--pale)';
-  cSelectedId = id;
-}
-
-function toggleAllCircles(cb) {
-  document.querySelectorAll('.c-row-check').forEach(c => c.checked = cb.checked);
-}
-
-function onCircleCheck() {
-  const all = document.querySelectorAll('.c-row-check');
-  const checked = document.querySelectorAll('.c-row-check:checked');
-  const master = document.getElementById('c-check-all');
-  if (master) master.indeterminate = checked.length > 0 && checked.length < all.length;
-  if (master) master.checked = checked.length === all.length && all.length > 0;
-}
 
 // ── Schedule rows ──
 function buildScheduleRow(day = '', from = '16:30', to = '18:30', active = true) {
@@ -7519,19 +6953,7 @@ function addScheduleRow() {
   if (cont) cont.insertAdjacentHTML('beforeend', buildScheduleRow());
 }
 
-function addScheduleRowEdit() {
-  const cont = document.getElementById('ec-schedule-rows');
-  if (cont) cont.insertAdjacentHTML('beforeend', buildScheduleRow());
-}
 
-function getScheduleFromRows(containerId) {
-  const rows = document.querySelectorAll('#' + containerId + ' .sched-row');
-  return Array.from(rows).map(r => {
-    const sel = r.querySelector('select');
-    const inputs = r.querySelectorAll('input[type=time]');
-    return { day: sel?.value || '', from: inputs[0]?.value || '', to: inputs[1]?.value || '', active: true };
-  }).filter(r => r.day);
-}
 
 function buildTeacherCheckboxes(containerId, selected = []) {
   const cont = document.getElementById(containerId);
@@ -7557,71 +6979,16 @@ function updateCTeacherLabel(cb) {
   label.style.fontWeight = cb.checked ? '700' : '';
 }
 
-function getSelectedTeachers(containerId) {
-  const vals = Array.from(document.querySelectorAll('#' + containerId + ' input[type=checkbox]:checked')).map(c => c.value);
-  return vals.length ? vals : [];
-}
 
 function saveCircle() {
   if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
   showToast('⛔ الإجراء ده من لوحة المدير بس');
 }
 
-async function editCircle(id) {
-  const c = CIRCLES.find(x => x.id === id);
-  if (!c) return;
-  document.getElementById('ec-circle-id').value = id;
-  document.getElementById('ec-name-ar').value = c.name;
-  document.getElementById('ec-name-en').value = c.name_en || '';
-  document.getElementById('ec-type').value = c.type;
-  document.getElementById('ec-gender').value = c.gender;
-  document.getElementById('ec-branch').value = c.branch || '';
-  document.getElementById('ec-public').value = c.public || 'نعم';
 
-  buildTeacherCheckboxes('ec-teachers-checkboxes', c.teachers || []);
-  // re-attach highlight for checked
-  document.querySelectorAll('#ec-teachers-checkboxes input[type=checkbox]').forEach(cb => {
-    if (cb.checked) updateCTeacherLabel(cb);
-    cb.onchange = function() { updateCTeacherLabel(this); };
-  });
 
-  const schedCont = document.getElementById('ec-schedule-rows');
-  schedCont.innerHTML = '';
-  (c.schedule || [{ day: DAYS_AR[0], from: '16:30', to: '18:30', active: true }]).forEach(s => {
-    schedCont.insertAdjacentHTML('beforeend', buildScheduleRow(s.day, s.from, s.to, s.active));
-  });
-  openModal('modal-edit-circle');
-}
 
-function updateCircle() {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
 
-function deleteCircle(id) {
-  if (typeof closeAllModalsSafe==='function') closeAllModalsSafe();
-  showToast('⛔ الإجراء ده من لوحة المدير بس');
-}
-
-function printCirclesTable() {
-  const rows = CIRCLES_FILTERED.map((c, i) =>
-    `<tr><td>${i+1}</td><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${esc(c.branch||'—')}</td><td>${esc(c.gender)}</td><td>${esc((c.teachers||[]).join('، ')||'—')}</td><td>${c.students_count||0}</td></tr>`
-  ).join('');
-  const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px;}h2{text-align:center;color:#1e5c36;}table{width:100%;border-collapse:collapse;}th{background:#1e5c36;color:#fff;padding:9px;text-align:right;}td{padding:8px;border:1px solid #ddd;}tr:nth-child(even){background:#f9f9f9;}<\/style><\/head><body><h2>قائمة الحلقات — مدرسة التوحيد القرآنية</h2><p style="text-align:center;color:#666;">${new Date().toLocaleDateString('ar-EG')} — إجمالي ${CIRCLES_FILTERED.length} حلقة</p><table><thead><tr><th>#</th><th>اسم الحلقة</th><th>النوع</th><th>الشعبة</th><th>الجنس</th><th>المعلمون</th><th>الطلاب</th></tr></thead><tbody>${rows}</tbody></table><\/body><\/html>`);
-  w.document.close(); w.print();
-}
-
-function exportCirclesExcel() {
-  let csv = 'اسم الحلقة,النوع,الشعبة,الجنس,المعلمون,عدد الطلاب\n';
-  CIRCLES_FILTERED.forEach(c => {
-    csv += `"${c.name}","${c.type}","${c.branch||''}","${c.gender}","${(c.teachers||[]).join(' - ')}","${c.students_count||0}"\n`;
-  });
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'circles.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
 
 // Patch openModal to init circles modal
 const _origOpenModal = openModal;
@@ -7653,7 +7020,6 @@ let CP_COURSE = '';
 let CP_SECTION = 'boys';
 const CP_SECT_TITLE = { boys:'شعبة البنون — الأبطال والرواد', banat:'شعبة البنات — الملكات والأميرات' };
 const CP_SECT_BR = { boys:['الأبطال','الرواد'], banat:['الملكات','الأميرات'] };
-const CP_FIELDS = ['day','date','tajweed','kunooz','talqeen','activity'];
 let CP_DIRTY = {}, CP_SAVE_T = {}, CP_CHAIN = Promise.resolve(), CP_LOAD_ERR = false;
 function cpTerm(){ return VIEW_TERM||CUR_TERM; }
 function cpSyncTerm(){
@@ -8139,7 +7505,6 @@ function closeSidebar(){
   if(ov) ov.classList.remove('show');
 }
 // إغلاق الـ sidebar لما نتنقل على الموبايل
-const _origNav = window.nav;
 document.addEventListener('click', function(e){
   if(window.innerWidth <= 768 && e.target.closest('.sb-item')) closeSidebar();
 });
@@ -8252,21 +7617,6 @@ function svCurrentCircleDate(branchName){
 }
 
 // ── هل هناك حلقة جارية الآن؟ نص توضيحي للحالة ──
-function svScheduleStatus(branchName){
-  const now = new Date();
-  const w = svDayWindow(branchName, now.getDay());
-  const hr = now.getHours();
-  if(w){
-    if(hr >= w.start && hr < w.end){
-      return {live:true, text:'🔴 حلقة جارية الآن' + (w.label?(' — '+w.label):''), date: localISO(now)};
-    }
-    if(hr < w.start){
-      return {live:false, text:`⏳ حلقة اليوم تبدأ ${termHourAr(w.start)}`, date: localISO(now)};
-    }
-    return {live:false, text:'✅ انتهت حلقة اليوم', date: localISO(now)};
-  }
-  return {live:false, text:'📅 لا توجد حلقة اليوم', date: svCurrentCircleDate(branchName)};
-}
 
 // ── تنبيهات لكل شعبة ──
 window.DB_BRANCH_ALERTS = window.DB_BRANCH_ALERTS || {};
@@ -8708,10 +8058,6 @@ async function svDoSaveSession(){
 }
 
 // ── أسبوع الشهر (1..4) ──
-function svWeekOfMonth(){
-  const d = new Date();
-  return Math.min(4, Math.floor((d.getDate()-1)/7)+1);
-}
 
 // الأركان الإشرافية (تتناوب على أيام الحلقات)
 const SV_SESS_PILLARS = [
@@ -8722,74 +8068,8 @@ const SV_SESS_PILLARS = [
 ];
 
 // أيام حلقات الشعبة في الأسبوع الجاري (بتواريخها، مرتّبة كما تظهر في الأسبوع)
-function svBranchSessionDays(branchName){
-  const wk = waCurrentWeekIndex(CUR_TERM);
-  const bDates = wkWeekDates(wk, branchName, CUR_TERM);
-  // أيام الاختبار (زي حصاد الجمعة في الصيف) مش حلقة تلقين — تُستثنى من التناوب الإشرافي
-  const days = wkBranchDays(branchName, CUR_TERM).filter(d=>!(termWindow(CUR_TERM, branchName, d)||{}).exam);
-  return days.map(di=>({ dayIdx:di, dayName:WK_DAYNAME[di], iso:wkIso(bDates[di]), date:bDates[di] }));
-}
 
 // ── جدول الجلسات الإشرافية — لكل حلقة (يوم) معلم وبند إشرافي بالتناوب ──
-function svBuildSessionsSchedule(branches){
-  const todayIso = localISO(new Date());
-
-  const cards = (branches||[]).map(b=>{
-    const cfg  = SV_DB_BRANCH_CFG[b] || SV_DB_BRANCH_CFG['الأبطال'];
-    const bEsc = b.replace(/'/g,"\'");
-    const teachers = svBranchTeachers(b);   // [{name, phone}]
-    const sessDays = svBranchSessionDays(b);
-
-    let rows;
-    if(!teachers.length || !sessDays.length){
-      rows = `<div class="empty" style="padding:20px;"><span class="empty-icon">📭</span>لا توجد حلقات لهذه الشعبة هذا الأسبوع</div>`;
-    } else {
-      // توزيع دوّار: كل يوم/حلقة → معلم يتناوب + بند إشرافي يتناوب
-      rows = sessDays.map((d,i)=>{
-        const t = teachers[i % teachers.length];
-        const p = SV_SESS_PILLARS[i % SV_SESS_PILLARS.length];
-        const nameEsc = t.name.replace(/'/g,"\'");
-        const rec  = svLoadSession(d.iso, t.name, b);
-        const done = !!(rec.pillars && rec.pillars[p.key]);
-        const isToday = d.iso===todayIso;
-        const first = t.name.split(' ').slice(0,2).join(' ');
-        return `<div onclick="svOpenEvalModal('${bEsc}','${nameEsc}','${p.key}','${d.iso}')"
-          title="${d.dayName} — ${t.name} — ${p.name}"
-          style="cursor:pointer;display:flex;align-items:center;gap:12px;border:1.5px solid ${done?p.accent:(isToday?cfg.accent:'var(--border)')};border-right:4px solid ${p.accent};background:${done?p.bg:'#fff'};border-radius:var(--r-sm);padding:11px 13px;transition:all .15s;"
-          onmouseover="this.style.transform='translateX(-2px)';this.style.boxShadow='var(--shadow)'"
-          onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="min-width:78px;text-align:center;border-left:1px solid var(--border);padding-left:10px;">
-            <div style="font-size:.82rem;font-weight:800;color:var(--forest);">${d.dayName}${isToday?' 🔴':''}</div>
-            <div style="font-size:.64rem;color:var(--light);margin-top:1px;">${wkFmt(d.date)}</div>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:.72rem;font-weight:700;color:${p.accent};">${p.icon} ${p.name}</div>
-            <div style="font-size:.84rem;font-weight:800;color:var(--forest);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${done?'✅ ':''}المعلم/ ${first}</div>
-          </div>
-          <div style="font-size:.66rem;color:${done?p.accent:'var(--light)'};font-weight:700;white-space:nowrap;">${done?'تمت':'لم تتم'}</div>
-        </div>`;
-      }).join('');
-    }
-
-    return `<div class="card" style="margin-bottom:0;border-top:3px solid ${cfg.accent};">
-      <div class="card-head" style="background:${cfg.bg};">
-        <div class="card-title" style="display:flex;align-items:center;gap:8px;font-size:1rem;">
-          <span style="font-size:1.2rem;">${cfg.emoji}</span> جلسات شعبة ${b}
-        </div>
-        <span class="badge bg-gray" style="font-size:.74rem;">جلسة لكل حلقة — البند يتناوب</span>
-      </div>
-      <div style="padding:14px;display:flex;flex-direction:column;gap:9px;">${rows}</div>
-    </div>`;
-  }).join('');
-
-  return `<div style="margin-bottom:0;">
-    <div class="card-head" style="background:none;border:none;padding:0 0 12px;">
-      <div class="card-title">🗓️ جدول الجلسات الإشرافية</div>
-      <span class="badge bg-gray">جلسة متابعة لكل حلقة — المعلم والبند يتناوبان يومياً</span>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px;">${cards || '<div class="card"><div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا توجد شعب</div></div>'}</div>
-  </div>`;
-}
 
 // ══════════════════════════════════════════════════════
 // تقارير الجلسات الإشرافية (live من supervisory_sessions)
@@ -8804,45 +8084,7 @@ function svFmtReportDate(iso){
 }
 
 // إزالة الجلسات المكررة لنفس (المعلم + التاريخ + الشعبة) مع الاحتفاظ بالأحدث
-function svDedupeSessions(rows){
-  const seen = {}, out = [];
-  (rows||[]).forEach(r=>{
-    const k = String(r.teacher_name||'').trim()+'|'+(r.session_date||'')+'|'+String(r.branch||'').trim();
-    const prev = seen[k];
-    if(!prev){ seen[k]=r; out.push(r); return; }
-    const t1 = new Date(prev.saved_at||prev.session_date||0).getTime();
-    const t2 = new Date(r.saved_at||r.session_date||0).getTime();
-    if(t2 >= t1){ const idx=out.indexOf(prev); if(idx>=0) out[idx]=r; seen[k]=r; }
-  });
-  return out;
-}
 
-async function loadReports(){
-  const body = document.getElementById('reports-body');
-  const cnt  = document.getElementById('reports-count');
-  if(!body) return;
-  body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>';
-  const cu = JSON.parse(localStorage.getItem('currentUser')||'{}');
-  let rows = [];
-  try{
-    let q = db.from('supervisory_sessions').select('*').order('session_date',{ascending:false});
-    if(cu.role==='supervisor' && cu.id) q = q.eq('supervisor_id', String(cu.id));
-    const { data, error } = await selectAll(q);
-    if(error){ console.log('loadReports:', error.message); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر تحميل التقارير</div>'; return; }
-    rows = data || [];
-  }catch(e){ console.log('loadReports ex:', e); body.innerHTML = '<div class="empty" style="padding:30px;"><span class="empty-icon">⚠️</span>تعذّر الاتصال بالخادم</div>'; return; }
-
-  // إزالة التكرار: صف واحد فقط لكل (معلم + تاريخ + شعبة) — نحتفظ بالأحدث
-  rows = svDedupeSessions(rows);
-
-  if(cnt) cnt.textContent = rows.length ? (rows.length + ' جلسة') : '—';
-  if(!rows.length){
-    body.innerHTML = '<div class="empty" style="padding:36px;"><span class="empty-icon">📭</span>لم تُسجَّل أي جلسات إشرافية بعد</div>';
-    return;
-  }
-  window.SV_REPORTS_CACHE = rows;
-  svRenderReportsTable(rows);
-}
 
 // (دفعة ١٥) نوع الجلسة الإشرافية: جلسة كاملة / ركن واحد (+ البنود اللي اتقيّمت فعلاً) / حضور بس
 function svSessType(r){
@@ -8858,38 +8100,7 @@ function svSessType(r){
     h += '<div style="font-size:.64rem;color:var(--light);margin-top:2px;">اتقيّم: '+secs.map(k => SV_PILLAR_NAMES[k]||k).join('، ')+'</div>';
   return h;
 }
-function svPillarBadges(pil){
-  const keys = Object.keys(pil||{}).filter(k=>pil[k]);
-  if(!keys.length) return '<span style="color:var(--light);font-size:.74rem;">—</span>';
-  return keys.map(k=>`<span class="badge bg-blue" style="font-size:.64rem;margin:1px;">${SV_PILLAR_NAMES[k]||k}</span>`).join('');
-}
 
-function svRenderReportsTable(rows){
-  const body = document.getElementById('reports-body');
-  const trs = rows.map((r,i)=>`<tr style="border-bottom:1px solid var(--border);">
-    <td style="padding:10px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);white-space:nowrap;">${svFmtReportDate(r.session_date)}</td>
-    <td style="padding:10px;font-weight:700;color:var(--forest);">${esc(r.teacher_name||'—')}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--mid);">${esc(r.branch||'—')}</td>
-    <td style="padding:10px;text-align:center;font-size:.8rem;color:var(--emerald);font-weight:700;">${r.supervisor_name||'—'}</td>
-    <td style="padding:10px;text-align:center;">${svSessType(r)}</td>
-    <td style="padding:10px;text-align:center;font-size:.78rem;">${r.attendance||'—'}</td>
-    <td style="padding:10px;text-align:center;"><button class="btn btn-outline btn-xs" onclick="svViewReport(${i})">👁️ عرض</button></td>
-  </tr>`).join('');
-  body.innerHTML = `<table style="width:100%;border-collapse:collapse;min-width:760px;">
-    <thead><tr style="background:var(--bg);">
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);width:40px;">م</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">تاريخ الجلسة</th>
-      <th style="padding:11px;text-align:right;font-size:.76rem;color:var(--mid);">المعلم</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الشعبة</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">المشرف</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">نوع الجلسة</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">الحضور</th>
-      <th style="padding:11px;text-align:center;font-size:.76rem;color:var(--mid);">التفاصيل</th>
-    </tr></thead>
-    <tbody>${trs}</tbody>
-  </table>`;
-}
 
 function svViewReport(i){
   const r = (window.SV_REPORTS_CACHE||[])[i]; if(!r) return;
@@ -8921,222 +8132,19 @@ function svViewReport(i){
 }
 
 // ── فتح معلمي شعبة معينة فقط ──
-function svOpenBranchTeachers(branchName){
-  navPage('teachers');
-  setTimeout(()=>{ try{ openTeacherBranch(branchName); }catch(e){ console.log('openTeacherBranch:', e); } }, 70);
-}
 
 // ── فتح طلاب شعبة معينة فقط ──
-function svOpenBranchStudents(branchName){
-  try{ openBranch(branchName); }catch(e){ console.log('openBranch:', e); }
-}
 
 // ══════════════════════════════════════════════════════
 // مودال تفاصيل الحلقة — جدول طلاب المعلم
 // ══════════════════════════════════════════════════════
-const SV_LEVELS = ['ممتاز','جيد جدًا','جيد','حاول مرة أخرى'];
 function svLevelColor(lvl){
   return lvl==='ممتاز'?'#1a7a4a':lvl==='جيد جدًا'?'#1d6fa4':lvl==='جيد'?'#c8920a':'#c0392b';
 }
-async function svOpenCircleModal(branchName, teacherName){
-  const titleEl = document.getElementById('svc-title');
-  if(titleEl) titleEl.textContent = 'حلقة المعلم/ ' + teacherName;
-  const body = document.getElementById('svc-body');
-  body.innerHTML = '<div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري تحميل بيانات الحلقة...</div>';
-  openModal('modal-circle-detail');
-
-  // حاول جلب البيانات الحقيقية من قاعدة البيانات
-  let realData = null;
-  try {
-    realData = await svFetchCircleLive(branchName, teacherName);
-  } catch(e){ console.log('svFetchCircleLive:', e); }
-
-  if(realData && realData.rows.length){
-    svRenderCircleTable(realData.rows, realData.status, true, realData.dailyReport);
-    return;
-  }
-
-  // ── لا توجد بيانات حقيقية بعد: اعرض الطلاب بحالة "لم يُسجّل" بدل توليد أرقام وهمية ──
-  const circles = svBranchCircles(branchName);
-  const circle  = circles.find(c => c.teacher === teacherName) || (BRANCH_DATA[branchName]||[]).find(c=>c.teacher===teacherName);
-  const students = (circle && circle.students) ? circle.students : [];
-  if(!students.length){
-    body.innerHTML = '<div class="empty" style="padding:24px;"><span class="empty-icon">📭</span>لا يوجد طلاب في هذه الحلقة</div>';
-    return;
-  }
-  const status = svScheduleStatus(branchName);
-  const rows = students.map((s) => ({
-    name: s, att: '—', mem: '—', rev: '—', memPlan: 'لم يتم', revPlan: 'لم يتم'
-  }));
-  svRenderCircleTable(rows, status, false);
-}
 
 // ── جلب بيانات الحلقة الحقيقية (حضور + تسميع) ليوم الحلقة الحالي ──
-async function svFetchCircleLive(branchName, teacherName){
-  // 1) Resolve teacher id via flexible name match (tolerates spaces/parentheses)
-  const clean = String(teacherName||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-  const norm  = x => String(x||'').replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim();
-  const { data: tAll } = await db.from('users').select('id, full_name');
-  if(!tAll || !tAll.length) return null;
-  let tRow = tAll.find(t => norm(t.full_name) === clean)
-          || tAll.find(t => norm(t.full_name).startsWith(clean) || clean.startsWith(norm(t.full_name)))
-          || tAll.find(t => clean && (norm(t.full_name).includes(clean) || clean.includes(norm(t.full_name))));
-  if(!tRow) return null;
-  const teacherId = tRow.id;
-  
-  // 2) طلاب المعلم
-  const { data: sData } = await db.from('students')
-    .select('id, users!students_user_id_fkey(full_name)')
-    .eq('teacher_id', teacherId).eq('is_active', true);
-  if(!sData || !sData.length) return null;
-  const students = sData.map(s => ({ id:s.id, name: s.users?.full_name || 'طالب' }));
-  const ids = students.map(s => s.id);
-
-  // 3) تاريخ الحلقة الحالي لهذه الشعبة
-  const status = svScheduleStatus(branchName);
-  const date = status.date;
-
-  // 3.ب) الطلاب الزائرون (خارج الحلقة) المضافون من المعلم لهذا اليوم — يظهرون مباشرة
-  let guests = [];
-  try {
-    const { data: gData } = await db.from('circle_guests')
-      .select('student_id, student_name, student_teacher')
-      .eq('added_by', teacherId).eq('guest_date', date);
-    guests = (gData||[]).filter(g => g.student_id && !ids.includes(g.student_id)).map(g => ({
-      id: g.student_id, name: g.student_name || 'طالب', _guest: true, guestTeacher: g.student_teacher || ''
-    }));
-  } catch(e){ loadWarn(e); }
-  // 3.ج) ضمان ظهور الزائر: ادمج زوّار تقرير اليوم المرفوع (لو التوقيت اختلف أو الصف اتسجّل في التقرير مش في الجداول)
-  try {
-    const { data: rRep } = await db.from('circle_reports')
-      .select('data').eq('teacher_id', teacherId).eq('report_date', date).limit(1);
-    const rd = (rRep && rRep[0] && Array.isArray(rRep[0].data)) ? rRep[0].data : [];
-    rd.forEach(row => {
-      if(!row || !row.is_guest) return;
-      const gid = row.student_id || ('rg_'+(row.name||'ضيف'));
-      if(ids.includes(gid) || guests.some(g=>g.id===gid)) return;
-      guests.push({ id:gid, name: row.name || 'طالب', _guest:true, guestTeacher: row.guest_teacher || '', _rep: row });
-    });
-  } catch(e){ loadWarn(e); }
-  const allStudents = students.concat(guests);
-  const allIds = allStudents.map(s => s.id);
-
-  // 4) الحضور لهذا اليوم
-  const { data: attData } = await selectAll(db.from('attendance')
-    .select('student_id, status, late_minutes').in('student_id', allIds).eq('date', date).order('date').order('student_id'));
-  const attMap = {}, lateMap = {};
-  (attData||[]).forEach(a => { attMap[a.student_id] = a.status; lateMap[a.student_id] = a.late_minutes||0; });
-
-  // 5) التسميع لهذا اليوم (حفظ + مراجعة)
-  const mq = cols => selectAll(db.from('memorization')
-    .select(cols).in('student_id', allIds).eq('date', date).order('date').order('student_id').order('type'));
-  let { data: memData, error: mErr } = await mq('student_id, type, grade, plan_status');
-  if(mErr && /plan_status/.test(mErr.message||'')) ({ data: memData } = await mq('student_id, type, grade'));
-  const memMap = {}, revMap = {}, memSt = {}, revSt = {};
-  (memData||[]).forEach(m => {
-    if(m.type==='review'){ revMap[m.student_id] = m.grade; revSt[m.student_id] = m.plan_status||null; }
-    else { memMap[m.student_id] = m.grade; memSt[m.student_id] = m.plan_status||null; }
-  });
-
-  const gradeAr = { excellent:'ممتاز', very_good:'جيد جداً', good:'جيد', retry:'حاول مرة أخرى' };
-  const attAr   = { present:'حاضر', absent:'غائب' };
-
-  // 6) نقاط الطلاب (مجموع من points_cards)  [#3]
-  const ptsMap = {};
-  try {
-    const { data: pData } = await db.from('points_cards').select('student_id, points').in('student_id', allIds);
-    (pData||[]).forEach(p => { ptsMap[p.student_id] = (ptsMap[p.student_id]||0) + (Number(p.points)||0); });
-  } catch(e){ loadWarn(e); }
-
-  // 7) آخر تقرير يومي للحلقة من المعلم  [#2]
-  let dailyReport = null;
-  try {
-    const { data: rData } = await db.from('circle_reports').select('*').eq('teacher_id', teacherId).order('report_date',{ascending:false}).limit(1);
-    if(rData && rData.length) dailyReport = rData[0];
-  } catch(e){ loadWarn(e); }
-
-  const rows = allStudents.map(s => {
-    let attRaw = attMap[s.id];
-    let memG = memMap[s.id], revG = revMap[s.id];
-    if(s._rep){ if(attRaw==null) attRaw = s._rep.attendance; if(memG==null) memG = s._rep.mem_grade; if(revG==null) revG = s._rep.rev_grade; }   // fallback من التقرير المرفوع
-    let att;
-    if(attRaw==='late'){ const mn=lateMap[s.id]||(s._rep&&s._rep.late_minutes)||0; att = mn ? ('متأخر '+wkAr(mn)+' دقيقة') : 'متأخر'; }
-    else att = attRaw ? (attAr[attRaw]||attRaw) : 'لم يُسجَّل';
-    const mem = (att==='غائب') ? '—' : (memG ? (gradeAr[memG]||memG) : '—');
-    const rev = (att==='غائب') ? '—' : (revG ? (gradeAr[revG]||revG) : '—');
-    return { name:s.name, att, mem, rev, pts: ptsMap[s.id]||0,
-      memPlan: memSt[s.id] ? WK_PLAN_ST[memSt[s.id]] : (memG ? (memG==='retry'?'لم يتم':'تم') : 'لم يتم'),
-      revPlan: revSt[s.id] ? WK_PLAN_ST[revSt[s.id]] : (revG ? (revG==='retry'?'لم يتم':'تم') : 'لم يتم'),
-      _guest: !!s._guest, guestTeacher: s.guestTeacher || '' };
-  });
-
-  return { rows, status, dailyReport };
-}
 
 // ── رسم جدول الحلقة (يُستخدم للحقيقي والتقديري) ──
-function svRenderCircleTable(rows, status, isLive, dailyReport){
-  const body = document.getElementById('svc-body');
-  const planBadge = (v)=> wkPlanPill(v,'font-size:.7rem;padding:2px 9px;');
-
-  const trs = rows.map((r,i)=>{
-    let attCol, attBg;
-    if(r.att==='حاضر'){ attCol='#1a7a4a'; attBg='#e8f5ee'; }
-    else if(r.att.indexOf('متأخر')===0){ attCol='#c8920a'; attBg='#fdf3dc'; }
-    else if(r.att==='غائب'){ attCol='#c0392b'; attBg='#fdf0ef'; }
-    else { attCol='var(--light)'; attBg='var(--bg)'; }
-    const memC = (r.mem==='—')?'var(--light)':svLevelColor(r.mem);
-    const revC = (r.rev==='—')?'var(--light)':svLevelColor(r.rev);
-    const guestBg = r._guest ? 'background:var(--gold-pale);' : '';
-    const guestTag = r._guest ? ` <span style="font-size:.62rem;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold-l);padding:1px 7px;border-radius:99px;white-space:nowrap;">ضيف${r.guestTeacher?' · معلمه: '+r.guestTeacher:''}</span>` : '';
-    return `<tr style="border-bottom:1px solid var(--border);${guestBg}">
-      <td style="padding:8px 6px;text-align:center;color:var(--light);font-size:.78rem;">${i+1}</td>
-      <td style="padding:8px 10px;font-weight:600;font-size:.82rem;color:var(--forest);">${r.name}${guestTag}</td>
-      <td style="padding:8px 6px;text-align:center;"><span style="font-size:.72rem;font-weight:700;color:${attCol};background:${attBg};padding:2px 9px;border-radius:99px;white-space:nowrap;">${r.att}</span></td>
-      <td style="padding:8px 6px;text-align:center;font-size:.78rem;font-weight:700;color:${memC};">${r.mem}</td>
-      <td style="padding:8px 6px;text-align:center;font-size:.78rem;font-weight:700;color:${revC};">${r.rev}</td>
-      <td style="padding:8px 6px;text-align:center;"><span style="font-size:.72rem;font-weight:800;color:var(--gold);background:var(--gold-pale);padding:2px 9px;border-radius:99px;white-space:nowrap;">${r.pts||0} ⭐</span></td>
-      <td style="padding:8px 6px;text-align:center;">${planBadge(r.memPlan)}</td>
-      <td style="padding:8px 6px;text-align:center;">${planBadge(r.revPlan)}</td>
-    </tr>`;
-  }).join('');
-
-  const banner = isLive
-    ? `<div style="background:#e8f5ee;border:1px solid #1a7a4a;color:#0f5c36;font-size:.76rem;font-weight:700;padding:7px 12px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-         <span>🔗 بيانات مباشرة من تسجيل المعلم</span><span style="font-weight:600;">${esc(status.text||'')}</span></div>`
-    : `<div style="background:var(--bg);border:1px dashed var(--border);color:var(--mid);font-size:.74rem;padding:7px 12px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-         <span>📊 عرض تقديري — لم يبدأ المعلم التسجيل بعد</span><span style="font-weight:600;">${esc(status.text||'')}</span></div>`;
-
-  // بانر التقرير اليومي للحلقة (من المعلم)  [#2]
-  let reportBanner = '';
-  if(dailyReport){
-    const rd = dailyReport.report_date || '';
-    const pc = (dailyReport.present_count!=null) ? dailyReport.present_count : '—';
-    const sc = (dailyReport.students_count!=null) ? dailyReport.students_count : '—';
-    reportBanner = `<div style="background:var(--blue-pale);border:1px solid var(--blue);color:#0d4d72;font-size:.76rem;padding:9px 12px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="font-weight:800;">📋 آخر تقرير يومي رفعه المعلم</span>
-      <span style="font-weight:600;">📅 ${rd}</span>
-      <span style="font-weight:600;">الحضور: ${pc} / ${sc}</span>
-    </div>`;
-  }
-
-  body.innerHTML = banner + reportBanner + `<div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;min-width:680px;">
-      <thead>
-        <tr style="background:var(--pale);">
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">م</th>
-          <th style="padding:9px 10px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:right;border-bottom:2px solid var(--border);">اسم الطالب</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">الحضور</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">مستوى الحفظ</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">مستوى المراجعة</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">النقاط</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">خطة الحفظ</th>
-          <th style="padding:9px 6px;font-size:.72rem;color:var(--emerald);font-weight:700;text-align:center;border-bottom:2px solid var(--border);">خطة المراجعة</th>
-        </tr>
-      </thead>
-      <tbody>${trs}</tbody>
-    </table>
-  </div>`;
-}
 
 // ══════════════════════════════════════════════════════
 // المتابعة الأسبوعية
@@ -9176,10 +8184,8 @@ function wkBranchDays(branchName, t){
 }
 
 // أحد الأسبوع الذي يقع فيه تاريخ معيّن (getDay: 0=أحد)
-function wkSundayOf(dt){ const x=new Date(dt); x.setHours(0,0,0,0); x.setDate(x.getDate()-x.getDay()); return x; }
 
 // هل الشعبة إناث؟
-function wkIsGirls(branchName){ return termIsGirls(branchName); }
 
 // تواريخ الأسبوع السبعة — مفهرسة بـ getDay (0=أحد..6=سبت) — بداية الأسبوع من جدول الدورات
 function wkWeekDates(wIdx, branchName, t){
@@ -9603,7 +8609,6 @@ let   WA_CURRENT = 0;
 let   WA_DATA    = {};   // {branchName: {alerts:[], warnings:[]}}
 
 // تحويل الأرقام العربية لإنجليزي ثم استخراج رقم
-function waNum(str){ const m = String(str).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).match(/\d+/); return m?parseInt(m[0]):0; }
 
 function waPrevWeek(){ if(WA_CURRENT>0){ WA_CURRENT--; renderWAlerts(); } }
 function waNextWeek(){ if(WA_CURRENT<WK_TOTAL-1){ WA_CURRENT++; renderWAlerts(); } }
@@ -10438,33 +9443,7 @@ function deleteBranchAlert(branchName, id){
   else svRenderBranchAlerts(branchName);
 }
 
-function openAddAlertModal(branchName){
-  window._CURRENT_ALERT_BRANCH = branchName || (window.SUPERVISOR_BRANCH) || 'الأبطال';
-  const teachers = svBranchTeacherList(window._CURRENT_ALERT_BRANCH) || (window.SUPERVISOR_TEACHER_LIST || []);
-  const sel = document.getElementById('add-alert-teacher-sel');
-  if(sel){
-    sel.innerHTML = '<option value="">اختر معلم (اختياري)</option>' +
-      teachers.map(t=>`<option value="${t}">${t}</option>`).join('');
-  }
-  document.getElementById('add-alert-text').value = '';
-  document.getElementById('add-alert-type').value = 'gold';
-  openModal('modal-add-alert');
-}
 
-function saveNewAlert(){
-  const text    = document.getElementById('add-alert-text').value.trim();
-  const type    = document.getElementById('add-alert-type').value;
-  const teacher = document.getElementById('add-alert-teacher-sel').value;
-  if(!text){ showToast('⚠️ اكتب نص التنبيه أولاً', 'error'); return; }
-  const branch  = window._CURRENT_ALERT_BRANCH || 'الأبطال';
-  const icons = {red:'⚠️', gold:'📋', green:'🏆', blue:'💬'};
-  const fullText = teacher ? `${teacher}: ${text}` : text;
-  svSeedBranchAlerts(branch);
-  window.DB_BRANCH_ALERTS[branch].unshift({id:Date.now(), type, icon:icons[type]||'📋', text:fullText, time:'الآن'});
-  closeModal('modal-add-alert');
-  svRenderBranchAlerts(branch);
-  showToast('✅ تم إضافة التنبيه لشعبة ' + branch);
-}
 
 // ── اشتراكات شعبة معينة ──
 
@@ -12408,85 +11387,16 @@ document.addEventListener('click', function(e) {
     drop.style.display = 'none';
   }
 });
-function svBranchCheckStyle(cb) {
-  const lbl = cb.closest('label');
-  if (!lbl) return;
-  if (cb.checked) {
-    lbl.style.borderColor = 'var(--jade)';
-    lbl.style.background  = 'var(--pale)';
-    lbl.style.color       = 'var(--emerald)';
-    lbl.style.fontWeight  = '700';
-  } else {
-    lbl.style.borderColor = 'var(--border)';
-    lbl.style.background  = '#fff';
-    lbl.style.color       = '';
-    lbl.style.fontWeight  = '600';
-  }
-}
 
 // ── transliterate Arabic helper ──
-function transliterateAr(str) {
-  const map = {'أ':'a','ا':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'th','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ى':'a','ة':'a','ء':'','إ':'a','آ':'a','ئ':'y','ؤ':'w'};
-  return str.split('').map(c => map[c] !== undefined ? map[c] : c).join('');
-}
 
 // ── helper used in branch checklists ──
 // svBranchCheckStyle is defined earlier in the file
 </script>
 
 <!-- ══ MODAL: إضافة تنبيه جديد ══ -->
-<div class="overlay" id="modal-add-alert">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-head">
-      <div class="modal-title">🔔 إضافة تنبيه جديد</div>
-      <button class="modal-close" onclick="closeModal('modal-add-alert')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg">
-        <label>نوع التنبيه</label>
-        <select id="add-alert-type" style="font-family:Tajawal;font-size:.88rem;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-          <option value="red">🔴 تحذير — خطأ أو مشكلة</option>
-          <option value="gold" selected>🟡 تنبيه — يحتاج متابعة</option>
-          <option value="green">🟢 إنجاز — خبر إيجابي</option>
-          <option value="blue">🔵 ملاحظة — معلومة</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>المعلم المعني <span style="color:var(--light);font-weight:400;">(اختياري)</span></label>
-        <select id="add-alert-teacher-sel" style="font-family:Tajawal;font-size:.88rem;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;direction:rtl;">
-          <option value="">اختر معلم (اختياري)</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>نص التنبيه *</label>
-        <textarea id="add-alert-text" placeholder="مثال: تسميع الحفظ أقل من المستهدف هذا الأسبوع..." rows="3"
-          style="font-family:Tajawal;font-size:.88rem;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);outline:none;resize:vertical;direction:rtl;width:100%;box-sizing:border-box;"
-          onkeydown="if(event.ctrlKey&&event.key==='Enter')saveNewAlert()"></textarea>
-        <div style="font-size:.72rem;color:var(--light);margin-top:3px;">Ctrl+Enter للحفظ السريع</div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="saveNewAlert()">💾 حفظ التنبيه</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add-alert')">إلغاء</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ مودال تفاصيل الحلقة ══ -->
-<div class="overlay" id="modal-circle-detail">
-  <div class="modal" style="max-width:760px;">
-    <div class="modal-head">
-      <div class="modal-title" id="svc-title">🕌 حلقة المعلم/</div>
-      <button class="modal-close" onclick="closeModal('modal-circle-detail')">×</button>
-    </div>
-    <div class="modal-body" id="svc-body" style="max-height:70vh;overflow-y:auto;">
-      <div class="empty" style="padding:24px;"><span class="empty-icon">⏳</span>جاري التحميل...</div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeModal('modal-circle-detail')">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══ مودال: المتابعة الأسبوعية — جداول اليوم ══ -->
 <div class="overlay" id="modal-weekly-day">
@@ -13202,8 +12112,8 @@ async function loadCsReviews(){
   if(!rows.length){ out.innerHTML='<div class="empty" style="padding:30px;"><span class="empty-icon">📭</span>لا توجد تلخيصات مُرسلة للمراجعة</div>'; return; }
   const pending=rows.filter(r=>r.status==='submitted'), others=rows.filter(r=>r.status!=='submitted');
   const rowHtml=(r)=>'<tr>'+
-    '<td style="font-weight:700;color:var(--forest);">'+(r._tname)+'</td>'+
-    '<td>'+((r.course_name||'—'))+'</td>'+
+    '<td style="font-weight:700;color:var(--forest);">'+esc(r._tname)+'</td>'+
+    '<td>'+esc(r.course_name||'—')+'</td>'+
     '<td style="text-align:center;white-space:nowrap;">'+(r.content?'📝':'')+((r.images&&r.images.length)?(' 🖼️'+rptAr(r.images.length)):'')+'</td>'+
     '<td>'+csrBadge(r.status)+'</td>'+
     '<td><button class="btn btn-primary btn-sm" onclick="openCsReview(\''+r.id+'\')">مراجعة</button></td></tr>';
@@ -14467,9 +13377,6 @@ function finSubsHeadRender(){
     +L.map((m,i)=>'<th style="text-align:center;'+(i===0?'border-right:2px solid var(--border);':'')+'">المبلغ</th><th style="text-align:center;">وسيلة الدفع</th><th style="text-align:center;">المستلم</th><th style="text-align:center;'+b+'">تاريخ التسليم</th>').join('')+'</tr>';
 }
 const FIN_DUR_AR      = { 1:'شهر', 2:'شهرين', 3:'ثلاثة أشهر' };
-const FIN_EXP_CAT_AR  = { salaries:'مرتبات', food:'طعام', maintenance:'صيانة', motivation:'تحفيز وترفيه', purchases:'مشتريات', marketing:'تسويق', assets:'الأصول', monthly_subs:'اشتراكات شهرية', transport:'انتقالات' };
-const FIN_SAL_KIND_AR = { monthly:'مرتب شهري', bonus:'حوافز' };
-const FIN_ROLE_AR     = { teacher:'معلم', supervisor:'مشرف', admin:'مدير', employee:'موظف' };
 
 const FIN_ICON_P = {
   plus:  '<path d="M12 5v14"/><path d="M5 12h14"/>',

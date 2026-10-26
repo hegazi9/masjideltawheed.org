@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- (دفعة ٣٥) تطبيق الموبايل -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2318">
+<link rel="icon" type="image/png" href="pwa-64.png">
+<link rel="apple-touch-icon" href="pwa-apple.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="مدرسة التوحيد">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>مدرسة التوحيد القرآنية — تسجيل الدخول</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 
@@ -125,6 +134,8 @@ input.error-input { border-color:var(--err); }
 .redirect-progress { height:3px; background:#dde8e2; border-radius:99px; margin-top:7px; overflow:hidden; }
 .redirect-fill { height:100%; border-radius:99px; background:linear-gradient(to left, var(--jade), var(--mint)); width:0%; transition:width 2.5s linear; }
 
+/* (دفعة ٣٥) الآيفون مايعملش زووم وإنت بتكتب */
+@media (max-width:900px){ input[type="text"], input[type="password"] { font-size:16px; } }
 @media (max-width:420px){
   .login-box { padding:28px 20px 30px; }
   .role-grid { gap:5px; }
@@ -496,5 +507,7 @@ document.addEventListener('keydown', function(e){
   } catch(e) { console.warn(e); }
 })();
 </script>
+<!-- (دفعة ٣٥) تطبيق الموبايل: التثبيت من صفحة الدخول -->
+<script src="pwa.js" data-page="login"></script>
 </body>
 </html>

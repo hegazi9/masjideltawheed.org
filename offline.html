@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2318">
+<title>مفيش إنترنت — مدرسة التوحيد القرآنية</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:linear-gradient(160deg,#0f1f14 0%,#1b3a28 45%,#162d1e 100%);color:#0f2318;}
+  .box{background:#fefcf5;border-radius:22px;padding:34px 30px;max-width:420px;width:100%;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.45);}
+  img{width:92px;height:92px;border-radius:50%;margin-bottom:16px;}
+  h1{font-size:1.35rem;font-weight:800;margin-bottom:8px;}
+  p{font-size:.92rem;color:#4a5e52;line-height:1.8;margin-bottom:20px;}
+  button{font-family:inherit;font-size:1rem;font-weight:700;color:#fff;border:none;border-radius:11px;padding:12px 26px;cursor:pointer;
+    background:linear-gradient(135deg,#1e5c36,#2d7a50);box-shadow:0 4px 16px rgba(30,92,54,.3);}
+  small{display:block;margin-top:16px;font-size:.75rem;color:#8ea598;}
+</style>
+</head>
+<body>
+  <div class="box">
+    <img src="pwa-192.png" alt="مدرسة التوحيد">
+    <h1>مفيش اتصال بالإنترنت</h1>
+    <p>اللوحة محتاجة إنترنت عشان تجيب البيانات الحقيقية.<br>اتأكد من الواي فاي أو البيانات وجرّب تاني.</p>
+    <button onclick="location.reload()">🔄 حاول تاني</button>
+    <small>مدرسة التوحيد القرآنية — إصلاح حياة</small>
+  </div>
+  <script>window.addEventListener('online', function () { location.reload(); });</script>
+</body>
+</html>
