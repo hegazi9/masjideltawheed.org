@@ -21,6 +21,15 @@
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- (دفعة ٣٦) تطبيق الموبايل -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2318">
+<link rel="icon" type="image/png" href="pwa-64.png">
+<link rel="apple-touch-icon" href="pwa-apple.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="التوحيد">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>لوحة المعلم — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
@@ -849,6 +858,7 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
     </div>
   </div>
   <div class="tb-right">
+    <div class="tb-notif" id="pwa-tb" onclick="if(window.PWA)PWA.tb()" title="تطبيق الموبايل" style="font-size:1.1rem;display:none;">📲</div>
     <div class="tb-notif" onclick="openThemePicker()" title="تغيير الثيم" style="font-size:1.1rem;">🎨</div>
     <div class="tb-date" id="tb-date"></div>
   </div>
@@ -1531,6 +1541,11 @@ html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);colo
   </div>
   <div class="card"><div class="card-head"><div class="card-title">🎨 مظهر اللوحة</div></div>
     <div class="card-body"><button class="btn btn-gold" onclick="openThemePicker()">🎨 اختيار الثيم</button></div>
+  </div>
+  <!-- (دفعة ٣٦) التطبيق + إشعارات الجهاز — المحتوى من pwa.js -->
+  <div class="card" style="margin-top:18px;" id="pwa-card">
+    <div class="card-head"><div class="card-title">📲 تطبيق الموبايل والإشعارات</div></div>
+    <div class="card-body" id="pwa-card-body"><div style="color:var(--light);font-size:.85rem;">⏳ جاري الفحص…</div></div>
   </div>
 </div>
 
@@ -6461,5 +6476,6 @@ async function mrLoadAlerts(){
 boot();
 </script>
 <script src="messages.js"></script>
+<script src="pwa.js"></script>
 </body>
 </html>

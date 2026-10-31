@@ -1,7 +1,7 @@
 {
   "id": "tawheed",
   "name": "مدرسة التوحيد القرآنية",
-  "short_name": "مدرسة التوحيد",
+  "short_name": "التوحيد",
   "description": "نظام إدارة مدرسة التوحيد القرآنية — إصلاح حياة",
   "start_url": "login.html",
   "scope": "./",

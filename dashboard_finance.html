@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" href="pwa-apple.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="مدرسة التوحيد">
+<meta name="apple-mobile-web-app-title" content="التوحيد">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>لوحة المدير المالي — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
@@ -1089,6 +1089,7 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
   </div>
   <div class="tb-right">
     <select id="term-sel" class="term-sel" onchange="termSwitch(this.value)" title="الدورة"></select>
+    <div class="tb-notif" id="pwa-tb" onclick="if(window.PWA)PWA.tb()" title="تطبيق الموبايل" style="font-size:1.1rem;display:none;">📲</div>
     <div class="tb-notif" onclick="openThemePicker()" title="تغيير الثيم" style="font-size:1.1rem;">🎨</div>
     <div class="tb-date" id="tb-date"></div>
   </div>
@@ -2116,6 +2117,11 @@ td.fin-unc-c .badge{filter:grayscale(1);opacity:.6;}
         <button class="btn btn-gold" id="set-pw-btn" onclick="changeMyPassword()">تغيير كلمة المرور</button>
       </div>
     </div>
+  </div>
+  <!-- (دفعة ٣٦) تطبيق الموبايل — المحتوى من pwa.js (المدير المالي مالوش إشعارات ← التثبيت بس) -->
+  <div class="card" style="margin-top:18px;" id="pwa-card">
+    <div class="card-head"><div class="card-title">📲 تطبيق الموبايل</div></div>
+    <div class="card-body" id="pwa-card-body"><div style="color:var(--light);font-size:.85rem;">⏳ جاري الفحص…</div></div>
   </div>
 </div>
 
@@ -5356,5 +5362,6 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mobInit); else mobInit();
 })();
 </script>
+<script src="pwa.js"></script>
 </body>
 </html>

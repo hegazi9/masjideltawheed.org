@@ -18,6 +18,14 @@
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- (دفعة ٣٦) تطبيق الموبايل -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="pwa-64.png">
+<link rel="apple-touch-icon" href="pwa-apple.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="التوحيد">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#0f2318">
 <title>منصة النقاط — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -377,6 +385,8 @@ body.tv .stat-card{background:rgba(255,255,255,.96);}
     <button class="tb-burger" onclick="toggleSide(true)" aria-label="القائمة">☰</button>
     <div class="tb-title" id="tb-title">🛒 البيع</div>
     <select id="term-sel" onchange="termSwitch(this.value)" title="الدورة"></select>
+    <button type="button" class="pwa-tbtn" id="pwa-tb" onclick="if(window.PWA)PWA.tb()" title="تطبيق الموبايل" style="display:none;">📲</button>
+    <button type="button" class="pwa-tbtn" id="pwa-rl" onclick="location.reload()" title="تحديث" style="display:none;">🔄</button>
   </div>
   <div class="content">
 
@@ -479,6 +489,11 @@ body.tv .stat-card{background:rgba(255,255,255,.96);}
             <button class="btn btn-primary" id="np-btn" onclick="changeMyPassword()">💾 حفظ</button>
           </div>
         </div>
+      </div>
+      <!-- (دفعة ٣٦) تطبيق الموبايل — المحتوى من pwa.js -->
+      <div class="card" style="margin-top:16px;" id="pwa-card">
+        <div class="card-head"><div class="card-title">📲 تطبيق الموبايل</div></div>
+        <div class="card-body" id="pwa-card-body"><div style="color:var(--light);font-size:.85rem;">⏳ جاري الفحص…</div></div>
       </div>
     </div>
 
@@ -1264,5 +1279,6 @@ async function init(){
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>
+<script src="pwa.js"></script>
 </body>
 </html>

@@ -1,20 +1,32 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   pwa.js — تطبيق الموبايل (PWA) + الإشعارات (Push) | مدرسة التوحيد القرآنية — دفعة ٣٥
+   pwa.js — تطبيق الموبايل (PWA) + الإشعارات (Push) | مدرسة التوحيد القرآنية
+   دفعة ٣٥ (المدير) • دفعة ٣٦ (كل اللوحات)
    • <script src="pwa.js" data-page="login"> في صفحة الدخول: التثبيت بس
-   • <script src="pwa.js"> آخر لوحة المدير: التثبيت + الإشعارات + كارت الإعدادات
-   • بيسجّل sw.js • شريط تحت على الموبايل («ثبّت التطبيق» ← «فعّل الإشعارات»)
+   • <script src="pwa.js"> آخر أي لوحة: التثبيت + الإشعارات + كارت الإعدادات
+   • بيسجّل sw.js • شريط على الموبايل («ثبّت التطبيق» ← «فعّل الإشعارات»)
+     — تحت، ولو اللوحة فيها شريط سفلي (.bnav) بيبقى فوق تحت الشريط العلوي
    • شرح التثبيت للآيفون (Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية) وللأندرويد
    • الجهاز بيتسجّل في القاعدة (push_subscribe) — والإرسال من السيرفر (Edge Function send-push)
-   • لأي لوحة تانية بعدين: ضيف السكربت + الكارت (#pwa-card-body) + الدور في PUSH_ROLES ودوال push_*
+   • الأدوار اللي ليها إشعارات = PUSH_ROLES (لازم تطابق _push_role_ok في القاعدة)
+     المدير المالي ومنصة النقاط: التثبيت بس (مالهمش إشعارات)
+   • عناصر اختيارية في اللوحة:
+       #pwa-card / #pwa-card-body  كارت الإعدادات
+       #pwa-tb                     أيقونة 📲 في الشريط العلوي (بتختفي لما مايبقاش فيه مطلوب)
+       #pwa-rl                     زرار 🔄 تحديث (بيظهر جوه التطبيق بس) — لو مش موجود: جنب .sb-footer .sb-logout
+   • دوال اختيارية من اللوحة (لو مافيهاش notifications.js):
+       window.pwaReady()      اللوحة خلّصت إقلاعها؟
+       window.pwaOpenNtf(id)  افتح الإشعار ده (لما يتضغط من الموبايل)
+       window.pwaUnread()     عدد غير المقروء (للرقم على أيقونة التطبيق)
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
 'use strict';
 if (window.PWA) return;
 
 var PAGE = (document.currentScript && document.currentScript.getAttribute('data-page')) || 'dash';
-var PUSH_ROLES = ['admin'];
+var PUSH_ROLES = ['admin', 'supervisor', 'teacher', 'parent', 'employee'];
+var APP_NAME = 'التوحيد';            // الاسم تحت الأيقونة (نفس short_name في manifest.webmanifest)
 var LS_HIDE = 'pwa_bar_hide_v1';
-var S = { reg: null, sub: null, key: null, deferred: null, busy: false, role: '', err: '', ready: false };
+var S = { reg: null, sub: null, key: null, deferred: null, busy: false, role: '', uid: '', err: '', ready: false, unread: null };
 var UA = navigator.userAgent || '';
 
 /* ══════════ الجهاز ══════════ */
@@ -38,10 +50,11 @@ function toast(m) { if (typeof showToast === 'function') showToast(m); }
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 function timeout(p, ms) { return Promise.race([p, sleep(ms).then(function () { throw new Error('timeout'); })]); }
 function safe(t) { return String(t == null ? '' : t).replace(/[<>&"']/g, ''); }
-function myRole() { try { return (JSON.parse(localStorage.getItem('currentUser') || '{}').role) || ''; } catch (e) { return ''; } }
+function lsUser() { try { return JSON.parse(localStorage.getItem('currentUser') || '{}') || {}; } catch (e) { return {}; } }
 function pushRole() { return PAGE === 'dash' && PUSH_ROLES.indexOf(S.role) > -1; }
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* وضع خاص */ } }
+function hasDB() { return typeof window.db !== 'undefined' && window.db && typeof window.db.from === 'function'; }
 function b64u(buf) {
   var b = new Uint8Array(buf), s = '';
   for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
@@ -81,29 +94,31 @@ function head() {
   add('link', { rel: 'apple-touch-icon', href: 'pwa-apple.png' }, 'link[rel="apple-touch-icon"]');
   add('meta', { name: 'mobile-web-app-capable', content: 'yes' }, 'meta[name="mobile-web-app-capable"]');
   add('meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }, 'meta[name="apple-mobile-web-app-capable"]');
-  add('meta', { name: 'apple-mobile-web-app-title', content: 'مدرسة التوحيد' }, 'meta[name="apple-mobile-web-app-title"]');
+  add('meta', { name: 'apple-mobile-web-app-title', content: APP_NAME }, 'meta[name="apple-mobile-web-app-title"]');
 }
 
-/* ══════════ CSS (الشريط + شرح التثبيت) ══════════ */
+/* ══════════ CSS (الشريط + شرح التثبيت + الكارت) ══════════ */
 var CSS = ''
 + '.pwa-bar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:990;display:none;align-items:center;gap:10px;'
 +   'background:#0f2318;color:#fff;border-radius:16px;padding:10px 10px 10px 12px;box-shadow:0 10px 32px rgba(0,0,0,.35);font-family:Tajawal,sans-serif;direction:rtl;animation:pwaUp .3s ease both;}'
 + '.pwa-bar.on{display:flex;}'
++ '.pwa-bar.top{bottom:auto;animation-name:pwaDn;}'
 + '@keyframes pwaUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}'
-+ '.pwa-bar img{width:40px;height:40px;border-radius:50%;flex:0 0 40px;}'
++ '@keyframes pwaDn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}'
++ '.pwa-bar img{width:40px;height:40px;border-radius:11px;flex:0 0 40px;}'
 + '.pwa-bar .t{flex:1;min-width:0;font-size:.86rem;font-weight:800;line-height:1.45;}'
 + '.pwa-bar .t small{display:block;font-size:.72rem;font-weight:600;color:rgba(255,255,255,.7);}'
 + '.pwa-bar .go{border:none;background:#f0b429;color:#0f2318;font-family:inherit;font-size:.86rem;font-weight:900;border-radius:11px;padding:10px 14px;cursor:pointer;white-space:nowrap;}'
 + '.pwa-bar .go:disabled{opacity:.6;}'
 + '.pwa-bar .x{border:none;background:rgba(255,255,255,.12);color:#fff;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;flex:0 0 30px;line-height:1;padding:0;}'
-+ 'body.pwa-bar-on{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;}'
-+ 'body.pwa-bar-on .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;}'
-+ 'body.pwa-bar-on .fbn-pops{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;}'
++ 'body.pwa-bar-on:not(.pwa-bar-top){padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;}'
++ 'body.pwa-bar-on:not(.pwa-bar-top) .toast,body.pwa-bar-on:not(.pwa-bar-top) #toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;}'
++ 'body.pwa-bar-on:not(.pwa-bar-top) .fbn-pops{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important;}'
 + '.pwa-ov{position:fixed;inset:0;z-index:13500;background:rgba(10,20,14,.55);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;font-family:Tajawal,sans-serif;direction:rtl;}'
 + '.pwa-ov.open{display:flex;}'
 + '.pwa-sh{background:#fff;color:#0f2318;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto;animation:pwaUp .25s ease both;}'
 + '.pwa-sh h3{margin:0 0 4px;font-size:1.15rem;font-weight:900;display:flex;align-items:center;gap:10px;}'
-+ '.pwa-sh h3 img{width:38px;height:38px;border-radius:50%;}'
++ '.pwa-sh h3 img{width:38px;height:38px;border-radius:10px;}'
 + '.pwa-sh .sub{font-size:.8rem;color:#4a5e52;margin:0 0 12px;}'
 + '.pwa-st{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px dashed #dce8e0;}'
 + '.pwa-st:last-of-type{border-bottom:none;}'
@@ -115,6 +130,14 @@ var CSS = ''
 + '.pwa-warn{background:#fdf0ef;color:#c0392b;border-radius:11px;padding:10px 12px;font-size:.82rem;font-weight:800;margin:6px 0 10px;line-height:1.7;}'
 + '.pwa-note{background:#e8f5ee;color:#1e5c36;border-radius:11px;padding:10px 12px;font-size:.8rem;font-weight:700;margin-top:10px;line-height:1.7;}'
 + '.pwa-cl{width:100%;margin-top:14px;border:none;background:#1e5c36;color:#fff;font-family:inherit;font-size:.95rem;font-weight:800;border-radius:12px;padding:12px;cursor:pointer;}'
+/* أزرار الكارت — شكل واحد في كل اللوحات */
++ '.pwa-b{font-family:inherit;font-size:.82rem;font-weight:800;border-radius:10px;padding:8px 14px;cursor:pointer;border:1.5px solid transparent;line-height:1.3;}'
++ '.pwa-b:disabled{opacity:.6;cursor:default;}'
++ '.pwa-b.p{background:var(--emerald,#1e5c36);color:#fff;}'
++ '.pwa-b.o{background:transparent;color:var(--emerald,#1e5c36);border-color:var(--emerald,#1e5c36);}'
++ '.pwa-b.g{background:transparent;color:var(--mid,#4a5e52);border-color:var(--border,#dce8e0);}'
+/* أيقونات الشريط العلوي للوحات اللي مافيهاش .tb-notif */
++ '.pwa-tbtn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border,#dce8e0);background:var(--white,#fff);font-size:1.05rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;padding:0;line-height:1;}'
 + '';
 
 function injectCSS() {
@@ -131,23 +154,24 @@ var $ov, $bar;
 function guideHTML() {
   var st = function (n, d, s) { return '<div class="pwa-st"><div class="n">' + n + '</div><div class="d">' + d + (s ? '<small>' + s + '</small>' : '') + '</div></div>'; };
   var h = '<h3><img src="pwa-192.png" alt="">ثبّت تطبيق مدرسة التوحيد</h3>';
+  var last = pushRole() || PAGE !== 'dash';
   if (isIOS()) {
     h += '<p class="sub">على الآيفون — دقيقة واحدة بس</p>';
     if (iosOld()) h += '<div class="pwa-warn">⚠️ نسخة الآيفون عندك قديمة — الإشعارات محتاجة iOS 16.4 أو أحدث (الإعدادات ← عام ← تحديث البرنامج). التطبيق نفسه هيشتغل عادي.</div>';
     if (iosNotSafari()) h += '<div class="pwa-warn">⚠️ إنت فاتح من برنامج تاني — انسخ الرابط وافتحه في <b>Safari</b> الأول.</div>';
     h += st(1, 'اضغط زرار المشاركة ' + IC_SHARE, 'تحت في الشاشة — لو مش ظاهر: اضغط «⋯» تحت وبعدين «مشاركة»')
       + st(2, 'انزل واختار «إضافة إلى الشاشة الرئيسية» ' + IC_ADD, 'لو مش ظاهرة: انزل لآخر القايمة ← «تعديل الإجراءات»')
-      + st(3, 'اضغط «إضافة» فوق', 'لو ظهر اختيار «فتح كتطبيق ويب» خلّيه شغّال • هتلاقي أيقونة «مدرسة التوحيد» على الشاشة الرئيسية')
+      + st(3, 'اضغط «إضافة» فوق', 'لو ظهر اختيار «فتح كتطبيق ويب» خلّيه شغّال • هتلاقي أيقونة «' + APP_NAME + '» على الشاشة الرئيسية')
       + st(4, 'افتح التطبيق من الأيقونة وسجّل دخول', 'أول مرة بس — التطبيق ليه دخول لوحده غير Safari')
-      + st(5, 'اضغط «🔔 فعّل الإشعارات» ← «سماح»', 'الإشعارات على الآيفون بتشتغل من جوه التطبيق بس');
+      + (last ? st(5, 'اضغط «🔔 فعّل الإشعارات» ← «سماح»', 'الإشعارات على الآيفون بتشتغل من جوه التطبيق بس') : '');
   } else {
     h += '<p class="sub">على الأندرويد — من Chrome</p>'
       + st(1, 'اضغط ' + IC_DOTS + ' اللي فوق في Chrome', 'قايمة المتصفح')
       + st(2, 'اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»')
-      + st(3, 'اضغط «تثبيت»', 'هتلاقي أيقونة «مدرسة التوحيد» على الشاشة الرئيسية')
-      + st(4, 'افتح التطبيق من الأيقونة واضغط «🔔 فعّل الإشعارات» ← «سماح»');
+      + st(3, 'اضغط «تثبيت»', 'هتلاقي أيقونة «' + APP_NAME + '» على الشاشة الرئيسية')
+      + st(4, 'افتح التطبيق من الأيقونة' + (last ? ' واضغط «🔔 فعّل الإشعارات» ← «سماح»' : ''));
   }
-  h += '<div class="pwa-note">✅ بعد كده افتح من الأيقونة على طول — بيفتح زي أي تطبيق، والإشعارات بتوصل حتى لو التطبيق مقفول.</div>'
+  h += '<div class="pwa-note">✅ بعد كده افتح من الأيقونة على طول — بيفتح زي أي تطبيق' + (last ? '، والإشعارات بتوصل حتى لو التطبيق مقفول' : '') + '.</div>'
     + '<button class="pwa-cl" type="button" data-pwa-close="1">تمام</button>';
   return h;
 }
@@ -267,7 +291,19 @@ function need() {
 }
 function tb() { var n = need(); if (n === 'install') install(); else if (n === 'push') enable(); else goSettings(); }
 
-/* ══════════ الشريط اللي تحت (موبايل بس) ══════════ */
+/* ══════════ الشريط (موبايل بس) ══════════ */
+// اللوحة فيها شريط سفلي ظاهر (ولي الأمر • منصة النقاط)؟ ← شريطنا يطلع فوق
+function bottomNavOn() {
+  var bn = document.querySelector('.bnav');
+  if (!bn) return false;
+  try { return getComputedStyle(bn).display !== 'none' && bn.getBoundingClientRect().height > 0; } catch (e) { return false; }
+}
+function topOffset() {
+  var tb = document.querySelector('.topbar');
+  var h = 0;
+  try { if (tb) { var r = tb.getBoundingClientRect(); h = Math.max(0, r.bottom); } } catch (e) { /* مش مهم */ }
+  return Math.round((h || 56) + 8);
+}
 function renderBar() {
   if (!$bar) {
     $bar = document.createElement('div'); $bar.className = 'pwa-bar'; $bar.setAttribute('role', 'region');
@@ -281,26 +317,32 @@ function renderBar() {
   var days = n === 'install' ? 3 : 1;
   var hidden = hid[0] === n && (Date.now() - (+hid[1] || 0)) < days * 86400000;
   var show = !!n && !hidden;
+  var top = show && bottomNavOn();
   if (show) {
+    var sub = S.role === 'parent' ? 'نتيجة التسميع والتنبيهات توصلك على طول' : 'الإشعارات توصلك حتى والتطبيق مقفول';
     var txt = n === 'install'
       ? 'ثبّت تطبيق مدرسة التوحيد<small>يفتح من أيقونة على الشاشة زي أي تطبيق</small>'
-      : 'فعّل الإشعارات على الموبايل<small>الرسائل توصلك حتى والتطبيق مقفول</small>';
+      : 'فعّل الإشعارات على الموبايل<small>' + sub + '</small>';
     var btn = n === 'install' ? (isIOS() || !S.deferred ? '📲 إزاي؟' : '📥 ثبّت') : (S.busy ? '⏳' : '🔔 فعّل');
     $bar.innerHTML = '<img src="pwa-192.png" alt=""><div class="t">' + txt + '</div>'
       + '<button class="go" type="button"' + (S.busy ? ' disabled' : '') + '>' + btn + '</button>'
       + '<button class="x" type="button" title="بعدين">×</button>';
   }
+  $bar.classList.toggle('top', top);
+  $bar.style.top = top ? topOffset() + 'px' : '';
   $bar.classList.toggle('on', show);
   document.body.classList.toggle('pwa-bar-on', show);
+  document.body.classList.toggle('pwa-bar-top', top);
 }
 
 /* ══════════ كارت الإعدادات ══════════ */
 function goSettings() {
   try { if (typeof navPage === 'function') navPage('settings'); } catch (e) { /* مش مهم */ }
   setTimeout(function () {
+    render();
     var c = document.getElementById('pwa-card');
     if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'center' }); c.style.boxShadow = '0 0 0 3px var(--gold-l,#f0b429)'; setTimeout(function () { c.style.boxShadow = ''; }, 1800); }
-  }, 120);
+  }, 150);
 }
 function row(icon, label, val, extra) {
   return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border,#dce8e0);">'
@@ -310,10 +352,10 @@ function row(icon, label, val, extra) {
     + (extra ? '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">' + extra + '</div>' : '') + '</div></div>';
 }
 function btn(cls, act, txt) {
-  return '<button class="btn ' + cls + ' btn-sm" ' + (S.busy ? 'disabled ' : '') + 'onclick="PWA.' + act + '()">' + txt + '</button>';
+  return '<button type="button" class="pwa-b ' + cls + '" ' + (S.busy ? 'disabled ' : '') + 'onclick="PWA.' + act + '()">' + txt + '</button>';
 }
 function deniedHelp() {
-  if (isIOS()) return 'افتح «الإعدادات» في الآيفون ← الإشعارات ← مدرسة التوحيد ← «السماح بالإشعارات»';
+  if (isIOS()) return 'افتح «الإعدادات» في الآيفون ← الإشعارات ← ' + APP_NAME + ' ← «السماح بالإشعارات»';
   if (isAndroid()) return 'اضغط ضغطة طويلة على أيقونة التطبيق ← ⓘ معلومات التطبيق ← الإشعارات ← سماح';
   return 'اضغط 🔒 جنب العنوان ← الإشعارات ← «سماح»';
 }
@@ -330,22 +372,22 @@ function render() {
   var on = !!S.sub, p = perm(), sa = standalone(), mob = isMobile(), h = '';
   // ١) التطبيق
   if (sa) h += row('📲', 'التطبيق', '✅ إنت فاتح من التطبيق');
-  else if (S.deferred) h += row('📲', 'التطبيق', 'مش متثبّت على الجهاز ده', btn('btn-primary', 'install', '📥 ثبّت التطبيق'));
-  else if (mob) h += row('📲', 'التطبيق', 'مش متثبّت على الموبايل ده', btn('btn-primary', 'guide', isIOS() ? '📖 طريقة التثبيت على الآيفون' : '📖 طريقة التثبيت'));
-  else h += row('📲', 'التطبيق', 'افتح الموقع من موبايلك وثبّته من هناك — هيظهر شريط تحت فيه «ثبّت»');
-  // ٢) الإشعارات
+  else if (S.deferred) h += row('📲', 'التطبيق', 'مش متثبّت على الجهاز ده', btn('p', 'install', '📥 ثبّت التطبيق'));
+  else if (mob) h += row('📲', 'التطبيق', 'مش متثبّت على الموبايل ده', btn('p', 'guide', isIOS() ? '📖 طريقة التثبيت على الآيفون' : '📖 طريقة التثبيت'));
+  else h += row('📲', 'التطبيق', 'افتح الموقع من موبايلك وثبّته من هناك — هيظهر شريط فيه «ثبّت»');
+  // ٢) الإشعارات (الأدوار اللي ليها إشعارات بس)
   var L = 'إشعارات الجهاز ده';
   if (!S.ready) h += row('🔔', L, '⏳ جاري الفحص…');
-  else if (!pushRole()) h += row('🔔', L, 'مش متاحة للحساب ده لسه');
-  else if (isIOS() && !sa) h += row('🔔', L, (iosOld() ? '⚠️ محتاج تحدّث الآيفون لـ iOS 16.4 أو أحدث — و' : '') + 'على الآيفون الإشعارات بتشتغل من جوه التطبيق بس — ثبّته الأول وافتحه من الأيقونة', btn('btn-outline', 'guide', '📖 إزاي أثبّته؟'));
+  else if (!pushRole()) { /* المدير المالي ومنصة النقاط: مالهمش إشعارات */ }
+  else if (isIOS() && !sa) h += row('🔔', L, (iosOld() ? '⚠️ محتاج تحدّث الآيفون لـ iOS 16.4 أو أحدث — و' : '') + 'على الآيفون الإشعارات بتشتغل من جوه التطبيق بس — ثبّته الأول وافتحه من الأيقونة', btn('o', 'guide', '📖 إزاي أثبّته؟'));
   else if (!supported()) h += row('🔔', L, isIOS() ? 'محتاج تحدّث الآيفون لـ iOS 16.4 أو أحدث' : 'المتصفح ده مش بيدعم الإشعارات — استخدم Chrome');
-  else if (p === 'denied') h += row('🔔', L, '🚫 مقفولة من إعدادات الجهاز — ' + deniedHelp() + '، وبعدين ارجع هنا واضغط «فعّل»', btn('btn-primary', 'enable', '🔔 فعّل الإشعارات'));
+  else if (p === 'denied') h += row('🔔', L, '🚫 مقفولة من إعدادات الجهاز — ' + deniedHelp() + '، وبعدين ارجع هنا واضغط «فعّل»', btn('p', 'enable', '🔔 فعّل الإشعارات'));
   else if (on) h += row('🔔', L, '✅ مفعّلة — أي إشعار جديد هيظهر على الجهاز حتى لو التطبيق مقفول',
-    btn('btn-outline', 'test', '📨 إشعار تجربة') + btn('btn-ghost', 'disable', '⏸️ إيقاف على الجهاز ده'));
-  else h += row('🔔', L, S.err ? ('⚠️ ' + safe(S.err)) : 'مش مفعّلة', btn('btn-primary', 'enable', S.busy ? '⏳ لحظة…' : '🔔 فعّل الإشعارات'));
+    btn('o', 'test', '📨 إشعار تجربة') + btn('g', 'disable', '⏸️ إيقاف على الجهاز ده'));
+  else h += row('🔔', L, S.err ? ('⚠️ ' + safe(S.err)) : 'مش مفعّلة', btn('p', 'enable', S.busy ? '⏳ لحظة…' : '🔔 فعّل الإشعارات'));
   h += '<div style="font-size:.76rem;color:var(--light,#8ea598);line-height:1.8;padding-top:10px;">'
-    + 'كل جهاز بيتفعّل لوحده • الخروج من الحساب بيوقف الإشعارات على الجهاز ده'
-    + (isAndroid() ? ' • لو الإشعارات بتتأخر: إعدادات البطارية ← Chrome ← «غير مقيّد»' : '') + '</div>';
+    + (pushRole() ? 'كل جهاز بيتفعّل لوحده • الخروج من الحساب بيوقف الإشعارات على الجهاز ده' : 'التطبيق بيفتح من أيقونة «' + APP_NAME + '» على الشاشة زي أي تطبيق')
+    + (pushRole() && isAndroid() ? ' • لو الإشعارات بتتأخر: إعدادات البطارية ← Chrome ← «غير مقيّد»' : '') + '</div>';
   box.innerHTML = h;
 }
 
@@ -356,16 +398,20 @@ var NTF_PAGE = {
   lesson_prep: 'rep-lessons', lesson_prep_ok: 'lessonprep', lesson_prep_back: 'lessonprep',
   course_summary: 'rep-summaries', alert_action: 'walerts', points: 'points', session: 'reports', tasks: 'tasks'
 };
+function dashReady() {
+  if (!hasDB()) return false;
+  if (typeof window.pwaReady === 'function') { try { return !!window.pwaReady(); } catch (e) { return false; } }
+  var d = document.getElementById('tb-date');
+  return !!window.NotifSys && (!d || !!d.textContent.trim());
+}
 async function openNtf(id) {
   if (!id || !/^[0-9a-f-]{36}$/i.test(String(id))) return;
   try { window.focus(); } catch (e) { /* مش مهم */ }
-  // استنى اللوحة تخلّص إقلاعها (التاريخ في الشريط العلوي بيتكتب بعد التحقق من الحساب)
-  for (var i = 0; i < 80; i++) {
-    var d = document.getElementById('tb-date');
-    if (typeof window.db !== 'undefined' && window.NotifSys && (!d || d.textContent.trim())) break;
-    await sleep(250);
-  }
+  // استنى اللوحة تخلّص إقلاعها (لحد ٢٠ ثانية)
+  for (var i = 0; i < 80 && !dashReady(); i++) await sleep(250);
+  if (!hasDB()) return;
   try {
+    if (typeof window.pwaOpenNtf === 'function') { await window.pwaOpenNtf(String(id)); badgeTick(); return; }
     var r = await db.from('notifications').select('id,type,link,is_read').eq('id', id).maybeSingle();
     if (r.error || !r.data) { if (window.NotifSys) window.NotifSys.open(); return; }
     if (!r.data.is_read && window.NotifSys) window.NotifSys.markRead([r.data.id]);
@@ -373,6 +419,7 @@ async function openNtf(id) {
     if (page && document.getElementById('page-' + page) && typeof navPage === 'function') navPage(page);
     else if (window.NotifSys) window.NotifSys.open();
   } catch (e) { /* مش مهم — الإشعار في الجرس */ }
+  setTimeout(badgeTick, 1500);
 }
 function ntfFromUrl() {
   try {
@@ -384,22 +431,55 @@ function ntfFromUrl() {
   } catch (e) { /* مش مهم */ }
 }
 
-/* ══════════ رقم غير المقروء على أيقونة التطبيق ══════════ */
-function badgeTick() {
-  if (!navigator.setAppBadge || !window.NotifSys || typeof window.NotifSys.unread !== 'function') return;
-  try { var n = window.NotifSys.unread(); if (n > 0) navigator.setAppBadge(n); else navigator.clearAppBadge(); } catch (e) { /* مش مدعوم */ }
+/* ══════════ رقم غير المقروء على أيقونة التطبيق (جوه التطبيق بس) ══════════ */
+var _cntAt = 0;
+async function unreadNow() {
+  if (window.NotifSys && typeof window.NotifSys.unread === 'function') return window.NotifSys.unread();
+  if (typeof window.pwaUnread === 'function') { try { return +window.pwaUnread() || 0; } catch (e) { return null; } }
+  // لوحة من غير جرس (الموظفين): عدّ من القاعدة — مرة كل دقيقة بالكتير
+  if (!S.uid || !hasDB()) return null;
+  if (Date.now() - _cntAt < 60000) return S.unread;
+  _cntAt = Date.now();
+  try {
+    var r = await db.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', S.uid).eq('is_read', false);
+    if (!r.error) S.unread = r.count || 0;
+  } catch (e) { /* الشبكة */ }
+  return S.unread;
+}
+async function badgeTick() {
+  if (!navigator.setAppBadge || !standalone() || !pushRole()) return;
+  try {
+    var n = await unreadNow();
+    if (n == null) return;
+    if (n > 0) navigator.setAppBadge(Math.min(n, 99)); else navigator.clearAppBadge();
+  } catch (e) { /* مش مدعوم */ }
 }
 
 /* ══════════ جوه التطبيق: زرار تحديث (مفيش شريط متصفح) ══════════ */
 function reloadBtn() {
-  if (!standalone() || document.getElementById('pwa-reload')) return;
+  if (!standalone()) return;
+  var own = document.getElementById('pwa-rl');
+  if (own) { own.style.display = ''; return; }
   var lo = document.querySelector('.sb-footer .sb-logout');
   if (!lo) return;
   var b = document.createElement('div');
-  b.id = 'pwa-reload'; b.className = 'sb-logout'; b.title = 'تحديث'; b.textContent = '🔄';
+  b.id = 'pwa-rl'; b.className = 'sb-logout'; b.title = 'تحديث'; b.textContent = '🔄';
   b.style.cssText = 'background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;';
   b.addEventListener('click', function () { location.reload(); });
   lo.parentNode.insertBefore(b, lo);
+}
+
+/* ══════════ الحساب (من القاعدة — مش من localStorage) ══════════ */
+async function whoAmI() {
+  var lu = lsUser();
+  S.role = lu.role || ''; S.uid = lu.id ? String(lu.id) : '';
+  try {
+    var ses = (await db.auth.getSession()).data.session;
+    if (!ses) return null;
+    var r = await db.from('users').select('id,role').eq('auth_id', ses.user.id).maybeSingle();
+    if (!r.error && r.data) { S.role = r.data.role || ''; S.uid = String(r.data.id); }
+    return ses;
+  } catch (e) { return null; }
 }
 
 /* ══════════ الإقلاع ══════════ */
@@ -412,6 +492,7 @@ async function boot() {
     S.deferred = null; render();
     toast('✅ التطبيق اتثبّت — افتحه من الأيقونة على الشاشة الرئيسية');
   });
+  window.addEventListener('resize', function () { if ($bar && $bar.classList.contains('on')) renderBar(); });
   render();
   reloadBtn();
   if ('serviceWorker' in navigator) {
@@ -424,14 +505,13 @@ async function boot() {
     } catch (e) { S.err = 'التطبيق ما اتسجّلش — اقفله وافتحه تاني'; }
   }
   if (PAGE !== 'dash') { S.ready = true; render(); return; }
-  for (var i = 0; i < 40 && typeof window.db === 'undefined'; i++) await sleep(250);
-  S.role = myRole();
-  try {
-    var ses = (typeof window.db !== 'undefined') ? (await db.auth.getSession()).data.session : null;
+  for (var i = 0; i < 40 && !hasDB(); i++) await sleep(250);
+  if (hasDB()) {
+    var ses = await whoAmI();
     if (ses && S.reg && pushRole() && supported() && perm() === 'granted') {
       try { await syncSub(); } catch (e) { S.err = errMsg(e); }
     }
-  } catch (e) { /* هيتعرض في الكارت */ }
+  }
   S.ready = true;
   render();
   ntfFromUrl();
@@ -444,5 +524,5 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else boot();
 
 window.PWA = { enable: enable, disable: disable, test: test, install: install, guide: openGuide, tb: tb,
-  goSettings: goSettings, beforeLogout: beforeLogout, render: render };
+  goSettings: goSettings, beforeLogout: beforeLogout, render: render, badge: badgeTick };
 })();

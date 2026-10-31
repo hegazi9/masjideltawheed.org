@@ -23,6 +23,14 @@
 ████████████████████████████████████████████████████████████████ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- (دفعة ٣٦) تطبيق الموبايل -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="pwa-64.png">
+<link rel="apple-touch-icon" href="pwa-apple.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="التوحيد">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#0f2318">
 <title>لوحة ولي الأمر — مدرسة التوحيد القرآنية</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -393,7 +401,7 @@ textarea.in{min-height:120px;resize:vertical;line-height:1.7;}
   <nav class="sb-nav" id="sb-nav"></nav>
   <div class="sb-foot">
     <div class="sb-user"><div class="sb-av" id="me-av">و</div><div style="min-width:0;flex:1;"><div class="sb-un" id="me-name">—</div><div class="sb-ur" id="me-code">ولي أمر</div></div>
-      <button class="tb-btn sb-out" title="خروج" onclick="confirmLogout()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button></div>
+      <button class="tb-btn" id="pwa-rl" title="تحديث" aria-label="تحديث" onclick="location.reload()" style="display:none;">🔄</button><button class="tb-btn sb-out" title="خروج" onclick="confirmLogout()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button></div>
   </div>
 </aside>
 
@@ -1544,6 +1552,17 @@ async function ntfOpen(id){
     navPage(n.link);
   }
 }
+// ══ (دفعة ٣٦) تطبيق الموبايل — pwa.js بينادي الدوال دي لما إشعار يتضغط من الموبايل ══
+window.pwaReady=()=>!!(ME&&NTF.rows);
+window.pwaUnread=()=>(NTF.rows||[]).filter(x=>!x.is_read).length;
+window.pwaOpenNtf=async id=>{
+  const find=()=>(NTF.rows||[]).find(x=>String(x.id)===String(id));
+  if(!find()) await loadNotifs();
+  const n=find();
+  if(!n){ navPage('notifs'); return; }
+  await ntfOpen(n.id);
+  if(!NTF_LINKS.includes(n.link)){ if(/^message/.test(n.type||'')){ INB_TAB='msg'; navPage('inbox'); } else navPage('notifs'); }
+};
 async function ntfReadAll(){
   const ids=(NTF.rows||[]).filter(x=>!x.is_read).map(x=>x.id); if(!ids.length) return;
   try{ const {data,error}=await db.from('notifications').update({is_read:true}).in('id',ids).eq('user_id',ME.id).select('id');
@@ -1701,7 +1720,9 @@ function rSettings(){
     +'<div class="fg"><label>كلمة المرور الجديدة</label><input class="in" type="password" id="np1" autocomplete="new-password" placeholder="٦ أرقام أو حروف على الأقل" style="direction:ltr;text-align:right;"></div>'
     +'<div class="fg"><label>تأكيد كلمة المرور</label><input class="in" type="password" id="np2" autocomplete="new-password" style="direction:ltr;text-align:right;"></div>'
     +'<button class="btn btn-p" style="width:100%;" id="np-btn" onclick="changeMyPassword()">'+ic('check','sm')+' حفظ</button></div></div></div>'
+    +'<div class="card" id="pwa-card">'+cardH('bell','تطبيق الموبايل والإشعارات','ثبّته على الشاشة وخلّي الإشعارات توصلك')+'<div class="card-b" id="pwa-card-body"></div></div>'   // (دفعة ٣٦)
     +'<button class="btn btn-o" style="width:100%;color:var(--red);" onclick="confirmLogout()">'+ic('logout','sm')+' تسجيل الخروج</button>';
+  if(window.PWA) PWA.render();   // (دفعة ٣٦) كارت التطبيق
 }
 // رقم الموبايل — RPC آمنة (دفعة ١١ — رجعت في دفعة ٢٢)
 async function saveMyPhone(){
@@ -1764,5 +1785,6 @@ async function thPick(key){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal('modal-msg'); closeModal('modal-compose'); closeModal('modal-theme'); vidClose(); toggleSide(false); } });
 </script>
+<script src="pwa.js"></script>
 </body>
 </html>
